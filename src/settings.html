@@ -8,12 +8,7 @@
   <body>
     <div class="container">
       <h1>Settings</h1>
-      
-      <div class="setting-group">
-        <label for="appName">Application Name</label>
-        <input type="text" id="appName" placeholder="FamFilmFav">
-      </div>
-      
+            
       <div class="setting-group">
         <label for="webPort">Web Server Port</label>
         <input type="number" id="webPort" placeholder="3000" value="3000">
@@ -38,8 +33,7 @@
     <script>
       async function saveSettings() {
         const settings = {
-          appName: document.getElementById('appName').value,
-          webPort: parseInt(document.getElementById('webPort').value),
+                    webPort: parseInt(document.getElementById('webPort').value),
           theme: document.getElementById('theme').value
         };
         
