@@ -181,8 +181,6 @@ ipcMain.handle('save-settings', async (event, settings) => {
     settingsManager.setAll(settings);
     console.log('Settings saved:', settings);
     return { success: true }
-    console.log('Settings saved to database:', settings);
-    return result;
   } catch (error) {
     console.error('Error saving settings:', error.message);
     return { success: false, error: error.message };
