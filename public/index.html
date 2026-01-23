@@ -30,7 +30,7 @@
             <h3>Getting Started</h3>
             <ul style="text-align: left; display: inline-block; margin-top: 10px;">
               <li>Click "Settings" to configure the app</li>
-              <li>Access the web version at http://localhost:3000</li>
+              <li>Access the web version at <span id="webAccessUrl">http://localhost:3000</span></li>
               <li>Right-click the tray icon for menu options</li>
             </ul>
           </div>
@@ -53,11 +53,20 @@
         const settingsBtn = document.getElementById('settingsBtn');
         const accessInfo = document.getElementById('accessInfo');
         const serverStatus = document.getElementById('serverStatus');
+        const webAccessUrl = document.getElementById('webAccessUrl');
         
         if (isElectron) {
           // Desktop app environment
           settingsBtn.style.display = 'block';
-          accessInfo.textContent = 'This UI is also accessible at: http://localhost:3000';
+          
+          try {
+            const port = await window.electron.getServerPort();
+            const url = `http://localhost:${port}`;
+            webAccessUrl.textContent = url;
+            accessInfo.textContent = `This UI is also accessible at: ${url}`;
+          } catch (error) {
+            console.error('Error loading server port:', error);
+          }
           
           try {
             const version = await window.electron.getAppVersion();
@@ -68,6 +77,7 @@
         } else {
           // Web browser environment
           accessInfo.textContent = 'Web Version - Access from any device on your network';
+          webAccessUrl.textContent = window.location.origin;
           
           try {
             const versionResponse = await fetch('/api/version');

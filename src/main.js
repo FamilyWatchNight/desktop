@@ -2,11 +2,14 @@ const { app, BrowserWindow, Menu, Tray, ipcMain, dialog } = require('electron');
 const path = require('path');
 const express = require('express');
 const server = require('./server');
+const db = require('./database');
+const SettingsManager = require('./settings-manager');
 
 let mainWindow = null;
 let settingsWindow = null;
 let tray = null;
 const webServer = express();
+const settingsManager = new SettingsManager();
 
 // Handle window closed
 function handleWindowClosed() {
@@ -85,7 +88,8 @@ function createTray() {
     {
       label: 'Open in Browser',
       click: () => {
-        require('electron').shell.openExternal('http://localhost:3000');
+        const port = settingsManager.get('webPort') || 3000;
+        require('electron').shell.openExternal(`http://localhost:${port}`);
       }
     },
     { type: 'separator' },
@@ -112,10 +116,22 @@ function createTray() {
 
 // App event handlers
 app.on('ready', () => {
+  // Initialize database
+  db.initDatabase();
+  
+  // Initialize settings manager
+  settingsManager.initialize();
+  
   createTray();
   
-  // Start internal web server
-  server.startServer(webServer, 3000);
+  // Load settings and start server with configured port
+  try {
+    const port = settingsManager.get('webPort') || 3000;
+    server.startServer(webServer, port);
+  } catch (error) {
+    console.error('Failed to load settings, using default port:', error.message);
+    server.startServer(webServer, 3000);
+  }
 });
 
 app.on('window-all-closed', () => {
@@ -133,12 +149,37 @@ ipcMain.handle('get-app-version', () => {
   return app.getVersion();
 });
 
+ipcMain.handle('get-server-port', () => {
+  return settingsManager.get('webPort') || 3000;
+});
+
 ipcMain.handle('open-settings', () => {
   createSettingsWindow();
 });
 
+ipcMain.handle('load-settings', () => {
+  try {
+    const settings = settingsManager.getAll();
+    return { success: true, data: settings };
+  } catch (error) {
+    console.error('Error loading settings:', error.message);
+    return { success: false, error: error.message };
+  }
+});
+
 ipcMain.handle('save-settings', async (event, settings) => {
-  // TODO: Persist settings to disk
-  console.log('Settings saved:', settings);
-  return { success: true };
+  try {
+    settingsManager.setAll(settings);
+    console.log('Settings saved:', settings);
+    return { success: true }
+    console.log('Settings saved to database:', settings);
+    return result;
+  } catch (error) {
+    console.error('Error saving settings:', error.message);
+    return { success: false, error: error.message };
+  }
+});
+
+app.on('before-quit', () => {
+  db.closeDatabase()
 });

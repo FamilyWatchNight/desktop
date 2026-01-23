@@ -8,7 +8,7 @@
   <body>
     <div class="container">
       <h1>Settings</h1>
-            
+      
       <div class="setting-group">
         <label for="webPort">Web Server Port</label>
         <input type="number" id="webPort" placeholder="3000" value="3000">
@@ -33,7 +33,7 @@
     <script>
       async function saveSettings() {
         const settings = {
-                    webPort: parseInt(document.getElementById('webPort').value),
+          webPort: parseInt(document.getElementById('webPort').value),
           theme: document.getElementById('theme').value
         };
         
@@ -55,8 +55,21 @@
       }
       
       // Load settings on window open
-      window.addEventListener('DOMContentLoaded', () => {
-        // TODO: Load saved settings
+      window.addEventListener('DOMContentLoaded', async () => {
+        try {
+          const result = await window.electron.loadSettings();
+          if (result.success && result.data) {
+            // Populate form fields with saved settings
+            if (result.data.webPort) {
+              document.getElementById('webPort').value = result.data.webPort;
+            }
+            if (result.data.theme) {
+              document.getElementById('theme').value = result.data.theme;
+            }
+          }
+        } catch (error) {
+          console.error('Failed to load settings:', error);
+        }
       });
     </script>
   </body>
