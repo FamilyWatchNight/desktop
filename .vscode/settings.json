@@ -1,0 +1,20 @@
+{
+  "debug.node.autoAttach": "on",
+  "debug.onTaskErrors": "prompt",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": false
+  },
+  "files.exclude": {
+    "node_modules/": true,
+    "dist/": true
+  },
+  "search.exclude": {
+    "node_modules/": true,
+    "dist/": true
+  },
+  "javascript.debugger.resourcePathResolver": "debugging",
+  "electron-debug.debugging": {
+    "enabled": true
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Electron Main + Renderer",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/electron",
+      "args": [".", "--remote-debugging-port=9223"],
+      "restart": true,
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Electron Renderer",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9223,
+      "pathMapping": {
+        "/": "${workspaceFolder}/",
+        "file://": "${workspaceFolder}/"
+      },
+      "trace": true
+    },
+    {
+      "name": "Debug Server (Express)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/server.js",
+      "restart": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Debug",
+      "configurations": [
+        "Electron Main + Renderer",
+        "Electron Renderer"
+      ],
+      "stopAll": true
+    }
+  ]
+}
