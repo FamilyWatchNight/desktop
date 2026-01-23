@@ -104,6 +104,15 @@ function createTray() {
   tray.setToolTip('FamFilmFav');
   tray.setContextMenu(contextMenu);
 
+  // Open app on tray icon click
+  tray.on('click', () => {
+    if (mainWindow === null) {
+      createAppWindow();
+    } else {
+      mainWindow.focus();
+    }
+  });
+
   // Open app on tray icon double-click (Windows/Linux)
   tray.on('double-click', () => {
     if (mainWindow === null) {
