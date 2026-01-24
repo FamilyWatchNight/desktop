@@ -3,6 +3,8 @@ import '../styles/SettingsPage.css';
 
 export default function SettingsPage() {
   const [webPort, setWebPort] = useState('3000');
+  const [watchmodeApiKey, setWatchmodeApiKey] = useState('');
+  const [tmdbApiKey, setTmdbApiKey] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const [statusType, setStatusType] = useState('');
 
@@ -13,6 +15,12 @@ export default function SettingsPage() {
         if (result.success && result.data) {
           if (result.data.webPort) {
             setWebPort(result.data.webPort.toString());
+          }
+          if (result.data.watchmodeApiKey != null) {
+            setWatchmodeApiKey(result.data.watchmodeApiKey);
+          }
+          if (result.data.tmdbApiKey != null) {
+            setTmdbApiKey(result.data.tmdbApiKey);
           }
         }
       } catch (error) {
@@ -26,6 +34,8 @@ export default function SettingsPage() {
   const saveSettings = async () => {
     const settings = {
       webPort: parseInt(webPort),
+      watchmodeApiKey,
+      tmdbApiKey
     };
 
     try {
@@ -62,6 +72,12 @@ export default function SettingsPage() {
           if (result.data.webPort) {
             setWebPort(result.data.webPort.toString());
           }
+          if (result.data.watchmodeApiKey != null) {
+            setWatchmodeApiKey(result.data.watchmodeApiKey);
+          }
+          if (result.data.tmdbApiKey != null) {
+            setTmdbApiKey(result.data.tmdbApiKey);
+          }
         }
       } catch (error) {
         console.error('Failed to load settings:', error);
@@ -85,6 +101,28 @@ export default function SettingsPage() {
             placeholder="3000"
             value={webPort}
             onChange={(e) => setWebPort(e.target.value)}
+          />
+        </div>
+
+        <div className="setting-group">
+          <label htmlFor="watchmodeApiKey">Watchmode API Key</label>
+          <input
+            type="password"
+            id="watchmodeApiKey"
+            placeholder=""
+            value={watchmodeApiKey}
+            onChange={(e) => setWatchmodeApiKey(e.target.value)}
+          />
+        </div>
+
+        <div className="setting-group">
+          <label htmlFor="tmdbApiKey">TMDB API Key</label>
+          <input
+            type="password"
+            id="tmdbApiKey"
+            placeholder=""
+            value={tmdbApiKey}
+            onChange={(e) => setTmdbApiKey(e.target.value)}
           />
         </div>
 

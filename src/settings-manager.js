@@ -3,7 +3,9 @@ const Store = require('electron-store').default;
 const DEFAULT_SETTINGS = {
   // Add default application settings here
   // Example: windowSize: { width: 1024, height: 768 }
-  webPort: 3000
+  webPort: 3000,
+  watchmodeApiKey: '',
+  tmdbApiKey: ''
 };
 
 class SettingsManager {
