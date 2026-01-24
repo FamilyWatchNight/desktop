@@ -32,10 +32,19 @@ export default function SettingsPage() {
       const result = await window.electron.saveSettings(settings);
       if (result.success) {
         showMessage('Settings saved successfully!', 'success');
-        setTimeout(() => window.close(), 1500);
+        // Clear message after 3 seconds
+        setTimeout(() => {
+          setStatusMessage('');
+          setStatusType('');
+        }, 3000);
       }
     } catch (error) {
       showMessage('Error saving settings: ' + error.message, 'error');
+      // Clear error message after 5 seconds
+      setTimeout(() => {
+        setStatusMessage('');
+        setStatusType('');
+      }, 5000);
     }
   };
 
@@ -45,7 +54,22 @@ export default function SettingsPage() {
   };
 
   const handleCancel = () => {
-    window.close();
+    // Reset form to original values
+    const loadSettings = async () => {
+      try {
+        const result = await window.electron.loadSettings();
+        if (result.success && result.data) {
+          if (result.data.webPort) {
+            setWebPort(result.data.webPort.toString());
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    };
+    loadSettings();
+    setStatusMessage('');
+    setStatusType('');
   };
 
   return (

@@ -6,7 +6,6 @@ const db = require('./database');
 const SettingsManager = require('./settings-manager');
 
 let mainWindow = null;
-let settingsWindow = null;
 let tray = null;
 const webServer = express();
 const settingsManager = new SettingsManager();
@@ -14,35 +13,6 @@ const settingsManager = new SettingsManager();
 // Handle window closed
 function handleWindowClosed() {
   mainWindow = null;
-}
-
-function handleSettingsWindowClosed() {
-  settingsWindow = null;
-}
-
-// Create Settings Window
-function createSettingsWindow() {
-  if (settingsWindow) {
-    settingsWindow.focus();
-    return;
-  }
-
-  settingsWindow = new BrowserWindow({
-    width: 600,
-    height: 400,
-    icon: path.join(__dirname, '../assets/icon.png'),
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      enableRemoteModule: false
-    }
-  });
-
-  settingsWindow.loadFile(path.join(__dirname, '../src/settings.html'));
-  settingsWindow.on('closed', handleSettingsWindowClosed);
-
-  // Open DevTools in development
-  // settingsWindow.webContents.openDevTools();
 }
 
 // Create DOM-based UI Window
@@ -79,17 +49,6 @@ function createTray() {
         } else {
           mainWindow.focus();
         }
-      }
-    },
-    {
-      label: 'Settings',
-      click: () => createSettingsWindow()
-    },
-    {
-      label: 'Open in Browser',
-      click: () => {
-        const port = settingsManager.get('webPort') || 3000;
-        require('electron').shell.openExternal(`http://localhost:${port}`);
       }
     },
     { type: 'separator' },

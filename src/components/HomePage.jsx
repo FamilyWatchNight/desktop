@@ -64,6 +64,8 @@ export default function HomePage() {
 
   return (
     <div className="home-page">
+
+      {/*
       <header className="app-header">
         <h1>FamFilmFav</h1>
         <div id="headerActions">
@@ -87,6 +89,7 @@ export default function HomePage() {
           )}
         </div>
       </header>
+      */}
 
       <div className="app-content">
         <div className="welcome-message">

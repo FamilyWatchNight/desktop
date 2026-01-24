@@ -1,6 +1,6 @@
 /* SettingsPage Styles */
 .settings-page {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: center;

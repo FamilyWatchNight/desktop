@@ -1,7 +1,7 @@
 import React from 'react';
-import HomePage from './components/HomePage';
+import Layout from './components/Layout';
 import '../public/styles.css';
 
 export default function App() {
-  return <HomePage />;
+  return <Layout />;
 }
