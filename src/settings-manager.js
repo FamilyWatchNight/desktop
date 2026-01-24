@@ -1,103 +1,87 @@
-const db = require('./database');
+const Store = require('electron-store').default;
+
+const DEFAULT_SETTINGS = {
+  // Add default application settings here
+  // Example: windowSize: { width: 1024, height: 768 }
+  webPort: 3000
+};
 
 class SettingsManager {
   constructor() {
-    this.cache = {};
-    this.isInitialized = false;
+    this.store = new Store();
+    // Ensure settings namespace exists
+    if (!this.store.has('settings')) {
+      this.store.set('settings', {});
+    }
   }
 
   /**
-   * Initialize the settings manager with data from the database
+   * Initialize the settings manager
+   * (No-op with electron-store as it auto-loads)
    */
   initialize() {
-    if (this.isInitialized) {
-      return;
-    }
-    try {
-      const settings = db.loadSettings();
-      this.cache = settings;
-      this.isInitialized = true;
-    } catch (error) {
-      console.error('Failed to initialize settings manager:', error.message);
-      this.isInitialized = true;
-    }
+    // electron-store automatically loads persisted data
   }
 
   /**
    * Get a single setting value by key
-   * If not in cache, attempts to load from database
+   * Returns the stored value if found, otherwise returns the default value
    * @param {string} key - The setting key
-   * @returns {any} The setting value, or undefined if not found
+   * @returns {any} The setting value or default value, or undefined if neither exists
    */
   get(key) {
-    if (key in this.cache) {
-      return this.cache[key];
+    const settings = this.store.get('settings', {});
+    if (key in settings) {
+      return settings[key];
     }
-
-    // Try to load from database if not in cache
-    try {
-      const dbSettings = db.loadSettings();
-      if (key in dbSettings) {
-        this.cache[key] = dbSettings[key];
-        return dbSettings[key];
-      }
-    } catch (error) {
-      console.error(`Failed to load setting "${key}" from database:`, error.message);
-    }
-
-    return undefined;
+    return DEFAULT_SETTINGS[key];
   }
 
   /**
-   * Set a single setting value and persist to database
+   * Set a single setting value and persist to store
    * @param {string} key - The setting key
    * @param {any} value - The setting value
    */
   set(key, value) {
-    this.cache[key] = value;
     try {
-      db.saveSettings({ [key]: value });
+      const settings = this.store.get('settings', {});
+      settings[key] = value;
+      this.store.set('settings', settings);
     } catch (error) {
-      console.error(`Failed to save setting "${key}" to database:`, error.message);
+      console.error(`Failed to save setting "${key}":`, error.message);
       throw error;
     }
   }
 
   /**
-   * Get all settings from the cache
-   * @returns {object} All cached settings
+   * Get all settings
+   * @returns {object} All settings
    */
   getAll() {
-    return { ...this.cache };
+    return this.store.get('settings', {});
   }
 
   /**
-   * Set all settings at once and persist to database
+   * Set all settings at once
    * @param {object} settings - Object with key-value pairs
    */
   setAll(settings) {
-    this.cache = { ...this.cache, ...settings };
     try {
-      db.saveSettings(settings);
+      const currentSettings = this.store.get('settings', {});
+      const merged = { ...currentSettings, ...settings };
+      this.store.set('settings', merged);
     } catch (error) {
-      console.error('Failed to save settings to database:', error.message);
+      console.error('Failed to save settings:', error.message);
       throw error;
     }
   }
 
   /**
-   * Clear all settings from cache and database
+   * Clear all settings from store
    */
   clear() {
-    this.cache = {};
     try {
-      const allSettings = db.loadSettings();
-      const keysToDelete = Object.keys(allSettings);
-      if (keysToDelete.length > 0) {
-        // Note: This approach deletes by resetting all to empty
-        // If you need selective deletion, you'd need to add that to database.js
-        db.saveSettings({});
-      }
+      this.store.set('settings', {});
     } catch (error) {
       console.error('Failed to clear settings:', error.message);
       throw error;
