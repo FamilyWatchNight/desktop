@@ -13,7 +13,8 @@
     "debug": "npm run webpack && electron . --remote-debugging-port=9223 --inspect=5858",
     "debug:main": "node --inspect=5858 --require ./node_modules/electron/cli.js .",
     "build": "npm run webpack:prod && electron-builder",
-    "pack": "npm run webpack:prod && electron-builder --dir"
+    "pack": "npm run webpack:prod && electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [
     "electron",
@@ -29,6 +30,7 @@
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.2",
     "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
     "electron-rebuild": "^3.2.9",
     "style-loader": "^4.0.0",
     "webpack": "^5.104.1",
