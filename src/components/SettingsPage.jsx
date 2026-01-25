@@ -39,13 +39,16 @@ export default function SettingsPage() {
       try {
         const state = await window.electron.getBackgroundTasks?.();
         setActiveTask(state?.active ?? null);
+        setQueue(state?.queue ?? []);
       } catch {
         setActiveTask(null);
+        setQueue([]);
       }
     };
     load();
     const unsubscribe = window.electron.onBackgroundTaskUpdate?.((state) => {
       setActiveTask(state?.active ?? null);
+      setQueue(state?.queue ?? []);
     });
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
@@ -170,7 +173,7 @@ export default function SettingsPage() {
               type="button"
               className="btn-background-task"
               onClick={() => enqueueBackgroundTask('import-watchmode')}
-              disabled={activeTask?.type === 'import-watchmode'}
+              disabled={activeTask?.type === 'import-watchmode' || queue.some(t => t.type === 'import-watchmode')}
             >
               Import Watchmode Database
             </button>
@@ -178,7 +181,7 @@ export default function SettingsPage() {
               type="button"
               className="btn-background-task"
               onClick={() => enqueueBackgroundTask('import-tmdb')}
-              disabled={activeTask?.type === 'import-tmdb'}
+              disabled={activeTask?.type === 'import-tmdb' || queue.some(t => t.type === 'import-tmdb')}
             >
               Import TMDB Database
             </button>
