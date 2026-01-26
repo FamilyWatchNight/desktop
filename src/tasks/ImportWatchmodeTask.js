@@ -75,70 +75,98 @@ class ImportWatchmodeTask extends BackgroundTask {
   async processFile(filePath, totalBytes, context) {
     const models = getModels();
     const fileStream = fs.createReadStream(filePath);
-    const rl = readline.createInterface({
-      input: fileStream,
-      crlfDelay: Infinity
-    });
 
-    let lineNumber = 0;
     let bytesRead = 0;
+    let buffer = '';
     let headers = null;
     let linesProcessed = 0;
+    let processingPromise = Promise.resolve();
+    let lastProgressTime = Date.now();
 
-    for await (const line of rl) {
-      if (context.isCancelled()) {
-        throw new Error('Task cancelled');
-      }
-      lineNumber++;
-      bytesRead += Buffer.byteLength(line, 'utf8') + 1; // +1 for newline
+    const processLine = async (rawLine) => {
+      const normalizedLine = rawLine.replace(/[\u2028\u2029]/g, '');
 
-      if (lineNumber === 1) {
+      if (headers === null) {
         // Parse header
-        const headerRecords = parse(line + '\n', { trim: true });
+        const headerRecords = parse(normalizedLine + '\n', { trim: true });
         headers = headerRecords[0].map(h => h.toLowerCase());
-        continue;
-      }
+      } else {
+        // Parse data line
+        const records = parse(normalizedLine + '\n', { columns: headers, trim: true });
+        const record = records[0];
 
-      // Parse data line
-      const records = parse(line + '\n', { columns: headers, trim: true });
-      const record = records[0];
+        if (record) {
+          const watchmodeId = record['watchmode id'];
+          const tmdbType = record['tmdb type'];
+          const tmdbId = record['tmdb id'];
+          const title = record['title'];
+          const year = record['year'];
 
-      if (record) {
-        const watchmodeId = record['watchmode id'];
-        const tmdbType = record['tmdb type'];
-        const tmdbId = record['tmdb id'];
-        const title = record['title'];
-        const year = record['year'];
+          if (tmdbType && tmdbType.toLowerCase() === 'movie') {
+            models.movies.upsertFromWatchmode(
+              watchmodeId,
+              tmdbId,
+              title,
+              year
+            );
+          }
 
-        if (tmdbType && tmdbType.toLowerCase() === 'movie') {
-          models.movies.upsertFromWatchmode(
-            watchmodeId,
-            tmdbId,
-            title,
-            year
-          );
+          linesProcessed++;
         }
-
-        linesProcessed++;
       }
+    };
 
-      // Yield control to event loop every 10 titles to prevent UI freezing
-      if (linesProcessed % 10 === 0) {
-        await new Promise(resolve => setTimeout(resolve, 0));
+    return new Promise((resolve, reject) => {
+      fileStream.on('data', chunk => {
+        processingPromise = processingPromise.then(async () => {
+          buffer += chunk;
+          let index;
+          while ((index = buffer.indexOf('\n')) !== -1) {
+            if (context.isCancelled()) {
+              throw new Error('Task cancelled');
+            }
 
-        context.reportProgress({
-          current: bytesRead,
-          max: totalBytes,
-          description: `Processing records... ${linesProcessed} titles processed`
-        });
-      }
-    }
+            const line = buffer.slice(0, index);
+            buffer = buffer.slice(index + 1);
+            bytesRead += Buffer.byteLength(line, 'utf8') + 1; // +1 for newline
+            await processLine(line);
+         
+            // Yield control to event loop every 0.1 seconds to prevent UI freezing
+            let currentTime = Date.now();
+            if (currentTime - lastProgressTime >= 100) {
+              await new Promise(resolve => setTimeout(resolve, 0));
 
-    // Final progress report
-    context.reportProgress({
-      current: bytesRead,
-      max: totalBytes,
-      description: `Processing records... ${linesProcessed} titles processed`
+              context.reportProgress({
+                current: bytesRead,
+                max: totalBytes,
+                description: `Processing records... ${linesProcessed} titles processed`
+              });
+              
+              lastProgressTime = currentTime;
+              
+            }
+          }
+        }).catch(reject);
+      });
+
+      fileStream.on('end', () => {
+        processingPromise = processingPromise.then(async () => {
+          // Handle any remaining buffer if no final newline
+          if (buffer.length > 0) {
+            bytesRead += Buffer.byteLength(buffer, 'utf8');
+            await processLine(buffer);
+          }
+
+          // Final progress report
+          context.reportProgress({
+            current: totalBytes, // all bytes read, even if our estimates were off during processing
+            max: totalBytes,
+            description: `Processing records... ${linesProcessed} titles processed`
+          });
+        }).then(resolve).catch(reject);
+      });
+
+      fileStream.on('error', reject);
     });
   }
 
