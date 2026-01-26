@@ -10,8 +10,8 @@ class MoviesModel {
   initStatements() {
     // Prepared statements for CRUD operations
     this.insertStmt = this.db.prepare(`
-      INSERT INTO movies (watchdog_id, tmdb_id, title, year, popularity, has_video)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO movies (watchdog_id, tmdb_id, original_title, normalized_title, year, popularity, has_video)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
 
     this.getByIdStmt = this.db.prepare(`
@@ -27,12 +27,12 @@ class MoviesModel {
     `);
 
     this.getAllStmt = this.db.prepare(`
-      SELECT * FROM movies ORDER BY title
+      SELECT * FROM movies ORDER BY normalized_title
     `);
 
     this.updateStmt = this.db.prepare(`
       UPDATE movies
-      SET watchdog_id = ?, tmdb_id = ?, title = ?, year = ?, popularity = ?, has_video = ?
+      SET watchdog_id = ?, tmdb_id = ?, original_title = ?, normalized_title = ?, year = ?, popularity = ?, has_video = ?
       WHERE id = ?
     `);
 
@@ -41,14 +41,14 @@ class MoviesModel {
     `);
 
     this.searchByTitleStmt = this.db.prepare(`
-      SELECT * FROM movies WHERE title LIKE ? ORDER BY title
+      SELECT * FROM movies WHERE normalized_title LIKE ? ORDER BY normalized_title
     `);
   }
 
   // Create a new movie
   create(movieData) {
-    const { watchdog_id, tmdb_id, title, year, popularity, has_video } = movieData;
-    const result = this.insertStmt.run(watchdog_id, tmdb_id, title, year, popularity, has_video ? 1 : 0);
+    const { watchdog_id, tmdb_id, original_title, normalized_title, year, popularity, has_video } = movieData;
+    const result = this.insertStmt.run(watchdog_id, tmdb_id, original_title, normalized_title, year, popularity, has_video ? 1 : 0);
     return result.lastInsertRowid;
   }
 
@@ -78,8 +78,8 @@ class MoviesModel {
 
   // Update movie
   update(id, movieData) {
-    const { watchdog_id, tmdb_id, title, year, popularity, has_video } = movieData;
-    const result = this.updateStmt.run(watchdog_id, tmdb_id, title, year, popularity, has_video ? 1 : 0, id);
+    const { watchdog_id, tmdb_id, original_title, normalized_title, year, popularity, has_video } = movieData;
+    const result = this.updateStmt.run(watchdog_id, tmdb_id, original_title, normalized_title, year, popularity, has_video ? 1 : 0, id);
     return result.changes > 0;
   }
 
@@ -110,10 +110,12 @@ class MoviesModel {
       };
       
       // Only update title if it's currently blank or missing
-      if (!existing.title || existing.title.trim() === '') {
-        updateData.title = title;
+      if (!existing.original_title || existing.original_title.trim() === '') {
+        updateData.original_title = title;
+        updateData.normalized_title = this.normalizeTitle(title);
       } else {
-        updateData.title = existing.title;
+        updateData.original_title = existing.original_title;
+        updateData.normalized_title = existing.normalized_title;
       }
       
       this.update(existing.id, updateData);
@@ -123,7 +125,8 @@ class MoviesModel {
       const movieData = {
         watchdog_id: watchmodeId,
         tmdb_id: tmdbId,
-        title: title,
+        original_title: title,
+        normalized_title: this.normalizeTitle(title),
         year: year,
         popularity: null, // Will be filled by TMDB import
         has_video: false // Default
@@ -139,12 +142,28 @@ class MoviesModel {
       id: row.id,
       watchdog_id: row.watchdog_id,
       tmdb_id: row.tmdb_id,
-      title: row.title,
+      original_title: row.original_title,
+      normalized_title: row.normalized_title,
       year: row.year,
       popularity: row.popularity,
       has_video: Boolean(row.has_video)
     };
   }
+
+  // Helper to normalize titles for better searchability
+  normalizeTitle(title) {
+    return title
+      // 1. Normalize accented characters → base letters
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+
+      // 2. Normalize quotes
+      .replace(/[“”«»„‟]/g, '"')
+      .replace(/[‘’‚‛]/g, "'")
+
+      // 3. Normalize dashes
+      .replace(/[–—―]/g, '-');
+  }  
 }
 
 module.exports = MoviesModel;
