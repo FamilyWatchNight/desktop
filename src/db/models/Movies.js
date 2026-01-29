@@ -106,7 +106,8 @@ class MoviesModel {
         watchdog_id: watchmodeId,
         tmdb_id: tmdbId,
         year: year,
-        has_video: existing.has_video // Keep existing value
+        popularity: existing.popularity,
+        has_video: existing.has_video
       };
       
       // Only update title if it's currently blank or missing
@@ -130,6 +131,47 @@ class MoviesModel {
         year: year,
         popularity: null, // Will be filled by TMDB import
         has_video: false // Default
+      };
+      
+      return this.create(movieData);
+    }
+  }
+
+  //Upsert from TMDB data
+  upsertFromTmdb(tmdbId, title, popularity, has_video) {
+    const existing = this.getByTmdbId(tmdbId);
+
+    if (existing) {
+      // Update existing movie
+      const updateData = {
+        watchdog_id: existing.watchdog_id,
+        tmdb_id: tmdbId,
+        year: existing.year,
+        popularity: popularity,
+        has_video: has_video
+      };
+      
+      // Only update title if it's currently blank or missing
+      if (!existing.original_title || existing.original_title.trim() === '') {
+        updateData.original_title = title;
+        updateData.normalized_title = this.normalizeTitle(title);
+      } else {
+        updateData.original_title = existing.original_title;
+        updateData.normalized_title = existing.normalized_title;
+      }
+      
+      this.update(existing.id, updateData);
+      return existing.id;
+    } else {
+      // Create new movie
+      const movieData = {
+        watchdog_id: null,
+        tmdb_id: tmdbId,
+        original_title: title,
+        normalized_title: this.normalizeTitle(title),
+        year: null,
+        popularity: popularity,
+        has_video: has_video
       };
       
       return this.create(movieData);
