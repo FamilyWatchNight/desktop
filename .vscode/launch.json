@@ -45,6 +45,7 @@
       "request": "attach",
       "port": 9229,
       "timeout": 30000,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "skipFiles": ["<node_internals>/**"]
     }
   ],
