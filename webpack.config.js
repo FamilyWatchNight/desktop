@@ -7,7 +7,7 @@ const isDev = process.env.NODE_ENV !== 'production';
 module.exports = {
   mode: isDev ? 'development' : 'production',
   entry: {
-    'app-home': './src/index.js',
+    'app-home': './src/index.tsx',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -17,12 +17,12 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.(tsx?|jsx?)$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react'],
+            presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
             plugins: isDev ? ['react-refresh/babel'] : []
           },
         },
@@ -34,7 +34,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
   },
   devtool: 'source-map',
   plugins: [

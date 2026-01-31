@@ -38,6 +38,14 @@
       "restart": true,
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Attach to Electron Main (Playwright)",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "timeout": 30000,
+      "skipFiles": ["<node_internals>/**"]
     }
   ],
   "compounds": [

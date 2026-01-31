@@ -4,48 +4,52 @@ import HomePage from './HomePage';
 import SettingsPage from './SettingsPage';
 import BackgroundTasksPage from './BackgroundTasksPage';
 
-export default function Layout() {
+interface TaskPayload {
+  id: string;
+  type: string;
+  label: string;
+  status: string;
+  current?: number;
+  max?: number;
+  description?: string;
+}
+
+export default function Layout(): React.ReactElement {
   const [menuOpen, setMenuOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
   const [systemExpanded, setSystemExpanded] = useState(false);
-  const [activeTask, setActiveTask] = useState(null);
-  const [queue, setQueue] = useState([]);
+  const [activeTask, setActiveTask] = useState<TaskPayload | null>(null);
+  const [queue, setQueue] = useState<TaskPayload[]>([]);
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-
-  const closeMenu = () => {
-    setMenuOpen(false);
-  };
-
-  const navigateTo = (page) => {
+  const toggleMenu = (): void => setMenuOpen(!menuOpen);
+  const closeMenu = (): void => setMenuOpen(false);
+  const navigateTo = (page: string): void => {
     setCurrentPage(page);
     closeMenu();
   };
 
   useEffect(() => {
-    const load = async () => {
+    const load = async (): Promise<void> => {
       try {
-        const state = await window.electron.getBackgroundTasks?.();
-        setActiveTask(state?.active ?? null);
-        setQueue(state?.queue ?? []);
+        const state = await window.electron?.getBackgroundTasks?.();
+        setActiveTask((state?.active as TaskPayload) ?? null);
+        setQueue((state?.queue as TaskPayload[]) ?? []);
       } catch {
         setActiveTask(null);
         setQueue([]);
       }
     };
-    load();
-    const unsubscribe = window.electron.onBackgroundTaskUpdate?.((state) => {
-      setActiveTask(state?.active ?? null);
-      setQueue(state?.queue ?? []);
+    void load();
+    const unsubscribe = window.electron?.onBackgroundTaskUpdate?.((state) => {
+      setActiveTask(state?.active as TaskPayload ?? null);
+      setQueue(state?.queue as TaskPayload[] ?? []);
     });
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
   }, []);
 
-  const renderPage = () => {
+  const renderPage = (): React.ReactElement => {
     switch (currentPage) {
       case 'home':
         return <HomePage />;
@@ -60,20 +64,14 @@ export default function Layout() {
 
   return (
     <div className="app-layout">
-      {/* Hamburger Menu Button */}
       <button className="hamburger-button" onClick={toggleMenu} aria-label="Toggle menu">
         <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
         <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
         <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
       </button>
-
-      {/* Overlay */}
       {menuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
-
-      {/* Side Menu */}
       <div className={`side-menu ${menuOpen ? 'open' : ''}`}>
         <div className="menu-content">
-          {/* Scrollable Navigation Items */}
           <div className="menu-nav-section">
             <nav className="menu-nav">
               <button
@@ -87,8 +85,6 @@ export default function Layout() {
                 <span>Home</span>
               </button>
             </nav>
-
-            {/* System submenu (collapsible) */}
             <div className={`menu-system ${systemExpanded ? 'expanded' : 'collapsed'}`}>
               <button
                 type="button"
@@ -120,8 +116,6 @@ export default function Layout() {
               </div>
             </div>
           </div>
-
-          {/* Settings at Bottom */}
           <div className="menu-footer">
             <button
               className={`menu-item ${currentPage === 'settings' ? 'active' : ''}`}
@@ -136,8 +130,6 @@ export default function Layout() {
           </div>
         </div>
       </div>
-
-      {/* Main Content */}
       <div className="main-content">
         {renderPage()}
       </div>

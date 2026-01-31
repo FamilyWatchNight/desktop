@@ -1,29 +1,34 @@
-const Database = require('better-sqlite3');
-const path = require('path');
-const os = require('os');
-const fs = require('fs');
-const packageJson = require('../package.json');
+import Database from 'better-sqlite3';
+import path from 'path';
+import os from 'os';
+import fs from 'fs';
+import MoviesModel from './db/models/Movies';
 
-// Get platform-specific app data directory
-function getAppDataDir() {
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const packageJson = require('../package.json') as { name: string };
+
+interface DbModels {
+  movies: MoviesModel;
+}
+
+let db: Database.Database | null = null;
+let models: DbModels | null = null;
+
+function getAppDataDir(): string {
   const appName = packageJson.name;
 
   if (process.platform === 'win32') {
-    // Windows: %APPDATA%\FamFilmFav
-    return path.join(process.env.APPDATA, appName, 'sqlite');
-  } else if (process.platform === 'darwin') {
-    // macOS: ~/Library/Application Support/FamFilmFav
-    return path.join(os.homedir(), 'Library', 'Application Support', appName, 'sqlite');
-  } else {
-    // Linux: ~/.config/FamFilmFav
-    return path.join(os.homedir(), '.config', appName, 'sqlite');
+    const appData = process.env.APPDATA;
+    if (!appData) throw new Error('APPDATA is not set');
+    return path.join(appData, appName, 'sqlite');
   }
+  if (process.platform === 'darwin') {
+    return path.join(os.homedir(), 'Library', 'Application Support', appName, 'sqlite');
+  }
+  return path.join(os.homedir(), '.config', appName, 'sqlite');
 }
 
-let db = null;
-let models = null;
-
-function runMigrations() {
+function runMigrations(): void {
   if (!db) {
     throw new Error('Database not initialized');
   }
@@ -35,61 +40,49 @@ function runMigrations() {
     return;
   }
 
-  const migrationFiles = fs.readdirSync(migrationsDir)
-    .filter(file => file.endsWith('.sql'))
-    .sort(); // Ensure migrations run in order
+  const migrationFiles = fs.readdirSync(migrationsDir).filter((file) => file.endsWith('.sql')).sort();
 
   for (const file of migrationFiles) {
     const filePath = path.join(migrationsDir, file);
     const sql = fs.readFileSync(filePath, 'utf8');
-
     console.log(`Running migration: ${file}`);
     db.exec(sql);
   }
 }
 
-function initModels() {
+function initModels(): void {
   if (!db) {
     throw new Error('Database not initialized');
   }
-
-  const MoviesModel = require('./db/models/Movies');
-
   models = {
-    movies: new MoviesModel(db)
+    movies: new MoviesModel(db as Database.Database)
   };
 }
 
-function initDatabase() {
+export function initDatabase(): void {
   const appDataDir = getAppDataDir();
 
-  // Create directory if it doesn't exist
   if (!fs.existsSync(appDataDir)) {
     fs.mkdirSync(appDataDir, { recursive: true });
   }
 
   const dbPath = path.join(appDataDir, 'famfilmfav.db');
-
-  // Open or create database
   db = new Database(dbPath);
-
   runMigrations();
   initModels();
 }
 
-function initMockDatabase(testDb) {
+export function initMockDatabase(testDb?: Database.Database | null): void {
   if (!testDb) {
     db = new Database(':memory:');
-  }
-  else {
+  } else {
     db = testDb;
   }
-
   runMigrations();
   initModels();
 }
 
-function closeDatabase() {
+export function closeDatabase(): void {
   if (db) {
     db.close();
     db = null;
@@ -97,24 +90,16 @@ function closeDatabase() {
   }
 }
 
-function getModels() {
+export function getModels(): DbModels {
   if (!models) {
     throw new Error('Database not initialized');
   }
   return models;
 }
 
-function getStatus() {
+export function getStatus(): { dbInitialized: boolean; dbConnected: boolean } {
   return {
     dbInitialized: !!db,
-    dbConnected: !!(db && db.open),
+    dbConnected: !!db
   };
 }
-
-module.exports = {
-  initDatabase,
-  initMockDatabase,
-  closeDatabase,
-  getModels,
-  getStatus,
-};

@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2020", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["src/index.tsx", "src/AppHome.tsx", "src/AppSettings.tsx", "src/settings.tsx", "src/components/**/*.tsx"]
+}
