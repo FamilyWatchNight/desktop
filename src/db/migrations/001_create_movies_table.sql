@@ -1,7 +1,7 @@
 -- Migration: Create Movies table
 CREATE TABLE IF NOT EXISTS movies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    watchdog_id TEXT,
+    watchmode_id TEXT,
     tmdb_id TEXT,
     original_title TEXT,
     normalized_title TEXT,
@@ -11,5 +11,5 @@ CREATE TABLE IF NOT EXISTS movies (
 );
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_movies_watchdog_id ON movies(watchdog_id);
+CREATE INDEX IF NOT EXISTS idx_movies_watchmode_id ON movies(watchmode_id);
 CREATE INDEX IF NOT EXISTS idx_movies_tmdb_id ON movies(tmdb_id);
