@@ -6,28 +6,21 @@
   "homepage": "./",
   "scripts": {
     "build:main": "tsc -p tsconfig.main.json && node scripts/copy-migrations.js",
+
     "build:main:watch": "tsc -p tsconfig.main.json --watch",
-    "webpack": "webpack --mode development",
-    "webpack:watch": "webpack --mode development --watch",
-    "webpack:serve": "webpack serve --config webpack.config.js --mode development --port 8080",
-    "webpack:prod": "webpack --mode production",
-    "start": "npm run build:main && npm run webpack && electron .",
-    "start:electron:dev": "cross-env ELECTRON_START_URL=http://localhost:8080 electron . --remote-debugging-port=9222",
-    "dev": "npm run build:main && concurrently npm:webpack:serve npm:start:electron:dev",
-    "dev:watch": "concurrently npm:build:main:watch npm:webpack:serve npm:start:electron:dev",
-    "debug": "npm run build:main && npm run webpack && electron . --remote-debugging-port=9223 --inspect=5858",
-    "debug:main": "node --inspect=5858 --require ./node_modules/electron/cli.js .",
-    "build": "npm run build:main && npm run webpack:prod && electron-builder",
-    "pack": "npm run build:main && npm run webpack:prod && electron-builder --dir",
-    "postinstall": "electron-builder install-app-deps",
+    "renderer:vite": "vite",
+    "electron:debug": "cross-env ELECTRON_START_URL=http://localhost:5173 electron . --inspect=5858 --remote-debugging-port=9222",
+
+    "dev:vite": "concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
+
     "test": "npm run test:unit && npm run test:integration && npm run test:features",
     "test:unit": "jest",
     "test:integration": "cross-env NODE_ENV=test playwright test",
     "test:features": "cross-env NODE_ENV=test cucumber-js",
-    "electron:vite": "cross-env ELECTRON_START_URL=http://localhost:5173 electron .",
-    "renderer:vite": "vite",
-    "dev:vite": "concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
-    "electron:debug": "cross-env ELECTRON_START_URL=http://localhost:5173 electron . --inspect=5858 --remote-debugging-port=9222"
+
+    "build": "npm run build:main && npm run webpack:prod && electron-builder",
+    "pack": "npm run build:main && npm run webpack:prod && electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [
     "electron",
