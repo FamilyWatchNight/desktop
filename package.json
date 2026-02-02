@@ -26,7 +26,8 @@
     "test:features": "cross-env NODE_ENV=test cucumber-js",
     "electron:vite": "cross-env ELECTRON_START_URL=http://localhost:5173 electron .",
     "renderer:vite": "vite",
-    "dev:vite": "concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:vite\""
+    "dev:vite": "concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
+    "electron:debug": "cross-env ELECTRON_START_URL=http://localhost:5173 electron . --inspect=5858 --remote-debugging-port=9222"
   },
   "keywords": [
     "electron",

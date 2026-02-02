@@ -2,42 +2,21 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Electron Main + Renderer",
+      "name": "Electron Main",
       "type": "node",
-      "request": "launch",
-      "preLaunchTask": "webpack:serve",
-      "program": ".",
-      "args": ["--remote-debugging-port=9222", "--inspect"],
-      "env": {
-        "ELECTRON_START_URL": "http://localhost:8080"
-      },
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd",
+      "request": "attach",
+      "port": 5858,
       "restart": true,
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
+      "timeout": 30000,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "${workspaceFolder}"
     },
     {
       "name": "Electron Renderer",
       "type": "chrome",
       "request": "attach",
       "port": 9222,
-      "pathMapping": {
-        "/": "${workspaceFolder}/",
-        "file://": "${workspaceFolder}/"
-      },
-      "trace": true
-    },
-    {
-      "name": "Debug Server (Express)",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/src/server.js",
-      "restart": true,
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "webRoot": "${workspaceFolder}/src"
     },
     {
       "name": "Attach to Electron Main (Playwright)",
@@ -53,9 +32,8 @@
     {
       "name": "Full Debug",
       "configurations": [
-        "Electron Main + Renderer",
-        "Electron Renderer"
-      ],
+        "Electron Main",
+        "Electron Renderer"],
       "stopAll": true
     }
   ]
