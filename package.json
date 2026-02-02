@@ -18,6 +18,7 @@
     "test:integration": "cross-env NODE_ENV=test playwright test",
     "test:features": "cross-env NODE_ENV=test cucumber-js",
 
+    "webpack:prod": "webpack --mode production",
     "build": "npm run build:main && npm run webpack:prod && electron-builder",
     "pack": "npm run build:main && npm run webpack:prod && electron-builder --dir",
     "postinstall": "electron-builder install-app-deps"
