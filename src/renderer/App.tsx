@@ -7,9 +7,9 @@ the Free Software Foundation, version 3.
 */
 
 import React from 'react';
-import Layout from './components/Layout';
+import AppLayout from './components/AppLayout';
 import '../../public/styles.css';
 
 export default function App(): React.ReactElement {
-  return <Layout />;
+  return <AppLayout />;
 }

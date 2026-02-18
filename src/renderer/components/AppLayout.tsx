@@ -7,7 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import React, { useState, useEffect } from 'react';
-import '../styles/Layout.css';
+import '../styles/AppLayout.css';
 import HomePage from './HomePage';
 import SettingsPage from './SettingsPage';
 import BackgroundTasksPage from './BackgroundTasksPage';

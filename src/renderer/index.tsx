@@ -8,11 +8,11 @@ the Free Software Foundation, version 3.
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import AppHome from './AppHome';
+import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
-    <AppHome />
+    <App />
   </React.StrictMode>
 );
