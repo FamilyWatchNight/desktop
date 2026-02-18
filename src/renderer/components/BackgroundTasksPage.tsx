@@ -29,7 +29,7 @@ export default function BackgroundTasksPage(): React.ReactElement {
         const state = await window.electron?.getBackgroundTasks();
         if (state) {
           setActive(state.active as TaskPayload);
-          setQueue(state.queue ?? []);
+          setQueue(state.queue as TaskPayload[] ?? []);
         }
       } catch (err) {
         console.error('Failed to load background tasks:', err);
@@ -38,7 +38,7 @@ export default function BackgroundTasksPage(): React.ReactElement {
     void load();
     const unsubscribe = window.electron?.onBackgroundTaskUpdate?.((state) => {
       setActive(state.active as TaskPayload);
-      setQueue(state.queue ?? []);
+      setQueue(state.queue as TaskPayload[] ?? []);
     });
     return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
   }, []);
