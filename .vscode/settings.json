@@ -17,12 +17,15 @@
     "NODE_ENV": "test"
   },
   "cucumber.glue": [
-    "tests/features/step-definitions/**/*.ts",
-    "tests/features/support/**/*.ts"
+    "src/tests/features/step-definitions/**/*.ts",
+    "src/tests/features/support/**/*.ts"
   ],
-  "cucumber_runner.features": [
-    "tests/features/**/*.feature"
+  "cucumber.features": [
+    "src/tests/features/**/*.feature"
   ],
+  "files.watcherExclude": {
+    "**/node_modules/**": true
+  },
   "cucumber-test-runner-new.debugEnvironmentVariables": {
     "PWDEBUG": "1"
   },
