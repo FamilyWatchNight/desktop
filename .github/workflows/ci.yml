@@ -32,8 +32,6 @@ jobs:
             libatk-bridge2.0-0 \
             libdrm2 \
             libgbm1
-      - name: Install Playwright dependencies
-        run: npx playwright install-deps
       - name: Test standard build (not for integration testing)
         run: npm run build:main
       - name: Run tests (will rebuild for integration testing)
