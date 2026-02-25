@@ -22,4 +22,4 @@ jobs:
       - name: Test standard build (not for integration testing)
         run: npm run build:main
       - name: Run tests (will rebuild for integration testing)
-        run: xvfb-run npm run test --if-present
+        run: npm run test --if-present
