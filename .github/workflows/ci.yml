@@ -17,7 +17,24 @@ jobs:
         with:
           node-version: 24.11.1
 
-      - run: npm install
-      - run: npm run build:main --if-present
-      - run: npx playwright install --with-deps
-      - run: xvfb-run npm run test --if-present
+      - name: Install npm dependencies
+        run: npm ci
+      - name: Install Electron dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-0 \
+            libnss3 \
+            libxss1 \
+            libasound2 \
+            libxtst6 \
+            libxrandr2 \
+            libatk-bridge2.0-0 \
+            libdrm2 \
+            libgbm1
+      - name: Install Playwright dependencies
+        run: npx playwright install-deps
+      - name: Test standard build (not for integration testing)
+        run: npm run build:main
+      - name: Run tests (will rebuild for integration testing)
+        run: xvfb-run npm run test --if-present
