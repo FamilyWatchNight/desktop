@@ -14,8 +14,9 @@ import { MovieData } from '../../../../../main/db/models/Movies';
 let app: ElectronApplication;
 
 test.beforeAll(async () => {
-  const debugArgs = process.env.PWDEBUG ? ['--inspect-brk=9229'] : [];
-  app = await electron.launch({ args: ['.', ...debugArgs] });
+  const debugArgs = (!!process.env.PWDEBUG) ? ['--inspect-brk=9229'] : [];
+  const ciArgs = (!!process.env.CI) ? ['--no-sandbox'] : [];
+  app = await electron.launch({ args: ['.', ...debugArgs, ...ciArgs] });
   app.on('console', (msg) => {
     console.log('[app]', msg.text());
   });

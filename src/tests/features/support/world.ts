@@ -19,8 +19,10 @@ export class CustomWorld extends World {
   }
 
   async launchApp(): Promise<void> {
-    const debugArgs = process.env.PWDEBUG ? ['--inspect-brk=9229'] : [];
-    this.app = await electron.launch({ args: ['.', ...debugArgs] });
+    const debugArgs = (!!process.env.PWDEBUG) ? ['--inspect-brk=9229'] : [];
+    const ciArgs = (!!process.env.CI) ? ['--no-sandbox'] : [];
+
+    this.app = await electron.launch({ args: ['.', ...debugArgs, ...ciArgs] });
     
     this.app.on('console', (msg) => {
       console.log('[app]', msg.text());
