@@ -31,5 +31,6 @@
   },
   "cucumber-test-runner-new.environmentVariables": {
     "NODE_ENV": "test"
-  }
+  },
+  "git.enableCommitSigning": true
 }
