@@ -28,6 +28,11 @@ jobs:
         run: xvfb-run npm run test --if-present
 
   windows-build:
+    permissions:
+      contents: read
+      actions: write
+      checks: write
+
     runs-on: windows-latest
 
     steps:
