@@ -50,7 +50,7 @@ jobs:
       - name: Build the Windows installer
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build
+        run: npm run build -- --publish=never
 
       - uses: actions/upload-artifact@v4
         with:
