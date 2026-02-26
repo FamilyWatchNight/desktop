@@ -1,6 +1,6 @@
 {
   "name": "FamilyWatchNight",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Cross-platform desktop application to bring fun and safety to family movie nights.",
   "main": "dist/main/index.js",
   "homepage": "./",
