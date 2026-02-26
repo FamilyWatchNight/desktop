@@ -8,6 +8,7 @@ the Free Software Foundation, version 3.
 
 import path from 'path';
 import express, { type Express, type Request, type Response } from 'express';
+import RateLimit from 'express-rate-limit';
 import { app } from 'electron';
 
 const rootDir = app.getAppPath();
@@ -15,6 +16,15 @@ const distPath = path.join(rootDir, 'dist');
 const publicPath = path.join(rootDir, 'public');
 
 export function startServer(app: Express, port: number): ReturnType<Express['listen']> {
+
+  // set up rate limiter: maximum of five requests per minute
+  var limiter = RateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    limit: 100, // max 100 requests per windowMs
+  });
+
+  app.use(limiter);
+
   app.get('/api/health', (_req: Request, res: Response) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
