@@ -21,8 +21,6 @@ jobs:
           node-version: 24.11.1
 
       - name: Prepare for CI
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
       - name: Test standard build (not for integration testing)
         run: npm run build:main
@@ -47,6 +45,8 @@ jobs:
       - name: Prepare for CI
         run: npm ci
       - name: Build the Windows installer
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run build
 
       - uses: actions/upload-artifact@v4
