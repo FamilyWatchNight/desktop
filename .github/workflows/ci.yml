@@ -21,6 +21,8 @@ jobs:
           node-version: 24.11.1
 
       - name: Prepare for CI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
       - name: Test standard build (not for integration testing)
         run: npm run build:main
