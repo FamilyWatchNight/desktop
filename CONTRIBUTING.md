@@ -18,26 +18,16 @@ under the GNU General Public License v3.0.
 - Releases are tagged `vX.Y.Z`
 - Version in `package.json` must match tag
 
-# Release Process (Manual for now)
+# Release Process
 
-1. Use `npm version X.Y.Z --no-git-tag-version` to update `package.json` and `package-lock.json`.
-1. Commit this change to a new branch, named `release-vX.Y.Z` and submit a PR to merge that branch to `main`.
-1. Wait for the CI checks on the new branch to pass.
-1. Merge the PR, and wait for those CI checks to pass.
-1. Create a tag `vX.Y.Z` from the `main` branch at the merge point.
-   - `git checkout main`
-   - `git pull`
-   - `git tag vX.Y.Z`
-   - `git push origin vX.Y.Z`
-1. Create a new Artifact (Windows only for now)
-   - `npm run clean; npm run build`
-   - _If Windows Defender complains about the new executable touching private data and fails the build, grant it permission, then re-run the build._
-1. Create a new Release
-   - __Github__ -> __Releases__ -> __Draft a new Release__
-   - Select the recently created tag
-   - __Generate Release Notes__
-   - Attach the `Family Watch Night Setup X.Y.Z.exe` generated from the previous step
-   - __Publish__ the Release
+1. (One time only) Make sure npm is set to sign tags: `npm config set sign-git-tag true`
+1. Make sure your workspace is fully synchronized with the `main` branch where the new version should be created.
+1. Use `npm version X.Y.Z` to update `package.json` and `package-lock.json` and create the new version tag.
+1. Synchronize changes and push tags to origin
+1. At https://github.com/FamilyWatchNight/desktop/actions, review and approve the pending deployment to the `release` environment.
+1. After the CI build completes, open the newly created Release.
+1. __Generate Release Notes__ and make any changes or clarifications
+1. __Publish__ the Release.
 
 # First-Time Launch for Developers
 
