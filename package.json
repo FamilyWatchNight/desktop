@@ -17,7 +17,7 @@
     "test:unit": "jest",
     "test:integration": "npm run build:main:for-integration-testing && cross-env NODE_ENV=test playwright test",
     "test:features": "npm run build:main:for-integration-testing && cross-env NODE_ENV=test cucumber-js",
-    "build": "npm run clean && npm run build:main && npm run build:renderer && electron-builder",
+    "build": "npm run clean && npm run build:main && npm run build:renderer && electron-builder --publish=onTag",
     "dev": "npm run build:main && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
     "dev:test": "npm run build:main:for-integration-testing && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
     "pack": "npm run clean && npm run build:main && npm run build:renderer && electron-builder --dir",
@@ -84,6 +84,10 @@
       "target": [
         "AppImage"
       ]
+    },
+    "publish": {
+      "provider": "github",
+      "releaseType": "draft"
     }
   }
 }
