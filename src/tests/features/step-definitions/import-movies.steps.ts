@@ -22,8 +22,14 @@ Given('the application is running with a test database', async function (this: C
 Given('stub Watchmode data is loaded from {string}', async function (this: CustomWorld, dataSource: string) {
   await this.loadStubWatchmodeData(dataSource);
 });
+Given('stub Watchmode data is loaded from', async function (this: CustomWorld, dataSource: string) {
+  await this.loadStubWatchmodeData(dataSource);
+});
 
 Given('stub TMDB data is loaded from {string}', async function (this: CustomWorld, dataSource: string) {
+  await this.loadStubTmdbData(dataSource);
+});
+Given('stub TMDB data is loaded from', async function (this: CustomWorld, dataSource: string) {
   await this.loadStubTmdbData(dataSource);
 });
 

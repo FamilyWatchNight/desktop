@@ -5,23 +5,68 @@ Feature: Import Movies
 
   Background:
     Given the application is running with a test database
+    And stub Watchmode data is loaded from
+    """
+    Watchmode ID,IMDB ID,TMDB ID,TMDB Type,Title,Year
+    "1288","tt0130430","120249","movie","‘Rameau’s Nephew’ by Diderot (Thanx to Dennis Young) by Wilma Schoen","1974"
+    "1290","tt0090557","14670","movie","'Round Midnight","1986"
+    "1301","tt0033122","192516","movie","'Swing It' Teacher","1940"
+    "1303","tt6054510","455562","movie","The Day of the Purple Sun: Part I","2017"
+    "1306","tt0184950","185111","movie","Thou-Vou Bald Agent, Operation: Havoc","1969"
+    "1371","tt2630898","329750","movie","(Dis)Honesty: The Truth About Lies","2015"
+    "1374","tt0118524","170028","movie","Grève party","1998"
+    "1375","tt7491128","470211","movie","(Girl)Friend","2018"
+    "1423","tt0275275","123409","movie","*Corpus Callosum","2002"
+    "1426","tt0092494","11548","movie","*batteries not included","1987"
+    "1427","tt2395385","176068","movie","+1","2013"
+    "1432","tt0052526","35924","movie","-30-","1959"
+    "1438","tt4129900","297745","movie","...It's Snowing Outside!","2014"
+    "1453","tt0122458","290597","movie","Dios los cría...","1979"
+    "1574","tt0065360","85255","movie","… tick… tick… tick…","1970"
+    "1597","tt0057804","146855","movie","... und sowas muß um 8 ins Bett","1965"
+    "1608","tt2064704","128253","movie",".hack//Beyond the World","2012"
+    "1610","tt0278259","34959","movie",".com for Murder","2001"
+    "1611","tt1164545","26595","movie",".hack//G.U. Trilogy","2007"
+    "1812","tt1591622","70018","movie","10½","2010"
+    "1262687","tt1623759","59499","movie","Mr. & Mrs. Incredible","2011"
+    "11083261","","1607455","movie","The Hobbit An Unexpected Journey extended edition",""
+    """
+    And stub TMDB data is loaded from
+    """
+    {"adult":false,"id":11548,"original_title":"*batteries not included","popularity":2.1678,"video":false}
+    {"adult":false,"id":14670,"original_title":"'Round Midnight","popularity":1.6769,"video":false}
+    {"adult":false,"id":26595,"original_title":".hack//G.U. Trilogy","popularity":1.8308,"video":false}
+    {"adult":false,"id":34959,"original_title":".com for Murder","popularity":0.8063,"video":false}
+    {"adult":false,"id":35924,"original_title":"-30-","popularity":1.6496,"video":false}
+    {"adult":false,"id":59499,"original_title":"神奇俠侶","popularity":0.8012,"video":false}
+    {"adult":false,"id":70018,"original_title":"10½","popularity":0.3777,"video":false}
+    {"adult":false,"id":85255,"original_title":"… tick… tick… tick…","popularity":3.2196,"video":false}
+    {"adult":false,"id":120249,"original_title":"‘Rameau’s Nephew’ by Diderot (Thanx to Dennis Young) by Wilma Schoen","popularity":0.2287,"video":false}
+    {"adult":false,"id":123409,"original_title":"*Corpus Callosum","popularity":1.6004,"video":false}
+    {"adult":false,"id":128253,"original_title":"ドットハック セカイの向こうに","popularity":5.8017,"video":false}
+    {"adult":false,"id":146855,"original_title":"... und sowas muß um 8 ins Bett","popularity":0.0722,"video":false}
+    {"adult":false,"id":170028,"original_title":"Grève party","popularity":0.241,"video":false}
+    {"adult":false,"id":176068,"original_title":"+1","popularity":1.9827,"video":false}
+    {"adult":false,"id":185111,"original_title":"Θου-Βου Φαλακρός Πράκτωρ, Επιχείρησις: Γης Μαδιάμ","popularity":3.6092,"video":false}
+    {"adult":false,"id":192516,"original_title":"Swing it, magistern","popularity":4.2237,"video":false}
+    {"adult":false,"id":297745,"original_title":"...E fuori nevica!","popularity":4.6809,"video":false}
+    {"adult":false,"id":290597,"original_title":"Dios los cría...","popularity":0.1825,"video":false}
+    {"adult":false,"id":329750,"original_title":"(Dis)Honesty: The Truth About Lies","popularity":0.1451,"video":false}
+    {"adult":false,"id":455562,"original_title":"Der Tag der violetten Sonne","popularity":0.3214,"video":false}
+    {"adult":false,"id":470211,"original_title":"Ami-Ami","popularity":0.6492,"video":false}
+    {"adult":false,"id":1622513,"original_title":"Oscar Goes","popularity":0.0,"video":false}
+    """
 
   @import @tmdb
-  Scenario: Import movies from TMDB and Watchmode data
-    Given stub Watchmode data is loaded from "src/tests/test-double-data/watchmode/import/title_id_map.csv"
-    And stub TMDB data is loaded from "src/tests/test-double-data/tmdb/import/movie_ids.json"
+  Scenario: Movies in both databases are properly merged
     Then I should see 23 movies in the database
 
   @import @tmdb @missing-data
   Scenario: Movies missing from Watchmode are handled gracefully
-    Given stub Watchmode data is loaded from "src/tests/test-double-data/watchmode/import/title_id_map.csv"
-    And stub TMDB data is loaded from "src/tests/test-double-data/tmdb/import/movie_ids.json"
     When I look up the movie with TMDB ID "1622513"
     Then the movie should have a null year value
 
   @import @watchmode @missing-data
   Scenario: Movies missing from TMDB are handled gracefully
-    Given stub Watchmode data is loaded from "src/tests/test-double-data/watchmode/import/title_id_map.csv"
-    And stub TMDB data is loaded from "src/tests/test-double-data/tmdb/import/movie_ids.json"
     When I look up the movie with Watchmode ID "11083261"
     Then the movie should have a null popularity value
