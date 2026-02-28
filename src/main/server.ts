@@ -10,6 +10,7 @@ import path from 'path';
 import express, { type Express, type Request, type Response } from 'express';
 import RateLimit from 'express-rate-limit';
 import { app } from 'electron';
+import { registerApiRoutes, registerHealthRoutes } from './api-server';
 
 const rootDir = app.getAppPath();
 const distPath = path.join(rootDir, 'dist');
@@ -25,15 +26,20 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
 
   app.use(limiter);
 
-  app.get('/api/health', (_req: Request, res: Response) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  // reject any request where the incoming Host header isn't localhost or 127.0.0.1
+  app.use((req, res, next) => {
+    const hostHeader = req.headers.host;
+    const hostname = typeof hostHeader === 'string' ? hostHeader.split(':')[0] : '';
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      res.status(403).send('Forbidden');
+      return;
+    }
+    next();
   });
 
-  app.get('/api/version', (_req: Request, res: Response) => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const appInfoJson = require(path.join(__dirname, 'app-info.json')) as { version: string };
-    res.json({ version: appInfoJson.version });
-  });
+  // register api endpoints powered by service layer
+  registerApiRoutes(app);
+  registerHealthRoutes(app);
 
   app.use('/dist', express.static(distPath));
   app.use(express.static(publicPath));
