@@ -7,7 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import { Express, Request } from 'express';
-import { BackgroundTaskService } from '../services';
+import { BackgroundTaskService } from '../../services';
 import { route } from './utils';
 
 const backgroundTaskService = new BackgroundTaskService();

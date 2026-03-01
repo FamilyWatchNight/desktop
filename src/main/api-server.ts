@@ -6,4 +6,6 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-export { registerApiRoutes, registerHealthRoutes } from './api';
+export { registerHttpRoutes } from './api-server/http';
+export { registerAppRoutes } from './api-server/http/app';
+export { registerIpcHandlers } from './api-server/ipc';

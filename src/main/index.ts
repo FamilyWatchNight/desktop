@@ -6,8 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { app, Menu, Tray, ipcMain } from 'electron';
-import { registerIpcHandlers } from './ipc-handlers';
+import { app, Menu, Tray } from 'electron';
+import { registerIpcHandlers } from './api-server/ipc';
 import { createAppWindow } from './window-manager';
 import path from 'path';
 import express from 'express';
@@ -101,7 +101,7 @@ if (process.env.NODE_ENV === 'test') {
 
   // TODO: Consider replacing the ipcMain handlers below with direct calls to the testHooks methods.
 
-  ipcMain.handle('test:get-db-status', async () => db.getStatus());
+  // test:get-db-status is registered by registerIpcHandlers when NODE_ENV === 'test'
 
   (global as unknown as { __testCallbacks: { createTaskContext: () => import('./tasks/BackgroundTask').TaskContext } }).__testCallbacks = {
     createTaskContext: () => ({

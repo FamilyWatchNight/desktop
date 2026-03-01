@@ -7,7 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import { Express, Request } from 'express';
-import { MovieService } from '../services';
+import { MovieService } from '../../services';
 import { route } from './utils';
 
 const movieService = new MovieService();

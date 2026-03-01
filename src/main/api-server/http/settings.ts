@@ -7,8 +7,8 @@ the Free Software Foundation, version 3.
 */
 
 import { Express, Request } from 'express';
-import SettingsManager from '../settings-manager';
-import { SettingsService } from '../services';
+import SettingsManager from '../../settings-manager';
+import { SettingsService } from '../../services';
 import { route } from './utils';
 
 const settingsManager = new SettingsManager();

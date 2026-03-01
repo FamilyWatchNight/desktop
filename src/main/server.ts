@@ -10,7 +10,7 @@ import path from 'path';
 import express, { type Express, type Request, type Response } from 'express';
 import RateLimit from 'express-rate-limit';
 import { app } from 'electron';
-import { registerApiRoutes, registerHealthRoutes } from './api-server';
+import { registerHttpRoutes, registerAppRoutes } from './api-server';
 
 const rootDir = app.getAppPath();
 const distPath = path.join(rootDir, 'dist');
@@ -37,9 +37,9 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
     next();
   });
 
-  // register api endpoints powered by service layer
-  registerApiRoutes(app);
-  registerHealthRoutes(app);
+  // register HTTP routes powered by service layer
+  registerHttpRoutes(app);
+  registerAppRoutes(app);
 
   app.use('/dist', express.static(distPath));
   app.use(express.static(publicPath));

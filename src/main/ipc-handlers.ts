@@ -17,7 +17,47 @@ const movieService = new MovieService();
 const settingsService = new SettingsService(settingsManager);
 const backgroundTaskService = new BackgroundTaskService();
 
+let handlersRegistered = false;
+
 export function registerIpcHandlers(): void {
+  // remove any existing handlers so that calling this function multiple times
+  // (as happens during tests or when the module reloads) doesn't result in an
+  // "attempted to register a second handler" error. This keeps the API
+  // idempotent.
+  const channels = [
+    'get-app-version',
+    'get-server-port',
+    'open-settings',
+    'load-settings',
+    'save-settings',
+    'enqueue-background-task',
+    'get-background-tasks',
+    'cancel-active-background-task',
+    'remove-queued-background-task',
+    'movies-create',
+    'movies-get-by-id',
+    'movies-get-by-watchdog-id',
+    'movies-get-by-tmdb-id',
+    'movies-get-all',
+    'movies-update',
+    'movies-delete',
+    'movies-search-by-title',
+    'test:get-db-status'
+  ];
+  channels.forEach((ch) => {
+    try {
+      ipcMain.removeHandler(ch);
+    } catch {
+      // ignore if not present
+    }
+  });
+
+  // also guard so we don’t run the initialization work twice within a single
+  // process invocation.
+  if (handlersRegistered) {
+    return;
+  }
+  handlersRegistered = true;
   // App handlers
   ipcMain.handle('get-app-version', () => app.getVersion());
   ipcMain.handle('get-server-port', () => (settingsManager.get('webPort') as number) || 3000);
@@ -140,7 +180,9 @@ export function registerIpcHandlers(): void {
 
   // Test handlers (only in test mode)
   if (process.env.NODE_ENV === 'test') {
-    ipcMain.handle('test:get-db-status', async () => db.getStatus());
+    if (ipcMain.listenerCount('test:get-db-status') === 0) {
+      ipcMain.handle('test:get-db-status', async () => db.getStatus());
+    }
   }
 }
 

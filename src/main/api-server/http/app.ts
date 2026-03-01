@@ -8,18 +8,8 @@ the Free Software Foundation, version 3.
 
 import { Express, Request, Response } from 'express';
 import path from 'path';
-import { registerSettingsRoutes } from './settings';
-import { registerMovieRoutes } from './movies';
-import { registerBackgroundTaskRoutes } from './background-tasks';
 
-export function registerApiRoutes(app: Express): void {
-  registerSettingsRoutes(app);
-  registerMovieRoutes(app);
-  registerBackgroundTaskRoutes(app);
-}
-
-// keep health/version here so simple
-export function registerHealthRoutes(app: Express): void {
+export function registerAppRoutes(app: Express): void {
   app.get('/api/health', (_req: Request, res: Response) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
