@@ -10,6 +10,7 @@ import { test, expect } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 import type { ElectronApplication } from 'playwright';
 import { MovieData } from '../../../../../main/db/models/Movies';
+import type { TestHooks } from '../../../../../main/testing/TestHooksImpl';
 
 let app: ElectronApplication;
 
@@ -22,12 +23,7 @@ test.beforeAll(async () => {
   });
 
   await app.evaluate(async ({ app }) => {
-    const appWithTestHooks = app as typeof app & {
-      testHooks?: {
-        db: { initMockDatabase: () => void }
-        data: { loadStubWatchmodeData: (p: string) => Promise<void>; loadStubTmdbData: (p: string) => Promise<void> }
-      };
-    };
+    const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
     if (!appWithTestHooks.testHooks) {
       throw new Error('Test hooks not available');
@@ -40,8 +36,13 @@ test.beforeAll(async () => {
 });
 
 test('should not throw errors', async () => {
-  const info = await app.evaluate(() => {
-    const g = global as unknown as { __testHooks?: { app: { getAppPath: () => string } } };
+  const info = await app.evaluate(({ app }) => {
+    const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
+
+    if (!appWithTestHooks.testHooks) {
+      throw new Error('Test hooks not available');
+    }
+
     return {
       hasProcess: typeof process !== 'undefined',
       hasVersions: typeof (process as NodeJS.Process).versions,
@@ -49,49 +50,57 @@ test('should not throw errors', async () => {
       node: (process as NodeJS.Process).versions?.node,
       sandboxed: (process as NodeJS.Process & { sandboxed?: boolean }).sandboxed,
       hasRequire: typeof require,
-      appPath: g.__testHooks ? g.__testHooks.app.getAppPath() : 'no testApi',
+      appPath: appWithTestHooks.testHooks.app.getAppPath(),
     };
   });
 });
 
 test('should have 23 movies in the database', async () => {
-  const window = await app.firstWindow();
-  const result = await window.evaluate(async () => {
-    const w = window as unknown as { electron: { movies: { getAll: () => Promise<{ success: boolean; data: unknown[] }> } } };
-    return await w.electron.movies.getAll();
+  const result = await app.evaluate(async ({ app }) => {
+    const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
+
+    if (!appWithTestHooks.testHooks) {
+      throw new Error('Test hooks not available');
+    }
+
+    return await appWithTestHooks.testHooks.movies.getAll();
   });
-  expect(result.success).toBe(true);
-  expect(result.data.length).toBe(23);
+
+  expect(result.length).toBe(23);
 });
 
 test('should not have year value for TMDB ID 1622513', async () => {
-  const window = await app.firstWindow();
-  const result = await window.evaluate(async () => {
-    const w = window as unknown as { electron: { movies: { getByTmdbId: (id: string) => Promise<{ data?: MovieData }> } } };
-    return await w.electron.movies.getByTmdbId('1622513');
+  const result = await app.evaluate(async ({ app }) => {
+    const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
+
+    if (!appWithTestHooks.testHooks) {
+      throw new Error('Test hooks not available');
+    }
+
+    return await appWithTestHooks.testHooks.movies.getByTmdbId('1622513');
   });
-  expect(result.data).toBeDefined();
-  expect(result.data!.year).toBeNull();
+
+  expect(result!.year).toBeNull();
 });
 
 test('should not have popularity value for Watchmode ID 11083261', async () => {
-  const window = await app.firstWindow();
-  const result = await window.evaluate(async () => {
-    const w = window as unknown as { electron: { movies: { getByWatchdogId: (id: string) => Promise<{ data?: MovieData }> } } };
-    return await w.electron.movies.getByWatchdogId('11083261');
+  const result = await app.evaluate(async ({ app }) => {
+    const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
+
+    if (!appWithTestHooks.testHooks) {
+      throw new Error('Test hooks not available');
+    }
+
+    return await appWithTestHooks.testHooks.movies.getByWatchmodeId('11083261');
   });
-  expect(result.data).toBeDefined();
-  expect(result.data!.popularity).toBeNull();
+
+  expect(result!.popularity).toBeNull();
 });
 
 test.afterAll(async () => {
 
   await app.evaluate(async ({ app }) => {
-    const appWithTestHooks = app as typeof app & {
-      testHooks?: {
-        db: { closeDatabase: () => void }
-      };
-    };
+    const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
     if (!appWithTestHooks.testHooks) {
       throw new Error('Test hooks not available');

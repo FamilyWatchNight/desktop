@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import { World, setWorldConstructor, IWorldOptions } from '@cucumber/cucumber';
 import { _electron as electron, ElectronApplication } from 'playwright';
 import { HomePage } from './pages/home.page';
+import type { TestHooks } from '../../../main/testing/TestHooksImpl';
 
 export class CustomWorld extends World {
   app!: ElectronApplication;
@@ -33,9 +34,7 @@ export class CustomWorld extends World {
 
   async initMockDatabase(): Promise<void> {
     await this.app.evaluate(async ({ app }) => {
-      const appWithTestHooks = app as typeof app & {
-        testHooks?: { db: { initMockDatabase: () => void } };
-      };
+      const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
         throw new Error('Test hooks not available');
@@ -47,9 +46,7 @@ export class CustomWorld extends World {
 
   async closeDatabase(): Promise<void> {
     await this.app.evaluate(async ({ app }) => {
-      const appWithTestHooks = app as typeof app & {
-        testHooks?: { db: { closeDatabase: () => void } };
-      };
+      const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
         throw new Error('Test hooks not available');
@@ -64,11 +61,7 @@ export class CustomWorld extends World {
     console.info('Loading stub TMDB data from:', dataSource);
     
     await this.app.evaluate(async ({ app }, dataSource: string) => {
-      const appWithTestHooks = app as typeof app & {
-        testHooks?: { 
-          data: { loadStubTmdbData(dataSource: string): Promise<void> }
-        };
-      };
+      const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
         throw new Error('Test hooks not available');
@@ -83,11 +76,7 @@ export class CustomWorld extends World {
     console.info('Loading stub Watchmode data from:', dataSource);
 
     await this.app.evaluate(async ({ app }, dataSource: string) => {
-      const appWithTestHooks = app as typeof app & {
-        testHooks?: { 
-          data: { loadStubWatchmodeData(dataSource: string): Promise<void> }
-        };
-      };
+      const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
         throw new Error('Test hooks not available');

@@ -24,9 +24,26 @@ export interface TestHooks {
     loadStubTmdbData: (dataSource: string) => Promise<void>;
     loadStubWatchmodeData: (dataSource: string) => Promise<void>;
   };
+  // service helpers exposed for integration tests so they can call
+  // application logic without needing a renderer window or HTTP server.
+  movies: {
+    getAll: () => import('../db/models/Movies').MovieData[];
+    getByTmdbId: (tmdbId: string) => import('../db/models/Movies').MovieData | undefined;
+    getByWatchmodeId: (watchmodeId: string) => import('../db/models/Movies').MovieData | undefined;
+    searchByTitle: (searchTerm: string) => import('../db/models/Movies').MovieData[];
+  };
+  backgroundTasks: {
+    enqueue: (taskType: string, args?: Record<string, unknown>) => unknown;
+    getState: () => { active: unknown; queue: unknown[] };
+    cancelActive: () => unknown;
+    removeQueued: (taskId: string) => unknown;
+  };
 }
 
 export function getTestHooks(): TestHooks {
+  // grab live service instances so we can call them directly from tests
+  const { movieService, backgroundTaskService } = require('../ipc-handlers').getServiceInstances();
+
   return {
     app: {
         getAppPath: () => app.getAppPath(),
@@ -48,6 +65,18 @@ export function getTestHooks(): TestHooks {
         const watchmodeTask = new ImportWatchmodeTask(watchmodeDownloader);
         await watchmodeTask.runTask({}, (global as unknown as { __testCallbacks: { createTaskContext: () => import('../tasks/BackgroundTask').TaskContext } }).__testCallbacks.createTaskContext());
       }
+    },
+    movies: {
+      getAll: () => movieService.getAll(),
+      getByTmdbId: (tmdbId: string) => movieService.getByTmdbId(tmdbId),
+      getByWatchmodeId: (watchmodeId: string) => movieService.getByWatchmodeId(watchmodeId),
+      searchByTitle: (searchTerm: string) => movieService.searchByTitle(searchTerm)
+    },
+    backgroundTasks: {
+      enqueue: (taskType: string, args?: Record<string, unknown>) => backgroundTaskService.enqueue(taskType as any, args ?? {}),
+      getState: () => backgroundTaskService.getState(),
+      cancelActive: () => backgroundTaskService.cancelActive(),
+      removeQueued: (taskId: string) => backgroundTaskService.removeQueued(taskId)
     }
   };
 }

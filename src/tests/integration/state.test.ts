@@ -8,6 +8,7 @@ the Free Software Foundation, version 3.
 
 import { test, expect } from '@playwright/test';
 import { _electron as electron } from 'playwright';
+import type { TestHooks } from '../../main/testing/TestHooksImpl';
 
 test('db is connected', async () => {
   const debugArgs = (!!process.env.PWDEBUG) ? ['--inspect=9229'] : [];
@@ -20,9 +21,7 @@ test('db is connected', async () => {
   });
 
   const status = await app.evaluate(async ({ app }) => {
-    const appWithTestHooks = app as typeof app & {
-      testHooks?: { db: { getStatus: () => { dbInitialized: boolean; dbConnected: boolean } } };
-    };
+    const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
     if (!appWithTestHooks.testHooks) {
       throw new Error('Test hooks not available');
@@ -32,12 +31,16 @@ test('db is connected', async () => {
 
   expect(status.dbConnected).toBe(true);
 
-  const search = await window.evaluate(async () => {
-    return (window as unknown as { electron: { movies: { searchByTitle: (q: string) => Promise<{ success: boolean; data: unknown[] }> } } }).electron.movies.searchByTitle('sd;flas;dflkj This movie should not exist');
+  const search = await app.evaluate(async ({ app }) => {
+    const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
+
+    if (!appWithTestHooks.testHooks) {
+      throw new Error('Test hooks not available');
+    }
+    return appWithTestHooks.testHooks.movies.searchByTitle('sd;flas;dflkj This movie should not exist');
   });
 
-  expect(search.success).toBe(true);
-  expect(search.data.length).toBe(0);
+  expect(search.length).toBe(0);
 
   await app.close();
 });
