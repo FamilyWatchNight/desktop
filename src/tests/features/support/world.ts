@@ -37,7 +37,7 @@ export class CustomWorld extends World {
       const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
+        throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
       }
 
       appWithTestHooks.testHooks.db.initMockDatabase();
@@ -49,7 +49,7 @@ export class CustomWorld extends World {
       const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
+        throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
       }
 
       appWithTestHooks.testHooks.db.closeDatabase();
@@ -64,7 +64,7 @@ export class CustomWorld extends World {
       const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
+        throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
       }
 
       await appWithTestHooks.testHooks.data.loadStubTmdbData(dataSource);
@@ -79,7 +79,7 @@ export class CustomWorld extends World {
       const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
+        throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
       }
 
       await appWithTestHooks.testHooks.data.loadStubWatchmodeData(dataSource);

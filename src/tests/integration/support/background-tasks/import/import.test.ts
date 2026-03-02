@@ -60,7 +60,7 @@ test('should have 23 movies in the database', async () => {
     const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
     if (!appWithTestHooks.testHooks) {
-      throw new Error('Test hooks not available');
+      throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
     }
 
     return await appWithTestHooks.testHooks.movies.getAll();
@@ -74,7 +74,7 @@ test('should not have year value for TMDB ID 1622513', async () => {
     const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
     if (!appWithTestHooks.testHooks) {
-      throw new Error('Test hooks not available');
+      throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
     }
 
     return await appWithTestHooks.testHooks.movies.getByTmdbId('1622513');
@@ -88,7 +88,7 @@ test('should not have popularity value for Watchmode ID 11083261', async () => {
     const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
     if (!appWithTestHooks.testHooks) {
-      throw new Error('Test hooks not available');
+      throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
     }
 
     return await appWithTestHooks.testHooks.movies.getByWatchmodeId('11083261');
@@ -103,7 +103,7 @@ test.afterAll(async () => {
     const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
     if (!appWithTestHooks.testHooks) {
-      throw new Error('Test hooks not available');
+      throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
     }
 
     appWithTestHooks.testHooks.db.closeDatabase();

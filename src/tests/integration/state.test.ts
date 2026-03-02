@@ -24,7 +24,7 @@ test('db is connected', async () => {
     const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
     if (!appWithTestHooks.testHooks) {
-      throw new Error('Test hooks not available');
+      throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
     }
     return appWithTestHooks.testHooks.db.getStatus();
   });
@@ -35,7 +35,7 @@ test('db is connected', async () => {
     const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
     if (!appWithTestHooks.testHooks) {
-      throw new Error('Test hooks not available');
+      throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
     }
     return appWithTestHooks.testHooks.movies.searchByTitle('sd;flas;dflkj This movie should not exist');
   });
