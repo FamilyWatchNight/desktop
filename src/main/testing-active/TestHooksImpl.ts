@@ -24,8 +24,6 @@ export interface TestHooks {
     loadStubTmdbData: (dataSource: string) => Promise<void>;
     loadStubWatchmodeData: (dataSource: string) => Promise<void>;
   };
-  // service helpers exposed for integration tests so they can call
-  // application logic without needing a renderer window or HTTP server.
   movies: {
     getAll: () => import('../db/models/Movies').MovieData[];
     getByTmdbId: (tmdbId: string) => import('../db/models/Movies').MovieData | undefined;
