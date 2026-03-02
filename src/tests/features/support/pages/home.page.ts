@@ -36,7 +36,7 @@ export class HomePage {
       const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
+        throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
       }
 
       return await appWithTestHooks.testHooks.movies.getAll();
@@ -53,7 +53,7 @@ export class HomePage {
       const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
+        throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
       }
 
       return await appWithTestHooks.testHooks?.movies.getByTmdbId(id);
@@ -70,7 +70,7 @@ export class HomePage {
       const appWithTestHooks = app as typeof app & { testHooks?: TestHooks; };
 
       if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
+        throw new Error('Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.');
       }
 
       return await appWithTestHooks.testHooks?.movies.getByWatchmodeId(id);
