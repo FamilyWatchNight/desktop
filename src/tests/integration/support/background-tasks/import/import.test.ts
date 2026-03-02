@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 import type { ElectronApplication } from 'playwright';
 import { MovieData } from '../../../../../main/db/models/Movies';
-import type { TestHooks } from '../../../../../main/testing/TestHooksImpl';
+import type { TestHooks } from '../../../../../main/testing-active/TestHooksImpl';
 
 let app: ElectronApplication;
 
