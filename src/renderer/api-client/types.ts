@@ -31,6 +31,9 @@ export interface BackgroundTaskApi {
   onBackgroundTaskUpdate(callback: (state: { active: unknown; queue: unknown[] }) => void): () => void;
 }
 
-export interface ApiClient extends AppApi, SettingsApi, BackgroundTaskApi {
+export interface ApiClient {
+  app: AppApi;
+  settings: SettingsApi;
+  backgroundTasks: BackgroundTaskApi;
   movies: MovieApi;
 }

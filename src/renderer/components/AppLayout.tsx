@@ -11,6 +11,9 @@ import '../styles/AppLayout.css';
 import HomePage from './HomePage';
 import SettingsPage from './SettingsPage';
 import BackgroundTasksPage from './BackgroundTasksPage';
+import { createApiClient } from '../api-client';
+
+const apiClient = createApiClient();
 
 interface TaskPayload {
   id: string;
@@ -39,7 +42,7 @@ export default function Layout(): React.ReactElement {
   useEffect(() => {
     const load = async (): Promise<void> => {
       try {
-        const state = await window.electron?.getBackgroundTasks?.();
+        const state = await apiClient.backgroundTasks.getBackgroundTasks();
         setActiveTask((state?.active as TaskPayload) ?? null);
         setQueue((state?.queue as TaskPayload[]) ?? []);
       } catch {
@@ -48,7 +51,7 @@ export default function Layout(): React.ReactElement {
       }
     };
     void load();
-    const unsubscribe = window.electron?.onBackgroundTaskUpdate?.((state) => {
+    const unsubscribe = apiClient.backgroundTasks.onBackgroundTaskUpdate((state) => {
       setActiveTask(state?.active as TaskPayload ?? null);
       setQueue(state?.queue as TaskPayload[] ?? []);
     });

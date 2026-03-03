@@ -9,17 +9,23 @@ the Free Software Foundation, version 3.
 import { contextBridge, ipcRenderer } from 'electron';
 
 export interface ElectronAPI {
-  getAppVersion: () => Promise<string>;
-  getServerPort: () => Promise<number>;
-  openSettings: () => Promise<void>;
-  loadSettings: () => Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }>;
-  saveSettings: (settings: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
-  onSettingsSaved: (callback: () => void) => void;
-  enqueueBackgroundTask: (taskType: string, args?: Record<string, unknown>) => Promise<unknown>;
-  getBackgroundTasks: () => Promise<{ active: unknown; queue: unknown[] }>;
-  cancelActiveBackgroundTask: () => Promise<unknown>;
-  removeQueuedBackgroundTask: (taskId: string) => Promise<unknown>;
-  onBackgroundTaskUpdate: (callback: (state: { active: unknown; queue: unknown[] }) => void) => () => void;
+  app: {
+    getAppVersion: () => Promise<string>;
+    getServerPort: () => Promise<number>;
+    openSettings: () => Promise<void>;
+  };
+  settings: {
+    loadSettings: () => Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }>;
+    saveSettings: (settings: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
+    onSettingsSaved: (callback: () => void) => void;
+  };
+  backgroundTasks: {
+    enqueueBackgroundTask: (taskType: string, args?: Record<string, unknown>) => Promise<unknown>;
+    getBackgroundTasks: () => Promise<{ active: unknown; queue: unknown[] }>;
+    cancelActiveBackgroundTask: () => Promise<unknown>;
+    removeQueuedBackgroundTask: (taskId: string) => Promise<unknown>;
+    onBackgroundTaskUpdate: (callback: (state: { active: unknown; queue: unknown[] }) => void) => () => void;
+  };
   movies: {
     create: (movieData: unknown) => Promise<unknown>;
     getById: (id: number) => Promise<unknown>;
@@ -33,24 +39,30 @@ export interface ElectronAPI {
 }
 
 contextBridge.exposeInMainWorld('electron', {
-  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
-  getServerPort: () => ipcRenderer.invoke('get-server-port'),
-  openSettings: () => ipcRenderer.invoke('open-settings'),
-  loadSettings: () => ipcRenderer.invoke('load-settings'),
-  saveSettings: (settings: Record<string, unknown>) => ipcRenderer.invoke('save-settings', settings),
-  onSettingsSaved: (callback: () => void) => {
-    ipcRenderer.on('settings-saved', () => callback());
+  app: {
+    getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+    getServerPort: () => ipcRenderer.invoke('get-server-port'),
+    openSettings: () => ipcRenderer.invoke('open-settings')
   },
-  enqueueBackgroundTask: (taskType: string, args?: Record<string, unknown>) =>
-    ipcRenderer.invoke('enqueue-background-task', taskType, args ?? {}),
-  getBackgroundTasks: () => ipcRenderer.invoke('get-background-tasks'),
-  cancelActiveBackgroundTask: () => ipcRenderer.invoke('cancel-active-background-task'),
-  removeQueuedBackgroundTask: (taskId: string) => ipcRenderer.invoke('remove-queued-background-task', taskId),
-  onBackgroundTaskUpdate: (callback: (state: { active: unknown; queue: unknown[] }) => void) => {
-    const handler = (_event: Electron.IpcRendererEvent, data: { active: unknown; queue: unknown[] }) =>
-      callback(data);
-    ipcRenderer.on('background-task-update', handler);
-    return () => ipcRenderer.removeListener('background-task-update', handler);
+  settings: {
+    loadSettings: () => ipcRenderer.invoke('load-settings'),
+    saveSettings: (settings: Record<string, unknown>) => ipcRenderer.invoke('save-settings', settings),
+    onSettingsSaved: (callback: () => void) => {
+      ipcRenderer.on('settings-saved', () => callback());
+    }
+  },
+  backgroundTasks: {
+    enqueueBackgroundTask: (taskType: string, args?: Record<string, unknown>) =>
+      ipcRenderer.invoke('enqueue-background-task', taskType, args ?? {}),
+    getBackgroundTasks: () => ipcRenderer.invoke('get-background-tasks'),
+    cancelActiveBackgroundTask: () => ipcRenderer.invoke('cancel-active-background-task'),
+    removeQueuedBackgroundTask: (taskId: string) => ipcRenderer.invoke('remove-queued-background-task', taskId),
+    onBackgroundTaskUpdate: (callback: (state: { active: unknown; queue: unknown[] }) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { active: unknown; queue: unknown[] }) =>
+        callback(data);
+      ipcRenderer.on('background-task-update', handler);
+      return () => ipcRenderer.removeListener('background-task-update', handler);
+    }
   },
   movies: {
     create: (movieData: unknown) => ipcRenderer.invoke('movies-create', movieData),

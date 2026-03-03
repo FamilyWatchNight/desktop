@@ -6,9 +6,9 @@ import { HttpAppApi } from './app';
 
 export function createHttpApiClient(): ApiClient {
   return {
-    ...new HttpAppApi(),
+    app:new HttpAppApi(),
     movies: new HttpMovieApi(),
-    ...new HttpSettingsApi(),
-    ...new HttpBackgroundTaskApi()
+    settings: new HttpSettingsApi(),
+    backgroundTasks: new HttpBackgroundTaskApi()
   } as ApiClient;
 }
