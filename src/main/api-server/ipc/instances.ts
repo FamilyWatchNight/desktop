@@ -11,6 +11,6 @@ import { MovieService, SettingsService, BackgroundTaskService } from '../../serv
 
 // shared service instances used by the IPC handlers
 export const settingsManager = new SettingsManager();
+export const backgroundTaskService = new BackgroundTaskService();
 export const movieService = new MovieService();
 export const settingsService = new SettingsService(settingsManager);
-export const backgroundTaskService = new BackgroundTaskService();

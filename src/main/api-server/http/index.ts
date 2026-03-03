@@ -7,12 +7,14 @@ the Free Software Foundation, version 3.
 */
 
 import { Express } from 'express';
-import { registerSettingsRoutes } from './settings';
-import { registerMovieRoutes } from './movies';
+import { registerAppRoutes } from './app';
 import { registerBackgroundTaskRoutes } from './background-tasks';
+import { registerMovieRoutes } from './movies';
+import { registerSettingsRoutes } from './settings';
 
 export function registerHttpRoutes(app: Express): void {
-  registerSettingsRoutes(app);
-  registerMovieRoutes(app);
+  registerAppRoutes(app);
   registerBackgroundTaskRoutes(app);
+  registerMovieRoutes(app);
+  registerSettingsRoutes(app);
 }

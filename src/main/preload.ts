@@ -14,11 +14,6 @@ export interface ElectronAPI {
     getServerPort: () => Promise<number>;
     openSettings: () => Promise<void>;
   };
-  settings: {
-    loadSettings: () => Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }>;
-    saveSettings: (settings: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
-    onSettingsSaved: (callback: () => void) => void;
-  };
   backgroundTasks: {
     enqueueBackgroundTask: (taskType: string, args?: Record<string, unknown>) => Promise<unknown>;
     getBackgroundTasks: () => Promise<{ active: unknown; queue: unknown[] }>;
@@ -36,6 +31,11 @@ export interface ElectronAPI {
     delete: (id: number) => Promise<unknown>;
     searchByTitle: (searchTerm: string) => Promise<unknown>;
   };
+  settings: {
+    loadSettings: () => Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }>;
+    saveSettings: (settings: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
+    onSettingsSaved: (callback: () => void) => void;
+  };
 }
 
 contextBridge.exposeInMainWorld('electron', {
@@ -43,13 +43,6 @@ contextBridge.exposeInMainWorld('electron', {
     getAppVersion: () => ipcRenderer.invoke('get-app-version'),
     getServerPort: () => ipcRenderer.invoke('get-server-port'),
     openSettings: () => ipcRenderer.invoke('open-settings')
-  },
-  settings: {
-    loadSettings: () => ipcRenderer.invoke('load-settings'),
-    saveSettings: (settings: Record<string, unknown>) => ipcRenderer.invoke('save-settings', settings),
-    onSettingsSaved: (callback: () => void) => {
-      ipcRenderer.on('settings-saved', () => callback());
-    }
   },
   backgroundTasks: {
     enqueueBackgroundTask: (taskType: string, args?: Record<string, unknown>) =>
@@ -73,6 +66,13 @@ contextBridge.exposeInMainWorld('electron', {
     update: (id: number, movieData: unknown) => ipcRenderer.invoke('movies-update', id, movieData),
     delete: (id: number) => ipcRenderer.invoke('movies-delete', id),
     searchByTitle: (searchTerm: string) => ipcRenderer.invoke('movies-search-by-title', searchTerm)
+  },
+  settings: {
+    loadSettings: () => ipcRenderer.invoke('load-settings'),
+    saveSettings: (settings: Record<string, unknown>) => ipcRenderer.invoke('save-settings', settings),
+    onSettingsSaved: (callback: () => void) => {
+      ipcRenderer.on('settings-saved', () => callback());
+    }
   }
 } as ElectronAPI);
 

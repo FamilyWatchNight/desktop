@@ -8,8 +8,7 @@ the Free Software Foundation, version 3.
 
 import { ipcMain } from 'electron';
 import * as db from '../../database';
-import { createSettingsWindow } from '../../window-manager';
-import { settingsManager } from './instances';
+import { registerAppIpcHandlers } from './app';
 import { registerMovieIpcHandlers } from './movies';
 import { registerSettingsIpcHandlers } from './settings';
 import { registerBackgroundTaskIpcHandlers } from './background-tasks';
@@ -51,17 +50,10 @@ export function registerIpcHandlers(): void {
   }
   handlersRegistered = true;
 
-  // application-level handlers
-  ipcMain.handle('get-app-version', () => require('electron').app.getVersion());
-  ipcMain.handle('get-server-port', () => (settingsManager.get('webPort') as number) || 3000);
-  ipcMain.handle('open-settings', () => {
-    createSettingsWindow();
-  });
-
-  // delegate domain handlers
-  registerSettingsIpcHandlers();
+  registerAppIpcHandlers();
   registerBackgroundTaskIpcHandlers();
   registerMovieIpcHandlers();
+  registerSettingsIpcHandlers();
 
   if (process.env.NODE_ENV === 'test') {
     if (ipcMain.listenerCount('test:get-db-status') === 0) {
