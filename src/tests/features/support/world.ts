@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import { World, setWorldConstructor, IWorldOptions } from '@cucumber/cucumber';
 import { _electron as electron, ElectronApplication } from 'playwright';
 import { HomePage } from './pages/home.page';
+import type { TestHooks } from '../../../main/testing-active/TestHooksImpl';
 
 export class CustomWorld extends World {
   app!: ElectronApplication;
@@ -16,6 +17,42 @@ export class CustomWorld extends World {
 
   constructor(options: IWorldOptions) {
     super(options);
+  }
+
+  // helper that executes a callback inside the electron app with access to test hooks.
+  // all of the repeated casting/validation logic lives here so callers can remain concise.
+  async withTestHooks<T, A extends unknown[]>(
+    fn: (hooks: TestHooks, ...args: A) => Promise<T> | T,
+    ...args: A
+  ): Promise<T> {
+    const fnString = fn.toString();
+
+    return this.app.evaluate(
+      async (
+        { app },
+        payload: { fnSource: string; fnArgs: unknown[] }
+      ) => {
+        const { fnSource, fnArgs } = payload;
+
+        const appWithTestHooks = app as typeof app & {
+          testHooks?: TestHooks;
+        };
+
+        if (!appWithTestHooks.testHooks) {
+          throw new Error(
+            'Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.'
+          );
+        }
+
+        const hookFn = eval(`(${fnSource})`);
+
+        return hookFn(appWithTestHooks.testHooks, ...fnArgs);
+      },
+      {
+        fnSource: fnString,
+        fnArgs: args,
+      }
+    );
   }
 
   async launchApp(): Promise<void> {
@@ -32,68 +69,26 @@ export class CustomWorld extends World {
   }
 
   async initMockDatabase(): Promise<void> {
-    await this.app.evaluate(async ({ app }) => {
-      const appWithTestHooks = app as typeof app & {
-        testHooks?: { db: { initMockDatabase: () => void } };
-      };
-
-      if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
-      }
-
-      appWithTestHooks.testHooks.db.initMockDatabase();
+    await this.withTestHooks(async (hooks) => {
+      return hooks.db.initMockDatabase();
     });
   }
 
   async closeDatabase(): Promise<void> {
-    await this.app.evaluate(async ({ app }) => {
-      const appWithTestHooks = app as typeof app & {
-        testHooks?: { db: { closeDatabase: () => void } };
-      };
-
-      if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
-      }
-
-      appWithTestHooks.testHooks.db.closeDatabase();
+    await this.withTestHooks(async (hooks) => {
+      return hooks.db.closeDatabase();
     });
   }
 
   async loadStubTmdbData(dataSource: string): Promise<void> {
-
-    console.info('Loading stub TMDB data from:', dataSource);
-    
-    await this.app.evaluate(async ({ app }, dataSource: string) => {
-      const appWithTestHooks = app as typeof app & {
-        testHooks?: { 
-          data: { loadStubTmdbData(dataSource: string): Promise<void> }
-        };
-      };
-
-      if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
-      }
-
-      await appWithTestHooks.testHooks.data.loadStubTmdbData(dataSource);
+    return await this.withTestHooks(async (hooks, dataSource) => {
+      return hooks.data.loadStubTmdbData(dataSource);
     }, dataSource);
   }
 
   async loadStubWatchmodeData(dataSource: string): Promise<void> {
-    
-    console.info('Loading stub Watchmode data from:', dataSource);
-
-    await this.app.evaluate(async ({ app }, dataSource: string) => {
-      const appWithTestHooks = app as typeof app & {
-        testHooks?: { 
-          data: { loadStubWatchmodeData(dataSource: string): Promise<void> }
-        };
-      };
-
-      if (!appWithTestHooks.testHooks) {
-        throw new Error('Test hooks not available');
-      }
-
-      await appWithTestHooks.testHooks.data.loadStubWatchmodeData(dataSource);
+    return await this.withTestHooks(async (hooks, dataSource) => {
+      return hooks.data.loadStubWatchmodeData(dataSource);
     }, dataSource);
   }
 

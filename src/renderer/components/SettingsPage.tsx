@@ -7,7 +7,10 @@ the Free Software Foundation, version 3.
 */
 
 import React, { useState, useEffect } from 'react';
+import { createApiClient } from '../api-client';
 import '../styles/SettingsPage.css';
+
+const apiClient = createApiClient();
 
 interface TaskPayload {
   id: string;
@@ -29,7 +32,7 @@ export default function SettingsPage(): React.ReactElement {
   useEffect(() => {
     async function loadSettings(): Promise<void> {
       try {
-        const result = await window.electron?.loadSettings();
+        const result = await apiClient.settings.loadSettings();
         if (result?.success && result.data) {
           if (result.data.webPort != null) setWebPort(String(result.data.webPort));
           if (result.data.watchmodeApiKey != null) setWatchmodeApiKey(String(result.data.watchmodeApiKey));
@@ -45,7 +48,7 @@ export default function SettingsPage(): React.ReactElement {
   useEffect(() => {
     async function load(): Promise<void> {
       try {
-        const state = await window.electron?.getBackgroundTasks?.();
+        const state = await apiClient.backgroundTasks.getBackgroundTasks();
         setActiveTask((state?.active as TaskPayload) ?? null);
         setQueue((state?.queue as TaskPayload[]) ?? []);
       } catch {
@@ -54,7 +57,7 @@ export default function SettingsPage(): React.ReactElement {
       }
     }
     void load();
-    const unsub = window.electron?.onBackgroundTaskUpdate?.((state) => {
+    const unsub = apiClient.backgroundTasks.onBackgroundTaskUpdate((state) => {
       setActiveTask(state?.active as TaskPayload ?? null);
       setQueue(state?.queue as TaskPayload[] ?? []);
     });
@@ -69,7 +72,7 @@ export default function SettingsPage(): React.ReactElement {
   const saveSettings = async (): Promise<void> => {
     const settings = { webPort: parseInt(webPort, 10), watchmodeApiKey, tmdbApiKey };
     try {
-      const result = await window.electron?.saveSettings(settings);
+      const result = await apiClient.settings.saveSettings(settings);
       if (result?.success) {
         showMessage('Settings saved successfully!', 'success');
         setTimeout(() => { setStatusMessage(''); setStatusType(''); }, 3000);
@@ -82,7 +85,7 @@ export default function SettingsPage(): React.ReactElement {
 
   const enqueueBackgroundTask = async (taskType: string): Promise<void> => {
     try {
-      const result = await window.electron?.enqueueBackgroundTask?.(taskType) as { success?: boolean; error?: string } | undefined;
+      const result = await apiClient.backgroundTasks.enqueueBackgroundTask(taskType) as { success?: boolean; error?: string } | undefined;
       if (result?.success) {
         setBackgroundTaskMessage('Task queued. See System → Background Tasks.');
         setTimeout(() => setBackgroundTaskMessage(''), 4000);
@@ -99,7 +102,7 @@ export default function SettingsPage(): React.ReactElement {
   const handleCancel = (): void => {
     async function load(): Promise<void> {
       try {
-        const result = await window.electron?.loadSettings();
+        const result = await apiClient.settings.loadSettings();
         if (result?.success && result.data) {
           if (result.data.webPort != null) setWebPort(String(result.data.webPort));
           if (result.data.watchmodeApiKey != null) setWatchmodeApiKey(String(result.data.watchmodeApiKey));
