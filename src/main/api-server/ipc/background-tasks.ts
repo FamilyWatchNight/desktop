@@ -8,11 +8,15 @@ the Free Software Foundation, version 3.
 
 import { ipcMain } from 'electron';
 import { backgroundTaskService } from './instances';
+import { TaskRegistryType, isTaskRegistryType } from '../../tasks/task-registry';
 
 export function registerBackgroundTaskIpcHandlers() {
-  ipcMain.handle('enqueue-background-task', (_event, taskType: string, args: Record<string, unknown>) =>
-    backgroundTaskService.enqueue(taskType as import('../../tasks/task-registry').TaskRegistryType, args ?? {})
-  );
+  ipcMain.handle('enqueue-background-task', (_event, taskType: string, args: Record<string, unknown>) => {
+    if (!isTaskRegistryType(taskType)) {
+      throw new Error(`Invalid task type: ${taskType}`);
+    }
+    return backgroundTaskService.enqueue(taskType as TaskRegistryType, args ?? {})
+  });
   ipcMain.handle('get-background-tasks', () => backgroundTaskService.getState());
   ipcMain.handle('cancel-active-background-task', () => backgroundTaskService.cancelActive());
   ipcMain.handle('remove-queued-background-task', (_event, taskId: string) =>

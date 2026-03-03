@@ -9,14 +9,18 @@ the Free Software Foundation, version 3.
 import { Express, Request } from 'express';
 import { BackgroundTaskService } from '../../services';
 import { route } from './utils';
+import { TaskRegistryType, isTaskRegistryType } from '../../tasks/task-registry';
 
 const backgroundTaskService = new BackgroundTaskService();
 
 export function registerBackgroundTaskRoutes(app: Express): void {
   app.post('/api/background-tasks/enqueue',
     route((req: Request) => {
-      const { type, args } = req.body || {};
-      return backgroundTaskService.enqueue(type, args);
+      const { taskType, args } = req.body || {};
+      if (typeof taskType !== 'string' || !isTaskRegistryType(taskType)) {
+        throw new Error(`Invalid task type: ${taskType}`);
+      }
+      return backgroundTaskService.enqueue(taskType as TaskRegistryType, args);
     })
   );
 
