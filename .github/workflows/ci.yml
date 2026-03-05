@@ -71,3 +71,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run build
+
+      - name: Verify build did not modify tracked files
+        run: git diff --exit-code
