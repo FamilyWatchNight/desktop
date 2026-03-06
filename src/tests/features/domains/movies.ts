@@ -8,7 +8,7 @@ the Free Software Foundation, version 3.
 
 import { ElectronApplication, Page } from 'playwright';
 import { MovieData } from '../../../../main/db/models/Movies';
-import type { TestHooks } from '../../../../main/testing-active/TestHooksImpl';
+import { withTestHooks } from '../infrastructure/utils';
 
 /**
  * API layer for exposing movie-related functionality in the electron app to Cucumber tests.
@@ -20,47 +20,11 @@ export class Movies {
     this.app = app;
   }
 
-  // helper that executes a callback inside the electron app with access to test hooks.
-  // all of the repeated casting/validation logic lives here so callers can remain concise.
-  async withTestHooks<T, A extends unknown[]>(
-    fn: (hooks: TestHooks, ...args: A) => Promise<T> | T,
-    ...args: A
-  ): Promise<T> {
-    const fnString = fn.toString();
-
-    return this.app.evaluate(
-      async (
-        { app },
-        payload: { fnSource: string; fnArgs: unknown[] }
-      ) => {
-        const { fnSource, fnArgs } = payload;
-
-        const appWithTestHooks = app as typeof app & {
-          testHooks?: TestHooks;
-        };
-
-        if (!appWithTestHooks.testHooks) {
-          throw new Error(
-            'Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.'
-          );
-        }
-
-        const hookFn = eval(`(${fnSource})`);
-
-        return hookFn(appWithTestHooks.testHooks, ...fnArgs);
-      },
-      {
-        fnSource: fnString,
-        fnArgs: args,
-      }
-    );
-  }
-
   /**
    * Get all movies from the database via the electron API
    */
   async getAllMovies(): Promise<MovieData[]> {
-    return await this.withTestHooks(async (hooks) => {
+    return await withTestHooks(this.app, async (hooks) => {
       return hooks.movies.getAll();
     });
   }
@@ -69,7 +33,7 @@ export class Movies {
    * Get a movie by its TMDB ID
    */
   async getMovieByTmdbId(tmdbId: string): Promise<MovieData | undefined> {
-    return await this.withTestHooks(async (hooks, tmdbId) => {
+    return await withTestHooks(this.app, async (hooks, tmdbId) => {
       return hooks.movies.getByTmdbId(tmdbId);
     }, tmdbId);
   }
@@ -78,7 +42,7 @@ export class Movies {
    * Get a movie by its Watchmode ID
    */
   async getMovieByWatchmodeId(watchmodeId: string): Promise<MovieData | undefined> {
-    return await this.withTestHooks(async (hooks, watchmodeId) => {
+    return await withTestHooks(this.app, async (hooks, watchmodeId) => {
       return hooks.movies.getByWatchmodeId(watchmodeId);
     }, watchmodeId);
   }
