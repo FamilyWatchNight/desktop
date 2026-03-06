@@ -8,12 +8,12 @@ the Free Software Foundation, version 3.
 
 import { World, setWorldConstructor, IWorldOptions } from '@cucumber/cucumber';
 import { _electron as electron, ElectronApplication } from 'playwright';
-import { HomePage } from './pages/home.page';
+import { Movies } from './api/movies.api';
 import type { TestHooks } from '../../../main/testing-active/TestHooksImpl';
 
 export class CustomWorld extends World {
   app!: ElectronApplication;
-  homePage!: HomePage;
+  moviesApi!: Movies;
 
   constructor(options: IWorldOptions) {
     super(options);
@@ -65,7 +65,7 @@ export class CustomWorld extends World {
       console.log('[app]', msg.text());
     });
 
-    this.homePage = new HomePage(this.app);
+    this.moviesApi = new Movies(this.app);
   }
 
   async initMockDatabase(): Promise<void> {

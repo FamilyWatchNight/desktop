@@ -11,10 +11,9 @@ import { MovieData } from '../../../../main/db/models/Movies';
 import type { TestHooks } from '../../../../main/testing-active/TestHooksImpl';
 
 /**
- * Page Object for the Home/Movies page
- * Provides methods to interact with the movie list and movie data
+ * API layer for exposing movie-related functionality in the electron app to Cucumber tests.
  */
-export class HomePage {
+export class Movies {
   private app: ElectronApplication;
 
   constructor(app: ElectronApplication) {
@@ -55,13 +54,6 @@ export class HomePage {
         fnArgs: args,
       }
     );
-  }
-
-  /**
-   * Get the first window of the application
-   */
-  async getWindow(): Promise<Page> {
-    return await this.app.firstWindow();
   }
 
   /**

@@ -34,15 +34,15 @@ Given('stub TMDB data is loaded from', async function (this: CustomWorld, dataSo
 });
 
 When('I look up the movie with TMDB ID {string}', async function (this: CustomWorld, tmdbId: string) {
-  currentMovie = await this.homePage.getMovieByTmdbId(tmdbId);
+  currentMovie = await this.moviesApi.getMovieByTmdbId(tmdbId);
 });
 
 When('I look up the movie with Watchmode ID {string}', async function (this: CustomWorld, watchmodeId: string) {
-  currentMovie = await this.homePage.getMovieByWatchmodeId(watchmodeId);
+  currentMovie = await this.moviesApi.getMovieByWatchmodeId(watchmodeId);
 });
 
 Then('I should see {int} movies in the database', async function (this: CustomWorld, expectedCount: number) {
-  const movieCount = await this.homePage.getMovieCount();
+  const movieCount = await this.moviesApi.getMovieCount();
   expect(movieCount).toBe(expectedCount);
 });
 
