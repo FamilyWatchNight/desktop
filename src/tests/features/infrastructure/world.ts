@@ -8,7 +8,7 @@ the Free Software Foundation, version 3.
 
 import { World, setWorldConstructor, IWorldOptions } from '@cucumber/cucumber';
 import { _electron as electron, ElectronApplication } from 'playwright';
-import { Movies } from './api/movies.api';
+import { Movies } from '../domains/movies';
 import type { TestHooks } from '../../../main/testing-active/TestHooksImpl';
 
 export class CustomWorld extends World {
