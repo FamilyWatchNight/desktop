@@ -8,11 +8,14 @@ the Free Software Foundation, version 3.
 
 import { World, setWorldConstructor, IWorldOptions } from '@cucumber/cucumber';
 import { _electron as electron, ElectronApplication } from 'playwright';
+import { TestData } from '../domains/data';
+import { Database } from '../domains/db';
 import { Movies } from '../domains/movies';
-import { withTestHooks } from './utils';
 
 export class CustomWorld extends World {
   app!: ElectronApplication;
+  dataApi!: TestData;
+  dbApi!: Database;
   moviesApi!: Movies;
 
   constructor(options: IWorldOptions) {
@@ -29,31 +32,9 @@ export class CustomWorld extends World {
       console.log('[app]', msg.text());
     });
 
+    this.dataApi = new TestData(this.app);
+    this.dbApi = new Database(this.app);
     this.moviesApi = new Movies(this.app);
-  }
-
-  async initMockDatabase(): Promise<void> {
-    await withTestHooks(this.app, async (hooks) => {
-      return hooks.db.initMockDatabase();
-    });
-  }
-
-  async closeDatabase(): Promise<void> {
-    await withTestHooks(this.app, async (hooks) => {
-      return hooks.db.closeDatabase();
-    });
-  }
-
-  async loadStubTmdbData(dataSource: string): Promise<void> {
-    return await withTestHooks(this.app, async (hooks, dataSource) => {
-      return hooks.data.loadStubTmdbData(dataSource);
-    }, dataSource);
-  }
-
-  async loadStubWatchmodeData(dataSource: string): Promise<void> {
-    return await withTestHooks(this.app, async (hooks, dataSource) => {
-      return hooks.data.loadStubWatchmodeData(dataSource);
-    }, dataSource);
   }
 
   async closeApp(): Promise<void> {

@@ -16,21 +16,21 @@ let currentMovie: MovieData | undefined;
 
 Given('the application is running with a test database', async function (this: CustomWorld) {
   // App is launched in Before hook
-  await this.initMockDatabase();
+  await this.dbApi.initMockDatabase();
 });
 
 Given('stub Watchmode data is loaded from {string}', async function (this: CustomWorld, dataSource: string) {
-  await this.loadStubWatchmodeData(dataSource);
+  await this.dataApi.loadStubWatchmodeData(dataSource);
 });
 Given('stub Watchmode data is loaded from', async function (this: CustomWorld, dataSource: string) {
-  await this.loadStubWatchmodeData(dataSource);
+  await this.dataApi.loadStubWatchmodeData(dataSource);
 });
 
 Given('stub TMDB data is loaded from {string}', async function (this: CustomWorld, dataSource: string) {
-  await this.loadStubTmdbData(dataSource);
+  await this.dataApi.loadStubTmdbData(dataSource);
 });
 Given('stub TMDB data is loaded from', async function (this: CustomWorld, dataSource: string) {
-  await this.loadStubTmdbData(dataSource);
+  await this.dataApi.loadStubTmdbData(dataSource);
 });
 
 When('I look up the movie with TMDB ID {string}', async function (this: CustomWorld, tmdbId: string) {
