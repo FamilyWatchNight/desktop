@@ -10,7 +10,7 @@ import { After, Before, Status } from '@cucumber/cucumber';
 import { CustomWorld } from './world';
 
 // Before each scenario - launch the app
-Before(async function (this: CustomWorld) {
+Before({ timeout: 60 * 1000 }, async function (this: CustomWorld) {
   await this.launchApp();
 });
 
