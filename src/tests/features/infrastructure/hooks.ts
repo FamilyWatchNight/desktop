@@ -10,7 +10,7 @@ import { After, Before, Status } from '@cucumber/cucumber';
 import { CustomWorld } from './world';
 
 // Before each scenario - launch the app
-Before(async function (this: CustomWorld) {
+Before({ timeout: 60 * 1000 }, async function (this: CustomWorld) {
   await this.launchApp();
 });
 
@@ -19,7 +19,7 @@ After(async function (this: CustomWorld, scenario) {
   // Close database connection
   if (this.app) {
     try {
-      await this.closeDatabase();
+      await this.dbApi.closeDatabase();
     } catch (error) {
       // Database may not have been initialized in some scenarios
       console.log('Note: Could not close database (may not have been initialized)');
