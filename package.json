@@ -31,7 +31,7 @@
   "author": "",
   "license": "GPL-3.0-only",
   "devDependencies": {
-    "@cucumber/cucumber": "^12.6.0",
+    "@cucumber/cucumber": "^12.7.0",
     "@playwright/test": "^1.58.2",
     "@types/better-sqlite3": "^7.6.11",
     "@types/express": "^5.0.0",
