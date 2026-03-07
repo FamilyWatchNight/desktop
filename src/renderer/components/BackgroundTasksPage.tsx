@@ -7,7 +7,10 @@ the Free Software Foundation, version 3.
 */
 
 import React, { useState, useEffect } from 'react';
+import { createApiClient } from '../api-client';
 import '../styles/BackgroundTasksPage.css';
+
+const apiClient = createApiClient();
 
 interface TaskPayload {
   id: string;
@@ -26,7 +29,7 @@ export default function BackgroundTasksPage(): React.ReactElement {
   useEffect(() => {
     async function load(): Promise<void> {
       try {
-        const state = await window.electron?.getBackgroundTasks();
+        const state = await apiClient.backgroundTasks.getBackgroundTasks();
         if (state) {
           setActive(state.active as TaskPayload);
           setQueue(state.queue as TaskPayload[] ?? []);
@@ -36,7 +39,7 @@ export default function BackgroundTasksPage(): React.ReactElement {
       }
     }
     void load();
-    const unsubscribe = window.electron?.onBackgroundTaskUpdate?.((state) => {
+    const unsubscribe = apiClient.backgroundTasks.onBackgroundTaskUpdate((state :{ active: unknown; queue: unknown[] }) => {
       setActive(state.active as TaskPayload);
       setQueue(state.queue as TaskPayload[] ?? []);
     });
@@ -50,7 +53,7 @@ export default function BackgroundTasksPage(): React.ReactElement {
 
   const cancelActiveTask = async (): Promise<void> => {
     try {
-      const result = await window.electron?.cancelActiveBackgroundTask?.() as { success?: boolean; error?: string } | undefined;
+      const result = await apiClient.backgroundTasks.cancelActiveBackgroundTask() as { success?: boolean; error?: string } | undefined;
       if (!result?.success) console.error('Failed to cancel active task:', result?.error);
     } catch (err) {
       console.error('Error cancelling task:', err);
@@ -59,7 +62,7 @@ export default function BackgroundTasksPage(): React.ReactElement {
 
   const removeQueuedTask = async (taskId: string): Promise<void> => {
     try {
-      const result = await window.electron?.removeQueuedBackgroundTask?.(taskId) as { success?: boolean; error?: string } | undefined;
+      const result = await apiClient.backgroundTasks.removeQueuedBackgroundTask(taskId) as { success?: boolean; error?: string } | undefined;
       if (!result?.success) console.error('Failed to remove queued task:', result?.error);
     } catch (err) {
       console.error('Error removing task:', err);

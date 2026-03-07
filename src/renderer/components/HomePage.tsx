@@ -7,27 +7,26 @@ the Free Software Foundation, version 3.
 */
 
 import React, { useState, useEffect } from 'react';
+import { createApiClient } from '../api-client';
 import '../styles/HomePage.css';
+
+const apiClient = createApiClient();
 
 export default function HomePage(): React.ReactElement {
   const [version, setVersion] = useState<string>('');
   const [port, setPort] = useState<number | null>(null);
   const [serverOnline, setServerOnline] = useState<boolean | null>(null);
-  const [isElectron, setIsElectron] = useState(false);
 
   useEffect(() => {
-    const checkElectron = typeof window !== 'undefined' && Boolean((window as Window & { electron?: unknown }).electron);
-    setIsElectron(checkElectron);
-
     async function load(): Promise<void> {
       try {
-        const v = await window.electron?.getAppVersion?.();
+        const v = await apiClient.app.getAppVersion();
         if (v != null) setVersion(String(v));
       } catch {
         setVersion('unknown');
       }
       try {
-        const p = await window.electron?.getServerPort?.();
+        const p = await apiClient.app.getServerPort();
         if (p != null) setPort(p);
       } catch {
         setPort(null);
@@ -52,7 +51,7 @@ export default function HomePage(): React.ReactElement {
   }, [port]);
 
   const openSettings = (): void => {
-    void window.electron?.openSettings?.();
+    void apiClient.app.openSettings();
   };
 
   return (
@@ -66,11 +65,9 @@ export default function HomePage(): React.ReactElement {
               {serverOnline === true ? 'Server online' : serverOnline === false ? 'Server offline' : 'Checking...'}
             </span>
           )}
-          {isElectron && (
-            <button type="button" onClick={openSettings} className="btn-settings">
-              Settings
-            </button>
-          )}
+          <button type="button" onClick={openSettings} className="btn-settings">
+            Settings
+          </button>
         </div>
       </div>
       <div className="app-content">

@@ -8,7 +8,7 @@ the Free Software Foundation, version 3.
 
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { CustomWorld } from '../support/world';
+import { CustomWorld } from '../infrastructure/world';
 import { MovieData } from '../../../main/db/models/Movies';
 
 // Store the current movie being examined
@@ -16,27 +16,33 @@ let currentMovie: MovieData | undefined;
 
 Given('the application is running with a test database', async function (this: CustomWorld) {
   // App is launched in Before hook
-  await this.initMockDatabase();
+  await this.dbApi.initMockDatabase();
 });
 
 Given('stub Watchmode data is loaded from {string}', async function (this: CustomWorld, dataSource: string) {
-  await this.loadStubWatchmodeData(dataSource);
+  await this.dataApi.loadStubWatchmodeData(dataSource);
+});
+Given('stub Watchmode data is loaded from', async function (this: CustomWorld, dataSource: string) {
+  await this.dataApi.loadStubWatchmodeData(dataSource);
 });
 
 Given('stub TMDB data is loaded from {string}', async function (this: CustomWorld, dataSource: string) {
-  await this.loadStubTmdbData(dataSource);
+  await this.dataApi.loadStubTmdbData(dataSource);
+});
+Given('stub TMDB data is loaded from', async function (this: CustomWorld, dataSource: string) {
+  await this.dataApi.loadStubTmdbData(dataSource);
 });
 
 When('I look up the movie with TMDB ID {string}', async function (this: CustomWorld, tmdbId: string) {
-  currentMovie = await this.homePage.getMovieByTmdbId(tmdbId);
+  currentMovie = await this.moviesApi.getMovieByTmdbId(tmdbId);
 });
 
 When('I look up the movie with Watchmode ID {string}', async function (this: CustomWorld, watchmodeId: string) {
-  currentMovie = await this.homePage.getMovieByWatchmodeId(watchmodeId);
+  currentMovie = await this.moviesApi.getMovieByWatchmodeId(watchmodeId);
 });
 
 Then('I should see {int} movies in the database', async function (this: CustomWorld, expectedCount: number) {
-  const movieCount = await this.homePage.getMovieCount();
+  const movieCount = await this.moviesApi.getMovieCount();
   expect(movieCount).toBe(expectedCount);
 });
 
