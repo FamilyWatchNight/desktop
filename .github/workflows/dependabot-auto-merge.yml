@@ -11,8 +11,7 @@ permissions:
 jobs:
   dependabot:
     if: >
-      github.actor == 'dependabot[bot]' &&
-      github.event.pull_request.mergeable_state == 'clean'
+      github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
 
     steps:
