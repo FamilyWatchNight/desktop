@@ -4,7 +4,7 @@ import { callApi } from './utils';
 export class HttpMovieApi implements MovieApi {
   create(movieData: unknown) { return callApi('/api/movies', { method: 'POST', body: JSON.stringify(movieData) }); }
   getById(id: number) { return callApi(`/api/movies/${id}`); }
-  getByWatchdogId(watchdogId: string) { return callApi(`/api/movies/watchmode/${watchdogId}`); }
+  getByWatchmodeId(watchmodeId: string) { return callApi(`/api/movies/watchmode/${watchmodeId}`); }
   getByTmdbId(tmdbId: string) { return callApi(`/api/movies/tmdb/${tmdbId}`); }
   getAll() { return callApi('/api/movies'); }
   update(id: number, movieData: unknown) { return callApi(`/api/movies/${id}`, { method: 'PUT', body: JSON.stringify(movieData) }); }

@@ -12,7 +12,7 @@ import { movieService } from './instances';
 export function registerMovieIpcHandlers() {
   ipcMain.handle('movies-create', (_event, movieData: unknown) => movieService.create(movieData));
   ipcMain.handle('movies-get-by-id', (_event, id: number) => movieService.getById(id));
-  ipcMain.handle('movies-get-by-watchdog-id', (_event, watchdogId: string) => movieService.getByWatchmodeId(watchdogId));
+  ipcMain.handle('movies-get-by-watchmode-id', (_event, watchmodeId: string) => movieService.getByWatchmodeId(watchmodeId));
   ipcMain.handle('movies-get-by-tmdb-id', (_event, tmdbId: string) => movieService.getByTmdbId(tmdbId));
   ipcMain.handle('movies-get-all', () => movieService.getAll());
   ipcMain.handle('movies-update', (_event, id: number, movieData: unknown) => {

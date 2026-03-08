@@ -28,7 +28,7 @@ export function registerIpcHandlers(): void {
     'remove-queued-background-task',
     'movies-create',
     'movies-get-by-id',
-    'movies-get-by-watchdog-id',
+    'movies-get-by-watchmode-id',
     'movies-get-by-tmdb-id',
     'movies-get-all',
     'movies-update',
