@@ -24,7 +24,7 @@ export interface ElectronAPI {
   movies: {
     create: (movieData: unknown) => Promise<unknown>;
     getById: (id: number) => Promise<unknown>;
-    getByWatchdogId: (watchdogId: string) => Promise<unknown>;
+    getByWatchmodeId: (watchmodeId: string) => Promise<unknown>;
     getByTmdbId: (tmdbId: string) => Promise<unknown>;
     getAll: () => Promise<unknown>;
     update: (id: number, movieData: unknown) => Promise<unknown>;
@@ -60,7 +60,7 @@ contextBridge.exposeInMainWorld('electron', {
   movies: {
     create: (movieData: unknown) => ipcRenderer.invoke('movies-create', movieData),
     getById: (id: number) => ipcRenderer.invoke('movies-get-by-id', id),
-    getByWatchdogId: (watchdogId: string) => ipcRenderer.invoke('movies-get-by-watchdog-id', watchdogId),
+    getByWatchmodeId: (watchmodeId: string) => ipcRenderer.invoke('movies-get-by-watchmode-id', watchmodeId),
     getByTmdbId: (tmdbId: string) => ipcRenderer.invoke('movies-get-by-tmdb-id', tmdbId),
     getAll: () => ipcRenderer.invoke('movies-get-all'),
     update: (id: number, movieData: unknown) => ipcRenderer.invoke('movies-update', id, movieData),

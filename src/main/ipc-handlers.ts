@@ -36,7 +36,7 @@ export function registerIpcHandlers(): void {
     'remove-queued-background-task',
     'movies-create',
     'movies-get-by-id',
-    'movies-get-by-watchdog-id',
+    'movies-get-by-watchmode-id',
     'movies-get-by-tmdb-id',
     'movies-get-all',
     'movies-update',
@@ -118,12 +118,12 @@ export function registerIpcHandlers(): void {
     }
   });
 
-  ipcMain.handle('movies-get-by-watchdog-id', (_event, watchdogId: string) => {
+  ipcMain.handle('movies-get-by-watchmode-id', (_event, watchmodeId: string) => {
     try {
-      const movie = movieService.getByWatchmodeId(watchdogId);
+      const movie = movieService.getByWatchmodeId(watchmodeId);
       return { success: true, data: movie };
     } catch (error) {
-      console.error('Error getting movie by Watchdog ID:', (error as Error).message);
+      console.error('Error getting movie by Watchmode ID:', (error as Error).message);
       return { success: false, error: (error as Error).message };
     }
   });

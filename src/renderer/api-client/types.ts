@@ -17,7 +17,7 @@ export interface BackgroundTaskApi {
 export interface MovieApi {
   create(movieData: unknown): Promise<unknown>;
   getById(id: number): Promise<unknown>;
-  getByWatchdogId(watchdogId: string): Promise<unknown>;
+  getByWatchmodeId(watchmodeId: string): Promise<unknown>;
   getByTmdbId(tmdbId: string): Promise<unknown>;
   getAll(): Promise<unknown>;
   update(id: number, movieData: unknown): Promise<unknown>;
