@@ -10,7 +10,6 @@ import { ipcMain, app } from 'electron';
 import SettingsManager from './settings-manager';
 import { MovieService, SettingsService, BackgroundTaskService } from './services';
 import * as db from './database';
-import { createSettingsWindow } from './window-manager';
 
 const settingsManager = new SettingsManager();
 const movieService = new MovieService();
@@ -27,7 +26,6 @@ export function registerIpcHandlers(): void {
   const channels = [
     'get-app-version',
     'get-server-port',
-    'open-settings',
     'load-settings',
     'save-settings',
     'enqueue-background-task',
@@ -61,9 +59,6 @@ export function registerIpcHandlers(): void {
   // App handlers
   ipcMain.handle('get-app-version', () => app.getVersion());
   ipcMain.handle('get-server-port', () => (settingsManager.get('webPort') as number) || 3000);
-  ipcMain.handle('open-settings', () => {
-    createSettingsWindow();
-  });
 
   // Settings handlers
   ipcMain.handle('load-settings', () => {

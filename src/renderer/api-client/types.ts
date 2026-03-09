@@ -3,7 +3,6 @@
 export interface AppApi {
   getAppVersion(): Promise<string>;
   getServerPort(): Promise<number>;
-  openSettings(): Promise<void>;
 }
 
 export interface BackgroundTaskApi {

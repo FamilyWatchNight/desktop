@@ -46,12 +46,6 @@ export function createAppWindow(): void {
   });
 }
 
-export function createSettingsWindow(): void {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.focus();
-  }
-}
-
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
 }
