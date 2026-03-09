@@ -8,7 +8,6 @@ the Free Software Foundation, version 3.
 
 import React, { useState, useEffect } from 'react';
 import { createApiClient } from '../api-client';
-import '../styles/SettingsPage.css';
 
 const apiClient = createApiClient();
 
