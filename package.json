@@ -64,10 +64,11 @@
   "build": {
     "appId": "com.familywatchnight.app",
     "productName": "Family Watch Night",
+    "icon": "src/assets/images/icon.png",
     "files": [
       "dist/**/*",
       "assets/**/*",
-      "public/**/*",
+      "src/assets/**/*",
       "node_modules/**/*"
     ],
     "win": {

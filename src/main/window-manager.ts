@@ -6,7 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { BrowserWindow } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import * as backgroundTaskManager from './background-task-manager';
 
@@ -24,7 +24,7 @@ export function createAppWindow(): void {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    icon: path.join(__dirname, '../../assets/icon.png'),
+    icon: path.join(app.getAppPath(), app.isPackaged ? 'assets' : 'src/assets', 'images', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true

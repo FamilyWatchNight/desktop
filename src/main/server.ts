@@ -14,7 +14,7 @@ import { registerHttpRoutes, registerAppRoutes } from './api-server';
 
 const rootDir = app.getAppPath();
 const distPath = path.join(rootDir, 'dist');
-const publicPath = path.join(rootDir, 'public');
+const publicPath = path.join(rootDir, app.isPackaged ? 'assets' : 'src/assets');
 
 export function startServer(app: Express, port: number): ReturnType<Express['listen']> {
 
