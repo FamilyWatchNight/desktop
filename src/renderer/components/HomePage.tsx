@@ -6,12 +6,10 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import '../styles/HomePage.css';
-
 export default function HomePage(): React.ReactElement {
 
   return (
-    <div className="home-page">
+    <div className="page">
     </div>
   );
 }

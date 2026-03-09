@@ -70,11 +70,11 @@ export default function BackgroundTasksPage(): React.ReactElement {
   };
 
   return (
-    <div className="background-tasks-page">
-      <div className="background-tasks-container">
-        <h1 className="background-tasks-title">Background Tasks</h1>
-        <section className="tasks-section">
-          <h2 className="tasks-section-title">Active Task</h2>
+      <div className="page centered">
+      <div className="page-container">
+        <h1 className="page-title">Background Tasks</h1>
+        <section className="section">
+          <h2 className="section-title">Active Task</h2>
           {active ? (
             <div className="active-task">
               <div className="active-task-label">{active.label}</div>
@@ -83,20 +83,20 @@ export default function BackgroundTasksPage(): React.ReactElement {
                 <div className={`progress-bar-fill ${isIndeterminate ? 'indeterminate' : ''}`} style={isIndeterminate ? {} : { width: `${progressPercent}%` }} />
               </div>
               <div className="progress-text">{isIndeterminate ? 'In progress...' : `${progressPercent}% complete`}</div>
-              <button type="button" className="btn-cancel-task" onClick={cancelActiveTask}>Cancel Task</button>
+              <button type="button" className="btn-danger" onClick={cancelActiveTask}>Cancel Task</button>
             </div>
           ) : (
             <div className="no-active-task">No task running</div>
           )}
         </section>
-        <section className="tasks-section">
-          <h2 className="tasks-section-title">Queued Tasks</h2>
+        <section className="section">
+          <h2 className="section-title">Queued Tasks</h2>
           {queue.length > 0 ? (
             <ul className="queued-list">
               {queue.map((t) => (
                 <li key={t.id} className="queued-item">
                   <span className="queued-item-label">{t.label}</span>
-                  <button type="button" className="btn-remove-task" onClick={() => removeQueuedTask(t.id)} aria-label={`Remove ${t.label}`}>Remove</button>
+                  <button type="button" className="btn-danger" onClick={() => removeQueuedTask(t.id)} aria-label={`Remove ${t.label}`}>Remove</button>
                 </li>
               ))}
             </ul>

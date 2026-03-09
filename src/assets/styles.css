@@ -54,6 +54,13 @@ h3 {
   font-size: 1.2em;
 }
 
+/* Page Title */
+.page-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #e0e0e0;
+}
+
 /* Header */
 header {
   background: #2d2d2daa;
@@ -90,26 +97,34 @@ button:hover {
   background: #005a9e;
 }
 
-button.btn-save {
+/* Button Modifiers */
+button.btn-primary {
   background: #007acc;
   color: white;
-  flex: 1;
   padding: 10px 20px;
 }
 
-button.btn-save:hover {
+button.btn-primary:hover {
   background: #005a9e;
 }
 
-button.btn-cancel {
+button.btn-secondary {
   background: #404040;
   color: #e0e0e0;
-  flex: 1;
   padding: 10px 20px;
 }
 
-button.btn-cancel:hover {
+button.btn-secondary:hover {
   background: #505050;
+}
+
+button.btn-danger {
+  background: #d13438;
+  color: white;
+}
+
+button.btn-danger:hover {
+  background: #b02e32;
 }
 
 /* Content Area */
@@ -119,6 +134,21 @@ button.btn-cancel:hover {
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   border: 1px solid #404040;
+}
+
+/* Page Container */
+.page-container {
+  background: #2d2d2daa;
+  padding: 30px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  border: 1px solid #404040;
+}
+
+/* Centered page containers have max-width */
+.page.centered .page-container {
+  width: 100%;
+  max-width: 640px;
 }
 
 /* Welcome Message */
@@ -153,8 +183,8 @@ code {
   color: #4dd0e1;
 }
 
-/* Settings Specific */
-.setting-group {
+/* Form Styles */
+.form-group {
   background: #2d2d2d;
   padding: 15px;
   margin-bottom: 15px;
@@ -163,15 +193,15 @@ code {
   border: 1px solid #404040;
 }
 
-.setting-group label {
+.form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
   color: #e0e0e0;
 }
 
-.setting-group input,
-.setting-group select {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 8px;
   border: 1px solid #505050;
@@ -179,6 +209,66 @@ code {
   font-size: 14px;
   background: #1e1e1e;
   color: #e0e0e0;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #007acc;
+  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+}
+
+/* Progress Bar */
+.progress-bar-wrap {
+  height: 8px;
+  background: #1e1e1e;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #007acc;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-bar-fill.indeterminate {
+  background: linear-gradient(90deg, #007acc 0%, #0099ff 50%, #007acc 100%);
+  background-size: 200% 100%;
+  animation: indeterminate-progress 1.5s ease-in-out infinite;
+}
+
+@keyframes indeterminate-progress {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #a0a0a0;
+}
+
+/* Section Styles */
+.section {
+  margin-bottom: 24px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #b0b0b0;
+  margin-bottom: 12px;
 }
 
 .button-group {
@@ -187,22 +277,42 @@ code {
   margin-top: 20px;
 }
 
+.button-group button {
+  flex: 1;
+}
+
+/* Page Layout */
+.page {
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+}
+
+.page.centered {
+  align-items: flex-start;
+  justify-content: center;
+}
+
 /* Status Messages */
-.status-message {
+/* Messages */
+.message {
   margin-top: 10px;
   padding: 10px;
   border-radius: 4px;
-  display: none;
+  font-weight: 500;
 }
 
-.status-message.success {
+.message.success {
   background: #1b5e20;
   color: #81c784;
-  display: block;
 }
 
-.status-message.error {
+.message.error {
   background: #b71c1c;
   color: #ef5350;
-  display: block;
+}
+
+.message.info {
+  background: #1a3a4a;
+  color: #4dd0e1;
 }
