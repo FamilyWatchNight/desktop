@@ -29,7 +29,7 @@ if (process.env.NODE_ENV === 'development') {
 
 
 function createTray(): void {
-  const iconPath = path.join(__dirname, '../../assets/icon.png');
+  const iconPath = path.join(app.getAppPath(), app.isPackaged ? 'assets' : 'src/assets', 'images', 'icon.png');
   tray = new Tray(iconPath);
 
   const contextMenu = Menu.buildFromTemplate([

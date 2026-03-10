@@ -8,7 +8,6 @@ the Free Software Foundation, version 3.
 
 import React, { useState, useEffect } from 'react';
 import { createApiClient } from '../api-client';
-import '../styles/SettingsPage.css';
 
 const apiClient = createApiClient();
 
@@ -118,34 +117,34 @@ export default function SettingsPage(): React.ReactElement {
   };
 
   return (
-    <div className="settings-page">
-      <div className="settings-container">
-        <h1 className="settings-title">Settings</h1>
-        <div className="setting-group">
+    <div className="page centered">
+      <div className="page-container">
+        <h1 className="page-title">Settings</h1>
+        <div className="form-group">
           <label htmlFor="webPort">Web Server Port</label>
           <input type="number" id="webPort" placeholder="3000" value={webPort} onChange={(e) => setWebPort(e.target.value)} />
         </div>
-        <div className="setting-group">
+        <div className="form-group">
           <label htmlFor="watchmodeApiKey">Watchmode API Key</label>
           <input type="password" id="watchmodeApiKey" placeholder="" value={watchmodeApiKey} onChange={(e) => setWatchmodeApiKey(e.target.value)} />
         </div>
-        <div className="setting-group">
+        <div className="form-group">
           <label htmlFor="tmdbApiKey">TMDB API Key</label>
           <input type="password" id="tmdbApiKey" placeholder="" value={tmdbApiKey} onChange={(e) => setTmdbApiKey(e.target.value)} />
         </div>
-        <div className="setting-group">
+        <div className="form-group">
           <label>Background Tasks</label>
-          <div className="background-task-buttons">
-            <button type="button" className="btn-background-task" onClick={() => enqueueBackgroundTask('import-watchmode')} disabled={activeTask?.type === 'import-watchmode' || queue.some((t) => t.type === 'import-watchmode')}>Import Watchmode Database</button>
-            <button type="button" className="btn-background-task" onClick={() => enqueueBackgroundTask('import-tmdb')} disabled={activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')}>Import TMDB Database</button>
+          <div className="button-group">
+            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-watchmode')} disabled={activeTask?.type === 'import-watchmode' || queue.some((t) => t.type === 'import-watchmode')}>Import Watchmode Database</button>
+            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-tmdb')} disabled={activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')}>Import TMDB Database</button>
           </div>
-          {backgroundTaskMessage && <div className="background-task-message">{backgroundTaskMessage}</div>}
+          {backgroundTaskMessage && <div className="message success">{backgroundTaskMessage}</div>}
         </div>
         <div className="button-group">
-          <button className="btn-save" onClick={saveSettings}>Save Settings</button>
-          <button className="btn-cancel" onClick={handleCancel}>Cancel</button>
+          <button className="btn-primary" onClick={saveSettings}>Save Settings</button>
+          <button className="btn-secondary" onClick={handleCancel}>Cancel</button>
         </div>
-        {statusMessage && <div className={`status-message ${statusType}`}>{statusMessage}</div>}
+        {statusMessage && <div className={`message ${statusType}`}>{statusMessage}</div>}
       </div>
     </div>
   );
