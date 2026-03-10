@@ -95,10 +95,10 @@ export default function BackgroundTasksPage(): React.ReactElement {
           <h2 className="section-title">{t('backgroundTasks.queuedTasks')}</h2>
           {queue.length > 0 ? (
             <ul className="queued-list">
-              {queue.map((t) => (
-                <li key={t.id} className="queued-item">
-                  <span className="queued-item-label">{t.label}</span>
-                  <button type="button" className="btn-danger" onClick={() => removeQueuedTask(t.id)} aria-label={t('backgroundTasks.remove') + ' ' + t.label}>{t('backgroundTasks.remove')}</button>
+              {queue.map((task) => (
+                <li key={task.id} className="queued-item">
+                  <span className="queued-item-label">{task.label}</span>
+                  <button type="button" className="btn-danger" onClick={() => removeQueuedTask(task.id)} aria-label={t('backgroundTasks.remove') + ' ' + task.label}>{t('backgroundTasks.remove')}</button>
                 </li>
               ))}
             </ul>
