@@ -25,62 +25,23 @@ body {
   color: #e0e0e0;
 }
 
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-/* Container variants */
-.container.settings-container {
-  max-width: 500px;
-}
-
 /* Typography */
 h1 {
   font-size: 28px;
-}
-
-h1.settings-title {
-  font-size: 24px;
   margin-bottom: 20px;
 }
 
 h2 {
   font-size: 1.5em;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
 h3 {
   font-size: 1.2em;
 }
 
-/* Page Title */
-.page-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #e0e0e0;
-}
-
-/* Header */
-header {
-  background: #2d2d2daa;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #404040;
-}
-
-#headerActions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Page Layout */
+/* Page */
 .page {
   min-height: 100%;
   padding: 20px;
@@ -92,7 +53,10 @@ header {
   justify-content: center;
 }
 
-/* Page Container */
+.page-title {
+  color: #e0e0e0;
+}
+
 .page-container {
   background: #2d2d2daa;
   padding: 30px;
@@ -101,13 +65,12 @@ header {
   border: 1px solid #404040;
 }
 
-/* Centered page containers have max-width */
 .page.centered .page-container {
   width: 100%;
   max-width: 640px;
 }
 
-/* Section Styles */
+/* Section */
 .section {
   margin-bottom: 24px;
 }
@@ -117,10 +80,7 @@ header {
 }
 
 .section-title {
-  font-size: 16px;
-  font-weight: 600;
   color: #b0b0b0;
-  margin-bottom: 12px;
 }
 
 /* Form Styles */
@@ -195,7 +155,7 @@ header {
   color: #a0a0a0;
 }
 
-/* Button Group */
+/* Buttons */
 .button-group {
   display: flex;
   gap: 10px;
@@ -206,7 +166,6 @@ header {
   flex: 1;
 }
 
-/* Buttons */
 button {
   padding: 8px 16px;
   border: none;
@@ -223,7 +182,6 @@ button:hover {
   background: #005a9e;
 }
 
-/* Button Modifiers */
 button.btn-primary {
   background: #007acc;
   color: white;
@@ -253,16 +211,7 @@ button.btn-danger:hover {
   background: #b02e32;
 }
 
-/* Content Area */
-.content {
-  background: #2d2d2daa;
-  padding: 30px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  border: 1px solid #404040;
-}
-
-/* Welcome Message */
+/* Styled Content */
 .welcome-message {
   text-align: center;
   color: #b0b0b0;
@@ -273,7 +222,6 @@ button.btn-danger:hover {
   font-size: 16px;
 }
 
-/* Info Box */
 .info-box {
   margin-top: 20px;
   padding: 15px;
@@ -286,7 +234,6 @@ button.btn-danger:hover {
   color: #4dd0e1;
 }
 
-/* Code */
 code {
   background: #1a1a1a;
   padding: 2px 6px;
@@ -295,8 +242,6 @@ code {
   color: #4dd0e1;
 }
 
-/* Status Messages */
-/* Messages */
 .message {
   margin-top: 10px;
   padding: 10px;
