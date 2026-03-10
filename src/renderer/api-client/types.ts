@@ -2,6 +2,7 @@
 
 export interface AppApi {
   getAppVersion(): Promise<string>;
+  getAppLocale(): Promise<string>;
   getServerPort(): Promise<number>;
 }
 

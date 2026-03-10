@@ -1,5 +1,6 @@
-import i18n from 'i18next';
+import i18n, { LanguageDetectorAsyncModule } from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { createApiClient } from './api-client';
 
 // the translations
 // (tip: move them in a JSON file and import them,
@@ -12,16 +13,34 @@ const resources = {
   },
 };
 
+// Set the UI language based on the language returned by the main process.
+// This allows the UI to match the user's system language without needing a separate language setting in the app.
+const electronDetector: LanguageDetectorAsyncModule = {
+  type: 'languageDetector',
+  async: true,
+  init: () => {},
+  detect: (callback: (lng: string) => void) => {
+    const apiClient = createApiClient();
+
+    apiClient.app.getAppLocale()
+      .then((locale: string) => {
+        callback(locale);
+      })
+      .catch(() => {
+        callback('en'); // Fallback on error
+      });
+  },
+  cacheUserLanguage: () => {}
+};
+
 i18n
   // pass the i18n instance to react-i18next.
   .use(initReactI18next)
+  .use(electronDetector)
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
     resources,
-    lng: 'en-US', // language to use, more info here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
-    // you can use the i18n.changeLanguage function to change the language manually: https://www.i18next.com/overview/api#changelanguage
-    // if you're using a language detector, do not define the lng option
     fallbackLng: 'en-US',
 
     interpolation: {

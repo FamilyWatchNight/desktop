@@ -12,5 +12,6 @@ import { settingsManager } from './instances';
 export function registerAppIpcHandlers() {
   // application-level handlers
   ipcMain.handle('get-app-version', () => require('electron').app.getVersion());
+  ipcMain.handle('get-app-locale', () => { return require('electron').app.getLocale(); });
   ipcMain.handle('get-server-port', () => (settingsManager.get('webPort') as number) || 3000);
 }

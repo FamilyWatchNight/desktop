@@ -11,6 +11,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 export interface ElectronAPI {
   app: {
     getAppVersion: () => Promise<string>;
+    getAppLocale: () => Promise<string>;
     getServerPort: () => Promise<number>;
     openSettings: () => Promise<void>;
   };
@@ -41,6 +42,7 @@ export interface ElectronAPI {
 contextBridge.exposeInMainWorld('electron', {
   app: {
     getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+    getAppLocale: () => ipcRenderer.invoke('get-app-locale'),
     getServerPort: () => ipcRenderer.invoke('get-server-port'),
     openSettings: () => ipcRenderer.invoke('open-settings')
   },

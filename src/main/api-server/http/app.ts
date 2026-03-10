@@ -14,6 +14,10 @@ export function registerAppRoutes(app: Express): void {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  app.get('/api/locale', (_req: Request, res: Response) => {
+    res.json({ status: 'ok', locale: require('electron').app.getLocale() });
+  });
+
   app.get('/api/version', (_req: Request, res: Response) => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const appInfoJson = require(path.join(__dirname, '..', 'app-info.json')) as { version: string };
