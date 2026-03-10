@@ -7,6 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createApiClient } from '../api-client';
 
 const apiClient = createApiClient();
@@ -19,6 +20,7 @@ interface TaskPayload {
 }
 
 export default function SettingsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const [webPort, setWebPort] = useState('3000');
   const [watchmodeApiKey, setWatchmodeApiKey] = useState('');
   const [tmdbApiKey, setTmdbApiKey] = useState('');
@@ -73,11 +75,11 @@ export default function SettingsPage(): React.ReactElement {
     try {
       const result = await apiClient.settings.saveSettings(settings);
       if (result?.success) {
-        showMessage('Settings saved successfully!', 'success');
+        showMessage(t('settings.saved'), 'success');
         setTimeout(() => { setStatusMessage(''); setStatusType(''); }, 3000);
       }
     } catch (error) {
-      showMessage('Error saving settings: ' + (error instanceof Error ? error.message : String(error)), 'error');
+      showMessage(t('settings.errorSave') + (error instanceof Error ? error.message : String(error)), 'error');
       setTimeout(() => { setStatusMessage(''); setStatusType(''); }, 5000);
     }
   };
@@ -86,10 +88,10 @@ export default function SettingsPage(): React.ReactElement {
     try {
       const result = await apiClient.backgroundTasks.enqueueBackgroundTask(taskType) as { success?: boolean; error?: string } | undefined;
       if (result?.success) {
-        setBackgroundTaskMessage('Task queued. See System → Background Tasks.');
+        setBackgroundTaskMessage(t('settings.taskQueued'));
         setTimeout(() => setBackgroundTaskMessage(''), 4000);
       } else {
-        setBackgroundTaskMessage(result?.error ?? 'Failed to queue task.');
+        setBackgroundTaskMessage(result?.error ?? t('settings.failedQueue'));
         setTimeout(() => setBackgroundTaskMessage(''), 5000);
       }
     } catch (err) {
@@ -119,30 +121,30 @@ export default function SettingsPage(): React.ReactElement {
   return (
     <div className="page centered">
       <div className="page-container">
-        <h1 className="page-title">Settings</h1>
+        <h1 className="page-title">{t('settings.title')}</h1>
         <div className="form-group">
-          <label htmlFor="webPort">Web Server Port</label>
+          <label htmlFor="webPort">{t('settings.webPort')}</label>
           <input type="number" id="webPort" placeholder="3000" value={webPort} onChange={(e) => setWebPort(e.target.value)} />
         </div>
         <div className="form-group">
-          <label htmlFor="watchmodeApiKey">Watchmode API Key</label>
+          <label htmlFor="watchmodeApiKey">{t('settings.watchmodeApiKey')}</label>
           <input type="password" id="watchmodeApiKey" placeholder="" value={watchmodeApiKey} onChange={(e) => setWatchmodeApiKey(e.target.value)} />
         </div>
         <div className="form-group">
-          <label htmlFor="tmdbApiKey">TMDB API Key</label>
+          <label htmlFor="tmdbApiKey">{t('settings.tmdbApiKey')}</label>
           <input type="password" id="tmdbApiKey" placeholder="" value={tmdbApiKey} onChange={(e) => setTmdbApiKey(e.target.value)} />
         </div>
         <div className="form-group">
-          <label>Background Tasks</label>
+          <label>{t('settings.backgroundTasks')}</label>
           <div className="button-group">
-            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-watchmode')} disabled={activeTask?.type === 'import-watchmode' || queue.some((t) => t.type === 'import-watchmode')}>Import Watchmode Database</button>
-            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-tmdb')} disabled={activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')}>Import TMDB Database</button>
+            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-watchmode')} disabled={activeTask?.type === 'import-watchmode' || queue.some((t) => t.type === 'import-watchmode')}>{t('settings.importWatchmode')}</button>
+            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-tmdb')} disabled={activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')}>{t('settings.importTmdb')}</button>
           </div>
           {backgroundTaskMessage && <div className="message success">{backgroundTaskMessage}</div>}
         </div>
         <div className="button-group">
-          <button className="btn-primary" onClick={saveSettings}>Save Settings</button>
-          <button className="btn-secondary" onClick={handleCancel}>Cancel</button>
+          <button className="btn-primary" onClick={saveSettings}>{t('settings.save')}</button>
+          <button className="btn-secondary" onClick={handleCancel}>{t('settings.cancel')}</button>
         </div>
         {statusMessage && <div className={`message ${statusType}`}>{statusMessage}</div>}
       </div>
