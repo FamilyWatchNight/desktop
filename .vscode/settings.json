@@ -32,5 +32,11 @@
   "cucumber-test-runner-new.environmentVariables": {
     "NODE_ENV": "test"
   },
-  "git.enableCommitSigning": true
+  "git.enableCommitSigning": true,
+  "i18n-ally.localesPaths": [
+    "assets/locales"
+  ],
+  "i18n-ally.dirStructure": "dir",
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.pathMatcher": "{locale}/{namespace}.json",
 }

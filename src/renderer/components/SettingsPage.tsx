@@ -20,7 +20,7 @@ interface TaskPayload {
 }
 
 export default function SettingsPage(): React.ReactElement {
-  const { t } = useTranslation();
+  const { t } = useTranslation( 'settings' );
   const [webPort, setWebPort] = useState('3000');
   const [watchmodeApiKey, setWatchmodeApiKey] = useState('');
   const [tmdbApiKey, setTmdbApiKey] = useState('');
@@ -75,11 +75,11 @@ export default function SettingsPage(): React.ReactElement {
     try {
       const result = await apiClient.settings.saveSettings(settings);
       if (result?.success) {
-        showMessage(t('settings.saved'), 'success');
+        showMessage(t('saved'), 'success');
         setTimeout(() => { setStatusMessage(''); setStatusType(''); }, 3000);
       }
     } catch (error) {
-      showMessage(t('settings.errorSave') + (error instanceof Error ? error.message : String(error)), 'error');
+      showMessage(t('errorSave') + (error instanceof Error ? error.message : String(error)), 'error');
       setTimeout(() => { setStatusMessage(''); setStatusType(''); }, 5000);
     }
   };
@@ -88,10 +88,10 @@ export default function SettingsPage(): React.ReactElement {
     try {
       const result = await apiClient.backgroundTasks.enqueueBackgroundTask(taskType) as { success?: boolean; error?: string } | undefined;
       if (result?.success) {
-        setBackgroundTaskMessage(t('settings.taskQueued'));
+        setBackgroundTaskMessage(t('taskQueued'));
         setTimeout(() => setBackgroundTaskMessage(''), 4000);
       } else {
-        setBackgroundTaskMessage(result?.error ?? t('settings.failedQueue'));
+        setBackgroundTaskMessage(result?.error ?? t('failedQueue'));
         setTimeout(() => setBackgroundTaskMessage(''), 5000);
       }
     } catch (err) {
@@ -121,21 +121,21 @@ export default function SettingsPage(): React.ReactElement {
   return (
     <div className="page centered">
       <div className="page-container">
-        <h1 className="page-title">{t('settings.title')}</h1>
+        <h1 className="page-title">{t('title')}</h1>
         <div className="form-group">
-          <label htmlFor="webPort">{t('settings.webPort')}</label>
+          <label htmlFor="webPort">{t('webPort')}</label>
           <input type="number" id="webPort" placeholder="3000" value={webPort} onChange={(e) => setWebPort(e.target.value)} />
         </div>
         <div className="form-group">
-          <label htmlFor="watchmodeApiKey">{t('settings.watchmodeApiKey')}</label>
+          <label htmlFor="watchmodeApiKey">{t('watchmodeApiKey')}</label>
           <input type="password" id="watchmodeApiKey" placeholder="" value={watchmodeApiKey} onChange={(e) => setWatchmodeApiKey(e.target.value)} />
         </div>
         <div className="form-group">
-          <label htmlFor="tmdbApiKey">{t('settings.tmdbApiKey')}</label>
+          <label htmlFor="tmdbApiKey">{t('tmdbApiKey')}</label>
           <input type="password" id="tmdbApiKey" placeholder="" value={tmdbApiKey} onChange={(e) => setTmdbApiKey(e.target.value)} />
         </div>
         <div className="form-group">
-          <label>{t('settings.backgroundTasks')}</label>
+          <label>{t('backgroundTasks')}</label>
           <div className="button-group">
             <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-watchmode')} disabled={activeTask?.type === 'import-watchmode' || queue.some((t) => t.type === 'import-watchmode')}>{t('settings.importWatchmode')}</button>
             <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-tmdb')} disabled={activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')}>{t('settings.importTmdb')}</button>
@@ -143,8 +143,8 @@ export default function SettingsPage(): React.ReactElement {
           {backgroundTaskMessage && <div className="message success">{backgroundTaskMessage}</div>}
         </div>
         <div className="button-group">
-          <button className="btn-primary" onClick={saveSettings}>{t('settings.save')}</button>
-          <button className="btn-secondary" onClick={handleCancel}>{t('settings.cancel')}</button>
+          <button className="btn-primary" onClick={saveSettings}>{t('save')}</button>
+          <button className="btn-secondary" onClick={handleCancel}>{t('button.cancel', { ns: 'common' })}</button>
         </div>
         {statusMessage && <div className={`message ${statusType}`}>{statusMessage}</div>}
       </div>
