@@ -7,6 +7,10 @@ export class ApiBackend implements BackendModule {
 
   private api = createApiClient().app;
 
+  init(_services: any, _backendOptions: any, _i18nextOptions: any): void {
+    // no initialization needed for this backend
+  }
+
   read(
     language: string,
     namespace: string,
