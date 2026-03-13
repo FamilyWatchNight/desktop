@@ -9,3 +9,4 @@ the Free Software Foundation, version 3.
 export { MovieService } from './MovieService';
 export { SettingsService } from './SettingsService';
 export { BackgroundTaskService } from './BackgroundTaskService';
+export { LocalizationService } from './LocalizationService';

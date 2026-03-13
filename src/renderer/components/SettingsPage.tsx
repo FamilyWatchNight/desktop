@@ -137,8 +137,8 @@ export default function SettingsPage(): React.ReactElement {
         <div className="form-group">
           <label>{t('backgroundTasks')}</label>
           <div className="button-group">
-            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-watchmode')} disabled={activeTask?.type === 'import-watchmode' || queue.some((t) => t.type === 'import-watchmode')}>{t('settings.importWatchmode')}</button>
-            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-tmdb')} disabled={activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')}>{t('settings.importTmdb')}</button>
+            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-watchmode')} disabled={activeTask?.type === 'import-watchmode' || queue.some((t) => t.type === 'import-watchmode')}>{t('importWatchmode')}</button>
+            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-tmdb')} disabled={activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')}>{t('importTmdb')}</button>
           </div>
           {backgroundTaskMessage && <div className="message success">{backgroundTaskMessage}</div>}
         </div>

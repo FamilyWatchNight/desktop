@@ -20,6 +20,8 @@ export function registerIpcHandlers(): void {
     'get-app-version',
     'get-app-locale',
     'get-server-port',
+    'locale-get',
+    'locale-missing-key',
     'open-settings',
     'load-settings',
     'save-settings',

@@ -68,10 +68,10 @@ function createTray(): void {
 }
 
 app.on("ready", () => {
-  const isDev = !app.isPackaged;
-  const locale = process.env.NODE_ENV=="test" ? "test" : ( isDev ? "dev" : app.getLocale() );
+  const isDevMode = !app.isPackaged;
+  const locale = process.env.NODE_ENV=="test" ? "test" : ( isDevMode ? "dev" : app.getLocale() );
 
-  console.log(`App is ready. Locale: ${locale}, isDev: ${isDev}, NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`App is ready. Locale: ${locale}, isDev: ${isDevMode}, NODE_ENV: ${process.env.NODE_ENV}`);
 
   i18n.changeLanguage(locale).then(() => {
     db.initDatabase();

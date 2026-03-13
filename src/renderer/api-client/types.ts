@@ -4,6 +4,8 @@ export interface AppApi {
   getAppVersion(): Promise<string>;
   getAppLocale(): Promise<string>;
   getServerPort(): Promise<number>;
+  getLocaleFile(namespace: string, language: string): Promise<Record<string, string>>;
+  saveMissingKey?(namespace: string, language: string, key: string, fallbackValue: string): Promise<void>;
 }
 
 export interface BackgroundTaskApi {

@@ -1,7 +1,9 @@
 import i18n, { LanguageDetectorAsyncModule } from 'i18next';
-import Backend from 'i18next-http-backend';
 import { initReactI18next } from 'react-i18next';
 import { createApiClient } from './api-client';
+import ApiBackend from './i18n-backend';
+
+const isDevMode = typeof window !== 'undefined' && (window as any).isDevMode === true;
 
 // Set the UI language based on the language returned by the main process.
 // This allows the UI to match the user's system language without needing a separate language setting in the app.
@@ -24,22 +26,20 @@ const electronDetector: LanguageDetectorAsyncModule = {
 };
 
 i18n
-  // pass the i18n instance to react-i18next.
   .use(initReactI18next)
-  .use(Backend)
+  .use(ApiBackend)
   .use(electronDetector)
   .init({
     ns: ['layout', 'backgroundTasks', 'common', 'settings'],
     defaultNS: 'common',
-    fallbackLng: 'en',
-    lng: 'dev',
-
+    fallbackLng: isDevMode ? 'dev' : 'en',
     interpolation: {
-      escapeValue: false, // react already does escaping
+      escapeValue: false,
     },
-
-    // for missing keys, show [key] to make it obvious
-    parseMissingKeyHandler: (key) => `[${key}]`,
+    parseMissingKeyHandler: (key) => `[!!!${key}!!!]`,
+    debug: isDevMode,
+    saveMissing: isDevMode,
+    saveMissingTo: 'fallback',
   });
 
 export default i18n;
