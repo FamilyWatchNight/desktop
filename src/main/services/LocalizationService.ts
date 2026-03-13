@@ -68,18 +68,36 @@ export class LocalizationService {
    * Build the full path to a locale file and ensure it stays within the locales root directory.
    */
   private getLocaleFilePath(language: string, namespace: string, suffix: string = ''): string {
-    const filePath = path.resolve(this.localesRoot, language, `${namespace}${suffix}.json`);
+    const candidatePath = path.resolve(this.localesRoot, language, `${namespace}${suffix}.json`);
+
+    // Resolve the locales root; if it does not exist yet, fall back to the configured path.
+    let resolvedRoot = this.localesRoot;
+    try {
+      resolvedRoot = fs.realpathSync(this.localesRoot);
+    } catch {
+      // If the root directory does not exist yet, we still enforce that candidate paths
+      // are rooted under the configured localesRoot string.
+    }
+
+    const normalizedRoot = resolvedRoot.endsWith(path.sep)
+      ? resolvedRoot
+      : resolvedRoot + path.sep;
+
+    // Try to resolve the candidate path fully (including symlinks) if it already exists.
+    let finalPath = candidatePath;
+    try {
+      finalPath = fs.realpathSync(candidatePath);
+    } catch {
+      // If the file does not exist yet, fall back to the normalized candidate path.
+      finalPath = path.normalize(candidatePath);
+    }
 
     // Ensure the resolved path is within the locales root directory.
-    const normalizedRoot = this.localesRoot.endsWith(path.sep)
-      ? this.localesRoot
-      : this.localesRoot + path.sep;
-
-    if (!filePath.startsWith(normalizedRoot) && filePath !== this.localesRoot) {
+    if (!finalPath.startsWith(normalizedRoot) && finalPath !== resolvedRoot) {
       throw new Error('Resolved locale file path is outside of the configured locales directory');
     }
 
-    return filePath;
+    return finalPath;
   }
 
   async getLocaleFile(namespace: string, language: string): Promise<Record<string, string>> {
@@ -159,7 +177,7 @@ export class LocalizationService {
       await fs.promises.mkdir(path.dirname(missingFilePath), { recursive: true });
 
       // Atomic write via temp file
-      const tempPath = `${missingFilePath}.tmp`;
+      const tempPath = path.join(path.dirname(missingFilePath), path.basename(missingFilePath) + '.tmp');
       await fs.promises.writeFile(tempPath, JSON.stringify(missingKeys, null, 2), 'utf-8');
       await fs.promises.rename(tempPath, missingFilePath);
     });
