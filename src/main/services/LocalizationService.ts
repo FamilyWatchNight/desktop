@@ -99,6 +99,22 @@ export class LocalizationService {
       throw new Error('Invalid assignment: Key and fallbackValue must both be strings');
     }
 
+    const trimmedKey = key.trim();
+    if (trimmedKey.length === 0) {
+      throw new Error('Invalid assignment: Key must not be empty');
+    }
+
+    const MAX_KEY_LENGTH = 1024;
+    if (trimmedKey.length > MAX_KEY_LENGTH) {
+      throw new Error(`Invalid assignment: Key is too long (max ${MAX_KEY_LENGTH} characters)`);
+    }
+
+    const MAX_KEY_SEGMENTS = 100;
+    const segmentCount = trimmedKey.split('.').length;
+    if (segmentCount > MAX_KEY_SEGMENTS) {
+      throw new Error(`Invalid assignment: Key has too many nested segments (max ${MAX_KEY_SEGMENTS})`);
+    }
+
     const missingFilePath = path.join(this.localesPath, language, `${namespace}.missing.json`);
 
     // Queue up operations for this specific file so they execute sequentially.
