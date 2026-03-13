@@ -67,8 +67,8 @@ export class LocalizationService {
   /**
    * Build the full path to a locale file and ensure it stays within the locales root directory.
    */
-  private getLocaleFilePath(language: string, namespace: string): string {
-    const filePath = path.resolve(this.localesRoot, language, `${namespace}.json`);
+  private getLocaleFilePath(language: string, namespace: string, suffix: string = ''): string {
+    const filePath = path.resolve(this.localesRoot, language, `${namespace}${suffix}.json`);
 
     // Ensure the resolved path is within the locales root directory.
     const normalizedRoot = this.localesRoot.endsWith(path.sep)
@@ -135,7 +135,7 @@ export class LocalizationService {
       throw new Error(`Invalid assignment: Key has too many nested segments (max ${MAX_KEY_SEGMENTS})`);
     }
 
-    const missingFilePath = path.join(this.localesPath, language, `${namespace}.missing.json`);
+    const missingFilePath = this.getLocaleFilePath(language, namespace, '.missing');
 
     // Queue up operations for this specific file so they execute sequentially.
     const queueKey = missingFilePath;
