@@ -52,6 +52,7 @@ function setNestedValue(obj: Record<string, any>, pathStr: string, value: any) {
 
 export class LocalizationService {
   private localesPath: string;
+  private localesRoot: string;
 
   // Simple per-file promise queue to serialize writes and avoid races.  The
   // key is the absolute path to the missing.json file being updated.
@@ -60,6 +61,25 @@ export class LocalizationService {
   // Allow overriding the locales path for testing
   constructor(localesPath: string = defaultLocalesPath) {
     this.localesPath = localesPath;
+    this.localesRoot = path.resolve(this.localesPath);
+  }
+
+  /**
+   * Build the full path to a locale file and ensure it stays within the locales root directory.
+   */
+  private getLocaleFilePath(language: string, namespace: string): string {
+    const filePath = path.resolve(this.localesRoot, language, `${namespace}.json`);
+
+    // Ensure the resolved path is within the locales root directory.
+    const normalizedRoot = this.localesRoot.endsWith(path.sep)
+      ? this.localesRoot
+      : this.localesRoot + path.sep;
+
+    if (!filePath.startsWith(normalizedRoot) && filePath !== this.localesRoot) {
+      throw new Error('Resolved locale file path is outside of the configured locales directory');
+    }
+
+    return filePath;
   }
 
   async getLocaleFile(namespace: string, language: string): Promise<Record<string, string>> {
@@ -71,7 +91,7 @@ export class LocalizationService {
       throw new Error(`Invalid language: "${language}". Language must contain only alphanumeric characters and hyphens.`);
     }
 
-    const filePath = path.join(this.localesPath, language, `${namespace}.json`);
+    const filePath = this.getLocaleFilePath(language, namespace);
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8');
       return JSON.parse(content);
