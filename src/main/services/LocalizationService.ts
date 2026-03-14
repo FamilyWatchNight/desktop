@@ -20,11 +20,16 @@ const defaultLocalesPath = path.join(
 );
 
 function isValidLanguage(language: string): boolean {
-  return /^[a-zA-Z0-9-]+$/.test(language);
+  // Allow only alphanumeric language tags with single hyphens between segments
+  // Examples: "en", "en-US", "pt-BR"
+  return /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(language);
 }
 
 function isValidNamespace(namespace: string): boolean {
-  return /^[a-zA-Z0-9_-]+$/.test(namespace);
+  // Allow only alphanumeric segments separated by single hyphens or underscores,
+  // no leading/trailing separators or repeated separators.
+  // Examples: "common", "app-core", "app_core"
+  return /^[A-Za-z0-9]+(?:[-_][A-Za-z0-9]+)*$/.test(namespace);
 }
 
 // Helper to set a nested value on an object given a dot-separated key path.
