@@ -42,6 +42,12 @@ function setNestedValue(obj: Record<string, any>, pathStr: string, value: any) {
   // Iterate through the parts of the path, creating nested objects as needed.
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
+
+    // Prevent prototype pollution by blocking dangerous keys.
+    if (part === '__proto__' || part === 'constructor' || part === 'prototype') {
+      return;
+    }
+
     if (i === parts.length - 1) {
       // This is the last part of the path.
       current[part] = value;
