@@ -6,15 +6,17 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import fs from 'fs';
 import path from 'path';
 import express, { type Express, type Request, type Response } from 'express';
 import RateLimit from 'express-rate-limit';
 import { app } from 'electron';
 import { registerHttpRoutes, registerAppRoutes } from './api-server';
 
+const isDevMode = !app.isPackaged;
 const rootDir = app.getAppPath();
 const distPath = path.join(rootDir, 'dist');
-const publicPath = path.join(rootDir, app.isPackaged ? 'assets' : 'src/assets');
+const publicPath = path.join(rootDir, 'assets');
 
 export function startServer(app: Express, port: number): ReturnType<Express['listen']> {
 
@@ -41,11 +43,25 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
   registerHttpRoutes(app);
   registerAppRoutes(app);
 
+
   app.use('/dist', express.static(distPath));
   app.use(express.static(publicPath));
 
   app.use((_req: Request, res: Response) => {
-    res.sendFile(path.join(publicPath, 'index.html'));
+    const indexPath = path.join(distPath, 'renderer', 'index.html');
+    try {
+      let html = fs.readFileSync(indexPath, 'utf-8');
+      if (isDevMode) {
+        html = html.replace(
+          '</head>',
+          '<script>window.isDevMode = true;</script></head>'
+        );
+      }
+      res.send(html);
+    } catch (err) {
+      console.error('Failed to read index.html', err);
+      res.status(500).send('Internal Server Error');
+    }
   });
 
   const server = app.listen(port, 'localhost', () => {

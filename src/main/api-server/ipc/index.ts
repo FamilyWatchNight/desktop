@@ -18,7 +18,10 @@ let handlersRegistered = false;
 export function registerIpcHandlers(): void {
   const channels = [
     'get-app-version',
+    'get-app-locale',
     'get-server-port',
+    'locale-get',
+    'locale-missing-key',
     'open-settings',
     'load-settings',
     'save-settings',

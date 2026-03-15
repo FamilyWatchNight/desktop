@@ -24,7 +24,7 @@ export function createAppWindow(): void {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    icon: path.join(app.getAppPath(), app.isPackaged ? 'assets' : 'src/assets', 'images', 'icon.png'),
+    icon: path.join(app.getAppPath(), 'assets', 'images', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true

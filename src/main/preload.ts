@@ -11,8 +11,11 @@ import { contextBridge, ipcRenderer } from 'electron';
 export interface ElectronAPI {
   app: {
     getAppVersion: () => Promise<string>;
+    getAppLocale: () => Promise<string>;
     getServerPort: () => Promise<number>;
     openSettings: () => Promise<void>;
+    getLocaleFile: (namespace: string, language: string) => Promise<Record<string, string>>;
+    saveMissingKey?: (namespace: string, language: string, key: string, fallbackValue: string) => Promise<void>;
   };
   backgroundTasks: {
     enqueueBackgroundTask: (taskType: string, args?: Record<string, unknown>) => Promise<unknown>;
@@ -41,8 +44,12 @@ export interface ElectronAPI {
 contextBridge.exposeInMainWorld('electron', {
   app: {
     getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+    getAppLocale: () => ipcRenderer.invoke('get-app-locale'),
     getServerPort: () => ipcRenderer.invoke('get-server-port'),
-    openSettings: () => ipcRenderer.invoke('open-settings')
+    openSettings: () => ipcRenderer.invoke('open-settings'),
+    getLocaleFile: (namespace: string, language: string) => ipcRenderer.invoke('locale-get', namespace, language),
+    saveMissingKey: (namespace: string, language: string, key: string, fallbackValue: string) => 
+      ipcRenderer.invoke('locale-missing-key', namespace, language, key, fallbackValue)
   },
   backgroundTasks: {
     enqueueBackgroundTask: (taskType: string, args?: Record<string, unknown>) =>
@@ -75,6 +82,10 @@ contextBridge.exposeInMainWorld('electron', {
     }
   }
 } as ElectronAPI);
+
+if (!!process.env.ELECTRON_START_URL) {
+  contextBridge.exposeInMainWorld('isDevMode', true);
+}
 
 if (process.env.NODE_ENV === 'test') {
   contextBridge.exposeInMainWorld('testApi', {

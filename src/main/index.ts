@@ -6,88 +6,102 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { app, Menu, Tray } from 'electron';
-import { registerIpcHandlers } from './api-server/ipc';
-import { createAppWindow } from './window-manager';
-import path from 'path';
-import express from 'express';
-import * as server from './server';
-import * as db from './database';
-import SettingsManager from './settings-manager';
-import type { TestHooks } from './testing/TestHooksImpl';
-import { getTestHooks } from './testing/TestHooksImpl';
+import { app, Menu, Tray } from "electron";
+import { registerIpcHandlers } from "./api-server/ipc";
+import { createAppWindow } from "./window-manager";
+import path from "path";
+import express from "express";
+import * as server from "./server";
+import * as db from "./database";
+import SettingsManager from "./settings-manager";
+import type { TestHooks } from "./testing/TestHooksImpl";
+import { getTestHooks } from "./testing/TestHooksImpl";
+import i18n from "./i18n";
 
 let tray: Tray | null = null;
 const webServer = express();
 const settingsManager = new SettingsManager();
+const t = i18n.t.bind(i18n);
 
-if (process.env.NODE_ENV === 'development') {
-  require('electron-reloader')(module, {
-    watchRenderer: false
-  })
+if (process.env.NODE_ENV === "development") {
+  require("electron-reloader")(module, {
+    watchRenderer: false,
+  });
 }
 
-
 function createTray(): void {
-  const iconPath = path.join(app.getAppPath(), app.isPackaged ? 'assets' : 'src/assets', 'images', 'icon.png');
+  const iconPath = path.join(
+    app.getAppPath(),
+    "assets",
+    "images",
+    "icon.png",
+  );
   tray = new Tray(iconPath);
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Open App',
+      label: t("menu.open-app"),
       click: () => {
         // use createAppWindow which focuses if already open
         createAppWindow();
-      }
+      },
     },
-    { type: 'separator' },
+    { type: "separator" },
     {
-      label: 'Quit',
+      label: t("menu.quit"),
       click: () => {
         app.quit();
-      }
-    }
+      },
+    },
   ]);
 
-  tray.setToolTip('Family Watch Night');
+  tray.setToolTip(t("app.name", { ns: "common" }));
   tray.setContextMenu(contextMenu);
 
-  tray.on('click', () => {
+  tray.on("click", () => {
     createAppWindow();
   });
 
-  tray.on('double-click', () => {
+  tray.on("double-click", () => {
     createAppWindow();
   });
 }
 
-app.on('ready', () => {
-  db.initDatabase();
-  settingsManager.initialize();
-  createTray();
-  createAppWindow();
-  registerIpcHandlers();
+app.on("ready", () => {
+  const isDevMode = !app.isPackaged;
+  const locale = process.env.NODE_ENV=="test" ? "test" : ( isDevMode ? "dev" : app.getLocale() );
 
-  try {
-    const port = (settingsManager.get('webPort') as number) || 3000;
-    server.startServer(webServer, port);
-  } catch (error) {
-    console.error('Failed to load settings, using default port:', (error as Error).message);
-    server.startServer(webServer, 3000);
-  }
+  console.log(`App is ready. Locale: ${locale}, isDev: ${isDevMode}, NODE_ENV: ${process.env.NODE_ENV}`);
+
+  i18n.changeLanguage(locale).then(() => {
+    db.initDatabase();
+    settingsManager.initialize();
+    createTray();
+    createAppWindow();
+    registerIpcHandlers();
+
+    try {
+      const port = (settingsManager.get("webPort") as number) || 3000;
+      server.startServer(webServer, port);
+    } catch (error) {
+      console.error(
+        "Failed to load settings, using default port:",
+        (error as Error).message,
+      );
+      server.startServer(webServer, 3000);
+    }
+  });
 });
 
-app.on('window-all-closed', () => {});
+app.on("window-all-closed", () => {});
 
-app.on('activate', () => {
-  if (process.platform === 'darwin') {
+app.on("activate", () => {
+  if (process.platform === "darwin") {
     createAppWindow();
   }
 });
 
-
-if (process.env.NODE_ENV === 'test') {
-
+if (process.env.NODE_ENV === "test") {
   // If NODE_ENV is set to 'test', register the hooks used for integration testing.
   // Node that build:main populates the testing directory with no-op implementations,
   // and build:main:for-integration-testing populates it with the active implementations,
@@ -103,15 +117,21 @@ if (process.env.NODE_ENV === 'test') {
 
   // test:get-db-status is registered by registerIpcHandlers when NODE_ENV === 'test'
 
-  (global as unknown as { __testCallbacks: { createTaskContext: () => import('./tasks/BackgroundTask').TaskContext } }).__testCallbacks = {
+  (
+    global as unknown as {
+      __testCallbacks: {
+        createTaskContext: () => import("./tasks/BackgroundTask").TaskContext;
+      };
+    }
+  ).__testCallbacks = {
     createTaskContext: () => ({
       abortSignal: null as unknown as AbortSignal,
       reportProgress: () => {},
-      isCancelled: () => false
-    })
+      isCancelled: () => false,
+    }),
   };
 }
 
-app.on('before-quit', () => {
+app.on("before-quit", () => {
   db.closeDatabase();
 });

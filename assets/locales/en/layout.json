@@ -1,0 +1,9 @@
+{
+  "menu": {
+    "home": "Home",
+    "system": "System",
+    "backgroundTasks": "Background Tasks",
+    "settings": "Settings"
+  },
+  "toggleMenu": "Toggle menu"
+}

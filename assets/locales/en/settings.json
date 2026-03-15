@@ -1,0 +1,14 @@
+{
+  "title": "Settings",
+  "webPort": "Web Server Port",
+  "watchmodeApiKey": "Watchmode API Key",
+  "tmdbApiKey": "TMDB API Key",
+  "backgroundTasks": "Background Tasks",
+  "importWatchmode": "Import Watchmode Database",
+  "importTmdb": "Import TMDB Database",
+  "taskQueued": "Task queued. See System → Background Tasks.",
+  "failedQueue": "Failed to queue task.",
+  "saved": "Settings saved successfully",
+  "errorSave": "Error saving settings:",
+  "save": "Save Settings"
+}

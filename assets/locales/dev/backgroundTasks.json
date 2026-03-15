@@ -1,0 +1,14 @@
+{
+  "title": "___Background Tasks___",
+  "activeTask": "___Active Task___",
+  "working": "___Working___ ...",
+  "inProgress": "___In progress___ ...",
+  "percentComplete": "___{{percent}}% complete___",
+  "cancel": "___Cancel Task___",
+  "noActive": "___No task running___",
+  "queuedTasks": "___Queued Tasks___",
+  "noneQueued": "___No tasks queued___",
+  "button": {
+    "removeTask": "___Remove Task___"
+  }
+}
