@@ -193,7 +193,15 @@ export class LocalizationService {
       setNestedValue(missingKeys, key, fallbackValue);
 
       // Ensure directory for language exists (may be missing for new languages)
-      await fs.promises.mkdir(path.dirname(missingFilePath), { recursive: true });
+      // First, verify that the directory path is still within the configured locales root.
+      const mkdirRootWithSep = this.localesRoot.endsWith(path.sep)
+        ? this.localesRoot
+        : this.localesRoot + path.sep;
+      const mkdirDirPath = path.normalize(path.dirname(missingFilePath));
+      if (!mkdirDirPath.startsWith(mkdirRootWithSep)) {
+        throw new Error('Resolved locale directory is outside of the configured locales directory');
+      }
+      await fs.promises.mkdir(mkdirDirPath, { recursive: true });
 
       // Before constructing a temporary path, double-check that the directory
       // for the missing file is still within the configured locales root.
