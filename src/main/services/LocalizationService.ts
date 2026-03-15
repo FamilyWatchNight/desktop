@@ -201,13 +201,16 @@ export class LocalizationService {
         ? this.localesRoot
         : this.localesRoot + path.sep;
       const dirPath = path.normalize(path.dirname(missingFilePath));
-      const dirWithSep = dirPath.endsWith(path.sep) ? dirPath : dirPath + path.sep;
+      // Resolve the directory path (following symlinks) if possible, falling back to
+      // the normalized path if it does not yet exist.
+      const resolvedDirPath = await fs.promises.realpath(dirPath).catch(() => dirPath);
+      const dirWithSep = resolvedDirPath.endsWith(path.sep) ? resolvedDirPath : resolvedDirPath + path.sep;
       if (!dirWithSep.startsWith(rootWithSep)) {
         throw new Error('Resolved locale directory is outside of the configured locales directory');
       }
 
       // Atomic write via temp file
-      const tempPath = path.join(dirPath, path.basename(missingFilePath) + '.tmp');
+      const tempPath = path.join(resolvedDirPath, path.basename(missingFilePath) + '.tmp');
       await fs.promises.writeFile(tempPath, JSON.stringify(missingKeys, null, 2), 'utf-8');
       await fs.promises.rename(tempPath, missingFilePath);
     });
