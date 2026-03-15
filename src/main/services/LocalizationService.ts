@@ -195,8 +195,19 @@ export class LocalizationService {
       // Ensure directory for language exists (may be missing for new languages)
       await fs.promises.mkdir(path.dirname(missingFilePath), { recursive: true });
 
+      // Before constructing a temporary path, double-check that the directory
+      // for the missing file is still within the configured locales root.
+      const rootWithSep = this.localesRoot.endsWith(path.sep)
+        ? this.localesRoot
+        : this.localesRoot + path.sep;
+      const dirPath = path.normalize(path.dirname(missingFilePath));
+      const dirWithSep = dirPath.endsWith(path.sep) ? dirPath : dirPath + path.sep;
+      if (!dirWithSep.startsWith(rootWithSep)) {
+        throw new Error('Resolved locale directory is outside of the configured locales directory');
+      }
+
       // Atomic write via temp file
-      const tempPath = path.join(path.dirname(missingFilePath), path.basename(missingFilePath) + '.tmp');
+      const tempPath = path.join(dirPath, path.basename(missingFilePath) + '.tmp');
       await fs.promises.writeFile(tempPath, JSON.stringify(missingKeys, null, 2), 'utf-8');
       await fs.promises.rename(tempPath, missingFilePath);
     });
