@@ -19,17 +19,39 @@ const defaultLocalesPath = path.join(
   'assets/locales'
 );
 
-function isValidLanguage(language: string): boolean {
-  // Allow only alphanumeric language tags with single hyphens between segments
-  // Examples: "en", "en-US", "pt-BR"
-  return /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(language);
+function normalizeLanguage(language: string): string {
+  const trimmed = language.trim();
+  const parts = trimmed.split('-');
+  const root = parts[0].toLowerCase();
+
+  if (! /^[a-z]*$/.test(root)) {
+    throw new Error('Invalid language: must be purely alphabetical');
+  }
+
+  if (parts.length > 2) {
+    throw new Error('Invalid language: must be either a simple language code or language and region in the form ll-RR');
+  }
+  else if (parts.length > 1) {
+    const region = parts[2].toUpperCase();
+    if (! /^[A-Z]*$/.test(region)) {
+      throw new Error('Invalid language: region, if supplied, be purely alphabetical');
+    }
+
+    return `${root}-${region}`;
+  }
+  else {
+    return root;
+  }
 }
 
-function isValidNamespace(namespace: string): boolean {
-  // Allow only alphanumeric segments separated by single hyphens or underscores,
-  // no leading/trailing separators or repeated separators.
-  // Examples: "common", "app-core", "app_core"
-  return /^[A-Za-z0-9]+(?:[-_][A-Za-z0-9]+)*$/.test(namespace);
+function normalizeNamespace(namespace: string): string {
+  const trimmed = namespace.trim().toLowerCase();
+
+  if (! /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/.test(trimmed)) {
+    throw new Error('Invalid namespace: Must be alphanumeric segments separated by single hyphens or underscords.')
+  }
+
+  return trimmed;
 }
 
 // Helper to set a nested value on an object given a dot-separated key path.
@@ -112,15 +134,7 @@ export class LocalizationService {
   }
 
   async getLocaleFile(namespace: string, language: string): Promise<Record<string, string>> {
-    if (!isValidNamespace(namespace)) {
-      throw new Error(`Invalid namespace: "${namespace}". Namespace must contain only alphanumeric characters, hyphens, and underscores.`);
-    }
-
-    if (!isValidLanguage(language)) {
-      throw new Error(`Invalid language: "${language}". Language must contain only alphanumeric characters and hyphens.`);
-    }
-
-    const filePath = this.getLocaleFilePath(language, namespace);
+    const filePath = this.getLocaleFilePath(normalizeLanguage(language), normalizeNamespace(namespace));
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8');
       return JSON.parse(content);
@@ -134,14 +148,6 @@ export class LocalizationService {
     if (!isDevMode && !isTestMode) {
       // Client-side protections should keep us from getting here, but guard against accidental calls in production just in case.
       throw new Error('Cannot save missing keys in production mode');
-    }
-
-    if (!isValidNamespace(namespace)) {
-      throw new Error(`Invalid namespace: "${namespace}". Namespace must contain only alphanumeric characters, hyphens, and underscores.`);
-    }
-
-    if (!isValidLanguage(language)) {
-      throw new Error(`Invalid language: "${language}". Language must contain only alphanumeric characters and hyphens.`);
     }
 
     if (typeof key !== 'string' || typeof fallbackValue !== 'string') {
@@ -164,7 +170,7 @@ export class LocalizationService {
       throw new Error(`Invalid assignment: Key has too many nested segments (max ${MAX_KEY_SEGMENTS})`);
     }
 
-    const missingFilePath = this.getLocaleFilePath(language, namespace, '.missing');
+    const missingFilePath = this.getLocaleFilePath(normalizeLanguage(language), normalizeNamespace(namespace), '.missing');
 
     // Queue up operations for this specific file so they execute sequentially.
     const queueKey = missingFilePath;
