@@ -117,7 +117,7 @@ export class LocalizationService {
       : resolvedRoot + path.sep;
 
     // Try to resolve the candidate path fully (including symlinks) if it already exists.
-    let finalPath = candidatePath;
+    var finalPath: string;
     try {
       finalPath = fs.realpathSync(candidatePath);
     } catch {
