@@ -57,6 +57,11 @@ function normalizeNamespace(namespace: string): string {
 function setNestedValue(obj: Record<string, any>, pathStr: string, value: any) {
   const parts = pathStr.split('.');
 
+  const MAX_KEY_SEGMENTS = 100;
+  if (parts.length > MAX_KEY_SEGMENTS) {
+    throw new Error(`Invalid assignment: Key has too many nested segments (max ${MAX_KEY_SEGMENTS})`);
+  }
+
   // Start with the topmost object
   let current: Record<string, any> = obj;
 
@@ -65,19 +70,17 @@ function setNestedValue(obj: Record<string, any>, pathStr: string, value: any) {
     const part = parts[i];
 
     // Prevent prototype pollution by blocking dangerous keys.
-    if (part === '__proto__' || part === 'constructor' || part === 'prototype') {
-      return;
-    }
-
-    if (i === parts.length - 1) {
-      // This is the last part of the path.
-      current[part] = value;
-    } else {
-      if (typeof current[part] !== 'object' || current[part] === null) {
-        current[part] = {};
+    if (part !== '__proto__' && part !== 'constructor' && part !== 'prototype') {
+      if (i === parts.length - 1) {
+        // This is the last part of the path.
+        current[part] = value;
+      } else {
+        if (typeof current[part] !== 'object' || current[part] === null) {
+          current[part] = {};
+        }
+        // Step down into the next level of the object for the next iteration.
+        current = current[part];
       }
-      // Step down into the next level of the object for the next iteration.
-      current = current[part];
     }
   }
 }
