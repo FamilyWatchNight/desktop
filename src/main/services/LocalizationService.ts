@@ -24,22 +24,21 @@ function normalizeLanguage(language: string): string {
   const parts = trimmed.split('-');
   const root = parts[0].toLowerCase();
 
-  if (! /^[a-z]*$/.test(root)) {
-    throw new Error('Invalid language: must be purely alphabetical');
+  // Require language code to be purely alphabetical and of reasonable length.
+  if (!/^[a-z]{2,8}$/.test(root)) {
+    throw new Error('Invalid language: must be a purely alphabetical language code');
   }
 
   if (parts.length > 2) {
     throw new Error('Invalid language: must be either a simple language code or language and region in the form ll-RR');
-  }
-  else if (parts.length > 1) {
-    const region = parts[2].toUpperCase();
-    if (! /^[A-Z]*$/.test(region)) {
-      throw new Error('Invalid language: region, if supplied, be purely alphabetical');
+  } else if (parts.length === 2) {
+    const region = parts[1].toUpperCase();
+    if (!/^[A-Z]{2,8}$/.test(region)) {
+      throw new Error('Invalid language: region, if supplied, must be purely alphabetical');
     }
 
     return `${root}-${region}`;
-  }
-  else {
+  } else {
     return root;
   }
 }
