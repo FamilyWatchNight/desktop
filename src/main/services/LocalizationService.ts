@@ -8,11 +8,12 @@ the Free Software Foundation, version 3.
 
 import fs from 'fs';
 import path from 'path';
+import { safeJoin, assertPathInsideAllowedDirs } from '../security/pathGuards';
 import { app } from 'electron';
 
 const isTestMode = process.env.NODE_ENV === 'test';
 const isDevMode = !(app && app.isPackaged);
-const defaultLocalesPath = path.join(
+const defaultLocalesPath = safeJoin(
   // if `app` is missing or doesn't have getAppPath, fall back to cwd so path
   // operations succeed during unit tests.
   (app && typeof app.getAppPath === 'function') ? app.getAppPath() : process.cwd(),
@@ -87,7 +88,6 @@ function setNestedValue(obj: Record<string, any>, pathStr: string, value: any) {
 
 export class LocalizationService {
   private localesPath: string;
-  private localesRoot: string;
 
   // Simple per-file promise queue to serialize writes and avoid races.  The
   // key is the absolute path to the missing.json file being updated.
@@ -96,43 +96,17 @@ export class LocalizationService {
   // Allow overriding the locales path for testing
   constructor(localesPath: string = defaultLocalesPath) {
     this.localesPath = localesPath;
-    this.localesRoot = path.resolve(this.localesPath);
   }
 
   /**
    * Build the full path to a locale file and ensure it stays within the locales root directory.
    */
   private getLocaleFilePath(language: string, namespace: string, suffix: string = ''): string {
-    const candidatePath = path.resolve(this.localesRoot, language, `${namespace}${suffix}.json`);
+    const candidatePath = safeJoin(this.localesPath, language, `${namespace}${suffix}.json`);
 
-    // Resolve the locales root; if it does not exist yet, fall back to the configured path.
-    let resolvedRoot = this.localesRoot;
-    try {
-      resolvedRoot = fs.realpathSync(this.localesRoot);
-    } catch {
-      // If the root directory does not exist yet, we still enforce that candidate paths
-      // are rooted under the configured localesRoot string.
-    }
+    assertPathInsideAllowedDirs(candidatePath, this.localesPath);
 
-    const normalizedRoot = resolvedRoot.endsWith(path.sep)
-      ? resolvedRoot
-      : resolvedRoot + path.sep;
-
-    // Try to resolve the candidate path fully (including symlinks) if it already exists.
-    var finalPath: string;
-    try {
-      finalPath = fs.realpathSync(candidatePath);
-    } catch {
-      // If the file does not exist yet, fall back to the normalized candidate path.
-      finalPath = path.normalize(candidatePath);
-    }
-
-    // Ensure the resolved path is within the locales root directory.
-    if (!finalPath.startsWith(normalizedRoot) && finalPath !== resolvedRoot) {
-      throw new Error('Resolved locale file path is outside of the configured locales directory');
-    }
-
-    return finalPath;
+    return candidatePath;
   }
 
   async getLocaleFile(namespace: string, language: string): Promise<Record<string, string>> {
@@ -192,33 +166,12 @@ export class LocalizationService {
       // Add the missing key in a nested structure
       setNestedValue(missingKeys, key, fallbackValue);
 
-      // Ensure directory for language exists (may be missing for new languages)
-      // First, verify that the directory path is still within the configured locales root.
-      const mkdirRootWithSep = this.localesRoot.endsWith(path.sep)
-        ? this.localesRoot
-        : this.localesRoot + path.sep;
-      const mkdirDirPath = path.normalize(path.dirname(missingFilePath));
-      if (!mkdirDirPath.startsWith(mkdirRootWithSep)) {
-        throw new Error('Resolved locale directory is outside of the configured locales directory');
-      }
-      await fs.promises.mkdir(mkdirDirPath, { recursive: true });
-
-      // Before constructing a temporary path, double-check that the directory
-      // for the missing file is still within the configured locales root.
-      const rootWithSep = this.localesRoot.endsWith(path.sep)
-        ? this.localesRoot
-        : this.localesRoot + path.sep;
-      const dirPath = path.normalize(path.dirname(missingFilePath));
-      // Resolve the directory path (following symlinks) if possible, falling back to
-      // the normalized path if it does not yet exist.
-      const resolvedDirPath = await fs.promises.realpath(dirPath).catch(() => dirPath);
-      const dirWithSep = resolvedDirPath.endsWith(path.sep) ? resolvedDirPath : resolvedDirPath + path.sep;
-      if (!dirWithSep.startsWith(rootWithSep)) {
-        throw new Error('Resolved locale directory is outside of the configured locales directory');
-      }
+      const languageDirPath = path.dirname(missingFilePath);
+      assertPathInsideAllowedDirs(languageDirPath, this.localesPath);
+      await fs.promises.mkdir(languageDirPath, { recursive: true });
 
       // Atomic write via temp file
-      const tempPath = path.join(resolvedDirPath, path.basename(missingFilePath) + '.tmp');
+      const tempPath = safeJoin(languageDirPath, path.basename(missingFilePath) + '.tmp');
       await fs.promises.writeFile(tempPath, JSON.stringify(missingKeys, null, 2), 'utf-8');
       await fs.promises.rename(tempPath, missingFilePath);
     });
