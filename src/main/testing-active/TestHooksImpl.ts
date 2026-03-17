@@ -9,7 +9,7 @@ the Free Software Foundation, version 3.
 import { app } from 'electron';
 import * as db from '../database';
 
-import { createMockDownloadJsonGzStream, createMockDownloadCsvStream }  from "../../../tests/integration/support/background-tasks/import-background-tasks.mocks";
+import { createMockDownloadJsonGzStream, createMockDownloadCsvStream }  from "./support/mocks/import-background-tasks.mocks";
 import ImportTmdbTask from "../tasks/ImportTmdbTask"
 import ImportWatchmodeTask from "../tasks/ImportWatchmodeTask";
 
