@@ -13,6 +13,6 @@
     "src/main/testing-active/**/*",
     "src/main/testing-noop/**/*",
     "src/renderer/**/*",
-    "src/tests/**/*"
+    "tests/**/*"
   ]
 }

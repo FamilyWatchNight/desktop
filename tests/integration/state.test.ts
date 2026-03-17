@@ -8,7 +8,7 @@ the Free Software Foundation, version 3.
 
 import { test, expect } from '@playwright/test';
 import { _electron as electron } from 'playwright';
-import type { TestHooks } from '../../main/testing-active/TestHooksImpl';
+import type { TestHooks } from '../../src/main/testing-active/TestHooksImpl';
 
 test('db is connected', async () => {
   const debugArgs = (!!process.env.PWDEBUG) ? ['--inspect=9229'] : [];

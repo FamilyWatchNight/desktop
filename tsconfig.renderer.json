@@ -12,6 +12,6 @@
   ],
   "exclude": [
     "src/main/**/*",
-    "src/tests/**/*"
+    "tests/**/*"
   ]
 }
