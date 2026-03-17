@@ -9,7 +9,6 @@ the Free Software Foundation, version 3.
 import { test, expect } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 import type { ElectronApplication } from 'playwright';
-import { MovieData } from '../../../../../src/main/db/models/Movies';
 import type { TestHooks } from '../../../../../src/main/testing-active/TestHooksImpl';
 
 let app: ElectronApplication;
@@ -70,7 +69,7 @@ test.beforeAll(async () => {
 });
 
 test('should not throw errors', async () => {
-  const info = await withTestHooks((hooks) => {
+  await withTestHooks((hooks) => {
     return {
       hasProcess: typeof process !== 'undefined',
       hasVersions: typeof (process as NodeJS.Process).versions,
