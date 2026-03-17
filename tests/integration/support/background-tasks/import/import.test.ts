@@ -9,8 +9,8 @@ the Free Software Foundation, version 3.
 import { test, expect } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 import type { ElectronApplication } from 'playwright';
-import { MovieData } from '../../../../../main/db/models/Movies';
-import type { TestHooks } from '../../../../../main/testing-active/TestHooksImpl';
+import { MovieData } from '../../../../../src/main/db/models/Movies';
+import type { TestHooks } from '../../../../../src/main/testing-active/TestHooksImpl';
 
 let app: ElectronApplication;
 
@@ -61,10 +61,10 @@ test.beforeAll(async () => {
   await withTestHooks(async (hooks) => {
     hooks.db.initMockDatabase();
     await hooks.data.loadStubWatchmodeData(
-      './src/tests/test-double-data/watchmode/import/title_id_map.csv'
+      './tests/test-double-data/watchmode/import/title_id_map.csv'
     );
     await hooks.data.loadStubTmdbData(
-      './src/tests/test-double-data/tmdb/import/movie_ids.json'
+      './tests/test-double-data/tmdb/import/movie_ids.json'
     );
   });
 });

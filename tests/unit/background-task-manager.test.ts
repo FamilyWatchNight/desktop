@@ -43,8 +43,8 @@ describe('background-task-manager', () => {
 
   test('enqueue starts and completes a task', async () => {
     const MockA = makeMockTask(50, false);
-    jest.doMock('../../../src/main/tasks/task-registry', () => ({ TASK_REGISTRY: { 'test-a': MockA } }));
-    const manager = require('../../../src/main/background-task-manager');
+    jest.doMock('../../src/main/tasks/task-registry', () => ({ TASK_REGISTRY: { 'test-a': MockA } }));
+    const manager = require('../../src/main/background-task-manager');
     const states: any[] = [];
     manager.setNotifyFn((s: any) => states.push(s));
 
@@ -62,8 +62,8 @@ describe('background-task-manager', () => {
 
   test('cancelActive sets active to cancelled', async () => {
     const MockB = makeMockTask(200, true);
-    jest.doMock('../../../src/main/tasks/task-registry', () => ({ TASK_REGISTRY: { 'test-b': MockB } }));
-    const manager = require('../../../src/main/background-task-manager');
+    jest.doMock('../../src/main/tasks/task-registry', () => ({ TASK_REGISTRY: { 'test-b': MockB } }));
+    const manager = require('../../src/main/background-task-manager');
     const states: any[] = [];
     manager.setNotifyFn((s: any) => states.push(s));
 
@@ -83,8 +83,8 @@ describe('background-task-manager', () => {
   test('removeQueued removes a queued task', async () => {
     const MockA2 = makeMockTask(200, true);
     const MockB2 = makeMockTask(200, true);
-    jest.doMock('../../../src/main/tasks/task-registry', () => ({ TASK_REGISTRY: { 'test-a': MockA2, 'test-b': MockB2 } }));
-    const manager = require('../../../src/main/background-task-manager');
+    jest.doMock('../../src/main/tasks/task-registry', () => ({ TASK_REGISTRY: { 'test-a': MockA2, 'test-b': MockB2 } }));
+    const manager = require('../../src/main/background-task-manager');
     const states: any[] = [];
     manager.setNotifyFn((s: any) => states.push(s));
 

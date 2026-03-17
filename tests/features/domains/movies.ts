@@ -7,7 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import { ElectronApplication } from 'playwright';
-import { MovieData } from '../../../main/db/models/Movies';
+import { MovieData } from '../../../src/main/db/models/Movies';
 import { withTestHooks } from '../infrastructure/utils';
 
 /**

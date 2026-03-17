@@ -9,7 +9,7 @@ the Free Software Foundation, version 3.
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { CustomWorld } from '../infrastructure/world';
-import { MovieData } from '../../../main/db/models/Movies';
+import { MovieData } from '../../../src/main/db/models/Movies';
 
 // Store the current movie being examined
 let currentMovie: MovieData | undefined;

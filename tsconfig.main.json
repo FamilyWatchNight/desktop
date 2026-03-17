@@ -2,7 +2,6 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
     "noEmit": false,
     "jsx": "preserve"
   },
@@ -13,6 +12,6 @@
     "src/main/testing-active/**/*",
     "src/main/testing-noop/**/*",
     "src/renderer/**/*",
-    "src/tests/**/*"
+    "tests/**/*"
   ]
 }
