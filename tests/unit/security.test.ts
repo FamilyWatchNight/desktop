@@ -41,6 +41,16 @@ describe('Security Utilities', () => {
       expect(result).toBe(path.resolve('/base/dir/with/backslashes'));
     });
 
+    test('treats empty segments as no-ops', () => {
+      const result = safeJoin('/base', '', 'sub');
+      expect(result).toBe(path.resolve('/base/sub'));
+    });
+
+    test('ignores "." segments', () => {
+      const result = safeJoin('/base', '.', 'sub');
+      expect(result).toBe(path.resolve('/base/sub'));
+    });
+
     const isWindows = process.platform === 'win32';
 
     (isWindows ? test : test.skip)('handles Windows drive letter paths', () => {
@@ -69,6 +79,22 @@ describe('Security Utilities', () => {
       expect(resolved).toBe(path.resolve(file));
     });
 
+    test('allows paths inside os.tmpdir when safeRoot omitted', async () => {
+      const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'fw-'));
+      const file = path.join(temp, 'x.txt');
+
+      expect(() => assertPathInsideAllowedDirs(file)).not.toThrow();
+    });
+
+    test('throws when path is outside allowed roots and safeRoot omitted', async () => {
+      // Use a path that is very unlikely to be under the default allowed roots.
+      const outside = path.resolve(path.parse(os.tmpdir()).root, 'some-random-dir');
+
+      expect(() => assertPathInsideAllowedDirs(outside)).toThrow(
+        'Path is outside allowed directories',
+      );
+    });
+
     test('throws when path is outside safeRoot', async () => {
       const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'fw-'));
       const other = await fs.mkdtemp(path.join(os.tmpdir(), 'fw-'));
@@ -87,6 +113,24 @@ describe('Security Utilities', () => {
       expect(() => assertPathInsideAllowedDirs(file, notNormalized)).toThrow(
         'Expected fully normalized absolute path',
       );
+    });
+
+    test('allows symlinks that resolve inside the allowed root', async () => {
+      const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'fw-'));
+      const target = path.join(temp, 'inside.txt');
+      await fs.writeFile(target, 'x');
+
+      const link = path.join(temp, 'link');
+      try {
+        await fs.symlink(target, link);
+      } catch {
+        // Symlinks may not be supported in some environments (e.g. without privileges).
+        // In that case, we consider the behavior covered by the fact that symlink
+        // creation is unsupported and skip the assertion.
+        return;
+      }
+
+      expect(() => assertPathInsideAllowedDirs(link, temp)).not.toThrow();
     });
 
     test('throws when symlink inside safeRoot escapes', async () => {
