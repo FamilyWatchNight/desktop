@@ -120,8 +120,8 @@ This project uses structured documentation to prevent stale guidance and capture
 
 # Development Commands
 
-```bash
-npm run dev              # Concurrent build:watch + vite + debug (development)
+```pwsh
+npm run dev             # Concurrent build:watch + vite + debug (development)
 npm run test:unit       # Jest unit tests
 npm run tests:features  # Cucumber feature tests
 npm run test            # All tests
@@ -145,6 +145,7 @@ All user-facing text must be translatable:
 - LocalizationService manages locale switching and translation loading
 - Locale files live in `./assets/locales/{locale}/` as JSON (e.g., `en/common.json`, `dev/common.json`)
 - When adding UI text, add corresponding translation keys to the appropriate files
+- `dev` text is the English text with underscores (___) affixed to the start and end.
 
 ## Security
 
@@ -152,8 +153,8 @@ Security is built into the architecture through multiple defense-in-depth layers
 
 ### Key Security Functions (`src/main/security/`)
 - **`safeJoin(base, ...segments)`** – Safely joins path segments while preventing path traversal attacks
-- **`assertNoSymlinkEscape(targetPath, allowedRoot)`** – Validates symlink targets don't escape allowed directory
-- Additional functions for path validation and normalization
+- **`assertPathInsideAllowedDirs(unsafePath, safeRoot?)`** – Protects against path traversal and arbitrary file writes
+- Additional functions for normalization and symlink protection
 
 **Always use these functions for file operations.** Do not construct paths manually.
 
