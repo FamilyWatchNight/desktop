@@ -48,6 +48,15 @@ export class Movies {
   }
 
   /**
+   * Search for movies by title
+   */
+  async searchByTitle(searchTerm: string): Promise<MovieData[]> {
+    return await withTestHooks(this.app, async (hooks, searchTerm) => {
+      return hooks.movies.searchByTitle(searchTerm);
+    }, searchTerm);
+  }
+
+  /**
    * Get the count of movies in the database
    */
   async getMovieCount(): Promise<number> {
