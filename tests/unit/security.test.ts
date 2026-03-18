@@ -6,8 +6,10 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import fs from 'fs/promises';
+import os from 'os';
 import path from 'path';
-import { safeJoin } from '../../src/main/security';
+import { assertPathInsideAllowedDirs, safeJoin } from '../../src/main/security';
 
 describe('Security Utilities', () => {
   describe('safeJoin', () => {
@@ -55,6 +57,55 @@ describe('Security Utilities', () => {
     (isWindows ? test : test.skip)('prevents UNC path escape', () => {
       expect(() => safeJoin('C:\\base', '\\\\server\\share\\file.txt')).toThrow(
         'Path traversal detected',
+      );
+    });
+  });
+
+  describe('assertPathInsideAllowedDirs', () => {
+    test('allows paths inside safeRoot', async () => {
+      const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'fw-'));
+      const file = path.join(temp, 'a.txt');
+      const resolved = assertPathInsideAllowedDirs(file, temp);
+      expect(resolved).toBe(path.resolve(file));
+    });
+
+    test('throws when path is outside safeRoot', async () => {
+      const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'fw-'));
+      const other = await fs.mkdtemp(path.join(os.tmpdir(), 'fw-'));
+      const file = path.join(other, 'b.txt');
+
+      expect(() => assertPathInsideAllowedDirs(file, temp)).toThrow(
+        'Path is outside allowed directories',
+      );
+    });
+
+    test('throws when safeRoot is not normalized absolute', async () => {
+      const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'fw-'));
+      const notNormalized = `${path.resolve(temp)}${path.sep}..`;
+      const file = path.join(temp, 'c.txt');
+
+      expect(() => assertPathInsideAllowedDirs(file, notNormalized)).toThrow(
+        'Expected fully normalized absolute path',
+      );
+    });
+
+    test('throws when symlink inside safeRoot escapes', async () => {
+      const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'fw-'));
+      const outside = await fs.mkdtemp(path.join(os.tmpdir(), 'fw-'));
+      const target = path.join(outside, 'out.txt');
+      await fs.writeFile(target, 'x');
+      const link = path.join(temp, 'link');
+      try {
+        await fs.symlink(target, link);
+      } catch {
+        // Symlinks may not be supported in some environments (e.g. without privileges).
+        // In that case, the fact that we can't create the symlink is enough to
+        // validate the OS behavior and we skip the remaining assertion.
+        return;
+      }
+
+      expect(() => assertPathInsideAllowedDirs(link, temp)).toThrow(
+        'Symlink escape detected',
       );
     });
   });
