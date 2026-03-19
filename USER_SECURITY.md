@@ -1,0 +1,43 @@
+# Desired Capabilities
+- Standard secure logon capabilities, with hashed, salted passwords using the latest security best practices
+- usernames are unique and required. Email addresses are optional.
+- The main "users" table in the SQLite database includes fields needed for authentication and security (such as last login time), but not for role-based authorization, user profile, or preferences. Those will be stored in their own tables, to be created as needed.
+- The user profile, for starters, will include the user's Display Name and profile picture. Store the actual image in the filesystem where an electron app would normally store uploaded images.
+- A role-based access system with roles and permissions. A user can have zero or more roles, and a role can have one or more permissions. The effective permissions for the user are aggregated from their roles.
+- Roles and their related permissions will be stored in the database. Each role and each permission should have a display name as well as a "stub" that's used to reference it in code and in the database.
+- These are the permissions that the permissions system will know about. The stub for each is in parentheses after its display name:
+  - Can Host Watch Night (can-host)
+  - Can Vote on Upcoming (can-vote)
+  - Can Rate Watched (can-rate)
+  - Can Manage Members (can-manage-users)
+  - Can Update Own Profile (can-update-profile)
+  - Can Hide Show (can-hide-show)
+  - Can Unhide Show (can-unhide-show)
+  - Can Update Show Information (can-update-show)
+  - Can Administrate Application (can-admin)
+- If a user's aggregated permissions include can-admin, then the permission system should respond positively to a check against any permission.
+- These are the initial roles, their stubs, and their initial default permissions. If the database has no roles, these should be created along with their associated permission stubs:
+  - Administrator (admin)
+    - can-admin
+  - Influencer (influencer)
+    - can-host
+    - can-vote
+    - can-rate
+    - can-update-profile
+    - can-hide-show
+    - can-update-show
+  - Host (host)
+    - can-host
+- The mapping between permission stubs and permission names should happen in code. There is no need for a database table to define permissions.
+- Users MAY be created without a password.
+- UI should be created for the following workflows:
+  - Creation of first admin user when no users exist yet
+  - Login for existing users.
+    - Does not prompt for username/password. Rather, it lists the existing users (who have can-host [or can-admin] permission) with their profile pictures and display names. When one is clicked, it prompts for the password, if any. If no password, then the user is logged on immediately.
+  - User Profile update (conditioned on can-update-profile permission), including changing password, display name, and profile picture 
+  - Add/Edit/Delete existing user (conditioned on can-manage-users permission), including changing password, display name, profile picture, and roles. Users MAY be created with no roles assigned. They can't log in, but we'll have a use for them in the future. Only users with can-admin permission can grant or remove a role with can-admin permission. Prevent removing can-admin permission from one's own account, so there will always be someone with can-admin permission.
+  - Add/Edit/Delete roles (conditioned on can-admin permission). Prevent deleting a role that's assigned to a user.
+- Restrictions listed in the UI workflow above should be enforced in the application logic, not only in the UI.
+- Cucumber features should be created and executed to validate behaviors. Use a TDD approach to create the feature first, make sure it fails, then create the capability, then make sure the feature passes.
+- Include periodic breaks in the plan for human validation and clarification before moving on.
+- And if you want to sanity-check the approach with questions or best-practice suggestions before beginning the planning, I'm open to that as well.
