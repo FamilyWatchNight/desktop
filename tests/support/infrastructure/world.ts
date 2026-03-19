@@ -11,12 +11,14 @@ import { _electron as electron, ElectronApplication } from 'playwright';
 import { TestData } from '../domains/data';
 import { Database } from '../domains/db';
 import { Movies } from '../domains/movies';
+import { Settings } from '../domains/settings';
 
 export class CustomWorld extends World {
   app!: ElectronApplication;
   dataApi!: TestData;
   dbApi!: Database;
   moviesApi!: Movies;
+  settingsApi!: Settings;
 
   constructor(options: IWorldOptions) {
     super(options);
@@ -35,6 +37,7 @@ export class CustomWorld extends World {
     this.dataApi = new TestData(this.app);
     this.dbApi = new Database(this.app);
     this.moviesApi = new Movies(this.app);
+    this.settingsApi = new Settings(this.app);
   }
 
   async closeApp(): Promise<void> {

@@ -24,9 +24,14 @@ export default class SettingsManager {
   private store: StoreLike;
 
   constructor() {
-    const s = new Store<{ settings: Record<string, unknown> }>();
+    const isTest = process.env.NODE_ENV === 'test';
+    const storeName = isTest ? 'test-settings' : 'config';
+    const s = new Store<{ settings: Record<string, unknown> }>({ name: storeName });
     this.store = s as unknown as StoreLike;
-    if (!this.store.has('settings')) {
+    if (isTest) {
+      // Clear test settings for isolation
+      this.store.set('settings', {});
+    } else if (!this.store.has('settings')) {
       this.store.set('settings', {});
     }
   }
@@ -51,6 +56,11 @@ export default class SettingsManager {
 
   getAll(): Record<string, unknown> {
     return this.store.get('settings', {}) as Record<string, unknown>;
+  }
+
+  load(): Record<string, unknown> {
+    const persisted = this.getAll();
+    return { ...DEFAULT_SETTINGS, ...persisted };
   }
 
   setAll(settings: Record<string, unknown>): void {

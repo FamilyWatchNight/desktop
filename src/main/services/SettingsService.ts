@@ -20,7 +20,7 @@ export class SettingsService {
   }
 
   load(): Record<string, unknown> {
-    return this.settingsManager.getAll();
+    return this.settingsManager.load();
   }
 
   save(settings: Record<string, unknown>): void {
