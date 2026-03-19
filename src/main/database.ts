@@ -11,6 +11,7 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs';
 import MoviesModel from './db/models/Movies';
+import { DEFAULT_ROLES } from './auth/permissions';
 
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -59,6 +60,52 @@ function runMigrations(): void {
   }
 }
 
+export function runSeed(): void {
+  if (!db) {
+    throw new Error('Database not initialized');
+  }
+  const countResult = db.prepare('SELECT COUNT(*) as count FROM roles').get() as { count: number };
+  if (countResult.count > 0) {
+    return;
+  }
+  const now = new Date().toISOString();
+  const insertRole = db.prepare(
+    'INSERT INTO roles (stub, display_name, created_at, updated_at) VALUES (?, ?, ?, ?)'
+  );
+  const insertRolePermission = db.prepare(
+    'INSERT INTO role_permissions (role_id, permission_stub, created_at) VALUES (?, ?, ?)'
+  );
+  for (const role of DEFAULT_ROLES) {
+    insertRole.run(role.stub, role.displayName, now, now);
+    const roleId = (db.prepare('SELECT last_insert_rowid() as id').get() as { id: number }).id;
+    for (const stub of role.permissionStubs) {
+      insertRolePermission.run(roleId, stub, now);
+    }
+  }
+  console.info('Seeded default roles');
+}
+
+/**
+ * Returns the current database instance. Used by test hooks so test-only logic
+ * (e.g. roles-test-support) can run against the same db without living in this module.
+ */
+export function getDb(): Database.Database | null {
+  return db;
+}
+
+export interface RoleDefinitionForTest {
+  stub: string;
+  displayName: string;
+  permissionStubs: string[];
+}
+
+export interface RoleForTest {
+  id: number;
+  stub: string;
+  displayName: string;
+  permissionStubs: string[];
+}
+
 function initModels(): void {
   if (!db) {
     throw new Error('Database not initialized');
@@ -78,6 +125,7 @@ export function initDatabase(): void {
   const dbPath = path.join(appDataDir, 'FamilyWatchNight.db');
   db = new Database(dbPath);
   runMigrations();
+  runSeed();
   initModels();
 }
 
@@ -88,6 +136,7 @@ export function initMockDatabase(testDb?: Database.Database | null): void {
     db = testDb;
   }
   runMigrations();
+  runSeed();
   initModels();
 }
 
