@@ -13,6 +13,11 @@ import { CustomWorld } from '../../support/infrastructure/world';
 // Store the current settings data being examined
 let currentSettings: any = {};
 
+Given('the application is running with default settings', async function (this: CustomWorld) {
+  // Initialize mock settings to ensure we start with a clean slate
+  await this.settingsApi.initializeMockSettings();
+});
+
 When('I request all settings', async function (this: CustomWorld) {
   currentSettings = await this.settingsApi.loadSettings();
 });

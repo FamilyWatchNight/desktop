@@ -6,10 +6,19 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import type SettingsManager from '../settings-manager';
+import SettingsManager from '../settings-manager';
+import { StoreLike } from '../settings-manager';
 
 export class SettingsService {
-  constructor(private settingsManager: SettingsManager) {}
+  private settingsManager: SettingsManager;
+
+  constructor() {
+    this.settingsManager = new SettingsManager();
+  }
+
+  initialize(store?: StoreLike): void {
+    this.settingsManager.initialize(store);
+  }
 
   get(key: string): unknown {
     return this.settingsManager.get(key);

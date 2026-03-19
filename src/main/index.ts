@@ -13,14 +13,13 @@ import path from "path";
 import express from "express";
 import * as server from "./server";
 import * as db from "./database";
-import SettingsManager from "./settings-manager";
 import type { TestHooks } from "./testing/TestHooksImpl";
 import { getTestHooks } from "./testing/TestHooksImpl";
 import i18n from "./i18n";
+import { settingsService } from "./api-server/ipc/instances";
 
 let tray: Tray | null = null;
 const webServer = express();
-const settingsManager = new SettingsManager();
 const t = i18n.t.bind(i18n);
 
 if (process.env.NODE_ENV === "development") {
@@ -75,13 +74,13 @@ app.on("ready", () => {
 
   i18n.changeLanguage(locale).then(() => {
     db.initDatabase();
-    settingsManager.initialize();
+    settingsService.initialize();
     createTray();
     createAppWindow();
     registerIpcHandlers();
 
     try {
-      const port = (settingsManager.get("webPort") as number) || 3000;
+      const port = (settingsService.get("webPort") as number) || 3000;
       server.startServer(webServer, port);
     } catch (error) {
       console.error(

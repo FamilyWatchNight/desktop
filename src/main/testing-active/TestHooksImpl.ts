@@ -10,6 +10,7 @@ import { app } from 'electron';
 import * as db from '../database';
 
 import { createMockDownloadJsonGzStream, createMockDownloadCsvStream }  from "./support/mocks/import-background-tasks.mocks";
+import { createMockElectronStore }  from "./support/mocks/electron-store.mocks";
 import ImportTmdbTask from "../tasks/ImportTmdbTask"
 import ImportWatchmodeTask from "../tasks/ImportWatchmodeTask";
 
@@ -31,6 +32,7 @@ export interface TestHooks {
     searchByTitle: (searchTerm: string) => import('../db/models/Movies').MovieData[];
   };
   settings: {
+    initializeMockSettings: (testSettings?: Record<string, unknown>) => void;
     get: (key: string) => unknown;
     set: (key: string, value: unknown) => void;
     load: () => Record<string, unknown>;
@@ -77,6 +79,10 @@ export function getTestHooks(): TestHooks {
       searchByTitle: (searchTerm: string) => movieService.searchByTitle(searchTerm)
     },
     settings: {
+      initializeMockSettings (testSettings?: Record<string, unknown>) {
+        const store = createMockElectronStore(testSettings);
+        settingsService.initialize(store);
+      },
       get: (key: string) => settingsService.get(key),
       set: (key: string, value: unknown) => settingsService.set(key, value),
       load: () => settingsService.load(),

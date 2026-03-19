@@ -4,6 +4,9 @@ Feature: Settings Management
   I want to manage application settings
   So that I can customize the app behavior
 
+  Background:
+    Given the application is running with default settings
+
   Scenario: Load default settings
     When I request all settings
     Then I should receive default settings with webPort 3000

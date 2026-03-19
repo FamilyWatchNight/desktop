@@ -14,34 +14,33 @@ const DEFAULT_SETTINGS: Record<string, unknown> = {
   tmdbApiKey: ''
 };
 
-type StoreLike = {
+export type StoreLike = {
   has: (key: string) => boolean;
   get: (key: string, defaultValue?: unknown) => unknown;
   set: (key: string, value: unknown) => void;
 };
 
 export default class SettingsManager {
-  private store: StoreLike;
+  private store?: StoreLike;
 
-  constructor() {
-    const isTest = process.env.NODE_ENV === 'test';
-    const storeName = isTest ? 'test-settings' : 'config';
-    const s = new Store<{ settings: Record<string, unknown> }>({ name: storeName });
-    this.store = s as unknown as StoreLike;
-    if (isTest) {
-      // Clear test settings for isolation
-      this.store.set('settings', {});
-    } else if (!this.store.has('settings')) {
-      this.store.set('settings', {});
+  initialize(store?: StoreLike): void {
+    if (store !== undefined) {
+      this.store = store;
+    }
+    else {
+      this.store = new Store() as unknown as StoreLike;
     }
   }
 
-  initialize(): void {
-    // electron-store automatically loads persisted data
-  }
+  private getStore(): StoreLike {
+    if (!this.store) {
+      throw new Error('SettingsManager not initialized');
+    }
+    return this.store;
+  } 
 
   get(key: string): unknown {
-    const settings = this.store.get('settings', {}) as Record<string, unknown>;
+    const settings = this.getStore().get('settings', {}) as Record<string, unknown>;
     if (key in settings) {
       return settings[key];
     }
@@ -49,13 +48,13 @@ export default class SettingsManager {
   }
 
   set(key: string, value: unknown): void {
-    const settings = this.store.get('settings', {}) as Record<string, unknown>;
+    const settings = this.getStore().get('settings', {}) as Record<string, unknown>;
     settings[key] = value;
-    this.store.set('settings', settings);
+    this.getStore().set('settings', settings);
   }
 
   getAll(): Record<string, unknown> {
-    return this.store.get('settings', {}) as Record<string, unknown>;
+    return this.getStore().get('settings', {}) as Record<string, unknown>;
   }
 
   load(): Record<string, unknown> {
@@ -64,12 +63,13 @@ export default class SettingsManager {
   }
 
   setAll(settings: Record<string, unknown>): void {
-    const currentSettings = this.store.get('settings', {}) as Record<string, unknown>;
+    const s = this.getStore();
+    const currentSettings = s.get('settings', {}) as Record<string, unknown>;
     const merged = { ...currentSettings, ...settings };
-    this.store.set('settings', merged);
+    s.set('settings', merged);
   }
 
   clear(): void {
-    this.store.set('settings', {});
+    this.getStore().set('settings', {});
   }
 }

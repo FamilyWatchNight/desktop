@@ -20,6 +20,15 @@ export class Settings {
   }
 
   /**
+   * Initialize mock settings for testing purposes. This will clear any existing settings and set the provided test settings.
+   */
+  async initializeMockSettings(testSettings?: Record<string, unknown>): Promise<void> {
+    await withTestHooks(this.app, async (hooks, testSettings) => {
+      hooks.settings.initializeMockSettings(testSettings);
+    }, testSettings);
+  }
+
+  /**
    * Get a setting value by key
    */
   async getSetting(key: string): Promise<unknown> {

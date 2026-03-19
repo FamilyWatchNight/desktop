@@ -7,12 +7,8 @@ the Free Software Foundation, version 3.
 */
 
 import { Express, Request } from 'express';
-import SettingsManager from '../../settings-manager';
-import { SettingsService } from '../../services';
+import { settingsService } from '../ipc/instances';
 import { route } from './utils';
-
-const settingsManager = new SettingsManager();
-const settingsService = new SettingsService(settingsManager);
 
 export function registerSettingsRoutes(app: Express): void {
   app.get('/api/settings',
