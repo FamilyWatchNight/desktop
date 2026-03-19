@@ -410,8 +410,9 @@ These can be extracted to shared `instances.ts` for single-instance pattern (cur
 | `npm run build:main` | Compiles TypeScript, generates app-info.json, copies migrations |
 | `npm run build:renderer` | Vite build for React + CSS |
 | `npm run test:unit` | Jest unit tests |
-| `npm run test:integration` | Playwright tests (requires build for integration testing) |
-| `npm run test:features` | Cucumber BDD tests |
+| `npm run test:smoke` | Cucumber smoke tests (basic health checks) |
+| `npm run test:component` | Cucumber integration tests (full workflows) |
+| `npm run test:features` | All Cucumber tests |
 | `npm run build` | Production: clean + build main + build renderer + package with electron-builder |
 
 ### **Key Dependencies**
@@ -464,10 +465,13 @@ concurrently:
 # Unit tests (no build required)
 npm run test:unit
 
-# Integration tests (Playwright + full Electron app)
-npm run test:integration
+# Smoke tests (basic health checks)
+npm run test:smoke
 
-# Feature tests (Cucumber + test fixtures)
+# Integration tests (full workflows)
+npm run test:component
+
+# All Cucumber tests
 npm run test:features
 
 # All tests
@@ -600,30 +604,37 @@ describe('title normalization', () => {
 })
 ```
 
-### **Integration Tests** (`tests/integration/`)
-- Framework: Playwright
-- Focus: Full Electron app lifecycle
-- Example: [launch.test.ts](tests/integration/launch.test.ts)
-```typescript
-test('Electron app launches', async () => {
-  const app = await electron.launch({ args: ['.'] })
-  const window = await app.firstWindow()
-  await app.close()
-})
-```
-Tests without relying on IPC, uses subprocess interaction.
+### **Integration Tests** (`tests/component/`)
+- Framework: Cucumber BDD + Playwright
+- Focus: Full application workflows
+- Structure: Feature files in `workflows/` for integration scenarios
+- Data Persistence: Module-level variables (e.g., `currentMovie`, `currentSettings`) for scenario data
+- Isolation: Automatic clearing of test stores and databases
+- Test Levels: @smoke (health checks), @integration (workflows)
+- Profiles: Cucumber profiles for targeted test execution
 
-### **Feature Tests** (`tests/features/`)
-- Framework: Cucumber + Playwright
-- Focus: Business scenarios in natural language
-- Example: [import-movies.feature](tests/features/import-movies.feature)
-```gherkin
-Scenario: Movies in both databases are properly merged
-  Given the application is running with a test database
-  And stub Watchmode data is loaded from [CSV]
-  And stub TMDB data is loaded from [JSON]
-  Then I should see 23 movies in the database
-```
+### **Development Process**
+- **Collaborative Documentation**: All architectural documentation updates go through HumanAgent Chat review
+- **Pattern Consistency**: New implementations must follow established patterns; research existing code thoroughly
+- **Structured Problem Solving**: Use brainstorm → plan → implement → lessons learned cycle for complex tasks
+
+---
+
+## 9. Test Architecture Evolution
+
+### **Current State (March 2026)**
+- **Smoke Tests**: Basic app health via Cucumber @smoke tags
+- **Integration Tests**: Full workflows via Cucumber @integration tags  
+- **Unit Tests**: Pure logic testing with Jest
+- **Isolation**: Automatic test store/database clearing
+- **Data Persistence**: Module variables for scenario state
+- **Coverage**: Settings management, movie operations, background tasks
+
+### **Key Components**
+- Test hooks provide direct service access in NODE_ENV=test
+- Dual transport testing (IPC + HTTP surfaces)
+- Playwright launches full Electron app for integration
+- Cucumber BDD with Gherkin features for business-readable tests
 
 ### **Test Infrastructure**
 

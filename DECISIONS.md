@@ -9,7 +9,7 @@ This document records significant architectural and implementation decisions for
 **Date**: March 2026  
 **Status**: Active
 
-**Decision**: New integration tests are written as Cucumber feature files under `./tests/features/`, not as direct Playwright tests in `./tests/integration/`.
+**Decision**: New integration tests are written as Cucumber feature files under `./tests/component/`, not as direct Playwright tests in `./tests/integration/`.
 
 **Rationale**:
 - Business-language specifications are clearer and more maintainable
@@ -161,3 +161,29 @@ This document records significant architectural and implementation decisions for
 - ARCHITECTURE_ANALYSIS.md captures current system design
 - DECISIONS.md records one-time decisions (rarely updated)
 - AGENTS.md captures conventions and workflow (may evolve)
+
+---
+
+## 7. Documentation Updates Require HumanAgent Chat Discussion
+
+**Date**: March 2026  
+**Status**: Active
+
+**Decision**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in HumanAgent Chat before implementation.
+
+**Rationale**:
+- Ensures collaborative refinement of guidance documents
+- Prevents misunderstandings in agent workflow instructions
+- Maintains documentation quality through human review
+- Creates shared understanding of changes
+
+**Implementation**:
+- Propose changes in HumanAgent Chat first
+- Refine wording and approach together
+- Implement only after agreement
+- Use this process for all documentation changes
+
+**Notes**:
+- This applies to all three key documentation files
+- Prevents unilateral changes to agent guidance
+- Builds on the checkpoint strategy for major changes
