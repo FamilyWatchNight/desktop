@@ -16,9 +16,8 @@ When('I launch the application', async function (this: CustomWorld) {
   // This step is primarily for documentation purposes
 });
 
-Then('the application window should be visible', async function (this: CustomWorld) {
-  // Check that the Electron app is ready (window should be created)
-  // Since we're using test hooks, verify the app is initialized
+Then('the application should consider itself ready', async function (this: CustomWorld) {
+  // Check that the Electron app has declared itself ready
   const appReady = await withTestHooks(this.app, async (hooks) => {
     return hooks.app.isReady();
   });

@@ -7,7 +7,7 @@ Feature: Application Health Checks
   @smoke
   Scenario: Application launches successfully
     When I launch the application
-    Then the application window should be visible
+    Then the application should consider itself ready
 
   @smoke
   Scenario: Database connects properly
