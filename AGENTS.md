@@ -80,15 +80,11 @@ The renderer's API client automatically detects its environment and selects the 
 ### Test Structure
 - **Unit tests** (Jest): Located in `./tests/unit/`, for isolated business logic
   - Execute: `npm run test:unit`
-- **Feature tests** (Cucumber/BDD): Located in `./tests/features/`, for end-to-end workflows
+- **Feature tests** (Cucumber/BDD): Located in `./tests/components/`
   - Execute: `npm run tests:features`
-  - Test fixtures in `./tests/integration/support/`
-  - These are the preferred format for new integration tests
-
-### Test File Locations & Patterns
-- ✅ **DO**: Write new integration tests as Cucumber feature files under `./tests/features/`
-- ❌ **DON'T**: Write new tests in `./tests/integration/` (direct Playwright tests)
-- **Rationale**: Project is migrating away from direct Playwright toward Cucumber BDD
+  - Feature files and steps in `./tests/component/`
+  - Accessors for application test hooks `./tests/support/domains/`
+  - Test orchestration infrastructure in `./tests/infrastructure/`
 
 ### Validation Flow
 Before writing tests:
