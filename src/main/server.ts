@@ -15,8 +15,7 @@ import { registerHttpRoutes, registerAppRoutes } from './api-server';
 
 const isDevMode = !app.isPackaged;
 const rootDir = app.getAppPath();
-const distPath = path.join(rootDir, 'dist');
-const publicPath = path.join(rootDir, 'assets');
+const publicPath = path.join(rootDir, 'dist', 'renderer');
 
 export function startServer(app: Express, port: number): ReturnType<Express['listen']> {
 
@@ -43,12 +42,10 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
   registerHttpRoutes(app);
   registerAppRoutes(app);
 
-
-  app.use('/dist', express.static(distPath));
   app.use(express.static(publicPath));
 
   app.use((_req: Request, res: Response) => {
-    const indexPath = path.join(distPath, 'renderer', 'index.html');
+    const indexPath = path.join(publicPath, 'index.html');
     try {
       let html = fs.readFileSync(indexPath, 'utf-8');
       if (isDevMode) {
