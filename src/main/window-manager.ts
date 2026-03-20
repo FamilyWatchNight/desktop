@@ -12,7 +12,22 @@ import * as backgroundTaskManager from './background-task-manager';
 
 let mainWindow: BrowserWindow | null = null;
 
+function handleBackgroundTaskUpdate(state: { active: unknown; queue: unknown[] }): void {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('background-task-update', state);
+  }
+}
+
+function registerCallbacks(): void {
+  backgroundTaskManager.setNotifyFn(handleBackgroundTaskUpdate);
+}
+
+function unregisterCallbacks(): void {
+  backgroundTaskManager.clearNotifyFn(handleBackgroundTaskUpdate);
+} 
+
 export function handleWindowClosed(): void {
+  unregisterCallbacks();
   mainWindow = null;
 }
 
@@ -39,11 +54,7 @@ export function createAppWindow(): void {
   }
   mainWindow.on('closed', handleWindowClosed);
 
-  backgroundTaskManager.setNotifyFn(() => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('background-task-update', backgroundTaskManager.getState());
-    }
-  });
+  registerCallbacks();
 }
 
 export function getMainWindow(): BrowserWindow | null {
