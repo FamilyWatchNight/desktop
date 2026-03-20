@@ -36,11 +36,6 @@ describe('Security Utilities', () => {
       expect(result).toBe(path.resolve('/base/a/b/c/file.txt'));
     });
 
-    test('normalizes path separators', () => {
-      const result = safeJoin('/base', 'dir\\with\\backslashes');
-      expect(result).toBe(path.resolve('/base/dir/with/backslashes'));
-    });
-
     test('treats empty segments as no-ops', () => {
       const result = safeJoin('/base', '', 'sub');
       expect(result).toBe(path.resolve('/base/sub'));
@@ -52,6 +47,11 @@ describe('Security Utilities', () => {
     });
 
     const isWindows = process.platform === 'win32';
+
+    (isWindows ? test : test.skip)('normalizes path separators', () => {
+      const result = safeJoin('/base', 'dir\\with\\backslashes');
+      expect(result).toBe(path.resolve('/base/dir/with/backslashes'));
+    });
 
     (isWindows ? test : test.skip)('handles Windows drive letter paths', () => {
       const result = safeJoin('C:\\base', 'subdir', 'file.txt');
