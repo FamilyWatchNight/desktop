@@ -18,38 +18,41 @@ Given('the application is running with default settings', async function (this: 
   await this.settingsApi.initializeMockSettings();
 });
 
+When('I save the following settings:', async function (this: CustomWorld, settingsJson: string) {
+  const settings = JSON.parse(settingsJson);
+  for (const key in settings) {
+    await this.settingsApi.setSetting(key, settings[key]);
+  }
+});
+
+When('I set the {string} setting to {int}', async function (this: CustomWorld, key: string, value: number) {
+  await this.settingsApi.setSetting(key, value);
+});
+When('I set the {string} setting to {string}', async function (this: CustomWorld, key: string, value: string) {
+  await this.settingsApi.setSetting(key, value);
+});
+
 When('I request all settings', async function (this: CustomWorld) {
   currentSettings = await this.settingsApi.loadSettings();
 });
 
-When('I set the webPort to {int}', async function (this: CustomWorld, port: number) {
-  await this.settingsApi.setSetting('webPort', port);
+When('I request the {string} setting', async function (this: CustomWorld, key: string) {
+  currentSettings[key] = await this.settingsApi.getSetting(key);
 });
 
-When('I request the webPort setting', async function (this: CustomWorld) {
-  currentSettings.webPort = await this.settingsApi.getSetting('webPort');
+Then('I should receive settings that include the following:', async function (this: CustomWorld, expectedSettingsJson: string) {
+  const expectedSettings = JSON.parse(expectedSettingsJson);
+  for (const key in expectedSettings) {
+    expect(currentSettings).toHaveProperty(key);
+    expect(currentSettings[key]).toEqual(expectedSettings[key]);
+  }
 });
 
-When('I save settings with webPort {int} and tmdbApiKey {string}', async function (this: CustomWorld, port: number, apiKey: string) {
-  await this.settingsApi.saveSettings({ webPort: port, tmdbApiKey: apiKey });
+Then('I should receive a {string} setting with value {int}', async function (this: CustomWorld, key: string, expectedValue: number) {
+  expect(currentSettings).toHaveProperty(key);
+  expect(currentSettings[key]).toEqual(expectedValue);
 });
-
-Then('I should receive default settings with webPort {int}', async function (this: CustomWorld, expectedPort: number) {
-  expect(currentSettings).toBeDefined();
-  expect(currentSettings.webPort).toBe(expectedPort);
-});
-
-Then('I should receive {int}', async function (this: CustomWorld, expectedValue: number) {
-  expect(currentSettings.webPort).toBe(expectedValue);
-});
-
-Then('I should receive settings with webPort {int}', async function (this: CustomWorld, expectedPort: number) {
-  expect(currentSettings).toBeDefined();
-  expect(currentSettings.webPort).toBe(expectedPort);
-});
-
-Then('I should receive settings with webPort {int} and tmdbApiKey {string}', async function (this: CustomWorld, expectedPort: number, expectedApiKey: string) {
-  expect(currentSettings).toBeDefined();
-  expect(currentSettings.webPort).toBe(expectedPort);
-  expect(currentSettings.tmdbApiKey).toBe(expectedApiKey);
+Then('I should receive a {string} setting with value {string}', async function (this: CustomWorld, key: string, expectedValue: string) {
+  expect(currentSettings).toHaveProperty(key);
+  expect(currentSettings[key]).toEqual(expectedValue);
 });
