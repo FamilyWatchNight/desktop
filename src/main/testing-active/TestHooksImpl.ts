@@ -13,6 +13,11 @@ import { createMockDownloadJsonGzStream, createMockDownloadCsvStream }  from "./
 import { createMockElectronStore }  from "./support/mocks/electron-store.mocks";
 import ImportTmdbTask from "../tasks/ImportTmdbTask"
 import ImportWatchmodeTask from "../tasks/ImportWatchmodeTask";
+import { MovieService, SettingsService, BackgroundTaskService } from '../services';
+
+const movieService = new MovieService();
+const settingsService = new SettingsService();
+const backgroundTaskService = new BackgroundTaskService();
 
 export interface TestHooks {
   app: { getAppPath: () => string; isReady: () => boolean };
@@ -26,10 +31,10 @@ export interface TestHooks {
     loadStubWatchmodeData: (dataSource: string) => Promise<void>;
   };
   movies: {
-    getAll: () => import('../db/models/Movies').MovieData[];
-    getByTmdbId: (tmdbId: string) => import('../db/models/Movies').MovieData | undefined;
-    getByWatchmodeId: (watchmodeId: string) => import('../db/models/Movies').MovieData | undefined;
-    searchByTitle: (searchTerm: string) => import('../db/models/Movies').MovieData[];
+    getAll: () => import('../db/models/Movies').Movie[];
+    getByTmdbId: (tmdbId: string) => import('../db/models/Movies').Movie | null;
+    getByWatchmodeId: (watchmodeId: string) => import('../db/models/Movies').Movie | null;
+    searchByTitle: (searchTerm: string) => import('../db/models/Movies').Movie[];
   };
   settings: {
     initializeMockSettings: (testSettings?: Record<string, unknown>) => void;
@@ -47,8 +52,6 @@ export interface TestHooks {
 }
 
 export function getTestHooks(): TestHooks {
-  // grab live service instances so we can call them directly from tests
-  const { movieService, backgroundTaskService, settingsService } = require('../ipc-handlers').getServiceInstances();
 
   return {
     app: {

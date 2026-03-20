@@ -13,46 +13,7 @@ import { registerMovieIpcHandlers } from './movies';
 import { registerSettingsIpcHandlers } from './settings';
 import { registerBackgroundTaskIpcHandlers } from './background-tasks';
 
-let handlersRegistered = false;
-
 export function registerIpcHandlers(): void {
-  const channels = [
-    'get-app-version',
-    'get-app-locale',
-    'get-server-port',
-    'locale-get',
-    'locale-missing-key',
-    'open-settings',
-    'load-settings',
-    'save-settings',
-    'enqueue-background-task',
-    'get-background-tasks',
-    'cancel-active-background-task',
-    'remove-queued-background-task',
-    'movies-create',
-    'movies-get-by-id',
-    'movies-get-by-watchmode-id',
-    'movies-get-by-tmdb-id',
-    'movies-get-all',
-    'movies-update',
-    'movies-delete',
-    'movies-search-by-title',
-    'test:get-db-status'
-  ];
-
-  channels.forEach((ch) => {
-    try {
-      ipcMain.removeHandler(ch);
-    } catch {
-      // ignore if not present
-    }
-  });
-
-  if (handlersRegistered) {
-    return;
-  }
-  handlersRegistered = true;
-
   registerAppIpcHandlers();
   registerBackgroundTaskIpcHandlers();
   registerMovieIpcHandlers();
