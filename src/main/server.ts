@@ -11,7 +11,7 @@ import path from 'path';
 import express, { type Express, type Request, type Response } from 'express';
 import RateLimit from 'express-rate-limit';
 import { app } from 'electron';
-import { registerHttpRoutes, registerAppRoutes } from './api-server';
+import { registerHttpRoutes } from './api-server';
 
 const isDevMode = !app.isPackaged;
 const rootDir = app.getAppPath();
@@ -38,13 +38,7 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
     next();
   });
 
-  // register HTTP routes powered by service layer
-  registerHttpRoutes(app);
-  registerAppRoutes(app);
-
-  app.use(express.static(publicPath));
-
-  app.use((_req: Request, res: Response) => {
+  app.get('/', (_req: Request, res: Response) => {
     const indexPath = path.join(publicPath, 'index.html');
     try {
       let html = fs.readFileSync(indexPath, 'utf-8');
@@ -60,6 +54,11 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
       res.status(500).send('Internal Server Error');
     }
   });
+
+  // register HTTP routes powered by service layer
+  registerHttpRoutes(app);
+
+  app.use(express.static(publicPath));
 
   const server = app.listen(port, 'localhost', () => {
     console.info(`Web server listening on http://localhost:${port}`);
