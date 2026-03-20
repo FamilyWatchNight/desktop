@@ -1,3 +1,4 @@
+@integration
 Feature: Import Movies
   As a user
   I want to import movie data from external sources

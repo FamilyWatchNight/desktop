@@ -27,4 +27,10 @@ export class Database {
         return hooks.db.closeDatabase();
       });
     }
+
+    async getStatus(): Promise<{ dbInitialized: boolean; dbConnected: boolean }> {
+      return await withTestHooks(this.app, async (hooks) => {
+        return hooks.db.getStatus();
+      });
+    }
   }

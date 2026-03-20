@@ -11,14 +11,26 @@ A cross-platform app for managing movie selection for a Family Watch Night
 - **Before completing a task**: Verify the solution matches expectations, ask if anything should be adjusted
 - **On scope questions**: If unsure whether to expand/reduce scope, ask first
 - **Implementation choices**: When multiple valid approaches exist, surface them for human decision-making
+- **Documentation Updates**: Always use HumanAgent Chat to propose documentation changes before implementing them
 
 **Never assume work is done. Always ask.**
+
+### Interaction Patterns
+
+**HumanAgent Chat Usage:**
+- **Documentation Changes**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in HumanAgent Chat before implementation
+- **Complex Decisions**: When multiple valid approaches exist, surface them in HumanAgent Chat for human decision-making
+- **Scope Clarification**: Use HumanAgent Chat to confirm understanding of requirements and scope before proceeding with implementation
 
 ### Testing Validation Flow
 When writing tests:
 1. **Before writing the first test**: Ask to validate the test approach and confirm test coverage strategy
 2. **Before each additional test**: Ask to validate the previous test worked as intended
 3. **Never assume test completeness**: Verify sufficient coverage with human before marking done
+4. **Test Architecture Awareness**: Understand test levels (@smoke, @integration, unit) and their purposes
+5. **Isolation Verification**: Confirm test stores and databases are properly isolated between runs
+6. **Data Persistence Patterns**: Use established module variable patterns for test data
+7. **Service Interface Matching**: Ensure service methods match test hook expectations
 
 See Testing section below for specific constraints.
 
@@ -68,15 +80,11 @@ The renderer's API client automatically detects its environment and selects the 
 ### Test Structure
 - **Unit tests** (Jest): Located in `./tests/unit/`, for isolated business logic
   - Execute: `npm run test:unit`
-- **Feature tests** (Cucumber/BDD): Located in `./tests/features/`, for end-to-end workflows
+- **Feature tests** (Cucumber/BDD): Located in `./tests/components/`
   - Execute: `npm run tests:features`
-  - Test fixtures in `./tests/integration/support/`
-  - These are the preferred format for new integration tests
-
-### Test File Locations & Patterns
-- ✅ **DO**: Write new integration tests as Cucumber feature files under `./tests/features/`
-- ❌ **DON'T**: Write new tests in `./tests/integration/` (direct Playwright tests)
-- **Rationale**: Project is migrating away from direct Playwright toward Cucumber BDD
+  - Feature files and steps in `./tests/component/`
+  - Accessors for application test hooks `./tests/support/domains/`
+  - Test orchestration infrastructure in `./tests/infrastructure/`
 
 ### Validation Flow
 Before writing tests:
@@ -127,6 +135,8 @@ npm run tests:features  # Cucumber feature tests
 npm run test            # All tests
 npm run build           # Production build
 ```
+
+**Pattern Research**: Before implementing new features, thoroughly examine existing similar implementations to understand established patterns and conventions.
 
 ---
 

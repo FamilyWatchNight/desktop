@@ -14,29 +14,33 @@ const DEFAULT_SETTINGS: Record<string, unknown> = {
   tmdbApiKey: ''
 };
 
-type StoreLike = {
+export type StoreLike = {
   has: (key: string) => boolean;
   get: (key: string, defaultValue?: unknown) => unknown;
   set: (key: string, value: unknown) => void;
 };
 
 export default class SettingsManager {
-  private store: StoreLike;
+  private store?: StoreLike;
 
-  constructor() {
-    const s = new Store<{ settings: Record<string, unknown> }>();
-    this.store = s as unknown as StoreLike;
-    if (!this.store.has('settings')) {
-      this.store.set('settings', {});
+  initialize(store?: StoreLike): void {
+    if (store !== undefined) {
+      this.store = store;
+    }
+    else {
+      this.store = new Store() as unknown as StoreLike;
     }
   }
 
-  initialize(): void {
-    // electron-store automatically loads persisted data
-  }
+  private getStore(): StoreLike {
+    if (!this.store) {
+      throw new Error('SettingsManager not initialized');
+    }
+    return this.store;
+  } 
 
   get(key: string): unknown {
-    const settings = this.store.get('settings', {}) as Record<string, unknown>;
+    const settings = this.getStore().get('settings', {}) as Record<string, unknown>;
     if (key in settings) {
       return settings[key];
     }
@@ -44,22 +48,28 @@ export default class SettingsManager {
   }
 
   set(key: string, value: unknown): void {
-    const settings = this.store.get('settings', {}) as Record<string, unknown>;
+    const settings = this.getStore().get('settings', {}) as Record<string, unknown>;
     settings[key] = value;
-    this.store.set('settings', settings);
+    this.getStore().set('settings', settings);
   }
 
   getAll(): Record<string, unknown> {
-    return this.store.get('settings', {}) as Record<string, unknown>;
+    return this.getStore().get('settings', {}) as Record<string, unknown>;
+  }
+
+  load(): Record<string, unknown> {
+    const persisted = this.getAll();
+    return { ...DEFAULT_SETTINGS, ...persisted };
   }
 
   setAll(settings: Record<string, unknown>): void {
-    const currentSettings = this.store.get('settings', {}) as Record<string, unknown>;
+    const s = this.getStore();
+    const currentSettings = s.get('settings', {}) as Record<string, unknown>;
     const merged = { ...currentSettings, ...settings };
-    this.store.set('settings', merged);
+    s.set('settings', merged);
   }
 
   clear(): void {
-    this.store.set('settings', {});
+    this.getStore().set('settings', {});
   }
 }

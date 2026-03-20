@@ -7,13 +7,11 @@ the Free Software Foundation, version 3.
 */
 
 import { ipcMain, app } from 'electron';
-import SettingsManager from './settings-manager';
 import { MovieService, SettingsService, BackgroundTaskService } from './services';
 import * as db from './database';
 
-const settingsManager = new SettingsManager();
 const movieService = new MovieService();
-const settingsService = new SettingsService(settingsManager);
+const settingsService = new SettingsService();
 const backgroundTaskService = new BackgroundTaskService();
 
 let handlersRegistered = false;
@@ -58,7 +56,7 @@ export function registerIpcHandlers(): void {
   handlersRegistered = true;
   // App handlers
   ipcMain.handle('get-app-version', () => app.getVersion());
-  ipcMain.handle('get-server-port', () => (settingsManager.get('webPort') as number) || 3000);
+  ipcMain.handle('get-server-port', () => (settingsService.get('webPort') as number) || 3000);
 
   // Settings handlers
   ipcMain.handle('load-settings', () => {
@@ -183,7 +181,6 @@ export function registerIpcHandlers(): void {
 
 export function getServiceInstances() {
   return {
-    settingsManager,
     movieService,
     settingsService,
     backgroundTaskService

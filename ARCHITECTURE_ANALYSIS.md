@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Family Watch Night is a TypeScript-based Electron desktop application with a sophisticated dual-mode API architecture. The main distinctive feature is that core business logic is completely decoupled from the IPC/HTTP exposure layer—services are business-logic containers that know nothing about Electron or web communication, which are instead exposed through parallel HTTP and IPC adapters. This allows the same logic to be tested and used via multiple channels.
+Family Watch Night is a TypeScript-based Electron desktop application with a sophisticated dual-mode API architecture. The main distinctive feature is that core business logic is completely decoupled from the IPC/HTTP exposure layer—services are business-logic containers that know nothing about Electron or web communication, which are instead exposed through parallel HTTP and IPC adapters. This allows the same logic to be used via multiple channels.
 
 ---
 
@@ -19,7 +19,6 @@ Located in `src/main/services/`, services are stateless, framework-agnostic clas
   - `update(id, movieData)`, `delete(id)` → mutations
   - `searchByTitle(searchTerm)` → full-text search using LIKE queries
 - **Pattern**: Delegates to database models (`db.getModels().movies.*`)
-- **No coupling**: Does not call IPC or HTTP, just accesses database layer
 
 ### **SettingsService**
 - **Responsibility**: Manage application settings persistence
@@ -29,6 +28,8 @@ Located in `src/main/services/`, services are stateless, framework-agnostic clas
   - `save(settings)` → batch update all settings
 - **Pattern**: Wraps `SettingsManager` (electron-store wrapper)
 - **Use case**: Web port, locale preferences, UI state
+- **Interesting detail**: `index.ts` must call initialize() before use. Alternatively, the test runner can
+  initialize() it with a mock electron store
 
 ### **BackgroundTaskService**
 - **Responsibility**: Coordinate long-running asynchronous tasks
@@ -47,7 +48,7 @@ Located in `src/main/services/`, services are stateless, framework-agnostic clas
   - `saveMissingKey(namespace, language, key, value)` → records missing translations (dev mode only)
 - **Pattern**: File I/O with security validation (prevents path traversal)
 - **Security**: Uses `assertPathInsideAllowedDirs()` to validate all file paths
-- **Interesting detail**: Implements write-queue per file to prevent race conditions
+- **Interesting detail**: Implements write-queue per file to prevent race conditions when saving missing keys
 
 ---
 
@@ -62,9 +63,8 @@ app.on('ready'):
   2. Initialize database
   3. Initialize settings manager
   4. Create tray icon with context menu
-  5. Create app window
-  6. Register IPC handlers
-  7. Start HTTP server on configured port
+  5. Register IPC handlers
+  6. Start HTTP server on configured port
 ```
 - **Tray integration**: Double-click/click to focus window, quit option
 - **Test mode**: Sets `app.testHooks` for integration testing when NODE_ENV=test
@@ -195,9 +195,8 @@ function createApiClient(): ApiClient {
 }
 ```
 **This is the key architectural pattern**: Same interface, two backends. Enables:
-- Testing via HTTP while Electron is building
-- Browser-based testing without Electron
-- Graceful fallback if IPC not available
+- Electron app's window communicates via IPC
+- The same UI is available to remote browsers or future mobile APPs over HTTP
 
 ### **[api-client/http/index.ts](src/renderer/api-client/http/index.ts)** - HTTP Adapter
 Implements `ApiClient` interface using `fetch()` to make HTTP calls:
@@ -393,10 +392,9 @@ These can be extracted to shared `instances.ts` for single-instance pattern (cur
 ### **Why This Pattern?**
 
 1. **Services are testable**: Mock database, inject dependencies
-2. **Dual-mode testing**: Test via HTTP without Electron, then via IPC with Electron
-3. **Clean separation**: Services don't know about HTTP/IPC mechanics
-4. **Port flexibility**: Can be run as standalone server, or headless daemon
-5. **Framework-agnostic**: Services work with any UI framework
+2. **Clean separation**: Services don't know about HTTP/IPC mechanics
+3. **Port flexibility**: Can be run as standalone server, or headless daemon
+4. **Framework-agnostic**: Services work with any UI framework
 
 ---
 
@@ -410,8 +408,9 @@ These can be extracted to shared `instances.ts` for single-instance pattern (cur
 | `npm run build:main` | Compiles TypeScript, generates app-info.json, copies migrations |
 | `npm run build:renderer` | Vite build for React + CSS |
 | `npm run test:unit` | Jest unit tests |
-| `npm run test:integration` | Playwright tests (requires build for integration testing) |
-| `npm run test:features` | Cucumber BDD tests |
+| `npm run test:smoke` | Cucumber smoke tests (basic health checks) |
+| `npm run test:component` | Cucumber integration tests (full workflows) |
+| `npm run test:features` | All Cucumber tests |
 | `npm run build` | Production: clean + build main + build renderer + package with electron-builder |
 
 ### **Key Dependencies**
@@ -464,10 +463,13 @@ concurrently:
 # Unit tests (no build required)
 npm run test:unit
 
-# Integration tests (Playwright + full Electron app)
-npm run test:integration
+# Smoke tests (basic health checks)
+npm run test:smoke
 
-# Feature tests (Cucumber + test fixtures)
+# Integration tests (full workflows)
+npm run test:component
+
+# All Cucumber tests
 npm run test:features
 
 # All tests
@@ -600,30 +602,37 @@ describe('title normalization', () => {
 })
 ```
 
-### **Integration Tests** (`tests/integration/`)
-- Framework: Playwright
-- Focus: Full Electron app lifecycle
-- Example: [launch.test.ts](tests/integration/launch.test.ts)
-```typescript
-test('Electron app launches', async () => {
-  const app = await electron.launch({ args: ['.'] })
-  const window = await app.firstWindow()
-  await app.close()
-})
-```
-Tests without relying on IPC, uses subprocess interaction.
+### **Integration Tests** (`tests/component/`)
+- Framework: Cucumber BDD + Playwright
+- Focus: Full application workflows
+- Structure: Feature files in `smoke/` and `workflows/` for integration scenarios
+- Data Persistence: Module-level variables (e.g., `currentMovie`, `currentSettings`) for scenario data
+- Isolation: Automatic clearing of test stores and databases
+- Test Levels: @smoke (health checks), @integration (workflows)
+- Profiles: Cucumber profiles for targeted test execution
 
-### **Feature Tests** (`tests/features/`)
-- Framework: Cucumber + Playwright
-- Focus: Business scenarios in natural language
-- Example: [import-movies.feature](tests/features/import-movies.feature)
-```gherkin
-Scenario: Movies in both databases are properly merged
-  Given the application is running with a test database
-  And stub Watchmode data is loaded from [CSV]
-  And stub TMDB data is loaded from [JSON]
-  Then I should see 23 movies in the database
-```
+### **Development Process**
+- **Collaborative Documentation**: All architectural documentation updates go through HumanAgent Chat review
+- **Pattern Consistency**: New implementations must follow established patterns; research existing code thoroughly
+- **Structured Problem Solving**: Use brainstorm → plan → implement → lessons learned cycle for complex tasks
+
+---
+
+## 9. Test Architecture Evolution
+
+### **Current State (March 2026)**
+- **Smoke Tests**: Basic app health via Cucumber @smoke tags
+- **Integration Tests**: Full workflows via Cucumber @integration tags  
+- **Unit Tests**: Pure logic testing with Jest
+- **Isolation**: Automatic test store/database clearing
+- **Data Persistence**: Module variables for scenario state
+- **Coverage**: Settings management, movie operations, background tasks
+
+### **Key Components**
+- Test hooks provide direct service access in NODE_ENV=test
+- Dual transport testing (IPC + HTTP surfaces)
+- Playwright launches full Electron app for integration
+- Cucumber BDD with Gherkin features for business-readable tests
 
 ### **Test Infrastructure**
 
@@ -631,7 +640,7 @@ Scenario: Movies in both databases are properly merged
 ```bash
 # Build for integration testing
 npm run build:main:for-integration-testing
-# Sets NODE_ENV=test, loads testing-active stubs
+# Loads testing-active stubs
 
 # Run tests with NODE_ENV set
 NODE_ENV=test npm run test:features
@@ -645,7 +654,6 @@ await db.initMockDatabase()  // In-memory SQLite
 ```
 
 #### **Test Fixtures**
-- [test-double-data/](tests/test-double-data/) - Stub CSV/JSON data
 - [domains/db.ts](tests/features/domains/db.ts) - Data setup helpers
 - [domains/movies.ts](tests/features/domains/movies.ts) - Movie test helpers
 
@@ -668,6 +676,7 @@ Provides shared fixture state across step definitions.
 3. **IPC Events**: Playwright waits for IPC messages sent by main process
 4. **HTTP**: Can test HTTP layer independently without Electron (faster)
 5. **File I/O**: Uses real temp directory for LocalizationService tests
+6. **Electron Store**: Settings uses in-memory `MockElectronStore` provided by test harness
 
 ### **Common Patterns**
 
@@ -676,33 +685,29 @@ Provides shared fixture state across step definitions.
 | `withTestHooks(app, fn)` | Run code with access to main process internals |
 | Stub CSV/JSON | Pre-load test database with realistic data |
 | Scenario tagging | @import @tmdb @missing-data for test organization |
-| Wait for condition | Playwright: `page.waitForFunction()` for async state |
 
 ---
 
 ## Architecture Strengths
 
 1. **Clean separation of concerns**: Services don't know about transport layer
-2. **Testability**: Services tested independently, then with IPC, then with HTTP
+2. **Testability**: Services tested independently of transport
 3. **Flexibility**: Can run as desktop app, web app, or headless service
 4. **Security**: Context isolation, path validation, rate limiting, localhost-only
-5. **Maintainability**: Parallel HTTP/IPC patterns make it clear what's exposed
-6. **Performance**: Prepared statements, in-memory DB for tests, no ORMs
-7. **Type safety**: Full TypeScript, pre-compiled queries
-8. **Internationalization**: Multi-language support with fallback handling
+5. **Performance**: Prepared statements, in-memory DB for tests, no ORMs
+6. **Type safety**: Full TypeScript, pre-compiled queries
+7. **Internationalization**: Multi-language support with fallback handling
 
 ---
 
 ## Areas for Future Enhancement
 
-1. **IPC Legacy Handler**: `src/main/ipc-handlers.ts` should be removed (migrate to modular handlers)
-2. **Shared Instances**: Some HTTP/IPC handler files create duplicate service instances (could use `instances.ts`)
-3. **Error Types**: Consider typed error responses instead of generic messages
-4. **API Documentation**: OpenAPI spec generation from Express routes
-5. **Database Versioning**: Add explicit schema version tracking
-6. **Caching**: Add service-level caching for frequently accessed data
-7. **Logging**: Structured logging (pino/winston) instead of console.log
-8. **Process Management**: Currently single active task; could support task priorities or parallel execution
+1. **Error Types**: Consider typed error responses instead of generic messages
+2. **API Documentation**: OpenAPI spec generation from Express routes
+3. **Database Versioning**: Add explicit schema version tracking
+4. **Caching**: Add service-level caching for frequently accessed data
+5. **Logging**: Structured logging (pino/winston) instead of console.log
+6. **Process Management**: Currently single active task; could support task priorities or parallel execution
 
 ---
 

@@ -10,6 +10,7 @@ import { app } from 'electron';
 import * as db from '../database';
 
 import { createMockDownloadJsonGzStream, createMockDownloadCsvStream }  from "./support/mocks/import-background-tasks.mocks";
+import { createMockElectronStore }  from "./support/mocks/electron-store.mocks";
 import ImportTmdbTask from "../tasks/ImportTmdbTask"
 import ImportWatchmodeTask from "../tasks/ImportWatchmodeTask";
 
@@ -30,6 +31,13 @@ export interface TestHooks {
     getByWatchmodeId: (watchmodeId: string) => import('../db/models/Movies').MovieData | undefined;
     searchByTitle: (searchTerm: string) => import('../db/models/Movies').MovieData[];
   };
+  settings: {
+    initializeMockSettings: (testSettings?: Record<string, unknown>) => void;
+    get: (key: string) => unknown;
+    set: (key: string, value: unknown) => void;
+    load: () => Record<string, unknown>;
+    save: (settings: Record<string, unknown>) => void;
+  };
   backgroundTasks: {
     enqueue: (taskType: string, args?: Record<string, unknown>) => unknown;
     getState: () => { active: unknown; queue: unknown[] };
@@ -40,7 +48,7 @@ export interface TestHooks {
 
 export function getTestHooks(): TestHooks {
   // grab live service instances so we can call them directly from tests
-  const { movieService, backgroundTaskService } = require('../ipc-handlers').getServiceInstances();
+  const { movieService, backgroundTaskService, settingsService } = require('../ipc-handlers').getServiceInstances();
 
   return {
     app: {
@@ -69,6 +77,16 @@ export function getTestHooks(): TestHooks {
       getByTmdbId: (tmdbId: string) => movieService.getByTmdbId(tmdbId),
       getByWatchmodeId: (watchmodeId: string) => movieService.getByWatchmodeId(watchmodeId),
       searchByTitle: (searchTerm: string) => movieService.searchByTitle(searchTerm)
+    },
+    settings: {
+      initializeMockSettings (testSettings?: Record<string, unknown>) {
+        const store = createMockElectronStore(testSettings);
+        settingsService.initialize(store);
+      },
+      get: (key: string) => settingsService.get(key),
+      set: (key: string, value: unknown) => settingsService.set(key, value),
+      load: () => settingsService.load(),
+      save: (settings: Record<string, unknown>) => settingsService.save(settings)
     },
     backgroundTasks: {
       enqueue: (taskType: string, args?: Record<string, unknown>) => backgroundTaskService.enqueue(taskType as any, args ?? {}),

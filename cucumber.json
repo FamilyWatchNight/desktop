@@ -1,9 +1,27 @@
 {
   "default": {
-    "paths": ["tests/features/**/*.feature"],
+    "paths": ["tests/component/**/*.feature"],
     "requireModule": ["ts-node/register/transpile-only"],
-    "require": ["tests/features/step-definitions/**/*.ts", "tests/features/infrastructure/**/*.ts"],
+    "require": ["tests/support/**/*.ts", "tests/component/**/*.ts"],
     "format": ["progress-bar", "html:test-results/reports/cucumber-report.html"],
+    "timeout": 60000,
+    "publishQuiet": true
+  },
+  "smoke": {
+    "paths": ["tests/component/**/*.feature"],
+    "requireModule": ["ts-node/register/transpile-only"],
+    "require": ["tests/support/**/*.ts", "tests/component/**/*.ts"],
+    "format": ["progress-bar", "html:test-results/reports/cucumber-report.html"],
+    "tags": "@smoke",
+    "timeout": 30000,
+    "publishQuiet": true
+  },
+  "component": {
+    "paths": ["tests/component/**/*.feature"],
+    "requireModule": ["ts-node/register/transpile-only"],
+    "require": ["tests/support/**/*.ts", "tests/component/**/*.ts"],
+    "format": ["progress-bar", "html:test-results/reports/cucumber-report.html"],
+    "tags": "@integration",
     "timeout": 60000,
     "publishQuiet": true
   }

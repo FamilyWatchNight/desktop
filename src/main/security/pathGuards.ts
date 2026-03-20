@@ -1,4 +1,4 @@
-import fs from "fs/promises";
+import fs from "fs";
 import os from "os";
 import path from "path";
 import { app } from "electron";
@@ -22,14 +22,24 @@ export function safeJoin(base: string, ...segments: string[]): string {
 /**
  * Ensures the resolved real filesystem path does not escape the allowed root.
  */
-export async function assertNoSymlinkEscape(
+export function assertNoSymlinkEscape(
   targetPath: string,
   allowedRoot: string,
-): Promise<void> {
-  const realTarget = await fs.realpath(targetPath).catch(() => targetPath);
+): void {
+  let realTarget = targetPath;
+  try {
+    realTarget = fs.realpathSync(targetPath);
+  } catch {
+    // If the path cannot be resolved (e.g. missing file), we fall back to the input.
+  }
   assertNormalizedAbsolute(realTarget);
 
-  const realRoot = await fs.realpath(allowedRoot).catch(() => allowedRoot);
+  let realRoot = allowedRoot;
+  try {
+    realRoot = fs.realpathSync(allowedRoot);
+  } catch {
+    // If the root cannot be resolved, fall back to the input value.
+  }
   assertNormalizedAbsolute(realRoot);
 
   const relative = path.relative(realRoot, realTarget);

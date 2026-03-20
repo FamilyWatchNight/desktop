@@ -7,7 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import { ipcMain } from 'electron';
-import { settingsManager, localizationService } from './instances';
+import { localizationService, settingsService } from './instances';
 import { app } from 'electron';
 
 const isDevMode = !app.isPackaged;
@@ -24,5 +24,5 @@ export function registerAppIpcHandlers() {
     );
   }
 
-  ipcMain.handle('get-server-port', () => (settingsManager.get('webPort') as number) || 3000);
+  ipcMain.handle('get-server-port', () => (settingsService.get('webPort') as number) || 3000);
 }
