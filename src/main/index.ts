@@ -76,7 +76,6 @@ app.on("ready", () => {
     db.initDatabase();
     settingsService.initialize();
     createTray();
-    createAppWindow();
     registerIpcHandlers();
 
     try {
@@ -93,12 +92,6 @@ app.on("ready", () => {
 });
 
 app.on("window-all-closed", () => {});
-
-app.on("activate", () => {
-  if (process.platform === "darwin") {
-    createAppWindow();
-  }
-});
 
 if (process.env.NODE_ENV === "test") {
   // If NODE_ENV is set to 'test', register the hooks used for integration testing.
