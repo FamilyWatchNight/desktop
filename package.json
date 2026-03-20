@@ -21,8 +21,8 @@
     "test:local": "npm run clean && npm run test:unit && npm run test:smoke",
     "test:critical": "npm run clean && npm run test:unit && npm run test:smoke",
     "build": "npm run clean && npm run build:main && npm run build:renderer && electron-builder --publish=onTag",
-    "dev": "npm run build:main && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
-    "dev:test": "npm run build:main:for-integration-testing && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
+    "dev": "npm run build:main && npm run build:renderer && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
+    "dev:test": "npm run build:main:for-integration-testing && npm run build:renderer && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
     "pack": "npm run clean && npm run build:main && npm run build:renderer && electron-builder --dir",
     "postinstall": "electron-builder install-app-deps"
   },
