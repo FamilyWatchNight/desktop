@@ -29,4 +29,8 @@ export class BackgroundTaskService {
   setNotifyFn(fn: (state: { active: unknown; queue: unknown[] }) => void): void {
     backgroundTaskManager.setNotifyFn(fn);
   }
+
+  clearNotifyFn(fn: (state: { active: unknown; queue: unknown[] }) => void): void {
+    backgroundTaskManager.clearNotifyFn(fn);
+  }
 }
