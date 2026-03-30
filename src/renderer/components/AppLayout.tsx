@@ -8,7 +8,7 @@ the Free Software Foundation, version 3.
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import '../styles/AppLayout.css';
+import '../styles/components/AppLayout.scss';
 import HomePage from './HomePage';
 import SettingsPage from './SettingsPage';
 import BackgroundTasksPage from './BackgroundTasksPage';
