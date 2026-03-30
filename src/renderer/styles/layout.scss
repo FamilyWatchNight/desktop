@@ -1,0 +1,103 @@
+@use "colors";
+
+/* Variables and mixins */
+$container-radius: 0.5rem;
+$container-padding: 2rem;
+$container-gap: $container-padding;
+
+$element-radius: 0.25rem;
+$element-padding: 1rem;
+$element-gap: $element-padding;
+
+$section-gap: 1rem;
+
+$centered-width: 640px;
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Full-screen application */
+html {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Layout mixins */
+@mixin make-container {
+  background: colors.$container-background;
+  padding: $container-padding;
+  border-radius: $container-radius;
+  border: 1px solid colors.$container-border;
+  margin-bottom: $container-gap;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Page */
+.page-container {
+  @include make-container;
+}
+
+.page {
+  min-height: 100%;
+  padding: $container-padding;
+  display: flex;
+
+  &.centered {
+    align-items: flex-start;
+    justify-content: center;
+
+    & .page-container {
+      width: 100%;
+      max-width: $centered-width;
+    }
+  }
+}
+
+/* Sections */
+.section {
+  margin-bottom: $section-gap;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Forms */
+.form-group {
+  @include make-container;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 0.5em;
+    border: 1px solid colors.$input-border;
+    border-radius: 4px;
+    font-size: 14px;
+    background: colors.$input-background;
+    color: colors.$text-color;
+    font-family: inherit;
+
+    &:focus {
+      outline: none;
+      border-color: colors.$primary-color;
+      box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+    }
+  }
+}

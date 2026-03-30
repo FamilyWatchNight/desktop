@@ -9,7 +9,7 @@ the Free Software Foundation, version 3.
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiClient } from '../api-client';
-import '../styles/BackgroundTasksPage.css';
+import '../styles/components/BackgroundTasksPage.scss';
 
 const apiClient = createApiClient();
 

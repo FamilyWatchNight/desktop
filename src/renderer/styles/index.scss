@@ -1,0 +1,19 @@
+@use 'colors';
+@use 'layout';
+@use 'typography';
+@use 'elements';
+
+/* Add background image to entire app, with blur effect */
+html {
+  background-image: url('../images/background.png');
+  background-size: cover;        /* key line */
+  background-position: center;   /* keep it centered while cropping */
+  background-repeat: no-repeat;  /* don't tile */
+  background-attachment: fixed;
+}
+
+body {
+  background-color: colors.$background-color;
+  backdrop-filter: blur(8px);
+  color: colors.$text-color;
+}
