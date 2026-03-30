@@ -55,6 +55,9 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
     }
   });
 
+  // Parse any incoming application/json content into req.body
+  app.use(express.json());
+
   // register HTTP routes powered by service layer
   registerHttpRoutes(app);
 
