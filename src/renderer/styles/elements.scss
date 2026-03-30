@@ -1,0 +1,116 @@
+@use "colors";
+@use "layout";
+@use "sass:color";
+
+/* Progress Bar */
+
+.progress-bar-wrap {
+  height: layout.$element-radius;
+  background: colors.$input-background;
+  border-radius: layout.$element-radius;
+  overflow: hidden;
+  margin-bottom: layout.$element-gap;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: colors.$primary-color;
+  border-radius: layout.$element-radius;
+  transition: width 0.3s ease;
+  &.indeterminate {
+    background: linear-gradient(
+      90deg,
+      colors.$primary-color 0%,
+      color.adjust(colors.$primary-color, $lightness: 50%) 50%,
+      colors.$primary-color 100%
+    );
+    background-size: 200% 100%;
+    animation: indeterminate-progress 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes indeterminate-progress {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  gap: layout.$element-gap;
+  margin-top: 20px;
+
+  & button {
+    flex: 1;
+  }
+}
+
+@mixin make-button-color($bg-color, $border-color: $bg-color) {
+  background: $bg-color;
+  border-color: $border-color;
+
+  &:hover {
+    background: color.adjust($bg-color, $lightness: -10%);
+  }
+}
+
+button {
+  padding: layout.$element-padding layout.$element-padding * 1.5;
+  border: 1px solid colors.$primary-color;
+  border-radius: layout.$element-radius;
+  background: colors.$primary-color;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background: color.adjust(colors.$primary-color, $lightness: -10%);
+  }
+
+  &.btn-secondary {
+    background: none;
+    border-color: rgba(colors.$text-color, 0.5);
+
+    &:hover {
+      background: rgba(colors.$primary-color, 0.1);
+    }
+  }
+
+  &.btn-danger {
+    @include make-button-color(colors.$danger-color);
+  }
+
+  &.btn-success {
+    @include make-button-color(colors.$success-color);
+  }
+
+  &.btn-info {
+    @include make-button-color(colors.$info-color);
+  }
+}
+
+/* Messages */
+.message {
+  padding: layout.$element-padding;
+  border-radius: layout.$element-radius;
+
+  &.success {
+    background: color.adjust(colors.$success-color, $lightness: -20%);
+    color: color.adjust(colors.$success-color, $lightness: 40%);
+  }
+
+  &.error {
+    background: color.adjust(colors.$error-color, $lightness: -20%);
+    color: color.adjust(colors.$error-color, $lightness: 40%);
+  }
+
+  &.info {
+    background: color.adjust(colors.$info-color, $lightness: -20%);
+    color: color.adjust(colors.$info-color, $lightness: 40%);
+  }
+}
