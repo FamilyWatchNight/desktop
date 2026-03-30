@@ -12,6 +12,9 @@ import { registerAppIpcHandlers } from './app';
 import { registerMovieIpcHandlers } from './movies';
 import { registerSettingsIpcHandlers } from './settings';
 import { registerBackgroundTaskIpcHandlers } from './background-tasks';
+import { setWindow, broadcast } from './notifications';
+
+export { setWindow, broadcast };
 
 export function registerIpcHandlers(): void {
   registerAppIpcHandlers();

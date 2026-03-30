@@ -42,6 +42,7 @@
     "@types/node": "^24.11.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.0.0",
+    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^6.0.1",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
@@ -66,7 +67,8 @@
     "i18next-http-backend": "^3.0.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-i18next": "^16.5.8"
+    "react-i18next": "^16.5.8",
+    "ws": "^8.20.0"
   },
   "build": {
     "appId": "com.familywatchnight.app",

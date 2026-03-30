@@ -11,7 +11,7 @@ import path from 'path';
 import express, { type Express, type Request, type Response } from 'express';
 import RateLimit from 'express-rate-limit';
 import { app } from 'electron';
-import { registerHttpRoutes } from './api-server';
+import { registerHttpRoutes, initializeWebSocketServer } from './api-server';
 
 const isDevMode = !app.isPackaged;
 const rootDir = app.getAppPath();
@@ -63,6 +63,9 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
   const server = app.listen(port, 'localhost', () => {
     console.info(`Web server listening on http://localhost:${port}`);
   });
+
+  // Initialize WebSocket server for real-time notifications
+  initializeWebSocketServer(server);
 
   return server;
 }

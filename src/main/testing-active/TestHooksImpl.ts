@@ -11,6 +11,9 @@ import * as db from '../database';
 
 import { createMockDownloadJsonGzStream, createMockDownloadCsvStream }  from "./support/mocks/import-background-tasks.mocks";
 import { createMockElectronStore }  from "./support/mocks/electron-store.mocks";
+import { clearRecordedEvents, recordEvent, getRecordedEvents, findEventByType, filterEventsByType }  from "./support/mocks/event-notification.mocks";
+import { MockBackgroundTask } from "./support/mocks/background-task.mocks";
+import { registerTask } from "./support/extensions/task-registry.extensions";
 import ImportTmdbTask from "../tasks/ImportTmdbTask"
 import ImportWatchmodeTask from "../tasks/ImportWatchmodeTask";
 import { MovieService, SettingsService, BackgroundTaskService } from '../services';
@@ -18,6 +21,9 @@ import { MovieService, SettingsService, BackgroundTaskService } from '../service
 const movieService = new MovieService();
 const settingsService = new SettingsService();
 const backgroundTaskService = new BackgroundTaskService();
+
+// Track the actively running mock task instance for test control
+let activeTestTask: InstanceType<typeof MockBackgroundTask> | null = null;
 
 export interface TestHooks {
   app: { getAppPath: () => string; isReady: () => boolean };
@@ -49,10 +55,24 @@ export interface TestHooks {
     cancelActive: () => unknown;
     removeQueued: (taskId: string) => unknown;
   };
+  eventNotifications: {
+    clearRecordedEvents: () => void;
+    getRecordedEvents: () => Array<{ type: string; data: unknown; timestamp: number }>;
+    findEventByType: (type: string) => { type: string; data: unknown; timestamp: number } | undefined;
+    filterEventsByType: (type: string) => Array<{ type: string; data: unknown; timestamp: number }>;
+    setupEventRecording: () => void;
+  };
+  testTasks: {
+    setupTestTaskType: () => void;
+    setTaskProgress: (current: number, max: number, description: string) => void;
+    setTaskDescription: (description: string) => void;
+    setTaskCurrent: (current: number) => void;
+    setTaskMax: (max: number) => void;
+    completeTask: () => void;
+  };
 }
 
 export function getTestHooks(): TestHooks {
-
   return {
     app: {
         getAppPath: () => app.getAppPath(),
@@ -96,6 +116,52 @@ export function getTestHooks(): TestHooks {
       getState: () => backgroundTaskService.getState(),
       cancelActive: () => backgroundTaskService.cancelActive(),
       removeQueued: (taskId: string) => backgroundTaskService.removeQueued(taskId)
+    },
+    eventNotifications: {
+      clearRecordedEvents,
+      getRecordedEvents,
+      findEventByType,
+      filterEventsByType,
+      setupEventRecording: () => {
+        backgroundTaskService.setNotifyFn((state) => {
+          recordEvent('background-task-update', state);
+        });
+      }
+    },
+    testTasks: {
+      setupTestTaskType: () => {
+        registerTask('test-background-task', class extends MockBackgroundTask {
+          constructor() {
+            super(false);
+            activeTestTask = this;
+          }
+        });
+      },
+      setTaskProgress: (current: number, max: number, description: string) => {
+        if (activeTestTask) {
+          activeTestTask.setProgress(current, max, description);
+        }
+      },
+      setTaskDescription: (description: string) => {
+        if (activeTestTask) {
+          activeTestTask.setDescription(description);
+        }
+      },
+      setTaskCurrent: (current: number) => {
+        if (activeTestTask) {
+          activeTestTask.setCurrent(current);
+        }
+      },
+      setTaskMax: (max: number) => {
+        if (activeTestTask) {
+          activeTestTask.setMax(max);
+        }
+      },
+      completeTask: () => {
+        if (activeTestTask) {
+          activeTestTask.complete();
+        }
+      }
     }
   };
 }

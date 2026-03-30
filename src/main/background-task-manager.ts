@@ -86,7 +86,7 @@ async function processQueue(): Promise<void> {
   };
   emitUpdate();
 
-  const TaskClass = TASK_REGISTRY[entry.type];
+  const TaskClass = TASK_REGISTRY[entry.type as TaskRegistryType];
   const task = new TaskClass();
   const abortController = new AbortController();
   const context: TaskContext = {
@@ -131,7 +131,7 @@ export function enqueue(
   type: TaskRegistryType,
   args: Record<string, unknown> = {}
 ): { success: boolean; taskId?: string; error?: string } {
-  const TaskClass = TASK_REGISTRY[type];
+  const TaskClass = TASK_REGISTRY[type as TaskRegistryType];
   if (!TaskClass) {
     return { success: false, error: `Unknown task type: ${type}` };
   }

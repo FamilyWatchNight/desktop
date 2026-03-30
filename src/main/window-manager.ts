@@ -8,26 +8,11 @@ the Free Software Foundation, version 3.
 
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
-import * as backgroundTaskManager from './background-task-manager';
+import { setWindow } from './api-server';
 
 let mainWindow: BrowserWindow | null = null;
 
-function handleBackgroundTaskUpdate(state: { active: unknown; queue: unknown[] }): void {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('background-task-update', state);
-  }
-}
-
-function registerCallbacks(): void {
-  backgroundTaskManager.setNotifyFn(handleBackgroundTaskUpdate);
-}
-
-function unregisterCallbacks(): void {
-  backgroundTaskManager.clearNotifyFn(handleBackgroundTaskUpdate);
-} 
-
 export function handleWindowClosed(): void {
-  unregisterCallbacks();
   mainWindow = null;
 }
 
@@ -54,7 +39,7 @@ export function createAppWindow(): void {
   }
   mainWindow.on('closed', handleWindowClosed);
 
-  registerCallbacks();
+  setWindow(mainWindow);
 }
 
 export function getMainWindow(): BrowserWindow | null {

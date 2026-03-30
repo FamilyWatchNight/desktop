@@ -19,6 +19,23 @@ After(async function (this: CustomWorld, scenario) {
   // Close database connection
   if (this.app) {
     try {
+      // Clean up background tasks first
+      const state = await this.backgroundTasksApi.getState();
+      
+      // Cancel active task if running
+      if (state.active) {
+        await this.backgroundTasksApi.cancelActive();
+      }
+      
+      // Remove all queued tasks
+      for (const task of state.queue as any[]) {
+        await this.backgroundTasksApi.removeQueued(task.id);
+      }
+      
+      // Small delay to allow tasks to clean up
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Now close database
       await this.dbApi.closeDatabase();
     } catch (error) {
       // Database may not have been initialized in some scenarios
@@ -29,10 +46,14 @@ After(async function (this: CustomWorld, scenario) {
     if (scenario.result?.status === Status.FAILED) {
       try {
         const window = await this.app.firstWindow();
-        const screenshot = await window.screenshot();
-        this.attach(screenshot, 'image/png');
+        // Only capture screenshot if window exists and is ready
+        if (window) {
+          const screenshot = await window.screenshot();
+          this.attach(screenshot, 'image/png');
+        }
       } catch (screenshotError) {
-        console.error('Could not capture screenshot:', screenshotError);
+        // Screenshot capture failed or no window available - continue with cleanup
+        console.log('Screenshot not available (no window or capture failed)');
       }
     }
 
