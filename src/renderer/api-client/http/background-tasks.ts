@@ -5,7 +5,7 @@ export class HttpBackgroundTaskApi implements BackgroundTaskApi {
   constructor(private client: { on(eventType: string, callback: (data: any) => void): void; off(eventType: string, callback: (data: any) => void): void }) {}
 
   enqueueBackgroundTask(taskType: string, args?: Record<string, unknown>) {
-    return callApi('/api/background-tasks/enqueue', { method: 'POST', body: JSON.stringify({ type: taskType, args }) });
+    return callApi('/api/background-tasks/enqueue', { method: 'POST', body: JSON.stringify({ taskType: taskType, args }) });
   }
   getBackgroundTasks() { return callApi('/api/background-tasks'); }
   cancelActiveBackgroundTask() { return callApi('/api/background-tasks/cancel-active', { method: 'POST' }); }
