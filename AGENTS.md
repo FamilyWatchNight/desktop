@@ -147,6 +147,7 @@ npm run build           # Production build
 - **Error handling**: HTTP routes consistently wrap and return errors
 - **Security**: Path guards prevent traversal, locale normalization prevents injection
 - **Task registry**: Use string constants for task type identifiers
+- **Event notification manager**: Use a central manager to register service-level callbacks and broadcast to both IPC and HTTP/WebSocket transport layers. Services (e.g., `BackgroundTaskService`) are broadcasters, transports are subscribers.
 
 ## Localization (i18next)
 

@@ -11,6 +11,9 @@ import { registerAppRoutes } from './app';
 import { registerBackgroundTaskRoutes } from './background-tasks';
 import { registerMovieRoutes } from './movies';
 import { registerSettingsRoutes } from './settings';
+import { initializeWebSocketServer, broadcast } from './notifications';
+
+export { initializeWebSocketServer, broadcast };
 
 export function registerHttpRoutes(app: Express): void {
   registerAppRoutes(app);

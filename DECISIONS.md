@@ -187,3 +187,34 @@ This document records significant architectural and implementation decisions for
 - This applies to all three key documentation files
 - Prevents unilateral changes to agent guidance
 - Builds on the checkpoint strategy for major changes
+
+---
+
+## 8. Central event-notification-manager for dual transport
+
+**Date**: March 2026
+**Status**: Active
+
+**Decision**: Introduce an `event-notification-manager` middleware layer that registers callbacks on services that broadcast state-change events (e.g., `BackgroundTaskService`) and forwards these events to all transport broadcasters (IPC + HTTP/WebSocket).
+
+**Rationale**:
+- Avoid duplicated event routing logic in multiple transport implementations
+- Ensure consistent event payload semantics across IPC and HTTP
+- Provide a single extensible place to add new broadcast events and service sources
+
+**Implementation**:
+- Services expose standard event callback API:
+  - `setNotifyFn(fn)`
+  - `clearNotifyFn(fn)`
+- `event-notification-manager.initialize()` binds transport broadcast functions to service callbacks
+- IPC transport implements `broadcast(eventType, data)` using `BrowserWindow.webContents.send()`
+- HTTP/WebSocket transport implements `broadcast(eventType, data)` using WS client sends
+
+**Trade-offs**:
+- Introduces additional layer and required initialization order
+- Requires careful error handling to avoid one transport failure blocking others
+
+**Notes**:
+- This is the foundation for real-time UI updates from background tasks.
+- The existing BackgroundTaskService is a reference broadcaster implementation.
+

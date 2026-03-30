@@ -398,6 +398,35 @@ These can be extracted to shared `instances.ts` for single-instance pattern (cur
 
 ---
 
+### API Callbacks using Event Notification Manager
+
+This subsystem coordinates real-time event dispatch across both IPC and HTTP/WebSocket transports.
+
+#### **Roles and Responsibilities**
+- **Broadcasters (Services)**
+  - Services that emit asynchronous state events implement a standard callback API. 
+  - Example: `BackgroundTaskService` exposes `setNotifyFn(fn)` and `clearNotifyFn(fn)`. 
+  - These services are *producers* of events, some of which may be interesting to the renderer via API
+
+- **EventNotificationManager**
+  - Used to make events available to the renderer.
+  - In `event-notification-manager.ts`, `initialize()` registers callback functions on broadcaster services.
+  - This callback receives events and forwards them to all configured transport broadcasters.
+  - Acts as the central “single source of subscription wiring” for event propagation.
+
+- **Transports**
+  - **IPC transport** (`api-server/ipc/notifications.ts`) implements `broadcast(eventType, data)` to send IPC messages to renderer windows.
+  - **HTTP/WebSocket transport** (`api-server/http/notifications.ts`) implements `broadcast(eventType, data)` to send updates over WebSockets to connected clients.
+
+#### **Sample Event Flow**
+1. `BackgroundTaskService` emits update via callback supplied from `EventNotificationManager`.
+2. `EventNotificationManager` receives background task state and calls:
+   - `ipcNotifications.broadcast('background-task-update', state)`
+   - `httpNotifications.broadcast('background-task-update', state)`
+3. Renderer clients receive updates via chosen transport.
+
+---
+
 ## 6. Build and Development Setup
 
 ### **Package.json Scripts**
@@ -667,12 +696,14 @@ export class CustomWorld extends World {
   // ... shared test context
 }
 ```
-Provides shared fixture state across step definitions.
+Provides shared fixture state across step definitions. Also maps task reference names to task IDs to support deterministic feature test assertions.
 
 ### **Test Mocking Strategy**
 
 1. **Database**: Use in-memory SQLite, pre-populated with test data
-2. **Background Tasks**: Mock TaskContext provided by test harness
+2. **Background Tasks**:
+   - Mock TaskContext provided by test harness;
+   - MockBackgroundTask allows deterministic setting of progress, triggering update events.
 3. **IPC Events**: Playwright waits for IPC messages sent by main process
 4. **HTTP**: Can test HTTP layer independently without Electron (faster)
 5. **File I/O**: Uses real temp directory for LocalizationService tests

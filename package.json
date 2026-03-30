@@ -21,8 +21,8 @@
     "test:local": "npm run clean && npm run test:unit && npm run test:smoke",
     "test:critical": "npm run clean && npm run test:unit && npm run test:smoke",
     "build": "npm run clean && npm run build:main && npm run build:renderer && electron-builder --publish=onTag",
-    "dev": "npm run build:main && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
-    "dev:test": "npm run build:main:for-integration-testing && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
+    "dev": "npm run build:main && npm run build:renderer && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
+    "dev:test": "npm run build:main:for-integration-testing && npm run build:renderer && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
     "pack": "npm run clean && npm run build:main && npm run build:renderer && electron-builder --dir",
     "postinstall": "electron-builder install-app-deps"
   },
@@ -42,6 +42,7 @@
     "@types/node": "^24.11.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.0.0",
+    "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^6.0.1",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
@@ -66,7 +67,8 @@
     "i18next-http-backend": "^3.0.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-i18next": "^16.5.8"
+    "react-i18next": "^16.5.8",
+    "ws": "^8.20.0"
   },
   "build": {
     "appId": "com.familywatchnight.app",

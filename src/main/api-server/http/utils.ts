@@ -26,10 +26,10 @@ export function envelope(res: Response, data: unknown = null, error?: string): v
  */
 export function route(
   handler: (req: Request, res: Response) => unknown
-): (req: Request, res: Response) => void {
-  return (req: Request, res: Response) => {
+): (req: Request, res: Response) => Promise<void> {
+  return async (req: Request, res: Response) => {
     try {
-      const result = handler(req, res);
+      const result = await handler(req, res);
       // if handler already sent a response (using envelope directly), skip
       if (!res.headersSent) {
         envelope(res, result);

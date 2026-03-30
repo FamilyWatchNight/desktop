@@ -7,5 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 export { registerHttpRoutes } from './api-server/http';
+export { initializeWebSocketServer, broadcast as broadcastHttp } from './api-server/http';
+export { setWindow, broadcast as broadcastIpc } from './api-server/ipc';
 export { registerAppRoutes } from './api-server/http/app';
 export { registerIpcHandlers } from './api-server/ipc';

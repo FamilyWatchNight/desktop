@@ -17,6 +17,7 @@ import type { TestHooks } from "./testing/TestHooksImpl";
 import { getTestHooks } from "./testing/TestHooksImpl";
 import i18n from "./i18n";
 import { settingsService } from "./api-server/ipc/instances";
+import { initialize as initializeEventNotificationManager } from "./event-notification-manager";
 
 let tray: Tray | null = null;
 const webServer = express();
@@ -81,12 +82,14 @@ app.on("ready", () => {
     try {
       const port = (settingsService.get("webPort") as number) || 3000;
       server.startServer(webServer, port);
+      initializeEventNotificationManager();
     } catch (error) {
       console.error(
         "Failed to load settings, using default port:",
         (error as Error).message,
       );
       server.startServer(webServer, 3000);
+      initializeEventNotificationManager();
     }
   });
 });

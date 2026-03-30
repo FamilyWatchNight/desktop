@@ -8,7 +8,7 @@ the Free Software Foundation, version 3.
 
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
-import * as backgroundTaskManager from './background-task-manager';
+import { setWindow } from './api-server';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -39,11 +39,7 @@ export function createAppWindow(): void {
   }
   mainWindow.on('closed', handleWindowClosed);
 
-  backgroundTaskManager.setNotifyFn(() => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('background-task-update', backgroundTaskManager.getState());
-    }
-  });
+  setWindow(mainWindow);
 }
 
 export function getMainWindow(): BrowserWindow | null {

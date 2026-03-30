@@ -17,7 +17,7 @@ export const TASK_REGISTRY_VALUES = [
 
 export type TaskRegistryType = typeof TASK_REGISTRY_VALUES[number];
 
-export const TASK_REGISTRY: Record<TaskRegistryType, new () => BackgroundTask> = {
+export const TASK_REGISTRY: Record<string, new () => BackgroundTask> = {
   'import-watchmode': ImportWatchmodeTask,
   'import-tmdb': ImportTmdbTask
 };
@@ -25,5 +25,3 @@ export const TASK_REGISTRY: Record<TaskRegistryType, new () => BackgroundTask> =
 export function isTaskRegistryType(value: string): value is TaskRegistryType {
   return (TASK_REGISTRY_VALUES as readonly string[]).includes(value);
 }
-
-export default TASK_REGISTRY;

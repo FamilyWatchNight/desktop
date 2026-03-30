@@ -6,6 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { EventEmitter } from 'events';
 import { TASK_REGISTRY, type TaskRegistryType } from './tasks/task-registry';
 import type BackgroundTask from './tasks/BackgroundTask';
 import type { ProgressReport, TaskContext } from './tasks/BackgroundTask';
@@ -43,7 +44,7 @@ interface StatePayload {
 let taskIdCounter = 0;
 const queue: QueueEntry[] = [];
 let active: ActiveEntry | null = null;
-let notifyFn: ((state: StatePayload) => void) | null = null;
+let eventEmitter = new EventEmitter();
 
 function generateId(): string {
   return `task-${++taskIdCounter}-${Date.now()}`;
@@ -65,12 +66,10 @@ function payload(entry: ActiveEntry | QueueEntry | null): TaskPayload | null {
 }
 
 function emitUpdate(): void {
-  if (typeof notifyFn === 'function') {
-    notifyFn({
-      active: active ? payload(active) : null,
-      queue: queue.map((e) => payload(e) as TaskPayload)
-    });
-  }
+  eventEmitter.emit('background-tasks.update', {
+    active: active ? payload(active) : null,
+    queue: queue.map((e) => payload(e) as TaskPayload)
+  });
 }
 
 async function processQueue(): Promise<void> {
@@ -87,7 +86,7 @@ async function processQueue(): Promise<void> {
   };
   emitUpdate();
 
-  const TaskClass = TASK_REGISTRY[entry.type];
+  const TaskClass = TASK_REGISTRY[entry.type as TaskRegistryType];
   const task = new TaskClass();
   const abortController = new AbortController();
   const context: TaskContext = {
@@ -121,14 +120,18 @@ async function processQueue(): Promise<void> {
 }
 
 export function setNotifyFn(fn: (state: StatePayload) => void): void {
-  notifyFn = fn;
+  eventEmitter.on('background-tasks.update', fn);
+}
+
+export function clearNotifyFn(fn: (state: StatePayload) => void): void {
+  eventEmitter.off('background-tasks.update', fn);
 }
 
 export function enqueue(
   type: TaskRegistryType,
   args: Record<string, unknown> = {}
 ): { success: boolean; taskId?: string; error?: string } {
-  const TaskClass = TASK_REGISTRY[type];
+  const TaskClass = TASK_REGISTRY[type as TaskRegistryType];
   if (!TaskClass) {
     return { success: false, error: `Unknown task type: ${type}` };
   }

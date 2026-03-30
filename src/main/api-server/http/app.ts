@@ -6,7 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { Express, Request, Response } from 'express';
+import { Express, Request } from 'express';
 import path from 'path';
 import { app } from 'electron';
 import { LocalizationService } from '../../services';
@@ -17,14 +17,18 @@ const isDevMode = !app.isPackaged;
 const localizationService = new LocalizationService();
 
 export function registerAppRoutes(app: Express): void {
-  app.get('/api/health', (_req: Request, res: Response) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-  });
+  app.get('/api/health',
+    route(() => {
+      return new Date().toISOString();
+    })
+  );
 
-  app.get('/api/locale', (_req: Request, res: Response) => {
-    const { appLanguage } = require('../../i18n');
-    res.json({ status: 'ok', locale: appLanguage });
-  });
+  app.get('/api/locale',
+    route(() => {
+      const { appLanguage } = require('../../i18n');
+      return appLanguage;
+    })
+  );
 
   app.get('/api/locale/get/:language/:namespace',
     route((req: Request) => {
@@ -43,9 +47,10 @@ export function registerAppRoutes(app: Express): void {
     );
   }
 
-  app.get('/api/version', (_req: Request, res: Response) => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const appInfoJson = require(path.join(__dirname, '..', 'app-info.json')) as { version: string };
-    res.json({ version: appInfoJson.version });
-  });
+  app.get('/api/version',
+    route(() => {
+      const appInfoJson = require(path.join(__dirname, '..', 'app-info.json')) as { version: string };
+      return appInfoJson.version;
+    })
+  );
 }

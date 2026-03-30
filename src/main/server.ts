@@ -11,12 +11,11 @@ import path from 'path';
 import express, { type Express, type Request, type Response } from 'express';
 import RateLimit from 'express-rate-limit';
 import { app } from 'electron';
-import { registerHttpRoutes, registerAppRoutes } from './api-server';
+import { registerHttpRoutes, initializeWebSocketServer } from './api-server';
 
 const isDevMode = !app.isPackaged;
 const rootDir = app.getAppPath();
-const distPath = path.join(rootDir, 'dist');
-const publicPath = path.join(rootDir, 'assets');
+const publicPath = path.join(rootDir, 'dist', 'renderer');
 
 export function startServer(app: Express, port: number): ReturnType<Express['listen']> {
 
@@ -39,16 +38,8 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
     next();
   });
 
-  // register HTTP routes powered by service layer
-  registerHttpRoutes(app);
-  registerAppRoutes(app);
-
-
-  app.use('/dist', express.static(distPath));
-  app.use(express.static(publicPath));
-
-  app.use((_req: Request, res: Response) => {
-    const indexPath = path.join(distPath, 'renderer', 'index.html');
+  app.get('/', (_req: Request, res: Response) => {
+    const indexPath = path.join(publicPath, 'index.html');
     try {
       let html = fs.readFileSync(indexPath, 'utf-8');
       if (isDevMode) {
@@ -64,9 +55,20 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
     }
   });
 
+  // Parse any incoming application/json content into req.body
+  app.use(express.json());
+
+  // register HTTP routes powered by service layer
+  registerHttpRoutes(app);
+
+  app.use(express.static(publicPath));
+
   const server = app.listen(port, 'localhost', () => {
     console.info(`Web server listening on http://localhost:${port}`);
   });
+
+  // Initialize WebSocket server for real-time notifications
+  initializeWebSocketServer(server);
 
   return server;
 }

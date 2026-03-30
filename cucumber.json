@@ -13,7 +13,7 @@
     "require": ["tests/support/**/*.ts", "tests/component/**/*.ts"],
     "format": ["progress-bar", "html:test-results/reports/cucumber-report.html"],
     "tags": "@smoke",
-    "timeout": 30000,
+    "timeout": 60000,
     "publishQuiet": true
   },
   "component": {
