@@ -13,6 +13,7 @@ import MoviesModel from './db/models/Movies';
 import UsersModel from './db/models/Users';
 import UserProfilesModel from './db/models/UserProfiles';
 import { getAppDataRoot } from './paths';
+import i18n from './i18n';
 import { DEFAULT_ROLES } from './auth/permissions';
 
 interface DbModels {
@@ -61,13 +62,14 @@ export function runSeed(): void {
   }
   const now = new Date().toISOString();
   const insertRole = db.prepare(
-    'INSERT INTO roles (stub, display_name, created_at, updated_at) VALUES (?, ?, ?, ?)'
+    'INSERT INTO roles (system_stub, display_name, is_hidden, created_at, updated_at) VALUES (?, ?, ?, ?, ?)'
   );
   const insertRolePermission = db.prepare(
     'INSERT INTO role_permissions (role_id, permission_stub, created_at) VALUES (?, ?, ?)'
   );
   for (const role of DEFAULT_ROLES) {
-    insertRole.run(role.stub, role.displayName, now, now);
+    const translatedName = i18n.t(role.displayNameKey, { ns: 'auth' });
+    insertRole.run(role.stub, translatedName, 0, now, now);
     const roleId = (db.prepare('SELECT last_insert_rowid() as id').get() as { id: number } | undefined)?.id;
     if (typeof roleId !== 'number') {
       continue;

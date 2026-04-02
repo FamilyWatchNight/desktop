@@ -23,7 +23,7 @@ i18n
     interpolation: { escapeValue: false},
     lng: appLanguage,
     load: 'all',
-    ns: ['main', 'common'],
+    ns: ['main', 'common', 'auth'],
     parseMissingKeyHandler: (key) => `[!!!${key}!!!]`,
     preload: ['en'],
     saveMissing: true,

@@ -11,15 +11,15 @@ the Free Software Foundation, version 3.
  * the database stores permission stubs on role_permissions.
  */
 export const PERMISSIONS = [
-  { stub: 'can-host', displayName: 'Can Host Watch Night' },
-  { stub: 'can-vote', displayName: 'Can Vote on Upcoming' },
-  { stub: 'can-rate', displayName: 'Can Rate Watched' },
-  { stub: 'can-manage-users', displayName: 'Can Manage Members' },
-  { stub: 'can-update-profile', displayName: 'Can Update Own Profile' },
-  { stub: 'can-hide-show', displayName: 'Can Hide Show' },
-  { stub: 'can-unhide-show', displayName: 'Can Unhide Show' },
-  { stub: 'can-update-show', displayName: 'Can Update Show Information' },
-  { stub: 'can-admin', displayName: 'Can Administrate Application' }
+  { stub: 'can-host', displayNameKey: 'permissions.canHost' },
+  { stub: 'can-vote', displayNameKey: 'permissions.canVote' },
+  { stub: 'can-rate', displayNameKey: 'permissions.canRate' },
+  { stub: 'can-manage-users', displayNameKey: 'permissions.canManageUsers' },
+  { stub: 'can-update-profile', displayNameKey: 'permissions.canUpdateProfile' },
+  { stub: 'can-hide-show', displayNameKey: 'permissions.canHideShow' },
+  { stub: 'can-unhide-show', displayNameKey: 'permissions.canUnhideShow' },
+  { stub: 'can-update-show', displayNameKey: 'permissions.canUpdateShow' },
+  { stub: 'can-admin', displayNameKey: 'permissions.canAdmin' }
 ] as const;
 
 export type PermissionStub = (typeof PERMISSIONS)[number]['stub'];
@@ -31,13 +31,13 @@ export const PERMISSION_STUBS: readonly PermissionStub[] = PERMISSIONS.map((p) =
  */
 export const DEFAULT_ROLES: ReadonlyArray<{
   stub: string;
-  displayName: string;
+  displayNameKey: string;
   permissionStubs: readonly PermissionStub[];
 }> = [
-  { stub: 'admin', displayName: 'Administrator', permissionStubs: ['can-admin'] },
+  { stub: 'admin', displayNameKey: 'roles.administrator', permissionStubs: ['can-admin'] },
   {
     stub: 'influencer',
-    displayName: 'Influencer',
+    displayNameKey: 'roles.influencer',
     permissionStubs: [
       'can-host',
       'can-vote',
@@ -47,5 +47,5 @@ export const DEFAULT_ROLES: ReadonlyArray<{
       'can-update-show'
     ]
   },
-  { stub: 'host', displayName: 'Host', permissionStubs: ['can-host'] }
+  { stub: 'host', displayNameKey: 'roles.host', permissionStubs: ['can-host'] }
 ];

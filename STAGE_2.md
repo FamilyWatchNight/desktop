@@ -215,9 +215,9 @@ The `userHasPermission` and `getUserPermissions` methods must implement the requ
 
 ## Implementation Order
 
-1. **Update Database Schema** (add system_stub and is_hidden columns)
-2. **Create Database Models** (Roles.ts, RolePermissions.ts with updated schema)
-3. **Update Database Integration** (database.ts with seeding changes)
+1. **Update Database Schema** (migration with system_stub and is_hidden columns)
+2. **Update Database Integration** (seeding logic in database.ts to set system_stub for system roles)
+3. **Create Database Models** (Roles.ts, RolePermissions.ts with updated schema)
 4. **Implement RoleService** with all business logic (including system role protection)
 5. **Update Service Registration** (services/index.ts)
 6. **Create Unit Tests** for RoleService
