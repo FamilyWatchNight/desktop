@@ -14,6 +14,7 @@ import { Movies } from '../domains/movies';
 import { Settings } from '../domains/settings';
 import { EventNotifications } from '../domains/event-notifications';
 import { BackgroundTasks } from '../domains/background-tasks';
+import { Users } from '../domains/users';
 
 export class CustomWorld extends World {
   app!: ElectronApplication;
@@ -23,6 +24,11 @@ export class CustomWorld extends World {
   settingsApi!: Settings;
   eventNotificationsApi!: EventNotifications;
   backgroundTasksApi!: BackgroundTasks;
+  usersApi!: Users;
+  
+  // User authentication test data
+  authResult: any = null;
+  permissionUsers: any[] = [];
   
   // Map task reference names to their enqueued task IDs
   private taskReferenceMap = new Map<string, string>();
@@ -80,6 +86,7 @@ export class CustomWorld extends World {
     this.settingsApi = new Settings(this.app);
     this.eventNotificationsApi = new EventNotifications(this.app);
     this.backgroundTasksApi = new BackgroundTasks(this.app);
+    this.usersApi = new Users(this.app);
 
     // Clear task references for clean slate
     this.clearTaskReferences();

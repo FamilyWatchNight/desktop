@@ -126,6 +126,60 @@ This project uses structured documentation to prevent stale guidance and capture
 
 ---
 
+# Implementation Guidelines
+
+## Validation and Testing Protocol
+After any substantive code change, immediately run relevant tests (unit, smoke, feature) to validate functionality. If tests fail, iterate up to three targeted fixes; if still failing, summarize root cause and options.
+
+## Exploration Strategy
+When researching complex questions or searching large codebases, use the Explore subagent for thorough, read-only investigations to avoid cluttering the main conversation.
+
+## Dependency Management
+Prefer minimal, pinned, widely-used libraries. Always update package manifests and lockfiles appropriately when adding dependencies.
+
+## Code Generation Standards
+For non-trivial code generation, produce complete runnable solutions including source files, minimal runner/test harness, README with usage/troubleshooting, and updated dependency manifests.
+
+## Security Integration
+When implementing features, always import and use security functions from `src/main/security/` (e.g., `safeJoin`, `assertPathInsideAllowedDirs`). Validate, normalize, and bounds-check all user inputs.
+
+## Build and Environment Awareness
+Before assuming build requirements or project structure, verify by checking common config files (package.json, etc.) or quick exploration. Adapt to existing patterns.
+
+## Memory Usage Guidelines
+Actively consult and update user/session/repo memories for patterns, preferences, and lessons learned. Record mistakes that could be common.
+
+## Question-Asking Protocol
+When multiple approaches exist or scope is unclear, use the vscode_askQuestions tool to gather user preferences before proceeding.
+
+## Response Formatting
+Keep answers short and impersonal. Use proper Markdown, KaTeX for math, and strict file linkification rules (no backticks on paths, use [path](path) format).
+
+## Error Handling
+Never invent APIs, paths, or commands; verify with tools first. If uncertain, gather context before acting.
+
+## File Placement and Directory Structure Analysis
+When creating new files (especially tests, components, or features), first examine the directory structure of existing similar files to identify established patterns. Check for subdirectories and naming conventions used for related functionality. If the appropriate location isn't immediately clear from existing patterns, ask for clarification before creating files. Document and follow the project's directory hierarchy conventions (e.g., test features in subdirectories under `tests/component/` like `smoke/` or `workflows/`).
+
+## Test Organization Conventions
+- Unit tests: Place in `tests/unit/` with descriptive names.
+- Feature tests: Place feature files and steps in appropriate subdirectories under `tests/component/` (e.g., `smoke/` for health checks, `workflows/` for business logic flows).
+- Avoid placing new test files at the root level of test directories unless that's the established pattern for that type.
+
+## Naming and Export Conventions
+Examine existing file names, class names, and export patterns for similar functionality. Ensure consistency in naming: e.g., Service classes use singular nouns (MovieService, UserService), Model classes follow established plural/singular patterns (MoviesModel, UsersModel). Check export styles: Use named exports for services (export class ServiceName), default exports for models if that's the pattern.
+
+## Implementation Pattern Matching
+Analyze how existing classes handle dependencies: e.g., avoid constructor dependency injection if other services use lazy binding via factory methods like `getModels()`. Compare method signatures and implementations: Look at how CRUD operations, error handling, and data flow are structured in similar classes. Follow established architectural patterns: e.g., services as pure business logic without transport concerns, models handling type conversion.
+
+## Code Structure Review Checklist
+Before finalizing a new class or file, cross-reference with 2-3 similar existing implementations. Verify that constructor patterns, method organization, and data access match the established style. If patterns conflict or aren't clear, ask for clarification on the preferred approach.
+
+## Test Quality Guidelines
+Avoid creating tests that don't actually validate the behavior they claim to test. Tests should provide genuine confidence in functionality, not false positives. Placeholder tests for future features should be clearly marked and not included in test suites until they can perform meaningful validation. Focus on tests that verify specific, observable outcomes rather than just checking that methods exist or return non-null values.
+
+---
+
 # Development Commands
 
 ```pwsh

@@ -16,11 +16,12 @@ import { MockBackgroundTask } from "./support/mocks/background-task.mocks";
 import { registerTask } from "./support/extensions/task-registry.extensions";
 import ImportTmdbTask from "../tasks/ImportTmdbTask"
 import ImportWatchmodeTask from "../tasks/ImportWatchmodeTask";
-import { MovieService, SettingsService, BackgroundTaskService } from '../services';
+import { MovieService, SettingsService, BackgroundTaskService, UserService } from '../services';
 
 const movieService = new MovieService();
 const settingsService = new SettingsService();
 const backgroundTaskService = new BackgroundTaskService();
+const userService = new UserService();
 
 // Track the actively running mock task instance for test control
 let activeTestTask: InstanceType<typeof MockBackgroundTask> | null = null;
@@ -69,6 +70,12 @@ export interface TestHooks {
     setTaskCurrent: (current: number) => void;
     setTaskMax: (max: number) => void;
     completeTask: () => void;
+  };
+  users: {
+    createTestUser: (data: { username: string; email?: string; password?: string }) => Promise<import('../services/UserService').AuthenticatedUser>;
+    authenticateTestUser: (username: string, password: string) => Promise<import('../services/UserService').AuthenticatedUser | null>;
+    getTestUserById: (id: number) => import('../services/UserService').AuthenticatedUser | null;
+    updateTestUserProfile: (id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }) => Promise<void>;
   };
 }
 
@@ -162,6 +169,12 @@ export function getTestHooks(): TestHooks {
           activeTestTask.complete();
         }
       }
+    },
+    users: {
+      createTestUser: (data) => userService.createUser(data),
+      authenticateTestUser: (username, password) => userService.authenticateUser(username, password),
+      getTestUserById: (id) => userService.getUserById(id),
+      updateTestUserProfile: (id, profileData) => userService.updateUserProfile(id, profileData)
     }
   };
 }
