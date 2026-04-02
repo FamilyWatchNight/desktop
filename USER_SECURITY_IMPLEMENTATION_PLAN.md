@@ -71,9 +71,11 @@ The implementation builds on the existing database schema (users, user_profiles,
 
 ### Stage 9: Role Management UI
 - Create UI for managing roles (add, edit, delete roles and their permissions)
-- Display role stubs, display names, and associated permissions
+- Display role system-stubs (for system roles), display names, and associated permissions
+- Allow duplicating roles, renaming system roles, and hiding roles
 - Enforce can-admin permission
-- Prevent deletion of roles that are assigned to users
+- Prevent deletion of system roles and roles that are assigned to users
+- Prevent modification of permissions for system roles
 - Add Cucumber integration tests for role management
 - **Commit:** `feat: add role management UI`
 
