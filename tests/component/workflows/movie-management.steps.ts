@@ -11,8 +11,9 @@ import { expect } from '@playwright/test';
 import { CustomWorld } from '../../support/infrastructure/world';
 import { MovieData } from '../../../src/main/db/models/Movies';
 
-// Store the current movie being examined
-let currentMovie: MovieData | undefined;
+function movieState(world: CustomWorld) {
+  return world.getStateStore('movieManagement');
+}
 
 Given('the application is running with a test database', async function (this: CustomWorld) {
   // App is launched in Before hook
@@ -34,11 +35,13 @@ Given('stub TMDB data is loaded from', async function (this: CustomWorld, dataSo
 });
 
 When('I look up the movie with TMDB ID {string}', async function (this: CustomWorld, tmdbId: string) {
-  currentMovie = await this.moviesApi.getMovieByTmdbId(tmdbId);
+  const state = movieState(this);
+  state.currentMovie = await this.moviesApi.getMovieByTmdbId(tmdbId);
 });
 
 When('I look up the movie with Watchmode ID {string}', async function (this: CustomWorld, watchmodeId: string) {
-  currentMovie = await this.moviesApi.getMovieByWatchmodeId(watchmodeId);
+  const state = movieState(this);
+  state.currentMovie = await this.moviesApi.getMovieByWatchmodeId(watchmodeId);
 });
 
 Then('I should see {int} movies in the database', async function (this: CustomWorld, expectedCount: number) {
@@ -47,20 +50,28 @@ Then('I should see {int} movies in the database', async function (this: CustomWo
 });
 
 Then('the movie should have a null year value', async function (this: CustomWorld) {
+  const state = movieState(this);
+  const currentMovie = state.currentMovie as MovieData | undefined;
   expect(currentMovie).toBeDefined();
   expect(currentMovie!.year).toBeNull();
 });
 
 Then('the movie should have a null popularity value', async function (this: CustomWorld) {
+  const state = movieState(this);
+  const currentMovie = state.currentMovie as MovieData | undefined;
   expect(currentMovie).toBeDefined();
   expect(currentMovie!.popularity).toBeNull();
 });
 
 Then('the movie should exist', async function (this: CustomWorld) {
+  const state = movieState(this);
+  const currentMovie = state.currentMovie as MovieData | undefined;
   expect(currentMovie).toBeDefined();
 });
 
 Then('the original movie title should be {string}', async function (this: CustomWorld, expectedTitle: string) {
+  const state = movieState(this);
+  const currentMovie = state.currentMovie as MovieData | undefined;
   expect(currentMovie).toBeDefined();
   expect(currentMovie!.original_title).toBe(expectedTitle);
 });

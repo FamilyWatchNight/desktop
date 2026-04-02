@@ -26,48 +26,29 @@ export class CustomWorld extends World {
   backgroundTasksApi!: BackgroundTasks;
   usersApi!: Users;
   
-  // User authentication test data
-  authResult: any = null;
-  permissionUsers: any[] = [];
+  // Per-scenario state that supports feature-local stores
+  scenarioState: Record<string, Record<string, unknown>> = {};
   
-  // Map task reference names to their enqueued task IDs
-  private taskReferenceMap = new Map<string, string>();
-
   constructor(options: IWorldOptions) {
     super(options);
   }
 
   /**
-   * Store mapping between a reference name and a task ID
+   * Get or create a named state store for the current scenario.
    */
-  storeTaskReference(refName: string, taskId: string): void {
-    this.taskReferenceMap.set(refName, taskId);
-  }
-
-  /**
-   * Get the task ID for a given reference name
-   */
-  getTaskId(refName: string): string | undefined {
-    return this.taskReferenceMap.get(refName);
-  }
-
-  /**
-   * Find the reference name for a given task ID
-   */
-  getTaskRefName(taskId: string): string | undefined {
-    for (const [refName, id] of this.taskReferenceMap.entries()) {
-      if (id === taskId) {
-        return refName;
-      }
+  getStateStore(storeName: string): Record<string, unknown> {
+    if (!this.scenarioState[storeName]) {
+      this.scenarioState[storeName] = {};
     }
-    return undefined;
+    return this.scenarioState[storeName];
   }
 
-  /**
-   * Clear all task references
-   */
-  clearTaskReferences(): void {
-    this.taskReferenceMap.clear();
+  clearStateStore(storeName: string): void {
+    delete this.scenarioState[storeName];
+  }
+
+  clearAllStateStores(): void {
+    this.scenarioState = {};
   }
 
   async launchApp(): Promise<void> {
@@ -88,9 +69,6 @@ export class CustomWorld extends World {
     this.backgroundTasksApi = new BackgroundTasks(this.app);
     this.usersApi = new Users(this.app);
 
-    // Clear task references for clean slate
-    this.clearTaskReferences();
-
     // Initialize test task type registration
     await this.backgroundTasksApi.setupTestTaskType();
 
@@ -102,7 +80,6 @@ export class CustomWorld extends World {
     if (this.app) {
       await this.app.close();
     }
-    this.clearTaskReferences();
   }
 }
 

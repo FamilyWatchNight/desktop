@@ -21,6 +21,9 @@ let originalHomeEnv: string | undefined;
 
 // Before each scenario - launch the app
 Before({ timeout: 60 * 1000 }, async function (this: CustomWorld) {
+  // Reset per-scenario state store
+  this.clearAllStateStores();
+
   // Set up test isolation for file system
   tempAppDataDir = path.join(os.tmpdir(), 'test-app-data-' + Date.now());
   console.log('[Hooks.Before] tempAppDataDir:', tempAppDataDir);

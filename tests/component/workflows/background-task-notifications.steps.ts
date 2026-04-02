@@ -10,6 +10,30 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { CustomWorld } from '../../support/infrastructure/world';
 
+function backgroundTaskState(world: CustomWorld) {
+  return world.getStateStore('backgroundTaskNotifications');
+}
+
+function storeTaskReference(world: CustomWorld, refName: string, taskId: string): void {
+  const state = backgroundTaskState(world);
+  if (!state.taskReferences) {
+    state.taskReferences = new Map<string, string>();
+  }
+  (state.taskReferences as Map<string, string>).set(refName, taskId);
+}
+
+function getTaskRefName(world: CustomWorld, taskId: string): string | undefined {
+  const state = backgroundTaskState(world);
+  const taskRefs = state.taskReferences as Map<string, string>;
+  if (!taskRefs) return undefined;
+  for (const [refName, id] of taskRefs.entries()) {
+    if (id === taskId) {
+      return refName;
+    }
+  }
+  return undefined;
+}
+
 Given('event recording is cleared', async function (this: CustomWorld) {
   await this.eventNotificationsApi.clearRecordedEvents();
 });
@@ -23,7 +47,7 @@ When('a background task {string} is enqueued', async function (this: CustomWorld
   
   // Store mapping from reference name to task ID
   if (result.taskId) {
-    this.storeTaskReference(refName, result.taskId);
+    storeTaskReference(this, refName, result.taskId);
   }
 });
 
@@ -64,7 +88,7 @@ Then('{string} should be the active task', async function (this: CustomWorld, ex
   
   expect(activeTaskId).toBeDefined();
   
-  const actualRefName = this.getTaskRefName(activeTaskId!);
+  const actualRefName = getTaskRefName(this, activeTaskId!);
   expect(actualRefName).toBe(expectedRefName);
 });
 
