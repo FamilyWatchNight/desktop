@@ -10,12 +10,14 @@ import path from 'path';
 import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import i18n from '../i18n';
 import { getDb, getModels } from '../database';
 import { getAppDataRoot } from '../paths';
 import { safeJoin, assertPathInsideAllowedDirs } from '../security';
 import { type User, type UserData } from '../db/models/Users';
 import { type UserProfile, type UserProfileData } from '../db/models/UserProfiles';
-import { type PermissionStub } from '../auth/permissions';
+import { type Role } from '../db/models/Roles';
+import { type PermissionStub, PERMISSIONS } from '../auth/permissions';
 
 export interface CreateUserData extends UserData {}
 
@@ -23,7 +25,14 @@ export interface AuthenticatedUser extends User {
   profile: UserProfile | null;
 }
 
+export interface PermissionInfo {
+  stub: PermissionStub;
+  displayName: string;
+}
+
 export class UserService {
+  private t = i18n.getFixedT(null, 'auth');
+  
   async createUser(data: CreateUserData): Promise<AuthenticatedUser> {
     try {
       const { users, userProfiles } = getModels();
@@ -213,5 +222,96 @@ export class UserService {
 
     // Update profile
     await this.updateUserProfile(userId, { profileImagePath: null });
+  }
+
+  // Permission checking - aggregates permissions from all user roles
+  private getUserPermissionStubs(userId: number): PermissionStub[] {
+    const db = getDb();
+    if (!db) throw new Error('Database not initialized');
+
+    const query = `
+      SELECT DISTINCT rp.permission_stub
+      FROM user_roles ur
+      JOIN role_permissions rp ON ur.role_id = rp.role_id
+      WHERE ur.user_id = ?
+    `;
+
+    const rows = db.prepare(query).all(userId) as Array<{ permission_stub: PermissionStub }>;
+    return rows.map(row => row.permission_stub);
+  }
+
+  getUserPermissions(userId: number): PermissionInfo[] {
+    const permissionStubs = this.getUserPermissionStubs(userId);
+
+    // If can-admin, return all possible permissions
+    if (permissionStubs.includes('can-admin')) {
+      return PERMISSIONS.map(p => ({
+        stub: p.stub,
+        displayName: this.t(p.displayNameKey)
+      }));
+    }
+
+    // Otherwise return only the user's permissions
+    return permissionStubs.map(stub => {
+      const permissionDef = PERMISSIONS.find(p => p.stub === stub);
+      return {
+        stub,
+        displayName: this.t(permissionDef?.displayNameKey || 'common.unknown')
+      };
+    });
+  }
+
+  userHasPermission(userId: number, permissionStub: PermissionStub): boolean {
+    const stubs = this.getUserPermissionStubs(userId);
+    return stubs.includes('can-admin') || stubs.includes(permissionStub);
+  }
+
+  userHasAnyPermission(userId: number, permissionStubs: PermissionStub[]): boolean {
+    const userStubs = this.getUserPermissionStubs(userId);
+    return userStubs.includes('can-admin') || permissionStubs.some(stub => userStubs.includes(stub));
+  }
+
+  userHasAllPermissions(userId: number, permissionStubs: PermissionStub[]): boolean {
+    const userStubs = this.getUserPermissionStubs(userId);
+    return userStubs.includes('can-admin') || permissionStubs.every(stub => userStubs.includes(stub));
+  }
+
+  // User role management
+  getUserRoles(userId: number): Role[] {
+    const { userRoles, roles } = getModels();
+    const userRoleRows = userRoles.getRolesForUser(userId);
+    return userRoleRows.map(userRole => {
+      const role = roles.getById(userRole.roleId);
+      if (!role) throw new Error(`Role ${userRole.roleId} not found`);
+      return role;
+    });
+  }
+
+  assignRoleToUser(userId: number, roleId: number): void {
+    // Verify role exists
+    const { roles, userRoles } = getModels();
+    const role = roles.getById(roleId);
+    if (!role) {
+      throw new Error(this.t('errors.roleNotFound', 'Role not found'));
+    }
+
+    userRoles.assignRoleToUser(userId, roleId);
+  }
+
+  removeRoleFromUser(userId: number, roleId: number): void {
+    const { userRoles } = getModels();
+    userRoles.removeRoleFromUser(userId, roleId);
+  }
+
+  assignMultipleRolesToUser(userId: number, roleIds: number[]): void {
+    for (const roleId of roleIds) {
+      this.assignRoleToUser(userId, roleId);
+    }
+  }
+
+  removeMultipleRolesFromUser(userId: number, roleIds: number[]): void {
+    for (const roleId of roleIds) {
+      this.removeRoleFromUser(userId, roleId);
+    }
   }
 }

@@ -12,6 +12,9 @@ import fs from 'fs';
 import MoviesModel from './db/models/Movies';
 import UsersModel from './db/models/Users';
 import UserProfilesModel from './db/models/UserProfiles';
+import RolesModel from './db/models/Roles';
+import RolePermissionsModel from './db/models/RolePermissions';
+import UserRolesModel from './db/models/UserRoles';
 import { getAppDataRoot } from './paths';
 import i18n from './i18n';
 import { DEFAULT_ROLES } from './auth/permissions';
@@ -20,6 +23,9 @@ interface DbModels {
   movies: MoviesModel;
   users: UsersModel;
   userProfiles: UserProfilesModel;
+  roles: RolesModel;
+  rolePermissions: RolePermissionsModel;
+  userRoles: UserRolesModel;
 }
 
 let db: Database.Database | null = null;
@@ -109,7 +115,10 @@ function initModels(): void {
   models = {
     movies: new MoviesModel(db as Database.Database),
     users: new UsersModel(db as Database.Database),
-    userProfiles: new UserProfilesModel(db as Database.Database)
+    userProfiles: new UserProfilesModel(db as Database.Database),
+    roles: new RolesModel(db as Database.Database),
+    rolePermissions: new RolePermissionsModel(db as Database.Database),
+    userRoles: new UserRolesModel(db as Database.Database)
   };
 }
 

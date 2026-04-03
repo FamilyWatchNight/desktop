@@ -11,3 +11,4 @@ export { SettingsService } from './SettingsService';
 export { BackgroundTaskService } from './BackgroundTaskService';
 export { LocalizationService } from './LocalizationService';
 export { UserService } from './UserService';
+export { RoleService } from './RoleService';
