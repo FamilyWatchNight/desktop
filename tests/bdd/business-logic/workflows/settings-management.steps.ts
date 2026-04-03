@@ -8,40 +8,55 @@ the Free Software Foundation, version 3.
 
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { CustomWorld } from '../../support/infrastructure/world';
+import { CustomWorld } from '../../../bdd/technical/infrastructure/world';
+import { InternalSystemPersona } from '../../../bdd/business-flow/personas/internal-system';
 
 function settingsState(world: CustomWorld) {
   return world.getStateStore('settingsManagement');
 }
 
+function getSystemPersona(world: CustomWorld): InternalSystemPersona {
+  const state = world.getStateStore('personas');
+  if (!state.system) {
+    state.system = new InternalSystemPersona(world);
+  }
+  return state.system;
+}
+
 Given('the application is running with default settings', async function (this: CustomWorld) {
   // Initialize mock settings to ensure we start with a clean slate
-  await this.settingsApi.initializeMockSettings();
+  const system = getSystemPersona(this);
+  system.initializeSettings();
 });
 
 When('I save the following settings:', async function (this: CustomWorld, settingsJson: string) {
   const settings = JSON.parse(settingsJson);
+  const system = getSystemPersona(this);
   for (const key in settings) {
-    await this.settingsApi.setSetting(key, settings[key]);
+    system.setSetting(key, settings[key]);
   }
 });
 
 When('I set the {string} setting to {int}', async function (this: CustomWorld, key: string, value: number) {
-  await this.settingsApi.setSetting(key, value);
+  const system = getSystemPersona(this);
+  system.setSetting(key, value);
 });
 When('I set the {string} setting to {string}', async function (this: CustomWorld, key: string, value: string) {
-  await this.settingsApi.setSetting(key, value);
+  const system = getSystemPersona(this);
+  system.setSetting(key, value);
 });
 
 When('I request all settings', async function (this: CustomWorld) {
   const state = settingsState(this);
-  state.currentSettings = await this.settingsApi.loadSettings();
+  const system = getSystemPersona(this);
+  state.currentSettings = await system.loadSettings();
 });
 
 When('I request the {string} setting', async function (this: CustomWorld, key: string) {
   const state = settingsState(this);
+  const system = getSystemPersona(this);
   const currentSettings = (state.currentSettings as Record<string, unknown> | undefined) ?? {};
-  currentSettings[key] = await this.settingsApi.getSetting(key);
+  currentSettings[key] = await system.getSetting(key);
   state.currentSettings = currentSettings;
 });
 

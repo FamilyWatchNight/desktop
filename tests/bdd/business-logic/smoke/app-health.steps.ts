@@ -8,8 +8,17 @@ the Free Software Foundation, version 3.
 
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { CustomWorld } from '../../support/infrastructure/world';
-import { withTestHooks } from '../../support/infrastructure/utils';
+import { CustomWorld } from '../../../bdd/technical/infrastructure/world';
+import { InternalSystemPersona } from '../../../bdd/business-flow/personas/internal-system';
+
+// Helper to get or create system persona for this scenario
+function getSystemPersona(world: CustomWorld): InternalSystemPersona {
+  const state = world.getStateStore('personas');
+  if (!state.system) {
+    state.system = new InternalSystemPersona(world);
+  }
+  return state.system;
+}
 
 When('I launch the application', async function (this: CustomWorld) {
   // Application is launched in the Before hook
@@ -18,19 +27,20 @@ When('I launch the application', async function (this: CustomWorld) {
 
 Then('the application should consider itself ready', async function (this: CustomWorld) {
   // Check that the Electron app has declared itself ready
-  const appReady = await withTestHooks(this.app, async (hooks) => {
-    return hooks.app.isReady();
-  });
+  const system = getSystemPersona(this);
+  const appReady = await system.isAppReady();
   expect(appReady).toBe(true);
 });
 
 Then('the database should be connected', async function (this: CustomWorld) {
-  const status = await this.dbApi.getStatus();
+  const system = getSystemPersona(this);
+  const status = await system.getDatabaseStatus();
   expect(status.dbConnected).toBe(true);
 });
 
 Then('I can perform basic movie searches', async function (this: CustomWorld) {
+  const system = getSystemPersona(this);
   // Test that searching for a non-existent movie returns empty results
-  const results = await this.moviesApi.searchByTitle('ThisMovieDefinitelyDoesNotExist12345');
+  const results = await system.searchMoviesByTitle('ThisMovieDefinitelyDoesNotExist12345');
   expect(results).toEqual([]);
 });

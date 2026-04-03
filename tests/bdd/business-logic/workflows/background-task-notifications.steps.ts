@@ -8,10 +8,19 @@ the Free Software Foundation, version 3.
 
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { CustomWorld } from '../../support/infrastructure/world';
+import { CustomWorld } from '../../../bdd/technical/infrastructure/world';
+import { InternalSystemPersona } from '../../../bdd/business-flow/personas/internal-system';
+
+function getSystemPersona(world: CustomWorld): InternalSystemPersona {
+  const state = world.getStateStore('personas');
+  if (!state.system) {
+    state.system = new InternalSystemPersona(world);
+  }
+  return state.system;
+}
 
 function backgroundTaskState(world: CustomWorld) {
-  return world.getStateStore('backgroundTaskNotifications');
+  return world.getStateStore('backgroundTasks');
 }
 
 function storeTaskReference(world: CustomWorld, refName: string, taskId: string): void {
@@ -35,19 +44,23 @@ function getTaskRefName(world: CustomWorld, taskId: string): string | undefined 
 }
 
 Given('event recording is cleared', async function (this: CustomWorld) {
-  await this.eventNotificationsApi.clearRecordedEvents();
+  const system = getSystemPersona(this);
+  system.clearRecordedEvents();
 });
 
 When('a background task {string} is enqueued', async function (this: CustomWorld, refName: string) {
-  await this.dbApi.initMockDatabase();
+  const system = getSystemPersona(this);
+  await system.initDatabase();
+  await system.setupTestTaskType();
   
   // Enqueue with the standard test task type
-  const result = (await this.backgroundTasksApi.enqueue('test-background-task', {})) as { success: boolean; taskId?: string };
-  expect(result.success).toBe(true);
+  const result = await system.enqueueTask('test-background-task', { refName });
+  expect((result as { success: boolean }).success).toBe(true);
   
   // Store mapping from reference name to task ID
-  if (result.taskId) {
-    storeTaskReference(this, refName, result.taskId);
+  const taskResult = result as { success: boolean; taskId?: string };
+  if (taskResult.taskId) {
+    storeTaskReference(this, refName, taskResult.taskId);
   }
 });
 
@@ -57,33 +70,39 @@ When('I set the task progress to current={int}, max={int}, description={string}'
   max: number,
   description: string
 ) {
-  await this.backgroundTasksApi.setTaskProgress(current, max, description);
+  const system = getSystemPersona(this);
+  await system.setTaskProgress(current, max, description);
   // Small delay to allow event to be recorded
-  await new Promise((resolve) => setTimeout(resolve, 50));
+  await new Promise((resolve) => setTimeout(resolve, 200));
 });
 
 When('I set the task description to {string}', async function (this: CustomWorld, description: string) {
-  await this.backgroundTasksApi.setTaskDescription(description);
+  const system = getSystemPersona(this);
+  system.setTaskDescription(description);
   await new Promise((resolve) => setTimeout(resolve, 50));
 });
 
 When('I set the task current to {int}', async function (this: CustomWorld, current: number) {
-  await this.backgroundTasksApi.setTaskCurrent(current);
+  const system = getSystemPersona(this);
+  system.setTaskCurrent(current);
   await new Promise((resolve) => setTimeout(resolve, 50));
 });
 
 When('I set the task max to {int}', async function (this: CustomWorld, max: number) {
-  await this.backgroundTasksApi.setTaskMax(max);
+  const system = getSystemPersona(this);
+  system.setTaskMax(max);
   await new Promise((resolve) => setTimeout(resolve, 50));
 });
 
 When('I complete the task', async function (this: CustomWorld) {
-  await this.backgroundTasksApi.completeTask();
+  const system = getSystemPersona(this);
+  await system.completeTask();
   await new Promise((resolve) => setTimeout(resolve, 200));
 });
 
 Then('{string} should be the active task', async function (this: CustomWorld, expectedRefName: string) {
-  const state = await this.backgroundTasksApi.getState() as { active: { id: string } | null; queue: unknown[] };
+  const system = getSystemPersona(this);
+  const state = await system.getTaskState() as { active: { id: string } | null; queue: unknown[] };
   const activeTaskId = state.active?.id;
   
   expect(activeTaskId).toBeDefined();
@@ -96,7 +115,8 @@ Then('the most recent {string} event should have no active task', async function
   this: CustomWorld,
   eventType: string
 ) {
-  const events = await this.eventNotificationsApi.filterEventsByType(eventType);
+  const system = getSystemPersona(this);
+  const events = await system.filterEventsByType(eventType);
   expect(events.length).toBeGreaterThan(0);
 
   const lastEvent = events[events.length - 1];
@@ -113,7 +133,8 @@ Then('the most recent {string} event should have active task with status={string
   expectedCurrent: number,
   expectedMax: number
 ) {
-  const events = await this.eventNotificationsApi.filterEventsByType(eventType);
+  const system = getSystemPersona(this);
+  const events = await system.filterEventsByType(eventType);
   expect(events.length).toBeGreaterThan(0);
 
   const lastEvent = events[events.length - 1];
@@ -133,7 +154,8 @@ Then('exactly {int} {string} events should be recorded', async function (
   expectedCount: number,
   eventType: string
 ) {
-  const events = await this.eventNotificationsApi.filterEventsByType(eventType);
+  const system = getSystemPersona(this);
+  const events = await system.filterEventsByType(eventType);
   expect(events.length).toBe(expectedCount);
 });
 
@@ -142,7 +164,8 @@ Then('the most recent {string} event should have {int} queued tasks', async func
   eventType: string,
   expectedQueueCount: number
 ) {
-  const events = await this.eventNotificationsApi.filterEventsByType(eventType);
+  const system = getSystemPersona(this);
+  const events = await system.filterEventsByType(eventType);
   expect(events.length).toBeGreaterThan(0);
 
   const lastEvent = events[events.length - 1];

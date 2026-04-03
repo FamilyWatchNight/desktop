@@ -17,12 +17,12 @@
     "NODE_ENV": "test"
   },
   "cucumber.glue": [
-    "tests/component/**/*.ts",
-    "tests/component/**/*.ts"
+    "tests/bdd/**/*.ts",
+    "tests/bdd/**/*.ts"
   ],
   "cucumber.features": [
-    "tests/component/**/*.feature",
-    "tests/component/**/*.feature"
+    "tests/bdd/**/*.feature",
+    "tests/bdd/**/*.feature"
   ],
   "files.watcherExclude": {
     "**/node_modules/**": true
