@@ -7,6 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import type Database from 'better-sqlite3';
+import { normalizeTitle } from '../../utils/text';
 
 export interface MovieRow {
   id: number;
@@ -170,7 +171,7 @@ export default class MoviesModel {
         original_title: !existing.original_title || existing.original_title.trim() === '' ? title : existing.original_title,
         normalized_title:
           !existing.original_title || existing.original_title.trim() === ''
-            ? this.normalizeTitle(title)
+            ? normalizeTitle(title)
             : existing.normalized_title
       };
       this.update(existing.id, updateData);
@@ -180,7 +181,7 @@ export default class MoviesModel {
       watchmode_id: watchmodeId,
       tmdb_id: tmdbId,
       original_title: title,
-      normalized_title: this.normalizeTitle(title),
+      normalized_title: normalizeTitle(title),
       year: year,
       popularity: null,
       has_video: false
@@ -207,7 +208,7 @@ export default class MoviesModel {
           !existing.original_title || existing.original_title.trim() === '' ? title : existing.original_title,
         normalized_title:
           !existing.original_title || existing.original_title.trim() === ''
-            ? this.normalizeTitle(title)
+            ? normalizeTitle(title)
             : existing.normalized_title
       };
       this.update(existing.id, updateData);
@@ -217,7 +218,7 @@ export default class MoviesModel {
       watchmode_id: null,
       tmdb_id: tmdbId,
       original_title: title,
-      normalized_title: this.normalizeTitle(title),
+      normalized_title: normalizeTitle(title),
       year: null,
       popularity,
       has_video
@@ -236,17 +237,5 @@ export default class MoviesModel {
       popularity: row.popularity,
       has_video: Boolean(row.has_video)
     };
-  }
-
-  normalizeTitle(title: string): string {
-    return title
-      // 1. Normalize accented characters → base letters
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '')
-      // 2. Normalize quotes
-      .replace(/[""]/g, '"')
-      .replace(/['']/g, "'")
-      // 3. Normalize dashes
-      .replace(/[–—―]/g, '-');
   }
 }
