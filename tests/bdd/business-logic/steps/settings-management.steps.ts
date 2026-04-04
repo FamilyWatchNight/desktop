@@ -8,8 +8,8 @@ the Free Software Foundation, version 3.
 
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { CustomWorld } from '../../../bdd/technical/infrastructure/world';
-import { InternalSystemPersona } from '../../../bdd/business-flow/personas/internal-system';
+import { CustomWorld } from '../../technical/infrastructure/world';
+import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
 
 function settingsState(world: CustomWorld) {
   return world.getStateStore('settingsManagement');

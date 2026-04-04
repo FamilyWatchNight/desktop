@@ -8,9 +8,9 @@ the Free Software Foundation, version 3.
 
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { CustomWorld } from '../../../bdd/technical/infrastructure/world';
-import { MovieData } from '../../../src/main/db/models/Movies';
-import { InternalSystemPersona } from '../../../bdd/business-flow/personas/internal-system';
+import { CustomWorld } from '../../technical/infrastructure/world';
+import { MovieData } from '../../../../src/main/db/models/Movies';
+import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
 
 function movieState(world: CustomWorld) {
   return world.getStateStore('movieManagement');
@@ -23,12 +23,6 @@ function getSystemPersona(world: CustomWorld): InternalSystemPersona {
   }
   return state.system;
 }
-
-Given('the application is running with a test database', async function (this: CustomWorld) {
-  // App is launched in Before hook
-  const system = getSystemPersona(this);
-  await system.initDatabase();
-});
 
 Given('stub Watchmode data is loaded from {string}', async function (this: CustomWorld, dataSource: string) {
   const system = getSystemPersona(this);

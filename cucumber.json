@@ -1,6 +1,6 @@
 {
   "default": {
-    "paths": ["tests/bdd/business-logic/**/*.feature"],
+    "paths": ["tests/bdd/business-logic/features/**/*.feature"],
     "requireModule": ["ts-node/register/transpile-only"],
     "require": ["tests/bdd/**/*.ts"],
     "format": ["progress-bar", "html:test-results/reports/cucumber-report.html"],
@@ -8,7 +8,7 @@
     "publishQuiet": true
   },
   "smoke": {
-    "paths": ["tests/bdd/business-logic/**/*.feature"],
+    "paths": ["tests/bdd/business-logic/features/**/*.feature"],
     "requireModule": ["ts-node/register/transpile-only"],
     "require": ["tests/bdd/**/*.ts"],
     "format": ["progress-bar", "html:test-results/reports/cucumber-report.html"],
@@ -17,7 +17,7 @@
     "publishQuiet": true
   },
   "component": {
-    "paths": ["tests/bdd/business-logic/**/*.feature"],
+    "paths": ["tests/bdd/business-logic/features/**/*.feature"],
     "requireModule": ["ts-node/register/transpile-only"],
     "require": ["tests/bdd/**/*.ts"],
     "format": ["progress-bar", "html:test-results/reports/cucumber-report.html"],
