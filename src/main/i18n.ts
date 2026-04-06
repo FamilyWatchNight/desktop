@@ -12,13 +12,14 @@ try {
 }
 
 const isDevMode = typeof app !== 'undefined' ? !app.isPackaged : true;
+const isTestMode = process.env.NODE_ENV === 'test';
 const i18nPath = path.join(
   typeof app !== 'undefined' ? app.getAppPath() : process.cwd(),
   'assets/locales'
 );
 
 export const appLanguage =
-  process.env.NODE_ENV === 'test'
+  isTestMode
     ? 'test'
     : isDevMode
     ? 'dev'
@@ -42,7 +43,7 @@ i18n
     lng: appLanguage,
     load: 'all',
     ns: ['main', 'common', 'auth'],
-    parseMissingKeyHandler: (key) => `[!!!${key}!!!]`,
+    parseMissingKeyHandler: isTestMode ? undefined : (key) => `[!!!${key}!!!]`,
     preload: ['en'],
     saveMissing: true,
     saveMissingPlurals: true,
