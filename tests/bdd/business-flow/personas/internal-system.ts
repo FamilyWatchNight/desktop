@@ -9,7 +9,6 @@ the Free Software Foundation, version 3.
 import { CustomWorld } from '../../technical/infrastructure/world';
 import { AuthenticatedUser } from '../../../../src/main/services/UserService';
 import { Role } from '../../../../src/main/db/models/Roles';
-import { UserRole } from '../../../../src/main/db/models/UserRoles';
 
 /**
  * Internal System Persona - represents trusted backend operations
@@ -145,24 +144,68 @@ export class InternalSystemPersona {
   //
   // Role operations
   //
-  async createRole(name: string, permissionStubs: string[]): Promise<Role> {
+  async assignRoleToUser(userId: number, roleId: number): Promise<void> {
+    return await this.world.rolesApi.assignRoleToUser(userId, roleId);
+  }
+
+  async createRole(name: string, permissionStubs: string[] = []): Promise<Role> {
     return await this.world.rolesApi.createRole(name, permissionStubs);
+  }
+
+  async deleteRole(id: number): Promise<void> {
+    return await this.world.rolesApi.deleteRole(id);
   }
 
   async getRoleById(id: number): Promise<Role | null> {
     return await this.world.rolesApi.getRoleById(id);
   }
 
-  async assignRoleToUser(userId: number, roleId: number): Promise<void> {
-    return await this.world.rolesApi.assignRoleToUser(userId, roleId);
+  async getRoleByStub(stub: string): Promise<Role | null> {
+    return await this.world.rolesApi.getRoleByStub(stub);
   }
 
-  async getUserRoles(userId: number): Promise<UserRole[]> {
-    return await this.world.rolesApi.getUserRoles(userId);
+  async getRolePermissions(roleId: number): Promise<string[]> {
+    return await this.world.rolesApi.getRolePermissions(roleId);
+  }
+
+  async getRolesForUser(userId: number): Promise<number[]> {
+    return await this.world.rolesApi.getRolesForUser(userId);
   }
 
   async getUserPermissions(userId: number): Promise<string[]> {
     return await this.world.rolesApi.getUserPermissions(userId);
+  }
+
+  async getAllPermissions(): Promise<string[]> {
+    return await this.world.rolesApi.getAllPermissions();
+  }
+
+  async getUsersWithRole(roleId: number): Promise<number[]> {
+    return await this.world.rolesApi.getUsersWithRole(roleId);
+  }
+
+  async duplicateRole(sourceRoleId: number): Promise<number> {
+    return await this.world.rolesApi.duplicateRole(sourceRoleId);
+  }
+
+  async removeRoleFromUser(userId: number, roleId: number): Promise<void> {
+    return await this.world.rolesApi.removeRoleFromUser(userId, roleId);
+  }
+
+  async setRolePermissions(roleId: number, permissionStubs: string[]): Promise<void> {
+    return await this.world.rolesApi.setRolePermissions(roleId, permissionStubs);
+  }
+
+  async updateRole(id: number, data: Partial<import('../../../../src/main/db/models/Roles').RoleData>): Promise<void> {
+    return await this.world.rolesApi.updateRole(id, data);
+  }
+
+  async updateRoleDisplayName(id: number, displayName: string): Promise<void> {
+    return await this.world.rolesApi.updateRoleDisplayName(id, displayName);
+  }
+
+  async updateRoleHiddenStatus(id: number, isHidden: boolean): Promise<void> {
+    return await this.world.rolesApi.updateRoleHiddenStatus(id, isHidden);
   }
 
   //
@@ -205,6 +248,12 @@ export class InternalSystemPersona {
 
   async updateUserProfile(id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }): Promise<void> {
     return await this.world.usersApi.updateUserProfile(id, profileData);
+  }
+
+  // Authorization operations
+  async checkUserHasPermission(userId: number, permissionStub: string): Promise<boolean> {
+    const permissions = await this.getUserPermissions(userId);
+    return permissions.includes(permissionStub);
   }
 
 }

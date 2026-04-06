@@ -278,13 +278,18 @@ export class UserService {
 
   // User role management
   getUserRoles(userId: number): Role[] {
-    const { userRoles, roles } = getModels();
-    const userRoleRows = userRoles.getRolesForUser(userId);
-    return userRoleRows.map(userRole => {
-      const role = roles.getById(userRole.roleId);
-      if (!role) throw new Error(`Role ${userRole.roleId} not found`);
+    const { roles } = getModels();
+    const roleIds = this.getUserRoleIds(userId);
+    return roleIds.map(roleId => {
+      const role = roles.getById(roleId);
+      if (!role) throw new Error(`Role ${roleId} not found`);
       return role;
     });
+  }
+
+  getUserRoleIds(userId: number): number[] {
+    const { userRoles } = getModels();
+    return userRoles.getRoleIdsForUser(userId);
   }
 
   assignRoleToUser(userId: number, roleId: number): void {

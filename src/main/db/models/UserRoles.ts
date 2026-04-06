@@ -62,9 +62,9 @@ export default class UserRolesModel {
     this.deleteByUserAndRoleStmt.run(userId, roleId);
   }
 
-  getRolesForUser(userId: number): UserRole[] {
+  getRoleIdsForUser(userId: number): number[] {
     const rows = this.getByUserIdStmt.all(userId) as UserRoleRow[];
-    return rows.map(row => this.formatUserRole(row));
+    return rows.map(row => row.role_id);
   }
 
   getUsersByRoleId(roleId: number): number[] {
@@ -75,14 +75,5 @@ export default class UserRolesModel {
   hasRole(userId: number, roleId: number): boolean {
     const row = this.getByUserAndRoleStmt.get(userId, roleId) as UserRoleRow | undefined;
     return !!row;
-  }
-
-  private formatUserRole(row: UserRoleRow): UserRole {
-    return {
-      id: row.id,
-      userId: row.user_id,
-      roleId: row.role_id,
-      createdAt: row.created_at
-    };
   }
 }

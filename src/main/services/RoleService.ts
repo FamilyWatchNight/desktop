@@ -7,9 +7,8 @@ the Free Software Foundation, version 3.
 */
 
 import i18n from '../i18n';
-import { getModels } from '../database';
-import RolesModel, { type Role, type RoleData } from '../db/models/Roles';
-import RolePermissionsModel from '../db/models/RolePermissions';
+import * as db from '../database';
+import { type Role, type RoleData } from '../db/models/Roles';
 import type { PermissionStub } from '../auth/permissions';
 import { PERMISSIONS } from '../auth/permissions';
 
@@ -23,55 +22,63 @@ export interface PermissionInfo {
 }
 
 export class RoleService {
-  private rolesModel: RolesModel;
-  private rolePermissionsModel: RolePermissionsModel;
   private t = i18n.getFixedT(null, 'auth');
-
-  constructor() {
-    const models = getModels();
-    this.rolesModel = models.roles;
-    this.rolePermissionsModel = models.rolePermissions;
-  }
 
   // Role CRUD operations
   createRole(data: RoleData): number {
-    return this.rolesModel.create(data);
+    const models = db.getModels();
+    return models.roles.create(data);
   }
 
   getRoleById(id: number): Role | null {
-    return this.rolesModel.getById(id);
+    const models = db.getModels();
+    return models.roles.getById(id);
   }
 
   getRoleBySystemStub(systemStub: string): Role | null {
-    return this.rolesModel.getBySystemStub(systemStub);
+    const models = db.getModels();
+    return models.roles.getBySystemStub(systemStub);
   }
 
   getAllRoles(): Role[] {
-    return this.rolesModel.getAll();
+    const models = db.getModels();
+    return models.roles.getAll();
   }
 
   updateRole(id: number, data: Partial<RoleData>): void {
-    this.rolesModel.update(id, data);
+    const models = db.getModels();
+    models.roles.update(id, data);
   }
 
   deleteRole(id: number): void {
+    const models = db.getModels();
+    const role = models.roles.getById(id);
+    if (!role) {
+      throw new Error(this.t('errors.roleNotFound', 'Role not found'));
+    }
+
+    if (role.systemStub) {
+      throw new Error(this.t('errors.systemRoleDeletion', 'System roles cannot be deleted'));
+    }
+
     // Check if role is in use
-    const { userRoles } = getModels();
-    const usersWithRole = userRoles.getUsersByRoleId(id);
+    const usersWithRole = models.userRoles.getUsersByRoleId(id);
     if (usersWithRole.length > 0) {
       throw new Error(this.t('errors.roleInUse', 'Role is assigned to users and cannot be deleted'));
     }
 
-    this.rolesModel.delete(id);
+    models.roles.delete(id);
   }
 
   // Permission management
   setPermissionsForRole(roleId: number, permissionStubs: PermissionStub[]): void {
-    this.rolePermissionsModel.setPermissionsForRole(roleId, permissionStubs);
+    const models = db.getModels();
+    models.rolePermissions.setPermissionsForRole(roleId, permissionStubs);
   }
 
   getPermissionsForRole(roleId: number): PermissionInfo[] {
-    const permissionStubs = this.rolePermissionsModel.getPermissionsForRole(roleId);
+    const models = db.getModels();
+    const permissionStubs = models.rolePermissions.getPermissionsForRole(roleId);
     return permissionStubs.map(stub => ({
       stub: stub.stub as PermissionStub,
       displayName: this.t(
@@ -81,7 +88,8 @@ export class RoleService {
   }
 
   getRoleWithPermissions(roleId: number): RoleWithPermissions | null {
-    const role = this.rolesModel.getById(roleId);
+    const models = db.getModels();
+    const role = models.roles.getById(roleId);
     if (!role) return null;
 
     const permissions = this.getPermissionsForRole(roleId);
@@ -89,7 +97,8 @@ export class RoleService {
   }
 
   getAllRolesWithPermissions(): RoleWithPermissions[] {
-    const roles = this.rolesModel.getAll();
+    const models = db.getModels();
+    const roles = models.roles.getAll();
     return roles.map(role => ({
       ...role,
       permissions: this.getPermissionsForRole(role.id)
@@ -98,7 +107,66 @@ export class RoleService {
 
   // Query users with a specific role (for role management operations)
   getUsersWithRole(roleId: number): number[] {
-    const { userRoles } = getModels();
-    return userRoles.getUsersByRoleId(roleId);
+    const models = db.getModels();
+    return models.userRoles.getUsersByRoleId(roleId);
+  }
+
+  // User-role assignment operations
+  assignRoleToUser(userId: number, roleId: number): void {
+    const models = db.getModels();
+    models.userRoles.assignRoleToUser(userId, roleId);
+  }
+
+  removeRoleFromUser(userId: number, roleId: number): void {
+    const models = db.getModels();
+    models.userRoles.removeRoleFromUser(userId, roleId);
+  }
+
+  getRolesForUser(userId: number): number[] {
+    const models = db.getModels();
+    return models.userRoles.getRoleIdsForUser(userId);
+  }
+
+  getAllPermissions(): PermissionInfo[] {
+    return PERMISSIONS.map(permission => ({
+      stub: permission.stub,
+      displayName: this.t(permission.displayNameKey)
+    }));
+  }
+
+  duplicateRole(sourceRoleId: number): number {
+    const models = db.getModels();
+    const sourceRole = models.roles.getById(sourceRoleId);
+    if (!sourceRole) {
+      throw new Error(this.t('errors.roleNotFound', 'Role not found'));
+    }
+
+    // Get the permissions for the source role
+    const permissionStubs = models.rolePermissions.getPermissionsForRole(sourceRoleId);
+
+    // Generate the display name for the duplicate
+    const baseName = this.t('roles.copyOf', 'Copy of {{name}}', { name: sourceRole.displayName });
+    let displayName = baseName;
+    let counter = 2;
+
+    // Check for existing roles with similar names and increment counter
+    while (models.roles.getByDisplayName(displayName)) {
+      displayName = `${baseName} (${counter})`;
+      counter++;
+    }
+
+    // Create the new role
+    const newRoleId = models.roles.create({
+      displayName,
+      systemStub: null, // Duplicates are never system roles
+      isHidden: sourceRole.isHidden
+    });
+
+    // Copy the permissions
+    if (permissionStubs.length > 0) {
+      models.rolePermissions.setPermissionsForRole(newRoleId, permissionStubs.map(p => p.stub));
+    }
+
+    return newRoleId;
   }
 }

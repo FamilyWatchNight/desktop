@@ -16,12 +16,13 @@ import { MockBackgroundTask } from "./support/mocks/background-task.mocks";
 import { registerTask } from "./support/extensions/task-registry.extensions";
 import ImportTmdbTask from "../tasks/ImportTmdbTask"
 import ImportWatchmodeTask from "../tasks/ImportWatchmodeTask";
-import { MovieService, SettingsService, BackgroundTaskService, UserService } from '../services';
+import { MovieService, SettingsService, BackgroundTaskService, UserService, RoleService } from '../services';
 
 const movieService = new MovieService();
 const settingsService = new SettingsService();
 const backgroundTaskService = new BackgroundTaskService();
 const userService = new UserService();
+const roleService = new RoleService();
 
 // Track the actively running mock task instance for test control
 let activeTestTask: InstanceType<typeof MockBackgroundTask> | null = null;
@@ -76,6 +77,24 @@ export interface TestHooks {
     authenticateTestUser: (username: string, password: string) => Promise<import('../services/UserService').AuthenticatedUser | null>;
     getTestUserById: (id: number) => import('../services/UserService').AuthenticatedUser | null;
     updateTestUserProfile: (id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }) => Promise<void>;
+  };
+  roles: {
+    createTestRole: (name: string, permissionStubs: string[]) => Promise<import('../db/models/Roles').Role>;
+    getTestRoleById: (id: number) => Promise<import('../db/models/Roles').Role | null>;
+    getTestRoleByStub: (stub: string) => Promise<import('../db/models/Roles').Role | null>;
+    assignRoleToUser: (userId: number, roleId: number) => Promise<void>;
+    getRolesForUser: (userId: number) => Promise<number[]>;
+    removeRoleFromUser: (userId: number, roleId: number) => Promise<void>;
+    setRolePermissions: (roleId: number, permissionStubs: string[]) => Promise<void>;
+    getRolePermissions: (roleId: number) => Promise<string[]>;
+    getUserPermissions: (userId: number) => Promise<string[]>;
+    getAllPermissions: () => string[];
+    updateRole: (id: number, data: Partial<import('../db/models/Roles').RoleData>) => Promise<void>;
+    updateRoleDisplayName: (id: number, displayName: string) => Promise<void>;
+    updateRoleHiddenStatus: (id: number, isHidden: boolean) => Promise<void>;
+    deleteRole: (id: number) => Promise<void>;
+    duplicateRole: (sourceRoleId: number) => Promise<number>;
+    getUsersWithRole: (roleId: number) => number[];
   };
 }
 
@@ -175,6 +194,59 @@ export function getTestHooks(): TestHooks {
       authenticateTestUser: (username, password) => userService.authenticateUser(username, password),
       getTestUserById: (id) => userService.getUserById(id),
       updateTestUserProfile: (id, profileData) => userService.updateUserProfile(id, profileData)
+    },
+    roles: {
+      createTestRole: async (name, permissionStubs) => {
+        const roleId = roleService.createRole({ displayName: name, systemStub: null, isHidden: false });
+        if (permissionStubs.length > 0) {
+          roleService.setPermissionsForRole(roleId, permissionStubs as any);
+        }
+        const role = roleService.getRoleById(roleId);
+        if (!role) throw new Error('Failed to retrieve created role');
+        return role;
+      },
+      getTestRoleById: (id) => Promise.resolve(roleService.getRoleById(id)),
+      getTestRoleByStub: (stub) => Promise.resolve(roleService.getRoleBySystemStub(stub)),
+      assignRoleToUser: async (userId, roleId) => {
+        roleService.assignRoleToUser(userId, roleId);
+      },
+      getRolesForUser: async (userId) => {
+        return roleService.getRolesForUser(userId);
+      },
+      removeRoleFromUser: async (userId, roleId) => {
+        roleService.removeRoleFromUser(userId, roleId);
+      },
+      setRolePermissions: async (roleId, permissionStubs) => {
+        roleService.setPermissionsForRole(roleId, permissionStubs as any);
+      },
+      getRolePermissions: async (roleId) => {
+        const permissions = roleService.getPermissionsForRole(roleId);
+        return permissions.map(p => p.stub);
+      },
+      getUserPermissions: async (userId) => {
+        const permissionInfos = userService.getUserPermissions(userId);
+        return permissionInfos.map(pInfo => pInfo.stub);
+      },
+      getAllPermissions: () => {
+        const permissions = roleService.getAllPermissions();
+        return permissions.map(p => p.stub);
+      },
+      updateRole: async (id, data) => {
+        roleService.updateRole(id, data);
+      },
+      updateRoleDisplayName: async (id, displayName) => {
+        roleService.updateRole(id, { displayName });
+      },
+      updateRoleHiddenStatus: async (id, isHidden) => {
+        roleService.updateRole(id, { isHidden });
+      },
+      deleteRole: async (id) => {
+        roleService.deleteRole(id);
+      },
+      duplicateRole: async (sourceRoleId) => {
+        return roleService.duplicateRole(sourceRoleId);
+      },
+      getUsersWithRole: (roleId) => roleService.getUsersWithRole(roleId)
     }
   };
 }

@@ -37,6 +37,7 @@ export default class RolesModel {
   private insertStmt!: Database.Statement;
   private getByIdStmt!: Database.Statement;
   private getBySystemStubStmt!: Database.Statement;
+  private getByDisplayNameStmt!: Database.Statement;
   private getAllStmt!: Database.Statement;
   private updateStmt!: Database.Statement;
   private deleteStmt!: Database.Statement;
@@ -54,9 +55,10 @@ export default class RolesModel {
 
     this.getByIdStmt = this.db.prepare('SELECT * FROM roles WHERE id = ?');
     this.getBySystemStubStmt = this.db.prepare('SELECT * FROM roles WHERE system_stub = ?');
+    this.getByDisplayNameStmt = this.db.prepare('SELECT * FROM roles WHERE display_name = ?');
     this.getAllStmt = this.db.prepare('SELECT * FROM roles ORDER BY display_name');
     this.updateStmt = this.db.prepare(`
-      UPDATE roles SET system_stub = ?, display_name = ?, is_hidden = ?, updated_at = ? WHERE id = ?
+      UPDATE roles SET display_name = ?, is_hidden = ?, updated_at = ? WHERE id = ?
     `);
     this.deleteStmt = this.db.prepare('DELETE FROM roles WHERE id = ?');
   }
@@ -84,6 +86,11 @@ export default class RolesModel {
     return row ? this.formatRole(row) : null;
   }
 
+  getByDisplayName(displayName: string): Role | null {
+    const row = this.getByDisplayNameStmt.get(displayName) as RoleRow | undefined;
+    return row ? this.formatRole(row) : null;
+  }
+
   getAll(): Role[] {
     const rows = this.getAllStmt.all() as RoleRow[];
     return rows.map(row => this.formatRole(row));
@@ -101,7 +108,6 @@ export default class RolesModel {
       
       // Merge changes with current data
       const merged = {
-        systemStub: data.systemStub !== undefined ? data.systemStub : current.systemStub,
         displayName: data.displayName !== undefined ? data.displayName : current.displayName,
         isHidden: data.isHidden !== undefined ? data.isHidden : current.isHidden
       };
@@ -109,7 +115,6 @@ export default class RolesModel {
       // Update with merged data
       const now = new Date().toISOString();
       this.updateStmt.run(
-        merged.systemStub,
         merged.displayName,
         merged.isHidden ? 1 : 0,
         now,

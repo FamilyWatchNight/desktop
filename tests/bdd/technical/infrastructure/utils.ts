@@ -7,7 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import { ElectronApplication } from 'playwright';
-import type { TestHooks } from '../../../src/main/testing-active/TestHooksImpl';
+import type { TestHooks } from '../../../../src/main/testing-active/TestHooksImpl';
 
 /**
  * Helper that executes a callback inside the electron app with access to test hooks.

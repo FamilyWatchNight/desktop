@@ -43,6 +43,8 @@ Before({ timeout: 60 * 1000 }, async function (this: CustomWorld) {
 
 // After each scenario - cleanup
 After({ timeout: 60 * 1000 }, async function (this: CustomWorld, scenario) {
+
+  
   // Close database connection
   if (this.app) {
     try {
