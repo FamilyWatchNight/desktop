@@ -4,51 +4,36 @@
 
 Family Watch Night is a TypeScript-based Electron desktop application with a sophisticated dual-mode API architecture. The main distinctive feature is that core business logic is completely decoupled from the IPC/HTTP exposure layer—services are business-logic containers that know nothing about Electron or web communication, which are instead exposed through parallel HTTP and IPC adapters. This allows the same logic to be used via multiple channels.
 
+The testing infrastructure uses a three-layer BDD architecture to verify business logic independently of transport concerns. See [Testing Architecture](#3-testing-architecture) below for details.
+
 ---
 
 ## 1. Key Services and Their Responsibilities
 
-Located in `src/main/services/`, services are stateless, framework-agnostic classes that encapsulate core business logic:
+Located in `src/main/services/`, services are stateless, framework-agnostic classes that encapsulate core business logic. Full method signatures are available in the source code; this section describes key responsibilities and patterns.
 
 ### **MovieService**
-- **Responsibility**: Manage movie CRUD operations
-- **Key Methods**:
-  - `create(movieData)` → inserts and returns ID
-  - `getById(id)`, `getByWatchmodeId()`, `getByTmdbId()` → queries
-  - `getAll()` → returns all movies sorted by normalized title
-  - `update(id, movieData)`, `delete(id)` → mutations
-  - `searchByTitle(searchTerm)` → full-text search using LIKE queries
-- **Pattern**: Delegates to database models (`db.getModels().movies.*`)
+- **Responsibility**: Movie CRUD operations and search
 
 ### **SettingsService**
-- **Responsibility**: Manage application settings persistence
-- **Key Methods**:
-  - `get(key)`, `set(key, value)` → individual setting operations
-  - `load()` → returns all settings as object
-  - `save(settings)` → batch update all settings
-- **Pattern**: Wraps `SettingsManager` (electron-store wrapper)
-- **Use case**: Web port, locale preferences, UI state
-- **Interesting detail**: `index.ts` must call initialize() before use. Alternatively, the test runner can
-  initialize() it with a mock electron store
+- **Responsibility**: Application settings persistence
 
 ### **BackgroundTaskService**
-- **Responsibility**: Coordinate long-running asynchronous tasks
-- **Key Methods**:
-  - `enqueue(taskType, args)` → adds task to queue, returns taskId or error
-  - `getState()` → returns `{active, queue}` current state
-  - `cancelActive()`, `removeQueued(taskId)` → task lifecycle management
-  - `setNotifyFn(fn)` → subscribe to state changes (called on progress updates)
-- **Pattern**: Delegates to `background-task-manager` module
-- **Integration**: Used by import tasks (TMDB, Watchmode data)
+- **Responsibility**: Long-running asynchronous task coordination and progress reporting
+
+### **UserService**
+- **Responsibility**: User authentication and profile management
+
+### **RoleService**
+- **Responsibility**: Role-based access control (RBAC): create, update, delete roles and manage permission assignments
 
 ### **LocalizationService**
 - **Responsibility**: Multi-language translation file management
-- **Key Methods**:
-  - `getLocaleFile(namespace, language)` → reads JSON locale file
-  - `saveMissingKey(namespace, language, key, value)` → records missing translations (dev mode only)
-- **Pattern**: File I/O with security validation (prevents path traversal)
-- **Security**: Uses `assertPathInsideAllowedDirs()` to validate all file paths
-- **Interesting detail**: Implements write-queue per file to prevent race conditions when saving missing keys
+- **Key Details** (security-critical pattern):
+  - **File I/O with security validation**: Uses `assertPathInsideAllowedDirs()` to prevent path traversal
+  - **Race condition protection**: Implements write-queue per file when saving missing keys
+  - **Input validation**: Strictly validates language codes and key namespaces before file operations
+- **Security Pattern**: LocalizationService demonstrates the defense-in-depth approach used throughout the codebase
 
 ---
 
@@ -162,7 +147,61 @@ This file is being refactored into modular handlers. Currently contains duplicat
 
 ---
 
-## 3. Renderer Process Structure
+## 3. Testing Architecture
+
+Family Watch Night uses a **three-layer BDD architecture** inspired by *BDD in Action* to separate business-facing test scenarios from technical implementation details:
+
+1. **Business Logic Layer** (`tests/bdd/business-logic/`): Feature files and step definitions expressing business scenarios in domain language
+2. **Business Flow Layer** (`tests/bdd/business-flow/personas/`): Persona classes (e.g., `InternalSystemPersona`) that translate domain intent into actionable steps
+3. **Technical Layer** (`tests/bdd/technical/`): Test hooks, infrastructure, and low-level integrations with the application
+
+**Key principle**: Business Logic steps must not directly call the Technical layer. All interactions route through personas, which maintain a stable domain-facing API.
+
+### Test Infrastructure Flow
+
+1. **Test Hooks Implementation** (`src/main/testing-active/TestHooksImpl.ts`):
+   - Exposes service-level operations for test consumption
+   - Instantiates actual services (MovieService, RoleService, etc.) for testing
+   - Implements a `TestHooks` interface defining all available test operations
+
+2. **Build Integration**:
+   - `npm run build:main:for-integration-testing` copies `src/main/testing-active/` to `src/main/testing/` before compilation
+   - This ensures test operations are only available during `NODE_ENV=test`
+   - Production builds use `src/main/testing-noop/` stub instead
+
+3. **Technical Hooks Layer** (`tests/bdd/technical/hooks/*.ts`):
+   - Classes like `Roles`, `Users`, etc. wrap TestHooks through the `withTestHooks` cross-process utility
+   - Adapt synchronous test operations (running in the main process) to async-compatible calls (for step execution in Node.js)
+   - Maintain 1:1 correspondence with service functionality
+
+4. **Business Flow Personas** (`tests/bdd/business-flow/personas/internal-system.ts`):
+   - Consume the Technical Hooks Layer to provide domain-aligned methods
+   - Express test operations using business language (e.g., `assignRoleToUser` instead of raw API calls)
+   - Stable contract for step definitions—changes to technical layer don't require step updates
+
+5. **Test State Store** (`tests/bdd/technical/infrastructure/world.ts`):
+   - Hierarchy: `world.getStateStore(namespace)` returns a shared state object for scenario context
+   - Supports keyed storage (`state.map.set(key, value)`) for multiple instances
+   - Supports last-created storage (`state.lastRole`) for un-keyed access to most recent instance
+   - Maintains isolation: each scenario gets a fresh state store
+
+### Example: Adding a Role Feature
+
+- **Feature file** (`tests/bdd/business-logic/features/rbac.feature`): User-facing scenario
+- **Step definition** (`tests/bdd/business-logic/steps/rbac-common.steps.ts`): Calls `getSystemPersona(world).createRole()`
+- **Persona** (`tests/bdd/business-flow/personas/internal-system.ts`): Implements `createRole()` → delegates to `world.rolesApi.createRole()`
+- **Technical Hooks Layer** (`tests/bdd/technical/hooks/roles.ts`): Calls `withTestHooks()` to invoke the test hook
+- **Test hook** (`src/main/testing-active/TestHooksImpl.ts`): Executes the actual `roleService.create()`
+
+This layering ensures that:
+- Personas provide a stable API for step definitions
+- Technical implementation changes don't break step definitions
+- State is centralized and scenario-scoped
+- Business and technical concerns remain separate
+
+---
+
+## 4. Renderer Process Structure
 
 The renderer is a React SPA that communicates with services via the dual API layer.
 
@@ -231,7 +270,7 @@ Forces consistency between both adapters.
 
 ---
 
-## 4. Database Setup
+## 5. Database
 
 ### **Storage Location**
 Platform-specific standard locations stored by `database.ts`:
@@ -240,66 +279,30 @@ Platform-specific standard locations stored by `database.ts`:
 - Linux: `~/.config/FamilyWatchNight/sqlite/FamilyWatchNight.db`
 
 ### **Migrations** (`src/main/db/migrations/`)
-- **001_create_movies_table.sql** - Initial schema
 - Run sequentially at startup via `runMigrations()` in database.ts
 - Each migration is read as raw SQL and executed with `db.exec(sql)`
 - Migrations are idempotent (use CREATE TABLE IF NOT EXISTS)
 
 ### **Models** (`src/main/db/models/`)
-Pattern: One TypeScript class per table, encapsulating all SQL operations.
 
-#### **MoviesModel**
-```typescript
-interface Movie {
-  id: number
-  watchmode_id: string | null
-  tmdb_id: string | null
-  original_title: string | null
-  normalized_title: string | null  // Stored normalized for searching
-  year: string | null
-  popularity: number | null
-  has_video: boolean
-}
+**Pattern**: One TypeScript class per table, encapsulating all SQL operations using prepared statements. All models follow consistent patterns:
+- **Performance**: Pre-compiled prepared statements with `?` placeholders
+- **Type conversion**: SQLite stores numbers and booleans; models convert to/from TypeScript types
+- **Query methods**: `create()`, `getById()`, `getAll()`, `update()`, `delete()` with table-specific queries as needed
 
-class MoviesModel {
-  private insertStmt, getByIdStmt, updateStmt, deleteStmt, searchByTitleStmt
-  
-  constructor(db: Database) {
-    this.initStatements()  // Pre-compiles all prepared statements
-  }
-  
-  create(movieData: MovieData): number
-  getById(id: number): Movie | null
-  getByWatchmodeId(watchmodeId: string): Movie | null
-  getByTmdbId(tmdbId: string): Movie | null
-  getAll(): Movie[]
-  update(id: number, movieData: MovieData): boolean
-  delete(id: number): boolean
-  searchByTitle(searchTerm: string): Movie[]  // Uses LIKE + normalized_title
-}
-```
+**Current models**:
+- **Users**: User accounts and authentication state
+- **UserProfiles**: Extended user data (display name, profile image)
+- **Movies**: Movie catalog with TMDB/Watchmode IDs
+- **Roles**: Role definitions (system roles like "admin" + custom roles)
+- **RolePermissions**: Junction table mapping roles to permission stubs
+- **UserRoles**: Junction table mapping users to assigned roles
 
-**Key design decisions**:
-- **Prepared statements**: All queries use `?` placeholders and `.prepare()` for performance
-- **Type conversion**: `boolean` stored as 0/1 in SQLite, converted to boolean in `create()/getById()`
-- **Normalization**: `normalized_title` uses diacritics removal for case-insensitive searching
-- **No ORM**: Direct SQL via better-sqlite3 for performance and control
+See `src/main/db/models/` for full implementations.
 
 ### **Testing Database**
-```typescript
-initMockDatabase(testDb?: Database | null) {
-  if (!testDb) {
-    db = new Database(':memory:')  // In-memory SQLite
-  } else {
-    db = testDb
-  }
-  runMigrations()  // Runs against in-memory DB
-  initModels()
-}
-```
-Enables fast test execution without file I/O.
 
----
+In-memory SQLite (`Database(':memory:')`) enables fast test execution without file I/O. Tests call `initMockDatabase()` to get a fresh database with all migrations applied and models instantiated.
 
 ## 5. API Server Pattern - Unified Service Exposure
 
@@ -639,11 +642,6 @@ describe('title normalization', () => {
 - Isolation: Automatic clearing of test stores and databases
 - Test Levels: @smoke (health checks), @integration (workflows)
 - Profiles: Cucumber profiles for targeted test execution
-
-### **Development Process**
-- **Collaborative Documentation**: All architectural documentation updates go through HumanAgent Chat review
-- **Pattern Consistency**: New implementations must follow established patterns; research existing code thoroughly
-- **Structured Problem Solving**: Use brainstorm → plan → implement → lessons learned cycle for complex tasks
 
 ---
 

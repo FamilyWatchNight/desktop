@@ -22,17 +22,50 @@ A cross-platform app for managing movie selection for a Family Watch Night
 - **Complex Decisions**: When multiple valid approaches exist, surface them in HumanAgent Chat for human decision-making
 - **Scope Clarification**: Use HumanAgent Chat to confirm understanding of requirements and scope before proceeding with implementation
 
-### Testing Validation Flow
+---
+
+# Testing in Family Watch Night
+
+## Test Architecture Overview
+
+This project uses a three-layer BDD architecture inspired by *BDD in Action*:
+
+1. **Business Logic Layer** (`tests/bdd/business-logic/`): Feature files and step definitions that express business scenarios in domain language
+2. **Business Flow Layer** (`tests/bdd/business-flow/personas/`): Persona classes (e.g., `InternalSystemPersona`) that translate domain intent into actionable steps
+3. **Technical Layer** (`tests/bdd/technical/`): Test hooks, infrastructure, and low-level integrations with the app
+
+**Key principle**: Business Logic steps must not call the Technical layer directly. They go through personas, which maintain a stable domain-facing API for test scenarios.
+
+### Test Structure
+- **Unit tests** (Jest): Located in `tests/unit/`, for isolated business logic
+  - Execute: `npm run test:unit`
+- **Feature tests** (Cucumber/BDD): Located in `tests/bdd/`
+  - Execute: `npm run test:features`
+  - Feature scenarios in `tests/bdd/business-logic/features/`
+  - Step definitions in `tests/bdd/business-logic/steps/`
+  - Personas (domain-facing APIs) in `tests/bdd/business-flow/personas/`
+  - Test hooks and infrastructure in `tests/bdd/technical/`
+
+### Test State Management
+
+Tests store scenario-specific data using a hierarchical state store via `world.getStateStore(namespace)`. This allows:
+- **Keyed state**: Store multiple instances by key (e.g., `state.roles.set('editor', role)`)
+- **Last-created state**: Store the most recent instance for un-keyed access (e.g., `state.lastRole`)
+
+When adding features with stateful test scenarios, use this pattern to maintain separation between setup/helpers and the scenario context.
+
+### Validation Flow
 When writing tests:
 1. **Before writing the first test**: Ask to validate the test approach and confirm test coverage strategy
-2. **Before each additional test**: Ask to validate the previous test worked as intended
+2. **Before each test scenario**: Ask to validate the previous test worked as intended
 3. **Never assume test completeness**: Verify sufficient coverage with human before marking done
-4. **Test Architecture Awareness**: Understand test levels (@smoke, @integration, unit) and their purposes
-5. **Isolation Verification**: Confirm test stores and databases are properly isolated between runs
-6. **Data Persistence Patterns**: Use established module variable patterns for test data
-7. **Service Interface Matching**: Ensure service methods match test hook expectations
+4. **Test Architecture Compliance**: Ensure Business Logic layers do not directly call Technical layers; route through personas
+5. **State Isolation**: Confirm test state is properly isolated between runs and namespaced appropriately
+6. **Persona Contract**: Ensure persona methods match test hook expectations and are stable for step definitions
 
-See Testing section below for specific constraints.
+---
+
+# Agent Implementation Guidance
 
 ---
 
@@ -100,9 +133,9 @@ This project uses structured documentation to prevent stale guidance and capture
 
 ## Key Documents
 
-- **ARCHITECTURE_ANALYSIS.md**: "Living" documentation of system design, patterns, infrastructure
+- **ARCHITECTURE_ANALYSIS.md**: "Living" documentation of system design, application architecture, and how testing infrastructure integrates with the main application
 - **DECISIONS.md**: Record of significant architectural and implementation decisions (created as-needed)
-- **AGENTS.md**: This file — agent workflow, conventions, and guidance
+- **AGENTS.md**: This file — agent workflow, conventions, testing patterns, and guidance
 
 ## Agent Approach to Documentation
 
