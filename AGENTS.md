@@ -220,8 +220,13 @@ npm run dev             # Concurrent build:watch + vite + debug (development)
 npm run test:unit       # Jest unit tests
 npm run tests:features  # Cucumber feature tests
 npm run test            # All tests
-npm run build           # Production build
+npm run build           # Full production build (slow - includes signing)
+npm run pack            # Production build without final executable/installer (faster validation)
+npm run build:main      # Main process TypeScript compilation only
+npm run build:renderer  # Renderer process build only
 ```
+
+**Build Validation Guidance**: For development validation, use `npm run build:main` for quick TypeScript checking of the main process, or `npm run pack` for comprehensive build validation without the slow code signing step. Reserve `npm run build` for final production releases.
 
 **Pattern Research**: Before implementing new features, thoroughly examine existing similar implementations to understand established patterns and conventions.
 
