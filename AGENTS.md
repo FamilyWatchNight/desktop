@@ -247,8 +247,8 @@ All user-facing text must be translatable:
 - Text exposed in UI should use i18next keys, not hardcoded strings
 - LocalizationService manages locale switching and translation loading
 - Locale files live in `./assets/locales/{locale}/` as JSON (e.g., `en/common.json`, `dev/common.json`)
-- When adding UI text, add corresponding translation keys to the appropriate files
-- `dev` text is the English text with underscores (___) affixed to the start and end.
+- **When adding new translation keys, update BOTH `en` and `dev` locale files**
+- `dev` text is the English text with underscores (___) affixed to the start and end for easy identification
 
 ## Security
 
