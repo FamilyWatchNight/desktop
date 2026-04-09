@@ -12,6 +12,7 @@ A cross-platform app for managing movie selection for a Family Watch Night
 - **On scope questions**: If unsure whether to expand/reduce scope, ask first
 - **Implementation choices**: When multiple valid approaches exist, surface them for human decision-making
 - **Documentation Updates**: Always use HumanAgent Chat to propose documentation changes before implementing them
+- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via HumanAgent Chat to confirm completion status and receive guidance on next steps.
 
 **Never assume work is done. Always ask.**
 
@@ -21,6 +22,7 @@ A cross-platform app for managing movie selection for a Family Watch Night
 - **Documentation Changes**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in HumanAgent Chat before implementation
 - **Complex Decisions**: When multiple valid approaches exist, surface them in HumanAgent Chat for human decision-making
 - **Scope Clarification**: Use HumanAgent Chat to confirm understanding of requirements and scope before proceeding with implementation
+- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via HumanAgent Chat to confirm completion status and receive guidance on next steps.
 
 ---
 
