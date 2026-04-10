@@ -122,6 +122,15 @@ The renderer's API client automatically detects its environment and selects the 
   - Accessors for application test hooks `./tests/support/domains/`
   - Test orchestration infrastructure in `./tests/infrastructure/`
 
+### Test Hooks
+- Service logic cannot be tested via Jest unit tests because it runs inside the Electron main process
+- Testing hooks, exposed only for integration testing, live in `src/main/testing-active`
+- The `InternalSystemPersona` in `tests/business-flow/personas/internal-system.ts` uses a test api in
+  `tests/technical/hooks` to call those hooks that run in the electron main process
+- Only serializable data can cross the hook boundary from Cucumber to Electron
+- NEVER, under any circumstances, change anything in `src/main/testing`. That file is overwritten at
+  build time
+
 ### Validation Flow
 Before writing tests:
 1. Get approval on test approach and coverage strategy
