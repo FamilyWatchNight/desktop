@@ -2,6 +2,7 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { CustomWorld } from '../../technical/infrastructure/world';
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
+import { AuthenticationError, AuthorizationError } from '../../../../src/main/auth/errors';
 
 function getSystemPersona(world: CustomWorld): InternalSystemPersona {
   const state = world.getStateStore('personas');
@@ -18,6 +19,7 @@ function getRbacState(world: CustomWorld) {
     lastRole?: unknown;
     lastUser?: unknown;
     deleteResult?: { success: boolean; error?: unknown };
+    lastError?: Error;
   };
   if (!state.roles) {
     state.roles = new Map<string, unknown>();
@@ -527,4 +529,33 @@ Then('the role {string} should be marked as hidden', async function (this: Custo
   const roleDetails = await system.getRoleById(role.id);
   expect(roleDetails).toBeTruthy();
   expect(roleDetails!.isHidden).toBe(true);
+});
+
+Then('an AuthenticationError should be thrown', function (this: CustomWorld) {
+  const state = getRbacState(this);
+  expect(state.lastError).toBeDefined();
+  expect(state.lastError!.message).toContain('AuthenticationError');
+});
+
+Then('an AuthorizationError should be thrown', function (this: CustomWorld) {
+  const state = getRbacState(this);
+  expect(state.lastError).toBeDefined();
+  expect(state.lastError!.message).toContain('AuthorizationError');
+});
+
+Given('I run unauthenticated', function (this: CustomWorld) {
+  const persona = getSystemPersona(this);
+  persona.runUnauthenticated();
+});
+
+Given('I run with the permissions {string}', function (this: CustomWorld, permissions: string) {
+  const persona = getSystemPersona(this);
+  const permissionStubs = parsePermissionList(permissions);
+  persona.runWithPermissions(permissionStubs);
+});
+
+Given('I run without the permissions {string}', function (this: CustomWorld, permissions: string) {
+  const persona = getSystemPersona(this);
+  const excludedPermissionStubs = parsePermissionList(permissions);
+  persona.runWithoutPermissions(excludedPermissionStubs);
 });

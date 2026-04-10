@@ -11,6 +11,8 @@ import * as db from '../database';
 import { type Role, type RoleData } from '../db/models/Roles';
 import type { PermissionStub } from '../auth/permissions';
 import { PERMISSIONS } from '../auth/permissions';
+import { AuthContext } from '../auth/context-manager';
+import { AuthenticationError, AuthorizationError } from '../auth/errors';
 
 export interface RoleWithPermissions extends Role {
   permissions: PermissionInfo[];
@@ -24,8 +26,19 @@ export interface PermissionInfo {
 export class RoleService {
   private t = i18n.getFixedT(null, 'auth');
 
+  private validateAuthContext(authContext?: AuthContext): void {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    if (!authContext.hasPermission('can-admin')) {
+      throw new AuthorizationError(this.t('errors.insufficientPermissions'));
+    }
+  }
+
   // Role CRUD operations
-  createRole(data: RoleData): number {
+  createRole(data: RoleData, authContext?: AuthContext): number {
+    this.validateAuthContext(authContext);
+
     const models = db.getModels();
     return models.roles.create(data);
   }
@@ -45,12 +58,26 @@ export class RoleService {
     return models.roles.getAll();
   }
 
-  updateRole(id: number, data: Partial<RoleData>): void {
+  updateRole(id: number, data: Partial<RoleData>, authContext?: AuthContext): void {
+    this.validateAuthContext(authContext);
+
     const models = db.getModels();
+    const existingRole = models.roles.getById(id);
+    if (!existingRole) {
+      throw new Error(this.t('errors.roleNotFound', 'Role not found'));
+    }
+    
+    // Prevent updating system roles (except display name and isHidden)
+    if (existingRole.systemStub && (data.systemStub !== undefined || data.displayName === undefined)) {
+      throw new AuthorizationError(this.t('errors.cannotModifySystemRole'));
+    }
+
     models.roles.update(id, data);
   }
 
-  deleteRole(id: number): void {
+  deleteRole(id: number, authContext?: AuthContext): void {
+    this.validateAuthContext(authContext);
+
     const models = db.getModels();
     const role = models.roles.getById(id);
     if (!role) {
@@ -71,8 +98,20 @@ export class RoleService {
   }
 
   // Permission management
-  setPermissionsForRole(roleId: number, permissionStubs: PermissionStub[]): void {
+  setPermissionsForRole(roleId: number, permissionStubs: PermissionStub[], authContext?: AuthContext): void {
+    this.validateAuthContext(authContext);
+
     const models = db.getModels();
+    const role = models.roles.getById(roleId);
+    if (!role) {
+      throw new Error(this.t('errors.roleNotFound', 'Role not found'));
+    }
+
+    // Prevent modifying permissions of system roles
+    if (role.systemStub) {
+      throw new AuthorizationError(this.t('errors.cannotModifySystemRole'));
+    }
+
     models.rolePermissions.setPermissionsForRole(roleId, permissionStubs);
   }
 
@@ -109,17 +148,6 @@ export class RoleService {
   getUsersWithRole(roleId: number): number[] {
     const models = db.getModels();
     return models.userRoles.getUsersByRoleId(roleId);
-  }
-
-  // User-role assignment operations
-  assignRoleToUser(userId: number, roleId: number): void {
-    const models = db.getModels();
-    models.userRoles.assignRoleToUser(userId, roleId);
-  }
-
-  removeRoleFromUser(userId: number, roleId: number): void {
-    const models = db.getModels();
-    models.userRoles.removeRoleFromUser(userId, roleId);
   }
 
   getRolesForUser(userId: number): number[] {
@@ -170,3 +198,6 @@ export class RoleService {
     return newRoleId;
   }
 }
+
+
+

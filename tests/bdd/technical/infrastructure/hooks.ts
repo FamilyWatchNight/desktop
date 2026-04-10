@@ -8,6 +8,7 @@ the Free Software Foundation, version 3.
 
 import { After, Before, Status } from '@cucumber/cucumber';
 import { CustomWorld } from './world';
+import { createSystemContext } from '../../../../src/main/auth/context-manager';
 import * as paths from '../../../../src/main/paths';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -44,17 +45,22 @@ Before({ timeout: 60 * 1000 }, async function (this: CustomWorld) {
 // After each scenario - cleanup
 After({ timeout: 60 * 1000 }, async function (this: CustomWorld, scenario) {
 
+  const systemContext = createSystemContext();
+  const authContextPayload = {
+    userId: systemContext.userId,
+    permissions: systemContext.permissions
+  };
   
   // Close database connection
   if (this.app) {
     try {
       // Clean up background tasks first
-      const state = await this.backgroundTasksApi.getState();
+      const state = await this.backgroundTasksApi.getState(authContextPayload);
       if (state.active) {
-        await this.backgroundTasksApi.cancelActive();
+        await this.backgroundTasksApi.cancelActive(authContextPayload);
       }
       for (const task of state.queue) {
-        await this.backgroundTasksApi.removeQueued(task.id);
+        await this.backgroundTasksApi.removeQueued(task.id, authContextPayload);
       }
 
       // Close database
@@ -91,3 +97,5 @@ After({ timeout: 60 * 1000 }, async function (this: CustomWorld, scenario) {
     }
   }
 });
+
+

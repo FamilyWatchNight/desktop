@@ -18,6 +18,8 @@ import { type User, type UserData } from '../db/models/Users';
 import { type UserProfile, type UserProfileData } from '../db/models/UserProfiles';
 import { type Role } from '../db/models/Roles';
 import { type PermissionStub, PERMISSIONS } from '../auth/permissions';
+import { AuthContext, createAuthContext } from '../auth/context-manager';
+import { AuthenticationError, AuthorizationError } from '../auth/errors';
 
 export interface CreateUserData extends UserData {}
 
@@ -32,8 +34,62 @@ export interface PermissionInfo {
 
 export class UserService {
   private t = i18n.getFixedT(null, 'auth');
+
+  private validateAuthContext(authContext?: AuthContext, targetUserId?: number): void {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+
+    // Allow self-access or user manager access
+    const canAccess = (targetUserId && authContext.userId === targetUserId) ||
+                     authContext.hasPermission('can-manage-users');
+
+    if (!canAccess) {
+      throw new AuthorizationError(this.t('errors.insufficientPermissions'));
+    }
+  }
   
-  async createUser(data: CreateUserData): Promise<AuthenticatedUser> {
+  private hasUsers(): boolean {
+    const db = getDb();
+    if (!db) throw new Error('Database not initialized');
+    
+    const result = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
+    return result.count > 0;
+  }
+  
+  async bootstrapAdmin(data: CreateUserData): Promise<AuthenticatedUser> {
+    // Only allow bootstrap when no users exist
+    if (this.hasUsers()) {
+      throw new AuthorizationError(this.t('errors.cannotBootstrapAdmin'));
+    }
+
+    // Create the admin user
+    const adminUser = await this.createUser(data, createAuthContext(0, [])); // Bootstrap context
+
+    // Assign admin role
+    const { roles } = getModels();
+    const adminRole = roles.getBySystemStub('admin');
+    if (adminRole) {
+      this.assignRoleToUser(adminUser.id, adminRole.id, createAuthContext(0, [])); // Bootstrap context
+    }
+
+    return adminUser;
+  }
+  
+  async createUser(data: CreateUserData, authContext?: AuthContext): Promise<AuthenticatedUser> {
+    // Bootstrap mode: allow creating first user without authentication
+    if (!this.hasUsers()) {
+      // This is bootstrap - allow creating admin user
+    } else {
+      // Normal mode: require authentication and permissions
+      if (!authContext) {
+        throw new AuthorizationError(this.t('errors.cannotBootstrapAdmin'));
+      }
+      if (!authContext.hasPermission('can-manage-users')) {
+        throw new AuthorizationError(this.t('errors.insufficientPermissions'));
+      }
+    }
+
     try {
       const { users, userProfiles } = getModels();
       const userId = await users.create(data);
@@ -86,7 +142,9 @@ export class UserService {
     return { ...user, profile };
   }
 
-  async updateUserProfile(userId: number, data: UserProfileData): Promise<void> {
+  async updateUserProfile(userId: number, data: UserProfileData, authContext?: AuthContext): Promise<void> {
+    this.validateAuthContext(authContext, userId);
+
     const { userProfiles } = getModels();
     const existingProfile = userProfiles.getByUserId(userId);
     if (existingProfile) {
@@ -96,7 +154,9 @@ export class UserService {
     }
   }
 
-  async changePassword(userId: number, newPassword: string): Promise<void> {
+  async changePassword(userId: number, newPassword: string, authContext?: AuthContext): Promise<void> {
+    this.validateAuthContext(authContext, userId);
+
     const { users } = getModels();
     await users.updatePassword(userId, newPassword);
   }
@@ -169,7 +229,9 @@ export class UserService {
     return path.join(getAppDataRoot(), 'profile-images');
   }
 
-  async saveProfileImage(userId: number, imageBuffer: Buffer, mimeType: string): Promise<string> {
+  async saveProfileImage(userId: number, imageBuffer: Buffer, mimeType: string, authContext?: AuthContext): Promise<string> {
+    this.validateAuthContext(authContext, userId);
+
     // Validate mime type
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
     if (!allowedTypes.includes(mimeType)) {
@@ -200,12 +262,14 @@ export class UserService {
     fs.writeFileSync(filePath, imageBuffer);
 
     // Update profile
-    await this.updateUserProfile(userId, { profileImagePath: filename });
+    await this.updateUserProfile(userId, { profileImagePath: filename }, authContext);
 
     return filename;
   }
 
-  async deleteProfileImage(userId: number): Promise<void> {
+  async deleteProfileImage(userId: number, authContext?: AuthContext): Promise<void> {
+    this.validateAuthContext(authContext, userId);
+
     const user = this.getUserById(userId);
     if (!user || !user.profile?.profileImagePath) return;
 
@@ -221,7 +285,7 @@ export class UserService {
     }
 
     // Update profile
-    await this.updateUserProfile(userId, { profileImagePath: null });
+    await this.updateUserProfile(userId, { profileImagePath: null }, authContext);
   }
 
   // Permission checking - aggregates permissions from all user roles
@@ -261,21 +325,6 @@ export class UserService {
     });
   }
 
-  userHasPermission(userId: number, permissionStub: PermissionStub): boolean {
-    const stubs = this.getUserPermissionStubs(userId);
-    return stubs.includes('can-admin') || stubs.includes(permissionStub);
-  }
-
-  userHasAnyPermission(userId: number, permissionStubs: PermissionStub[]): boolean {
-    const userStubs = this.getUserPermissionStubs(userId);
-    return userStubs.includes('can-admin') || permissionStubs.some(stub => userStubs.includes(stub));
-  }
-
-  userHasAllPermissions(userId: number, permissionStubs: PermissionStub[]): boolean {
-    const userStubs = this.getUserPermissionStubs(userId);
-    return userStubs.includes('can-admin') || permissionStubs.every(stub => userStubs.includes(stub));
-  }
-
   // User role management
   getUserRoles(userId: number): Role[] {
     const { roles } = getModels();
@@ -292,7 +341,20 @@ export class UserService {
     return userRoles.getRoleIdsForUser(userId);
   }
 
-  assignRoleToUser(userId: number, roleId: number): void {
+  assignRoleToUser(userId: number, roleId: number, authContext?: AuthContext): void {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    
+    if (!authContext.hasPermission('can-manage-users')) {
+      throw new AuthorizationError(this.t('errors.insufficientPermissions'));
+    }
+
+    // Users cannot modify roles for their own user account
+    if (authContext.userId === userId) {
+      throw new AuthorizationError(this.t('errors.cannotModifyOwnRoles'));
+    }
+
     // Verify role exists
     const { roles, userRoles } = getModels();
     const role = roles.getById(roleId);
@@ -303,20 +365,25 @@ export class UserService {
     userRoles.assignRoleToUser(userId, roleId);
   }
 
-  removeRoleFromUser(userId: number, roleId: number): void {
+  removeRoleFromUser(userId: number, roleId: number, authContext?: AuthContext): void {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    
+    if (!authContext.hasPermission('can-manage-users')) {
+      throw new AuthorizationError(this.t('errors.insufficientPermissions'));
+    }
+
+    // Users cannot modify roles for their own user account
+    if (authContext.userId === userId) {
+      throw new AuthorizationError(this.t('errors.cannotModifyOwnRoles'));
+    }
+
     const { userRoles } = getModels();
     userRoles.removeRoleFromUser(userId, roleId);
   }
 
-  assignMultipleRolesToUser(userId: number, roleIds: number[]): void {
-    for (const roleId of roleIds) {
-      this.assignRoleToUser(userId, roleId);
-    }
-  }
-
-  removeMultipleRolesFromUser(userId: number, roleIds: number[]): void {
-    for (const roleId of roleIds) {
-      this.removeRoleFromUser(userId, roleId);
-    }
-  }
 }
+
+
+

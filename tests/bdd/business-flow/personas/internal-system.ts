@@ -9,13 +9,22 @@ the Free Software Foundation, version 3.
 import { CustomWorld } from '../../technical/infrastructure/world';
 import { AuthenticatedUser } from '../../../../src/main/services/UserService';
 import { Role } from '../../../../src/main/db/models/Roles';
+import { createSystemContext, type AuthContext, type AuthContextPayload } from '../../../../src/main/auth/context-manager';
+import { PERMISSIONS } from '../../../../src/main/auth/permissions';
 
 /**
  * Internal System Persona - represents trusted backend operations
  * for testing business logic without transport concerns.
  */
 export class InternalSystemPersona {
-  constructor(private world: CustomWorld) {}
+  public authContext: AuthContext;
+
+  private isUnauthenticated: boolean = false;
+  private customPermissions: string[] | null = null;
+
+  constructor(private world: CustomWorld) {
+    this.authContext = createSystemContext();
+  }
 
   //
   // App operations
@@ -30,20 +39,36 @@ export class InternalSystemPersona {
   //
   // Background task operations
   //
+  private getAuthContextPayload(): AuthContextPayload | undefined {
+    if (this.isUnauthenticated) {
+      return undefined;
+    }
+    if (this.customPermissions !== null) {
+      return {
+        userId: 1, // Test user ID
+        permissions: this.customPermissions
+      };
+    }
+    return {
+      userId: this.authContext.userId,
+      permissions: this.authContext.permissions
+    };
+  }
+
   async enqueueTask(taskType: string, args?: Record<string, unknown>) {
-    return await this.world.backgroundTasksApi.enqueue(taskType, args);
+    return await this.world.backgroundTasksApi.enqueue(taskType, args, this.getAuthContextPayload());
   }
 
   async getTaskState() {
-    return await this.world.backgroundTasksApi.getState();
+    return await this.world.backgroundTasksApi.getState(this.getAuthContextPayload());
   }
 
   async cancelActiveTask() {
-    return await this.world.backgroundTasksApi.cancelActive();
+    return await this.world.backgroundTasksApi.cancelActive(this.getAuthContextPayload());
   }
 
   async removeQueuedTask(taskId: string) {
-    return await this.world.backgroundTasksApi.removeQueued(taskId);
+    return await this.world.backgroundTasksApi.removeQueued(taskId, this.getAuthContextPayload());
   }
 
   // Test Tasks
@@ -122,38 +147,34 @@ export class InternalSystemPersona {
   // Movie operations
   //
   async getAllMovies() {
-    return await this.world.moviesApi.getAllMovies();
+    return await this.world.moviesApi.getAllMovies(this.getAuthContextPayload());
   }
 
   async getMovieByTmdbId(tmdbId: string) {
-    return await this.world.moviesApi.getMovieByTmdbId(tmdbId);
+    return await this.world.moviesApi.getMovieByTmdbId(tmdbId, this.getAuthContextPayload());
   }
 
   async getMovieByWatchmodeId(watchmodeId: string) {
-    return await this.world.moviesApi.getMovieByWatchmodeId(watchmodeId);
+    return await this.world.moviesApi.getMovieByWatchmodeId(watchmodeId, this.getAuthContextPayload());
   }
 
   async searchMoviesByTitle(searchTerm: string) {
-    return await this.world.moviesApi.searchByTitle(searchTerm);
+    return await this.world.moviesApi.searchByTitle(searchTerm, this.getAuthContextPayload());
   }
 
   async getMovieCount() {
-    return await this.world.moviesApi.getMovieCount();
+    return await this.world.moviesApi.getMovieCount(this.getAuthContextPayload());
   }
 
   //
   // Role operations
   //
-  async assignRoleToUser(userId: number, roleId: number): Promise<void> {
-    return await this.world.rolesApi.assignRoleToUser(userId, roleId);
-  }
-
   async createRole(name: string, permissionStubs: string[] = []): Promise<Role> {
-    return await this.world.rolesApi.createRole(name, permissionStubs);
+    return await this.world.rolesApi.createRole(name, permissionStubs, this.getAuthContextPayload());
   }
 
   async deleteRole(id: number): Promise<void> {
-    return await this.world.rolesApi.deleteRole(id);
+    return await this.world.rolesApi.deleteRole(id, this.getAuthContextPayload());
   }
 
   async getRoleById(id: number): Promise<Role | null> {
@@ -188,54 +209,50 @@ export class InternalSystemPersona {
     return await this.world.rolesApi.duplicateRole(sourceRoleId);
   }
 
-  async removeRoleFromUser(userId: number, roleId: number): Promise<void> {
-    return await this.world.rolesApi.removeRoleFromUser(userId, roleId);
-  }
-
   async setRolePermissions(roleId: number, permissionStubs: string[]): Promise<void> {
-    return await this.world.rolesApi.setRolePermissions(roleId, permissionStubs);
+    return await this.world.rolesApi.setRolePermissions(roleId, permissionStubs, this.getAuthContextPayload());
   }
 
   async updateRole(id: number, data: Partial<import('../../../../src/main/db/models/Roles').RoleData>): Promise<void> {
-    return await this.world.rolesApi.updateRole(id, data);
+    return await this.world.rolesApi.updateRole(id, data, this.getAuthContextPayload());
   }
 
   async updateRoleDisplayName(id: number, displayName: string): Promise<void> {
-    return await this.world.rolesApi.updateRoleDisplayName(id, displayName);
+    return await this.world.rolesApi.updateRoleDisplayName(id, displayName, this.getAuthContextPayload());
   }
 
   async updateRoleHiddenStatus(id: number, isHidden: boolean): Promise<void> {
-    return await this.world.rolesApi.updateRoleHiddenStatus(id, isHidden);
+    return await this.world.rolesApi.updateRoleHiddenStatus(id, isHidden, this.getAuthContextPayload());
   }
 
   //
   // Settings operations
   //
   async initializeSettings(testSettings?: Record<string, unknown>) {
-    return await this.world.settingsApi.initializeMockSettings(testSettings);
+    return await this.world.settingsApi.initializeMockSettings(testSettings, this.getAuthContextPayload());
   }
 
   async getSetting(key: string) {
-    return await this.world.settingsApi.getSetting(key);
+    return await this.world.settingsApi.getSetting(key, this.getAuthContextPayload());
   }
 
   async setSetting(key: string, value: unknown) {
-    return await this.world.settingsApi.setSetting(key, value);
+    return await this.world.settingsApi.setSetting(key, value, this.getAuthContextPayload());
   }
 
   async loadSettings() {
-    return await this.world.settingsApi.loadSettings();
+    return await this.world.settingsApi.loadSettings(this.getAuthContextPayload());
   }
 
   async saveSettings(settings: Record<string, unknown>) {
-    return await this.world.settingsApi.saveSettings(settings);
+    return await this.world.settingsApi.saveSettings(settings, this.getAuthContextPayload());
   }
 
   //
   // User operations
   //
   async createUser(data: { username: string; email?: string; password?: string }): Promise<AuthenticatedUser> {
-    return await this.world.usersApi.createUser(data);
+    return await this.world.usersApi.createUser(data, this.getAuthContextPayload());
   }
 
   async authenticateUser(username: string, password: string): Promise<AuthenticatedUser | null> {
@@ -247,13 +264,39 @@ export class InternalSystemPersona {
   }
 
   async updateUserProfile(id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }): Promise<void> {
-    return await this.world.usersApi.updateUserProfile(id, profileData);
+    return await this.world.usersApi.updateUserProfile(id, profileData, this.getAuthContextPayload());
+  }
+
+  async assignRoleToUser(userId: number, roleId: number): Promise<void> {
+    return await this.world.usersApi.assignRoleToUser(userId, roleId, this.getAuthContextPayload());
+  }
+
+  async removeRoleFromUser(userId: number, roleId: number): Promise<void> {
+    return await this.world.usersApi.removeRoleFromUser(userId, roleId, this.getAuthContextPayload());
   }
 
   // Authorization operations
   async checkUserHasPermission(userId: number, permissionStub: string): Promise<boolean> {
     const permissions = await this.getUserPermissions(userId);
     return permissions.includes(permissionStub);
+  }
+
+  // Auth context control for testing
+  runUnauthenticated(): void {
+    this.isUnauthenticated = true;
+    this.customPermissions = null;
+  }
+
+  runWithPermissions(permissionStubs: string[]): void {
+    this.isUnauthenticated = false;
+    this.customPermissions = permissionStubs;
+  }
+
+  runWithoutPermissions(excludedPermissionStubs: string[]): void {
+    this.isUnauthenticated = false;
+    const allPermissions = PERMISSIONS.map(p => p.stub);
+    const excluded = new Set(['can-admin', ...excludedPermissionStubs]);
+    this.customPermissions = allPermissions.filter(p => !excluded.has(p));
   }
 
 }

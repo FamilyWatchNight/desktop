@@ -10,6 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import { safeJoin, assertPathInsideAllowedDirs } from '../security/pathGuards';
 import { app } from 'electron';
+import { AuthContext } from '../auth/context-manager';
 
 const isTestMode = process.env.NODE_ENV === 'test';
 const isDevMode = !(app && app.isPackaged);
@@ -96,6 +97,11 @@ export class LocalizationService {
   // Allow overriding the locales path for testing
   constructor(localesPath: string = defaultLocalesPath) {
     this.localesPath = localesPath;
+  }
+
+  // @ts-ignore: Intentionally unused - LocalizationService allows unauthenticated access
+  private validateAuthContext(_authContext?: AuthContext): void {
+    // No-op - translations available to all users including unauthenticated
   }
 
   /**

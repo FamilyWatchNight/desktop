@@ -57,7 +57,13 @@ export class CustomWorld extends World {
     const debugArgs = (!!process.env.PWDEBUG) ? ['--inspect-brk=9229'] : [];
     const ciArgs = (!!process.env.CI) ? ['--no-sandbox'] : [];
 
-    this.app = await electron.launch({ args: ['.', ...debugArgs, ...ciArgs] });
+    this.app = await electron.launch({ 
+      args: ['.', ...debugArgs, ...ciArgs],
+      env: {
+        ...process.env,
+        NODE_ENV: process.env.NODE_ENV || 'test'
+      }
+    });
     
     this.app.on('console', (msg) => {
       console.log('[app]', msg.text());

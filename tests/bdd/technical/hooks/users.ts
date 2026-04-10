@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import { ElectronApplication } from 'playwright';
 import { withTestHooks } from '../infrastructure/utils';
 import { AuthenticatedUser } from '../../../src/main/services/UserService';
+import { type AuthContextPayload } from '../../../src/main/auth/context-manager';
 
 /**
  * API layer for exposing user-related functionality in the electron app to Cucumber tests.
@@ -23,10 +24,10 @@ export class Users {
   /**
    * Create a new user
    */
-  async createUser(data: { username: string; email?: string; password?: string }): Promise<AuthenticatedUser> {
-    return await withTestHooks(this.app, async (hooks, data) => {
-      return hooks.users.createTestUser(data);
-    }, data);
+  async createUser(data: { username: string; email?: string; password?: string }, authContext?: AuthContextPayload): Promise<AuthenticatedUser> {
+    return await withTestHooks(this.app, async (hooks, data, authContext) => {
+      return hooks.users.createTestUser(data, authContext);
+    }, data, authContext);
   }
 
   /**
@@ -50,9 +51,27 @@ export class Users {
   /**
    * Update a user's profile
    */
-  async updateUserProfile(id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }): Promise<void> {
-    return await withTestHooks(this.app, async (hooks, id, profileData) => {
-      return hooks.users.updateTestUserProfile(id, profileData);
-    }, id, profileData);
+  async updateUserProfile(id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }, authContext?: AuthContextPayload): Promise<void> {
+    return await withTestHooks(this.app, async (hooks, id, profileData, authContext) => {
+      return hooks.users.updateTestUserProfile(id, profileData, authContext);
+    }, id, profileData, authContext);
+  }
+
+  /**
+   * Assign a role to a user
+   */
+  async assignRoleToUser(userId: number, roleId: number, authContext?: AuthContextPayload): Promise<void> {
+    return await withTestHooks(this.app, async (hooks, userId, roleId, authContext) => {
+      return hooks.users.assignRoleToUser(userId, roleId, authContext);
+    }, userId, roleId, authContext);
+  }
+
+  /**
+   * Remove a role from a user
+   */
+  async removeRoleFromUser(userId: number, roleId: number, authContext?: AuthContextPayload): Promise<void> {
+    return await withTestHooks(this.app, async (hooks, userId, roleId, authContext) => {
+      return hooks.users.removeRoleFromUser(userId, roleId, authContext);
+    }, userId, roleId, authContext);
   }
 }

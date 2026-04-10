@@ -18,6 +18,7 @@ import { getTestHooks } from "./testing/TestHooksImpl";
 import i18n from "./i18n";
 import { settingsService } from "./api-server/ipc/instances";
 import { initialize as initializeEventNotificationManager } from "./event-notification-manager";
+import { createSystemContext } from './auth/context-manager';
 
 let tray: Tray | null = null;
 const webServer = express();
@@ -79,8 +80,10 @@ app.on("ready", () => {
     createTray();
     registerIpcHandlers();
 
+    const systemAuthContext = createSystemContext();
+
     try {
-      const port = (settingsService.get("webPort") as number) || 3000;
+      const port = (settingsService.get("webPort", systemAuthContext) as number) || 3000;
       server.startServer(webServer, port);
       initializeEventNotificationManager();
     } catch (error) {

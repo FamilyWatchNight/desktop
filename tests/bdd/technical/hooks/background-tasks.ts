@@ -8,6 +8,7 @@ the Free Software Foundation, version 3.
 
 import { ElectronApplication } from 'playwright';
 import { withTestHooks } from '../infrastructure/utils';
+import { type AuthContextPayload } from '../../../src/main/auth/context-manager';
 
 /**
  * API layer for exposing background task functionality in the electron app to Cucumber tests.
@@ -22,37 +23,37 @@ export class BackgroundTasks {
   /**
    * Enqueue a background task
    */
-  async enqueue(taskType: string, args?: Record<string, unknown>): Promise<unknown> {
-    return await withTestHooks(this.app, async (hooks, taskType, args) => {
-      return hooks.backgroundTasks.enqueue(taskType, args);
-    }, taskType, args);
+  async enqueue(taskType: string, args?: Record<string, unknown>, authContext?: AuthContextPayload): Promise<unknown> {
+    return await withTestHooks(this.app, async (hooks, taskType, args, authContext) => {
+      return hooks.backgroundTasks.enqueue(taskType, args, authContext);
+    }, taskType, args, authContext);
   }
 
   /**
    * Get the current background task state
    */
-  async getState(): Promise<{ active: unknown; queue: unknown[] }> {
-    return await withTestHooks(this.app, async (hooks) => {
-      return hooks.backgroundTasks.getState();
-    });
+  async getState(authContext?: AuthContextPayload): Promise<{ active: unknown; queue: unknown[] }> {
+    return await withTestHooks(this.app, async (hooks, authContext) => {
+      return hooks.backgroundTasks.getState(authContext);
+    }, authContext);
   }
 
   /**
    * Cancel the active background task
    */
-  async cancelActive(): Promise<unknown> {
-    return await withTestHooks(this.app, async (hooks) => {
-      return hooks.backgroundTasks.cancelActive();
-    });
+  async cancelActive(authContext?: AuthContextPayload): Promise<unknown> {
+    return await withTestHooks(this.app, async (hooks, authContext) => {
+      return hooks.backgroundTasks.cancelActive(authContext);
+    }, authContext);
   }
 
   /**
    * Remove a queued background task
    */
-  async removeQueued(taskId: string): Promise<unknown> {
-    return await withTestHooks(this.app, async (hooks, taskId) => {
-      return hooks.backgroundTasks.removeQueued(taskId);
-    }, taskId);
+  async removeQueued(taskId: string, authContext?: AuthContextPayload): Promise<unknown> {
+    return await withTestHooks(this.app, async (hooks, taskId, authContext) => {
+      return hooks.backgroundTasks.removeQueued(taskId, authContext);
+    }, taskId, authContext);
   }
 
   /**
@@ -98,3 +99,4 @@ export class BackgroundTasks {
   }
 
 }
+

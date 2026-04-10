@@ -8,21 +8,43 @@ the Free Software Foundation, version 3.
 
 import * as backgroundTaskManager from '../background-task-manager';
 import type { TaskRegistryType } from '../tasks/task-registry';
+import i18n from '../i18n';
+import { AuthContext } from '../auth/context-manager';
+import { AuthenticationError, AuthorizationError } from '../auth/errors';
 
 export class BackgroundTaskService {
-  enqueue(taskType: TaskRegistryType, args: Record<string, unknown> = {}): { success: boolean; taskId?: string; error?: string } {
+  private t = i18n.getFixedT(null, 'auth');
+
+  private validateAuthContext(authContext?: AuthContext): void {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    if (!authContext.hasPermission('can-admin')) {
+      throw new AuthorizationError(this.t('errors.insufficientPermissions'));
+    }
+  }
+
+  enqueue(taskType: TaskRegistryType, args: Record<string, unknown> = {}, authContext?: AuthContext): { success: boolean; taskId?: string; error?: string } {
+    this.validateAuthContext(authContext);
+    
     return backgroundTaskManager.enqueue(taskType, args);
   }
 
-  getState(): { active: unknown; queue: unknown[] } {
+  getState(authContext?: AuthContext): { active: unknown; queue: unknown[] } {
+    this.validateAuthContext(authContext);
+
     return backgroundTaskManager.getState();
   }
 
-  cancelActive(): { success: boolean; error?: string } {
+  cancelActive(authContext?: AuthContext): { success: boolean; error?: string } {
+    this.validateAuthContext(authContext);
+    
     return backgroundTaskManager.cancelActive();
   }
 
-  removeQueued(taskId: string): { success: boolean; error?: string } {
+  removeQueued(taskId: string, authContext?: AuthContext): { success: boolean; error?: string } {
+    this.validateAuthContext(authContext);
+    
     return backgroundTaskManager.removeQueued(taskId);
   }
 
@@ -34,3 +56,7 @@ export class BackgroundTaskService {
     backgroundTaskManager.clearNotifyFn(fn);
   }
 }
+
+
+
+
