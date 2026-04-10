@@ -40,7 +40,6 @@ export interface TestHooks {
     loadStubWatchmodeData: (dataSource: string) => Promise<void>;
   };
   movies: {
-    getAll: (authContext?: AuthContextPayload) => import('../db/models/Movies').Movie[];
     getByTmdbId: (tmdbId: string, authContext?: AuthContextPayload) => import('../db/models/Movies').Movie | null;
     getByWatchmodeId: (watchmodeId: string, authContext?: AuthContextPayload) => import('../db/models/Movies').Movie | null;
     searchByTitle: (searchTerm: string, authContext?: AuthContextPayload) => import('../db/models/Movies').Movie[];
@@ -123,7 +122,6 @@ export function getTestHooks(): TestHooks {
       }
     },
     movies: {
-      getAll: (authContext?: AuthContextPayload) => movieService.getAll(authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined),
       getByTmdbId: (tmdbId: string, authContext?: AuthContextPayload) => movieService.getByTmdbId(tmdbId, authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined),
       getByWatchmodeId: (watchmodeId: string, authContext?: AuthContextPayload) => movieService.getByWatchmodeId(watchmodeId, authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined),
       searchByTitle: (searchTerm: string, authContext?: AuthContextPayload) => movieService.searchByTitle(searchTerm, authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined)

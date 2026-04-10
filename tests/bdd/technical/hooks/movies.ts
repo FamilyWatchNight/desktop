@@ -56,12 +56,4 @@ export class Movies {
       return hooks.movies.searchByTitle(searchTerm, authContext);
     }, searchTerm, authContext);
   }
-
-  /**
-   * Get the count of movies in the database
-   */
-  async getMovieCount(authContext?: AuthContextPayload): Promise<number> {
-    const movies = await this.getAllMovies(authContext);
-    return movies.length;
-  }
 }

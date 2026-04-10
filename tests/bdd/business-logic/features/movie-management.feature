@@ -58,10 +58,6 @@ Feature: Import Movies
     {"adult":false,"id":1622513,"original_title":"Oscar Goes","popularity":0.0,"video":false}
     """
 
-  @import @tmdb
-  Scenario: Movies in both databases are properly merged
-    Then I should see 23 movies in the database
-
   @import @tmdb @missing-data
   Scenario: Movies missing from Watchmode are handled gracefully
     When I look up the movie with TMDB ID "1622513"

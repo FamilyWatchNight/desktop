@@ -146,10 +146,6 @@ export class InternalSystemPersona {
   //
   // Movie operations
   //
-  async getAllMovies() {
-    return await this.world.moviesApi.getAllMovies(this.getAuthContextPayload());
-  }
-
   async getMovieByTmdbId(tmdbId: string) {
     return await this.world.moviesApi.getMovieByTmdbId(tmdbId, this.getAuthContextPayload());
   }
@@ -160,10 +156,6 @@ export class InternalSystemPersona {
 
   async searchMoviesByTitle(searchTerm: string) {
     return await this.world.moviesApi.searchByTitle(searchTerm, this.getAuthContextPayload());
-  }
-
-  async getMovieCount() {
-    return await this.world.moviesApi.getMovieCount(this.getAuthContextPayload());
   }
 
   //

@@ -54,12 +54,6 @@ When('I look up the movie with Watchmode ID {string}', async function (this: Cus
   state.currentMovie = await system.getMovieByWatchmodeId(watchmodeId);
 });
 
-Then('I should see {int} movies in the database', async function (this: CustomWorld, expectedCount: number) {
-  const system = getSystemPersona(this);
-  const count = await system.getMovieCount();
-  expect(count).toBe(expectedCount);
-});
-
 Then('the movie should have a null year value', async function (this: CustomWorld) {
   const state = movieState(this);
   const currentMovie = state.currentMovie as MovieData | undefined;

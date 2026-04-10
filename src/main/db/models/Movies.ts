@@ -47,7 +47,6 @@ export default class MoviesModel {
   private getByIdStmt!: Database.Statement;
   private getByWatchmodeIdStmt!: Database.Statement;
   private getByTmdbIdStmt!: Database.Statement;
-  private getAllStmt!: Database.Statement;
   private updateStmt!: Database.Statement;
   private deleteStmt!: Database.Statement;
   private searchByTitleStmt!: Database.Statement;
@@ -73,10 +72,6 @@ export default class MoviesModel {
 
     this.getByTmdbIdStmt = this.db.prepare(`
       SELECT * FROM movies WHERE tmdb_id = ?
-    `);
-
-    this.getAllStmt = this.db.prepare(`
-      SELECT * FROM movies ORDER BY normalized_title
     `);
 
     this.updateStmt = this.db.prepare(`
@@ -121,11 +116,6 @@ export default class MoviesModel {
   getByTmdbId(tmdbId: string): Movie | null {
     const row = this.getByTmdbIdStmt.get(tmdbId) as MovieRow | undefined;
     return row ? this.formatMovie(row) : null;
-  }
-
-  getAll(): Movie[] {
-    const rows = this.getAllStmt.all() as MovieRow[];
-    return rows.map((row) => this.formatMovie(row));
   }
 
   update(id: number, movieData: MovieData): boolean {
