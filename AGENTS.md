@@ -64,6 +64,7 @@ When writing tests:
 4. **Test Architecture Compliance**: Ensure Business Logic layers do not directly call Technical layers; route through personas
 5. **State Isolation**: Confirm test state is properly isolated between runs and namespaced appropriately
 6. **Persona Contract**: Ensure persona methods match test hook expectations and are stable for step definitions
+7. **Integration hook validation**: Use `npm run build:main:for-integration-testing` when modifying `src/main/testing-active/TestHooksImpl.ts` or related test hooks so compile-time mismatches are caught before running feature tests.
 
 ---
 
