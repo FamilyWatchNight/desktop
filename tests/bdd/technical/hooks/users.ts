@@ -33,19 +33,19 @@ export class Users {
   /**
    * Authenticate a user with username and password
    */
-  async authenticateUser(username: string, password: string): Promise<AuthenticatedUser | null> {
-    return await withTestHooks(this.app, async (hooks, username, password) => {
-      return hooks.users.authenticateTestUser(username, password);
-    }, username, password);
+  async authenticateUser(username: string, password: string, authContext?: AuthContextPayload): Promise<AuthenticatedUser | null> {
+    return await withTestHooks(this.app, async (hooks, username, password, authContext) => {
+      return hooks.users.authenticateTestUser(username, password, authContext);
+    }, username, password, authContext);
   }
 
   /**
    * Get a user by ID
    */
-  async getUserById(id: number): Promise<AuthenticatedUser | null> {
-    return await withTestHooks(this.app, async (hooks, id) => {
-      return hooks.users.getTestUserById(id);
-    }, id);
+  async getUserById(id: number, authContext?: AuthContextPayload): Promise<AuthenticatedUser | null> {
+    return await withTestHooks(this.app, async (hooks, id, authContext) => {
+      return hooks.users.getTestUserById(id, authContext);
+    }, id, authContext);
   }
 
   /**
@@ -91,6 +91,15 @@ export class Users {
     return await withTestHooks(this.app, async (hooks, userId, authContext) => {
       return hooks.users.getUserPermissions(userId, authContext);
     }, userId, authContext);
+  }
+
+  /**
+   * Get all users that have specified permissions
+   */
+  async getUsersWithPermissions(permissions: string[], authContext?: AuthContextPayload): Promise<AuthenticatedUser[]> {
+    return await withTestHooks(this.app, async (hooks, permissions, authContext) => {
+      return hooks.users.getUsersWithPermissions(permissions, authContext);
+    }, permissions, authContext);
   }
 }
 

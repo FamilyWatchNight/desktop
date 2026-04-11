@@ -26,6 +26,11 @@ export interface AuthenticatedUser extends User {
   profile: UserProfile | null;
 }
 
+export interface BasicUserInfo {
+  username: string;
+  profile: { displayName: string | null; profileImagePath: string | null } | null;
+}
+
 export interface PermissionInfo {
   stub: PermissionStub;
   displayName: string;
@@ -86,7 +91,12 @@ export class UserService {
     }
   }
 
-  async authenticateUser(username: string, password: string): Promise<AuthenticatedUser | null> {
+  async authenticateUser(username: string, password: string, authContext?: AuthContext): Promise<AuthenticatedUser | null> {
+    if (authContext) {
+      // If already authenticated, do not allow re-authentication (to prevent abuse of this method)
+      throw new AuthorizationError(this.t('errors.mustBeLoggedOut'));
+    }
+
     const { users, userProfiles } = getModels();
     const userRow = users.getByUsername(username);
     if (!userRow) return null;
@@ -113,13 +123,25 @@ export class UserService {
     return user ? { ...user, profile } : null;
   }
 
-  getUserById(id: number): AuthenticatedUser | null {
+  getUserById(id: number, authContext?: AuthContext): AuthenticatedUser | BasicUserInfo | null {
+    let canSeeUserDetails = false;
+
+    if (authContext) {
+      canSeeUserDetails = authContext.userId === id || authContext.hasPermission('can-manage-users');
+    }
+
     const { users, userProfiles } = getModels();
     const user = users.getById(id);
     if (!user) return null;
 
     const profile = userProfiles.getByUserId(user.id);
-    return { ...user, profile };
+
+    if (canSeeUserDetails) {
+      return { ...user, profile };
+    } else {
+      return { username: user.username, profile: { displayName: profile?.displayName || null, profileImagePath: profile?.profileImagePath || null } };
+    }
+  
   }
 
   async updateUserProfile(userId: number, data: UserProfileData, authContext?: AuthContext): Promise<void> {
@@ -141,7 +163,15 @@ export class UserService {
     await users.updatePassword(userId, newPassword);
   }
 
-  getUsersWithPermissions(permissions: PermissionStub[]): AuthenticatedUser[] {
+  getUsersWithPermissions(permissions: PermissionStub[], authContext?: AuthContext): BasicUserInfo[] {
+    if (authContext) {
+      // We really don't expect this ever to be called when someone is logged in.
+      // The purpose is to get a list of users who *can* log in.
+      // If we ever use it for something different, then we need to rethink it.
+      // So for now, fail if that ever happens.
+      throw new AuthorizationError(this.t('errors.mustBeLoggedOut'));
+    }
+
     const db = getDb();
     if (!db) throw new Error('Database not initialized');
 
@@ -163,7 +193,7 @@ export class UserService {
     const adminUsers = this.getUsersWithAdminPermission();
 
     // Combine and deduplicate
-    const userMap = new Map<number, AuthenticatedUser>();
+    const userMap = new Map<number, BasicUserInfo>();
 
     for (const userId of userIds) {
       const user = users.getById(userId);
@@ -173,7 +203,7 @@ export class UserService {
     }
 
     for (const adminUser of adminUsers) {
-      userMap.set(adminUser.id, adminUser);
+      userMap.set(adminUser.id, { ...adminUser, profile: adminUser.profile });
     }
 
     return Array.from(userMap.values());

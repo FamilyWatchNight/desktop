@@ -74,8 +74,9 @@ export interface TestHooks {
   };
   users: {
     createTestUser: (data: { username: string; email?: string; password?: string }, authContext?: AuthContextPayload) => Promise<import('../services/UserService').AuthenticatedUser>;
-    authenticateTestUser: (username: string, password: string) => Promise<import('../services/UserService').AuthenticatedUser | null>;
-    getTestUserById: (id: number) => import('../services/UserService').AuthenticatedUser | null;
+    authenticateTestUser: (username: string, password: string, authContext?: AuthContextPayload) => Promise<import('../services/UserService').AuthenticatedUser | null>;
+    getTestUserById: (id: number, authContext?: AuthContextPayload) => Promise<import('../services/UserService').AuthenticatedUser | import('../services/UserService').BasicUserInfo | null>;
+    getUsersWithPermissions: (permissions: string[], authContext?: AuthContextPayload) => Promise<import('../services/UserService').BasicUserInfo[]>;
     updateTestUserProfile: (id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }, authContext?: AuthContextPayload) => Promise<void>;
     assignRoleToUser: (userId: number, roleId: number, authContext?: AuthContextPayload) => Promise<void>;
     removeRoleFromUser: (userId: number, roleId: number, authContext?: AuthContextPayload) => Promise<void>;
@@ -193,8 +194,18 @@ export function getTestHooks(): TestHooks {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
         return userService.createUser(data, ctx);
       },
-      authenticateTestUser: (username, password) => userService.authenticateUser(username, password),
-      getTestUserById: (id) => userService.getUserById(id),
+      authenticateTestUser: (username, password, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return userService.authenticateUser(username, password, ctx);
+      },
+      getTestUserById: (id, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return Promise.resolve(userService.getUserById(id, ctx));
+      },
+      getUsersWithPermissions: (permissions, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return Promise.resolve(userService.getUsersWithPermissions(permissions as any, ctx));
+      },
       updateTestUserProfile: (id, profileData, authContext) => {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
         return userService.updateUserProfile(id, profileData, ctx);

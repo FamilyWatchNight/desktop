@@ -240,11 +240,15 @@ export class InternalSystemPersona {
   }
 
   async authenticateUser(username: string, password: string): Promise<AuthenticatedUser | null> {
-    return await this.world.usersApi.authenticateUser(username, password);
+    return await this.world.usersApi.authenticateUser(username, password, this.getAuthContextPayload());
   }
 
   async getUserById(id: number): Promise<AuthenticatedUser | null> {
-    return await this.world.usersApi.getUserById(id);
+    return await this.world.usersApi.getUserById(id, this.getAuthContextPayload());
+  }
+
+  async getUsersWithPermissions(permissions: string[]): Promise<AuthenticatedUser[]> {
+    return await this.world.usersApi.getUsersWithPermissions(permissions, this.getAuthContextPayload());
   }
 
   async updateUserProfile(id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }): Promise<void> {
