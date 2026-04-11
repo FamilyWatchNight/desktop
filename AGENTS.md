@@ -128,8 +128,12 @@ The renderer's API client automatically detects its environment and selects the 
 - The `InternalSystemPersona` in `tests/business-flow/personas/internal-system.ts` uses a test api in
   `tests/technical/hooks` to call those hooks that run in the electron main process
 - Only serializable data can cross the hook boundary from Cucumber to Electron
-- NEVER, under any circumstances, change anything in `src/main/testing`. That file is overwritten at
-  build time
+- NEVER, under any circumstances, change anything in `src/main/testing`. That folder's contents is
+  overwritten at build time.
+- If any compile, build, or test failure points to a problem in `src/main/testing` and you believe that
+  you need to change a file in that folder to resolve the error, instead make the change to the
+  equivalent file in the `src/main/testing-active` folder. Those files will be copied into `src/main/testing`
+  at build time, so your changes there will take effect at the next build.
 
 ### Validation Flow
 Before writing tests:
