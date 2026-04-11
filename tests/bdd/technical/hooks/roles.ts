@@ -33,46 +33,28 @@ export class Roles {
   /**
    * Get a role by ID
    */
-  async getRoleById(id: number): Promise<Role | null> {
-    return await withTestHooks(this.app, async (hooks, id) => {
-      return hooks.roles.getTestRoleById(id);
-    }, id);
-  }
-
-  /**
-   * Get roles assigned to a user
-   */
-  async getRolesForUser(userId: number): Promise<number[]> {
-    return await withTestHooks(this.app, async (hooks, userId) => {
-      return hooks.roles.getRolesForUser(userId);
-    }, userId);
-  }
-
-  /**
-   * Get effective permissions for a user
-   */
-  async getUserPermissions(userId: number): Promise<string[]> {
-    return await withTestHooks(this.app, async (hooks, userId) => {
-      return hooks.roles.getUserPermissions(userId);
-    }, userId);
+  async getRoleById(id: number, authContext?: AuthContextPayload): Promise<Role | null> {
+    return await withTestHooks(this.app, async (hooks, id, authContext) => {
+      return hooks.roles.getTestRoleById(id, authContext);
+    }, id, authContext);
   }
 
   /**
    * Get a role by system stub
    */
-  async getRoleByStub(stub: string): Promise<Role | null> {
-    return await withTestHooks(this.app, async (hooks, stub) => {
-      return hooks.roles.getTestRoleByStub(stub);
-    }, stub);
+  async getRoleByStub(stub: string, authContext?: AuthContextPayload): Promise<Role | null> {
+    return await withTestHooks(this.app, async (hooks, stub, authContext) => {
+      return hooks.roles.getTestRoleByStub(stub, authContext);
+    }, stub, authContext);
   }
 
   /**
    * Get permissions assigned to a role
    */
-  async getRolePermissions(roleId: number): Promise<string[]> {
-    return await withTestHooks(this.app, async (hooks, roleId) => {
-      return hooks.roles.getRolePermissions(roleId);
-    }, roleId);
+  async getRolePermissions(roleId: number, authContext?: AuthContextPayload): Promise<string[]> {
+    return await withTestHooks(this.app, async (hooks, roleId, authContext) => {
+      return hooks.roles.getRolePermissions(roleId, authContext);
+    }, roleId, authContext);
   }
 
   /**
@@ -123,28 +105,28 @@ export class Roles {
   /**
    * Duplicate a role
    */
-  async duplicateRole(sourceRoleId: number): Promise<number> {
-    return await withTestHooks(this.app, async (hooks, sourceRoleId) => {
-      return hooks.roles.duplicateRole(sourceRoleId);
-    }, sourceRoleId);
+  async duplicateRole(sourceRoleId: number, authContext?: AuthContextPayload): Promise<number> {
+    return await withTestHooks(this.app, async (hooks, sourceRoleId, authContext) => {
+      return hooks.roles.duplicateRole(sourceRoleId, authContext);
+    }, sourceRoleId, authContext);
   }
 
   /**
    * Get all user IDs with a specific role
    */
-  async getUsersWithRole(roleId: number): Promise<number[]> {
-    return await withTestHooks(this.app, async (hooks, roleId) => {
-      return hooks.roles.getUsersWithRole(roleId);
-    }, roleId);
+  async getUsersWithRole(roleId: number, authContext?: AuthContextPayload): Promise<number[]> {
+    return await withTestHooks(this.app, async (hooks, roleId, authContext) => {
+      return hooks.roles.getUsersWithRole(roleId, authContext);
+    }, roleId, authContext);
   }
 
   /**
    * Get all defined permissions
    */
-  async getAllPermissions(): Promise<string[]> {
-    return await withTestHooks(this.app, async (hooks) => {
-      return hooks.roles.getAllPermissions();
-    });
+  async getAllPermissions(authContext?: AuthContextPayload): Promise<string[]> {
+    return await withTestHooks(this.app, async (hooks, authContext) => {
+      return hooks.roles.getAllPermissions(authContext);
+    }, authContext);
   }
 }
 

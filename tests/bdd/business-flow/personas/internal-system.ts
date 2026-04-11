@@ -170,35 +170,27 @@ export class InternalSystemPersona {
   }
 
   async getRoleById(id: number): Promise<Role | null> {
-    return await this.world.rolesApi.getRoleById(id);
+    return await this.world.rolesApi.getRoleById(id, this.getAuthContextPayload());
   }
 
   async getRoleByStub(stub: string): Promise<Role | null> {
-    return await this.world.rolesApi.getRoleByStub(stub);
+    return await this.world.rolesApi.getRoleByStub(stub, this.getAuthContextPayload());
   }
 
   async getRolePermissions(roleId: number): Promise<string[]> {
-    return await this.world.rolesApi.getRolePermissions(roleId);
-  }
-
-  async getRolesForUser(userId: number): Promise<number[]> {
-    return await this.world.rolesApi.getRolesForUser(userId);
-  }
-
-  async getUserPermissions(userId: number): Promise<string[]> {
-    return await this.world.rolesApi.getUserPermissions(userId);
+    return await this.world.rolesApi.getRolePermissions(roleId, this.getAuthContextPayload());
   }
 
   async getAllPermissions(): Promise<string[]> {
-    return await this.world.rolesApi.getAllPermissions();
+    return await this.world.rolesApi.getAllPermissions(this.getAuthContextPayload());
   }
 
   async getUsersWithRole(roleId: number): Promise<number[]> {
-    return await this.world.rolesApi.getUsersWithRole(roleId);
+    return await this.world.rolesApi.getUsersWithRole(roleId, this.getAuthContextPayload());
   }
 
   async duplicateRole(sourceRoleId: number): Promise<number> {
-    return await this.world.rolesApi.duplicateRole(sourceRoleId);
+    return await this.world.rolesApi.duplicateRole(sourceRoleId, this.getAuthContextPayload());
   }
 
   async setRolePermissions(roleId: number, permissionStubs: string[]): Promise<void> {
@@ -265,6 +257,14 @@ export class InternalSystemPersona {
 
   async removeRoleFromUser(userId: number, roleId: number): Promise<void> {
     return await this.world.usersApi.removeRoleFromUser(userId, roleId, this.getAuthContextPayload());
+  }
+  
+  async getRolesForUser(userId: number): Promise<number[]> {
+    return await this.world.usersApi.getRolesForUser(userId, this.getAuthContextPayload());
+  }
+
+  async getUserPermissions(userId: number): Promise<string[]> {
+    return await this.world.usersApi.getUserPermissions(userId, this.getAuthContextPayload());
   }
 
   // Authorization operations

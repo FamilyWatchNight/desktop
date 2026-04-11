@@ -74,4 +74,23 @@ export class Users {
       return hooks.users.removeRoleFromUser(userId, roleId, authContext);
     }, userId, roleId, authContext);
   }
+
+  /**
+   * Get role IDs assigned to a user
+   */
+  async getRolesForUser(userId: number, authContext?: AuthContextPayload): Promise<number[]> {
+    return await withTestHooks(this.app, async (hooks, userId, authContext) => {
+      return hooks.users.getRolesForUser(userId, authContext);
+    }, userId, authContext);
+  }
+
+  /**
+   * Get permissions assigned to a user through roles
+   */
+  async getUserPermissions(userId: number, authContext?: AuthContextPayload): Promise<string[]> {
+    return await withTestHooks(this.app, async (hooks, userId, authContext) => {
+      return hooks.users.getUserPermissions(userId, authContext);
+    }, userId, authContext);
+  }
 }
+

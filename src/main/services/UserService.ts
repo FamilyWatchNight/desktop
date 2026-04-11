@@ -16,9 +16,8 @@ import { getAppDataRoot } from '../paths';
 import { safeJoin, assertPathInsideAllowedDirs } from '../security';
 import { type User, type UserData } from '../db/models/Users';
 import { type UserProfile, type UserProfileData } from '../db/models/UserProfiles';
-import { type Role } from '../db/models/Roles';
 import { type PermissionStub, PERMISSIONS } from '../auth/permissions';
-import { AuthContext, createAuthContext } from '../auth/context-manager';
+import { AuthContext } from '../auth/context-manager';
 import { AuthenticationError, AuthorizationError } from '../auth/errors';
 
 export interface CreateUserData extends UserData {}
@@ -55,25 +54,6 @@ export class UserService {
     
     const result = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
     return result.count > 0;
-  }
-  
-  async bootstrapAdmin(data: CreateUserData): Promise<AuthenticatedUser> {
-    // Only allow bootstrap when no users exist
-    if (this.hasUsers()) {
-      throw new AuthorizationError(this.t('errors.cannotBootstrapAdmin'));
-    }
-
-    // Create the admin user
-    const adminUser = await this.createUser(data, createAuthContext(0, [])); // Bootstrap context
-
-    // Assign admin role
-    const { roles } = getModels();
-    const adminRole = roles.getBySystemStub('admin');
-    if (adminRole) {
-      this.assignRoleToUser(adminUser.id, adminRole.id, createAuthContext(0, [])); // Bootstrap context
-    }
-
-    return adminUser;
   }
   
   async createUser(data: CreateUserData, authContext?: AuthContext): Promise<AuthenticatedUser> {
@@ -304,7 +284,8 @@ export class UserService {
     return rows.map(row => row.permission_stub);
   }
 
-  getUserPermissions(userId: number): PermissionInfo[] {
+  getUserPermissions(userId: number, authContext?: AuthContext): PermissionInfo[] {
+    this.validateAuthContext(authContext, userId);
     const permissionStubs = this.getUserPermissionStubs(userId);
 
     // If can-admin, return all possible permissions
@@ -326,17 +307,8 @@ export class UserService {
   }
 
   // User role management
-  getUserRoles(userId: number): Role[] {
-    const { roles } = getModels();
-    const roleIds = this.getUserRoleIds(userId);
-    return roleIds.map(roleId => {
-      const role = roles.getById(roleId);
-      if (!role) throw new Error(`Role ${roleId} not found`);
-      return role;
-    });
-  }
-
-  getUserRoleIds(userId: number): number[] {
+  getRolesForUser(userId: number, authContext?: AuthContext): number[] {
+    this.validateAuthContext(authContext, userId);
     const { userRoles } = getModels();
     return userRoles.getRoleIdsForUser(userId);
   }

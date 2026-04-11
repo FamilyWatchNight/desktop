@@ -43,17 +43,20 @@ export class RoleService {
     return models.roles.create(data);
   }
 
-  getRoleById(id: number): Role | null {
+  getRoleById(id: number, authContext?: AuthContext): Role | null {
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     return models.roles.getById(id);
   }
 
-  getRoleBySystemStub(systemStub: string): Role | null {
+  getRoleBySystemStub(systemStub: string, authContext?: AuthContext): Role | null {
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     return models.roles.getBySystemStub(systemStub);
   }
 
-  getAllRoles(): Role[] {
+  getAllRoles(authContext?: AuthContext): Role[] {
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     return models.roles.getAll();
   }
@@ -115,7 +118,8 @@ export class RoleService {
     models.rolePermissions.setPermissionsForRole(roleId, permissionStubs);
   }
 
-  getPermissionsForRole(roleId: number): PermissionInfo[] {
+  getPermissionsForRole(roleId: number, authContext?: AuthContext): PermissionInfo[] {
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     const permissionStubs = models.rolePermissions.getPermissionsForRole(roleId);
     return permissionStubs.map(stub => ({
@@ -126,43 +130,43 @@ export class RoleService {
     }));
   }
 
-  getRoleWithPermissions(roleId: number): RoleWithPermissions | null {
+  getRoleWithPermissions(roleId: number, authContext?: AuthContext): RoleWithPermissions | null {
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     const role = models.roles.getById(roleId);
     if (!role) return null;
 
-    const permissions = this.getPermissionsForRole(roleId);
+    const permissions = this.getPermissionsForRole(roleId, authContext);
     return { ...role, permissions };
   }
 
-  getAllRolesWithPermissions(): RoleWithPermissions[] {
+  getAllRolesWithPermissions(authContext?: AuthContext): RoleWithPermissions[] {
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     const roles = models.roles.getAll();
     return roles.map(role => ({
       ...role,
-      permissions: this.getPermissionsForRole(role.id)
+      permissions: this.getPermissionsForRole(role.id, authContext)
     }));
   }
 
   // Query users with a specific role (for role management operations)
-  getUsersWithRole(roleId: number): number[] {
+  getUsersWithRole(roleId: number, authContext?: AuthContext): number[] {
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     return models.userRoles.getUsersByRoleId(roleId);
   }
 
-  getRolesForUser(userId: number): number[] {
-    const models = db.getModels();
-    return models.userRoles.getRoleIdsForUser(userId);
-  }
-
-  getAllPermissions(): PermissionInfo[] {
+  getAllPermissions(authContext?: AuthContext): PermissionInfo[] {
+    this.validateAuthContext(authContext);
     return PERMISSIONS.map(permission => ({
       stub: permission.stub,
       displayName: this.t(permission.displayNameKey)
     }));
   }
 
-  duplicateRole(sourceRoleId: number): number {
+  duplicateRole(sourceRoleId: number, authContext?: AuthContext): number {
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     const sourceRole = models.roles.getById(sourceRoleId);
     if (!sourceRole) {

@@ -15,32 +15,33 @@ import { AuthenticationError } from '../auth/errors';
 export class MovieService {
   private t = i18n.getFixedT(null, 'auth');
 
-  private validateReadOnlyAuthContext(authContext?: AuthContext): void {
+  private validateAuthContext(authContext?: AuthContext): void {
     if (!authContext) {
       throw new AuthenticationError(this.t('errors.authenticationRequired'));
     }
+    // No specific permission required to access movies, but user must be authenticated
   }
 
   getById(id: number, authContext?: AuthContext): Movie | null {
-    this.validateReadOnlyAuthContext(authContext);
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     return models.movies.getById(id);
   }
 
   getByWatchmodeId(watchmodeId: string, authContext?: AuthContext): Movie | null {
-    this.validateReadOnlyAuthContext(authContext);
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     return models.movies.getByWatchmodeId(watchmodeId);
   }
 
   getByTmdbId(tmdbId: string, authContext?: AuthContext): Movie | null {
-    this.validateReadOnlyAuthContext(authContext);
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     return models.movies.getByTmdbId(tmdbId);
   }
 
   searchByTitle(searchTerm: string, authContext?: AuthContext): Movie[] {
-    this.validateReadOnlyAuthContext(authContext);
+    this.validateAuthContext(authContext);
     const models = db.getModels();
     return models.movies.searchByTitle(searchTerm);
   }

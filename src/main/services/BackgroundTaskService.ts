@@ -26,25 +26,21 @@ export class BackgroundTaskService {
 
   enqueue(taskType: TaskRegistryType, args: Record<string, unknown> = {}, authContext?: AuthContext): { success: boolean; taskId?: string; error?: string } {
     this.validateAuthContext(authContext);
-    
     return backgroundTaskManager.enqueue(taskType, args);
   }
 
   getState(authContext?: AuthContext): { active: unknown; queue: unknown[] } {
     this.validateAuthContext(authContext);
-
     return backgroundTaskManager.getState();
   }
 
   cancelActive(authContext?: AuthContext): { success: boolean; error?: string } {
     this.validateAuthContext(authContext);
-    
     return backgroundTaskManager.cancelActive();
   }
 
   removeQueued(taskId: string, authContext?: AuthContext): { success: boolean; error?: string } {
     this.validateAuthContext(authContext);
-    
     return backgroundTaskManager.removeQueued(taskId);
   }
 

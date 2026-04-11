@@ -79,22 +79,22 @@ export interface TestHooks {
     updateTestUserProfile: (id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }, authContext?: AuthContextPayload) => Promise<void>;
     assignRoleToUser: (userId: number, roleId: number, authContext?: AuthContextPayload) => Promise<void>;
     removeRoleFromUser: (userId: number, roleId: number, authContext?: AuthContextPayload) => Promise<void>;
+    getRolesForUser: (userId: number, authContext?: AuthContextPayload) => Promise<number[]>;
+    getUserPermissions: (userId: number, authContext?: AuthContextPayload) => Promise<string[]>;
   };
   roles: {
     createTestRole: (name: string, permissionStubs: string[], authContext?: AuthContextPayload) => Promise<import('../db/models/Roles').Role>;
-    getTestRoleById: (id: number) => Promise<import('../db/models/Roles').Role | null>;
-    getTestRoleByStub: (stub: string) => Promise<import('../db/models/Roles').Role | null>;
-    getRolesForUser: (userId: number) => Promise<number[]>;
+    getTestRoleById: (id: number, authContext?: AuthContextPayload) => Promise<import('../db/models/Roles').Role | null>;
+    getTestRoleByStub: (stub: string, authContext?: AuthContextPayload) => Promise<import('../db/models/Roles').Role | null>;
     setRolePermissions: (roleId: number, permissionStubs: string[], authContext?: AuthContextPayload) => Promise<void>;
-    getRolePermissions: (roleId: number) => Promise<string[]>;
-    getUserPermissions: (userId: number) => Promise<string[]>;
-    getAllPermissions: () => string[];
+    getRolePermissions: (roleId: number, authContext?: AuthContextPayload) => Promise<string[]>;
+    getAllPermissions: (authContext?: AuthContextPayload) => string[];
     updateRole: (id: number, data: Partial<import('../db/models/Roles').RoleData>, authContext?: AuthContextPayload) => Promise<void>;
     updateRoleDisplayName: (id: number, displayName: string, authContext?: AuthContextPayload) => Promise<void>;
     updateRoleHiddenStatus: (id: number, isHidden: boolean, authContext?: AuthContextPayload) => Promise<void>;
     deleteRole: (id: number, authContext?: AuthContextPayload) => Promise<void>;
-    duplicateRole: (sourceRoleId: number) => Promise<number>;
-    getUsersWithRole: (roleId: number) => number[];
+    duplicateRole: (sourceRoleId: number, authContext?: AuthContextPayload) => Promise<number>;
+    getUsersWithRole: (roleId: number, authContext?: AuthContextPayload) => number[];
   };
 }
 
@@ -206,6 +206,15 @@ export function getTestHooks(): TestHooks {
       removeRoleFromUser: async (userId, roleId, authContext) => {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
         userService.removeRoleFromUser(userId, roleId, ctx);
+      },
+      getRolesForUser: async (userId, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return userService.getRolesForUser(userId, ctx);
+      },
+      getUserPermissions: async (userId, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        const permissions = userService.getUserPermissions(userId, ctx);
+        return permissions.map(p => p.stub);
       }
     },
     roles: {
@@ -215,29 +224,30 @@ export function getTestHooks(): TestHooks {
         if (permissionStubs.length > 0) {
           roleService.setPermissionsForRole(roleId, permissionStubs as any, ctx);
         }
-        const role = roleService.getRoleById(roleId);
+        const role = roleService.getRoleById(roleId, ctx);
         if (!role) throw new Error('Failed to retrieve created role');
         return role;
       },
-      getTestRoleById: (id) => Promise.resolve(roleService.getRoleById(id)),
-      getTestRoleByStub: (stub) => Promise.resolve(roleService.getRoleBySystemStub(stub)),
-      getRolesForUser: async (userId) => {
-        return roleService.getRolesForUser(userId);
+      getTestRoleById: (id, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return Promise.resolve(roleService.getRoleById(id, ctx));
+      },
+      getTestRoleByStub: (stub, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return Promise.resolve(roleService.getRoleBySystemStub(stub, ctx));
       },
       setRolePermissions: async (roleId, permissionStubs, authContext) => {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
         roleService.setPermissionsForRole(roleId, permissionStubs as any, ctx);
       },
-      getRolePermissions: async (roleId) => {
-        const permissions = roleService.getPermissionsForRole(roleId);
+      getRolePermissions: async (roleId, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        const permissions = roleService.getPermissionsForRole(roleId, ctx);
         return permissions.map(p => p.stub);
       },
-      getUserPermissions: async (userId) => {
-        const permissionInfos = userService.getUserPermissions(userId);
-        return permissionInfos.map(pInfo => pInfo.stub);
-      },
-      getAllPermissions: () => {
-        const permissions = roleService.getAllPermissions();
+      getAllPermissions: (authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        const permissions = roleService.getAllPermissions(ctx);
         return permissions.map(p => p.stub);
       },
       updateRole: async (id, data, authContext) => {
@@ -256,10 +266,14 @@ export function getTestHooks(): TestHooks {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
         roleService.deleteRole(id, ctx);
       },
-      duplicateRole: async (sourceRoleId) => {
-        return roleService.duplicateRole(sourceRoleId);
+      duplicateRole: async (sourceRoleId, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return roleService.duplicateRole(sourceRoleId, ctx);
       },
-      getUsersWithRole: (roleId) => roleService.getUsersWithRole(roleId)
+      getUsersWithRole: (roleId, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return roleService.getUsersWithRole(roleId, ctx);
+      }
     }
   };
 }
