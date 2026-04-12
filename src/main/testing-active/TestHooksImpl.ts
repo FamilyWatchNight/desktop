@@ -281,9 +281,10 @@ export function getTestHooks(): TestHooks {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
         return roleService.duplicateRole(sourceRoleId, ctx);
       },
-      getUsersWithRole: (roleId, authContext) => {
-        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
-        return roleService.getUsersWithRole(roleId, ctx);
+      getUsersWithRole: (roleId) => {
+        // This is used only for testing. This isn't something the service layer exposes.
+        const models = db.getModels();
+        return models.userRoles.getUsersByRoleId(roleId);
       }
     }
   };

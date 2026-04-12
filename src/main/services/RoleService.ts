@@ -130,33 +130,6 @@ export class RoleService {
     }));
   }
 
-  getRoleWithPermissions(roleId: number, authContext?: AuthContext): RoleWithPermissions | null {
-    this.validateAuthContext(authContext);
-    const models = db.getModels();
-    const role = models.roles.getById(roleId);
-    if (!role) return null;
-
-    const permissions = this.getPermissionsForRole(roleId, authContext);
-    return { ...role, permissions };
-  }
-
-  getAllRolesWithPermissions(authContext?: AuthContext): RoleWithPermissions[] {
-    this.validateAuthContext(authContext);
-    const models = db.getModels();
-    const roles = models.roles.getAll();
-    return roles.map(role => ({
-      ...role,
-      permissions: this.getPermissionsForRole(role.id, authContext)
-    }));
-  }
-
-  // Query users with a specific role (for role management operations)
-  getUsersWithRole(roleId: number, authContext?: AuthContext): number[] {
-    this.validateAuthContext(authContext);
-    const models = db.getModels();
-    return models.userRoles.getUsersByRoleId(roleId);
-  }
-
   getAllPermissions(authContext?: AuthContext): PermissionInfo[] {
     this.validateAuthContext(authContext);
     return PERMISSIONS.map(permission => ({
