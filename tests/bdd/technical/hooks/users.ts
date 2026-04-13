@@ -101,5 +101,32 @@ export class Users {
       return hooks.users.getUsersWithPermissions(permissions, authContext);
     }, permissions, authContext);
   }
+
+  /**
+   * Save a profile image for a user
+   */
+  async saveProfileImage(userId: number, imageBuffer: Buffer, mimeType: string, authContext?: AuthContextPayload): Promise<string> {
+    return await withTestHooks(this.app, async (hooks, userId, imageBuffer, mimeType, authContext) => {
+      return hooks.users.saveProfileImage(userId, imageBuffer, mimeType, authContext);
+    }, userId, imageBuffer, mimeType, authContext);
+  }
+
+  /**
+   * Delete a user's profile image
+   */
+  async deleteProfileImage(userId: number, authContext?: AuthContextPayload): Promise<void> {
+    return await withTestHooks(this.app, async (hooks, userId, authContext) => {
+      return hooks.users.deleteProfileImage(userId, authContext);
+    }, userId, authContext);
+  }
+
+  /**
+   * Change a user's password
+   */
+  async changePassword(userId: number, newPassword: string, authContext?: AuthContextPayload): Promise<void> {
+    return await withTestHooks(this.app, async (hooks, userId, newPassword, authContext) => {
+      return hooks.users.changePassword(userId, newPassword, authContext);
+    }, userId, newPassword, authContext);
+  }
 }
 

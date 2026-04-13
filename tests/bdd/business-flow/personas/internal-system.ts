@@ -9,7 +9,7 @@ the Free Software Foundation, version 3.
 import { CustomWorld } from '../../technical/infrastructure/world';
 import { AuthenticatedUser } from '../../../../src/main/services/UserService';
 import { Role } from '../../../../src/main/db/models/Roles';
-import { createSystemContext, type AuthContext, type AuthContextPayload } from '../../../../src/main/auth/context-manager';
+import { createAuthContext, createSystemContext, type AuthContext, type AuthContextPayload } from '../../../../src/main/auth/context-manager';
 import { PERMISSIONS } from '../../../../src/main/auth/permissions';
 
 /**
@@ -240,7 +240,11 @@ export class InternalSystemPersona {
   }
 
   async authenticateUser(username: string, password: string): Promise<AuthenticatedUser | null> {
-    return await this.world.usersApi.authenticateUser(username, password, this.getAuthContextPayload());
+    const result = await this.world.usersApi.authenticateUser(username, password, this.getAuthContextPayload());
+    if (result?.id) {
+      this.runAsUser(result.id as number);
+    }
+    return result;
   }
 
   async getUserById(id: number): Promise<AuthenticatedUser | null> {
@@ -253,6 +257,18 @@ export class InternalSystemPersona {
 
   async updateUserProfile(id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }): Promise<void> {
     return await this.world.usersApi.updateUserProfile(id, profileData, this.getAuthContextPayload());
+  }
+
+  async saveProfileImage(userId: number, imageBuffer: Buffer, mimeType: string): Promise<string> {
+    return await this.world.usersApi.saveProfileImage(userId, imageBuffer, mimeType, this.getAuthContextPayload());
+  }
+
+  async deleteProfileImage(userId: number): Promise<void> {
+    return await this.world.usersApi.deleteProfileImage(userId, this.getAuthContextPayload());
+  }
+
+  async changePassword(userId: number, newPassword: string): Promise<void> {
+    return await this.world.usersApi.changePassword(userId, newPassword, this.getAuthContextPayload());
   }
 
   async assignRoleToUser(userId: number, roleId: number): Promise<void> {
@@ -293,6 +309,17 @@ export class InternalSystemPersona {
     const allPermissions = PERMISSIONS.map(p => p.stub);
     const excluded = new Set(['can-admin', ...excludedPermissionStubs]);
     this.customPermissions = allPermissions.filter(p => !excluded.has(p));
+  }
+
+  async runAsUser(userId: number): Promise<void> {
+    // Set authContext directly to represent the real authenticated user
+    // With customPermissions = null, getAuthContextPayload will use the real authContext
+    this.isUnauthenticated = false;
+    this.customPermissions = null;
+
+    // Build authContext with the user's actual permissions from the system
+    const permissions = await this.getUserPermissions(userId);
+    this.authContext = createAuthContext(userId, permissions);
   }
 
 }

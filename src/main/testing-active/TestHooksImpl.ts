@@ -28,6 +28,34 @@ const roleService = new RoleService();
 // Track the actively running mock task instance for test control
 let activeTestTask: InstanceType<typeof MockBackgroundTask> | null = null;
 
+/**
+ * Deserialize a buffer that was JSON-serialized across the Electron boundary.
+ * When buffers cross app.evaluate(), they're converted to Uint8Array and then to object form.
+ */
+function deserializeBuffer(value: unknown): Buffer {
+  if (Buffer.isBuffer(value)) {
+    return value;
+  }
+  if (value instanceof Uint8Array) {
+    return Buffer.from(value);
+  }
+  if (typeof value === 'object' && value !== null) {
+    const obj = value as Record<string, any>;
+    // Handle standard { type: 'Buffer', data: [...] } format
+    if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
+      return Buffer.from(obj.data);
+    }
+    // Handle Uint8Array serialized as object with numeric string keys: { "0": 137, "1": 80, ... }
+    // Convert the object's values back to an array
+    const keys = Object.keys(obj);
+    if (keys.length > 0 && keys.every((k) => /^\d+$/.test(k))) {
+      const bytes = keys.map((k) => obj[k]);
+      return Buffer.from(bytes);
+    }
+  }
+  throw new TypeError(`Expected a Buffer, Uint8Array, or serialized Buffer object, got: ${typeof value}`);
+}
+
 export interface TestHooks {
   app: { getAppPath: () => string; isReady: () => boolean };
   db: {
@@ -78,6 +106,9 @@ export interface TestHooks {
     getTestUserById: (id: number, authContext?: AuthContextPayload) => Promise<import('../services/UserService').AuthenticatedUser | import('../services/UserService').BasicUserInfo | null>;
     getUsersWithPermissions: (permissions: string[], authContext?: AuthContextPayload) => Promise<import('../services/UserService').BasicUserInfo[]>;
     updateTestUserProfile: (id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }, authContext?: AuthContextPayload) => Promise<void>;
+    saveProfileImage: (userId: number, imageBuffer: Buffer, mimeType: string, authContext?: AuthContextPayload) => Promise<string>;
+    deleteProfileImage: (userId: number, authContext?: AuthContextPayload) => Promise<void>;
+    changePassword: (userId: number, newPassword: string, authContext?: AuthContextPayload) => Promise<void>;
     assignRoleToUser: (userId: number, roleId: number, authContext?: AuthContextPayload) => Promise<void>;
     removeRoleFromUser: (userId: number, roleId: number, authContext?: AuthContextPayload) => Promise<void>;
     getRolesForUser: (userId: number, authContext?: AuthContextPayload) => Promise<number[]>;
@@ -209,6 +240,19 @@ export function getTestHooks(): TestHooks {
       updateTestUserProfile: (id, profileData, authContext) => {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
         return userService.updateUserProfile(id, profileData, ctx);
+      },
+      saveProfileImage: (userId, imageBuffer, mimeType, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        const deserializedBuffer = deserializeBuffer(imageBuffer);
+        return userService.saveProfileImage(userId, deserializedBuffer, mimeType, ctx);
+      },
+      deleteProfileImage: (userId, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return userService.deleteProfileImage(userId, ctx);
+      },
+      changePassword: async (userId, newPassword, authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return userService.changePassword(userId, newPassword, ctx);
       },
       assignRoleToUser: async (userId, roleId, authContext) => {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;

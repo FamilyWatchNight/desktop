@@ -9,6 +9,28 @@ the Free Software Foundation, version 3.
 import { ElectronApplication } from 'playwright';
 import type { TestHooks } from '../../../../src/main/testing-active/TestHooksImpl';
 
+function normalizeTestHookArg(value: unknown): unknown {
+  if (Buffer.isBuffer(value)) {
+    return Uint8Array.from(value);
+  }
+
+  if (value instanceof Uint8Array) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(normalizeTestHookArg);
+  }
+
+  if (value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entryValue]) => [key, normalizeTestHookArg(entryValue)])
+    );
+  }
+
+  return value;
+}
+
 /**
  * Helper that executes a callback inside the electron app with access to test hooks.
  * All of the repeated casting/validation logic lives here so callers can remain concise.
@@ -19,6 +41,7 @@ export async function withTestHooks<T, A extends unknown[]>(
   ...args: A
 ): Promise<T> {
   const fnString = fn.toString();
+  const normalizedArgs = args.map(normalizeTestHookArg) as unknown[];
 
   return app.evaluate(
     async (
@@ -43,7 +66,7 @@ export async function withTestHooks<T, A extends unknown[]>(
     },
     {
       fnSource: fnString,
-      fnArgs: args,
+      fnArgs: normalizedArgs,
     }
   );
 }
