@@ -297,7 +297,7 @@ When('I duplicate the role {string} to create a new role {string}', async functi
   state.roles?.set(targetRoleKey, { role: duplicated, permissions: duplicatedPermissions });
 });
 
-When('I attempt to delete the system role {string}', async function (this: CustomWorld, roleStub: string) {
+When('I delete the system role {string}', async function (this: CustomWorld, roleStub: string) {
   const system = getSystemPersona(this);
   const role = await system.getRoleByStub(roleStub);
   if (!role) {
@@ -435,17 +435,6 @@ Then('the permissions for the user should be exactly {string}', async function (
   const system = getSystemPersona(this);
   const actualPermissions = await system.getUserPermissions(user.id);
   expect(actualPermissions.sort()).toEqual(parsePermissionList(expectedPermissions).sort());
-});
-
-When('I attempt to delete the role', async function (this: CustomWorld) {
-  const role = getStoreRole(this);
-  const system = getSystemPersona(this);
-  try {
-    await system.deleteRole(role.id);
-    getRbacState(this).deleteResult = { success: true };
-  } catch (error) {
-    getRbacState(this).deleteResult = { success: false, error };
-  }
 });
 
 Then('deleting the role should fail', function (this: CustomWorld) {

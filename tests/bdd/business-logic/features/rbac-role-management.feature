@@ -46,13 +46,13 @@ Feature: RBAC role management
 
   Scenario: A system role cannot be deleted, even if no users have it assigned
     Given no users have the system role "admin" assigned
-    When I attempt to delete the system role "admin"
+    When I delete the system role "admin"
     Then deleting the role should fail
 
   Scenario: A custom role assigned to a user cannot be deleted
     Given a custom role exists
     And a user exists with the role assigned
-    When I attempt to delete the role
+    When I delete the role
     Then deleting the role should fail
 
   Scenario: A custom role not assigned to any user can be deleted
