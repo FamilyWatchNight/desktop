@@ -118,6 +118,7 @@ export interface TestHooks {
     createTestRole: (name: string, permissionStubs: string[], authContext?: AuthContextPayload) => Promise<import('../db/models/Roles').Role>;
     getTestRoleById: (id: number, authContext?: AuthContextPayload) => Promise<import('../db/models/Roles').Role | null>;
     getTestRoleByStub: (stub: string, authContext?: AuthContextPayload) => Promise<import('../db/models/Roles').Role | null>;
+    getAllRoles: (authContext?: AuthContextPayload) => Promise<import('../db/models/Roles').Role[]>;
     setRolePermissions: (roleId: number, permissionStubs: string[], authContext?: AuthContextPayload) => Promise<void>;
     getRolePermissions: (roleId: number, authContext?: AuthContextPayload) => Promise<string[]>;
     getAllPermissions: (authContext?: AuthContextPayload) => string[];
@@ -290,6 +291,10 @@ export function getTestHooks(): TestHooks {
       getTestRoleByStub: (stub, authContext) => {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
         return Promise.resolve(roleService.getRoleBySystemStub(stub, ctx));
+      },
+      getAllRoles: (authContext) => {
+        const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
+        return Promise.resolve(roleService.getAllRoles(ctx));
       },
       setRolePermissions: async (roleId, permissionStubs, authContext) => {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;

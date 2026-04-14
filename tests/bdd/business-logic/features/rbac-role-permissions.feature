@@ -21,3 +21,16 @@ Feature: RBAC role permissions
     When I update the role's permissions to be "can-vote, can-rate, can-update-profile"
     Then the role should have the permissions "can-vote, can-rate, can-update-profile"
 
+  Scenario: Listing all permissions returns exactly the system-defined permissions
+    When I retrieve all defined permissions
+    Then the results should include exactly these permissions:
+      | can-host           |
+      | can-vote           |
+      | can-rate           |
+      | can-manage-users   |
+      | can-update-profile |
+      | can-hide-show      |
+      | can-unhide-show    |
+      | can-update-show    |
+      | can-admin          |
+

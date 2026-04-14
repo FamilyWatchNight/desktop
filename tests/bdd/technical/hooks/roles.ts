@@ -49,6 +49,15 @@ export class Roles {
   }
 
   /**
+   * Get all roles
+   */
+  async getAllRoles(authContext?: AuthContextPayload): Promise<Role[]> {
+    return await withTestHooks(this.app, async (hooks, authContext) => {
+      return hooks.roles.getAllRoles(authContext);
+    }, authContext);
+  }
+
+  /**
    * Get permissions assigned to a role
    */
   async getRolePermissions(roleId: number, authContext?: AuthContextPayload): Promise<string[]> {

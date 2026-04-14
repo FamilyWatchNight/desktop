@@ -55,6 +55,21 @@ function getStoreRole(world: CustomWorld, roleKey?: string) {
   return (stored as { role: { id: number }; permissions: string[] }).role;
 }
 
+async function getRoleByKey(world: CustomWorld, roleKey: string) {
+  const system = getSystemPersona(world);
+
+  let role = await system.getRoleByStub(roleKey);
+  if (!role) {
+    role = await getStoreRole(world, roleKey);
+  }
+  
+  if (!role) {
+    throw new Error(`Role not found: ${roleKey} (neither system role nor stored role key)`);
+  }
+
+  return role;
+}
+
 function getStoreRolePermissions(world: CustomWorld, roleKey?: string): string[] {
   const state = getRbacState(world);
   if (!roleKey) {
@@ -210,23 +225,33 @@ Given('a user exists with the role assigned', async function (this: CustomWorld)
   await system.assignRoleToUser(user.id, role.id);
 });
 
-Given('a user exists with the role {string} assigned', async function (this: CustomWorld, roleIdentifier: string) {
+Given('a user exists with the role {string} assigned', async function (this: CustomWorld, roleKey: string) {
   const system = getSystemPersona(this);
-  
-  // Try to get as system role first
-  let role = await system.getRoleByStub(roleIdentifier);
-  
-  // If not found as system role, try as stored role key
-  if (!role) {
-    role = getStoreRole(this, roleIdentifier);
-  }
-  
-  if (!role) {
-    throw new Error(`Role not found: ${roleIdentifier} (neither system role nor stored role key)`);
-  }
+  const role = await getRoleByKey(this, roleKey);
   
   const user = await createUser(this);
   await system.assignRoleToUser(user.id, role.id);
+  
+  const state = getRbacState(this);
+  state.lastUser = user;
+});
+
+Given('a user {string} exists with no roles assigned', async function (this: CustomWorld, userKey: string) {
+  const user = await createUser(this);
+  const state = getRbacState(this);
+  state.lastUser = user;
+  state.users?.set(userKey, user);
+});
+
+Given('a user {string} exists with the role {string} assigned', async function (this: CustomWorld, userKey: string, roleKey: string) {
+  const system = getSystemPersona(this);
+  const role = await getRoleByKey(this, roleKey);
+  const user = await createUser(this);
+  await system.assignRoleToUser(user.id, role.id);
+
+  const state = getRbacState(this);
+  state.lastUser = user;
+  state.users?.set(userKey, user);
 });
 
 Given('no users have the role assigned', async function (this: CustomWorld) {
@@ -242,7 +267,7 @@ Given('no users have the role assigned', async function (this: CustomWorld) {
 });
 
 Given('the role {string} has permissions {string}', async function (this: CustomWorld, roleKey: string, permissions: string) {
-  const role = getStoreRole(this, roleKey);
+  const role = await getRoleByKey(this, roleKey);
   const system = getSystemPersona(this);
   await system.setRolePermissions(role.id, parsePermissionList(permissions));
 });
@@ -254,7 +279,7 @@ When('I hide the role', async function (this: CustomWorld) {
 });
 
 When('I hide the role {string}', async function (this: CustomWorld, roleKey: string) {
-  const role = getStoreRole(this, roleKey);
+  const role = await getRoleByKey(this, roleKey);
   const system = getSystemPersona(this);
   await system.updateRoleHiddenStatus(role.id, true);
 });
@@ -283,7 +308,7 @@ When('I duplicate the role {string} to create a new role {string}', async functi
   sourceRoleKey: string,
   targetRoleKey: string
 ) {
-  const sourceRole = getStoreRole(this, sourceRoleKey);
+  const sourceRole = await getRoleByKey(this, sourceRoleKey);
   const system = getSystemPersona(this);
   const duplicatedRoleId = await system.duplicateRole(sourceRole.id);
   const duplicated = await system.getRoleById(duplicatedRoleId);
@@ -361,7 +386,7 @@ When('I assign the role to the user', async function (this: CustomWorld) {
 });
 
 When('I assign the role {string} to the user', async function (this: CustomWorld, roleKey: string) {
-  const role = getStoreRole(this, roleKey);
+  const role = await getRoleByKey(this, roleKey);
   const user = getStoreUser(this);
   const system = getSystemPersona(this);
   await system.assignRoleToUser(user.id, role.id);
@@ -414,17 +439,8 @@ Then('the user\'s roles should be exactly {string}', async function (this: Custo
   const expectedKeys = expectedRoles.split(',').map((roleKey) => roleKey.trim()).filter(Boolean);
   
   for (const roleKey of expectedKeys) {
-    // Try to get as stored role key first
-    let role = getStoreRole(this, roleKey);
-    if (!role) {
-      // Try to get as system role stub
-      role = await system.getRoleByStub(roleKey);
-    }
-    if (role) {
-      expectedRoleIds.push(role.id);
-    } else {
-      throw new Error(`Role not found: ${roleKey} (neither stored role key nor system role stub)`);
-    }
+    const role = await getRoleByKey(this, roleKey);
+    expectedRoleIds.push(role.id);
   }
   
   expect(actualRoleIds.sort()).toEqual(expectedRoleIds.sort());
@@ -482,14 +498,14 @@ Then('the role should not be marked as hidden', async function (this: CustomWorl
 });
 
 Then('the role {string} should have the permissions {string}', async function (this: CustomWorld, roleKey: string, permissions: string) {
-  const role = getStoreRole(this, roleKey);
+  const role = await getRoleByKey(this, roleKey);
   const system = getSystemPersona(this);
   const actualPermissions = await system.getRolePermissions(role.id);
   expect(actualPermissions.sort()).toEqual(parsePermissionList(permissions).sort());
 });
 
 Then('the role {string} should not be marked as a system role', async function (this: CustomWorld, roleKey: string) {
-  const role = getStoreRole(this, roleKey);
+  const role = await getRoleByKey(this, roleKey);
   const system = getSystemPersona(this);
   const roleDetails = await system.getRoleById(role.id);
   expect(roleDetails).toBeTruthy();
@@ -497,7 +513,7 @@ Then('the role {string} should not be marked as a system role', async function (
 });
 
 Then('the role {string} should not be marked as hidden', async function (this: CustomWorld, roleKey: string) {
-  const role = getStoreRole(this, roleKey);
+  const role = await getRoleByKey(this, roleKey);
   const system = getSystemPersona(this);
   const roleDetails = await system.getRoleById(role.id);
   expect(roleDetails).toBeTruthy();
@@ -505,7 +521,7 @@ Then('the role {string} should not be marked as hidden', async function (this: C
 });
 
 Then('the role {string} should have display name {string}', async function (this: CustomWorld, roleKey: string, displayName: string) {
-  const role = getStoreRole(this, roleKey);
+  const role = await getRoleByKey(this, roleKey);
   const system = getSystemPersona(this);
   const roleDetails = await system.getRoleById(role.id);
   expect(roleDetails).toBeTruthy();
@@ -513,7 +529,7 @@ Then('the role {string} should have display name {string}', async function (this
 });
 
 Then('the role {string} should be marked as hidden', async function (this: CustomWorld, roleKey: string) {
-  const role = getStoreRole(this, roleKey);
+  const role = await getRoleByKey(this, roleKey);
   const system = getSystemPersona(this);
   const roleDetails = await system.getRoleById(role.id);
   expect(roleDetails).toBeTruthy();
@@ -547,4 +563,67 @@ Given('I run without the permissions {string}', function (this: CustomWorld, per
   const persona = getSystemPersona(this);
   const excludedPermissionStubs = parsePermissionList(permissions);
   persona.runWithoutPermissions(excludedPermissionStubs);
+});
+
+When('I retrieve all roles', async function (this: CustomWorld) {
+  const system = getSystemPersona(this);
+  const allRoles = await system.getAllRoles();
+  const state = getRbacState(this);
+  state.lastRole = { roles: allRoles };
+});
+
+When('I find all users with the role {string}', async function (this: CustomWorld, roleKey: string) {
+  const system = getSystemPersona(this);
+  const role = await getRoleByKey(this, roleKey);
+  const userIds = await system.getUsersWithRole(role.id);
+  const state = getRbacState(this);
+  state.lastRole = { userIds };
+});
+
+When('I retrieve all defined permissions', async function (this: CustomWorld) {
+  const system = getSystemPersona(this);
+  const permissions = await system.getAllPermissions();
+  const state = getRbacState(this);
+  state.lastRole = { permissions };
+});
+
+Then('the results should include the role {string}', async function (this: CustomWorld, roleKey: string) {
+  const state = getRbacState(this);
+  const roles = (state.lastRole as { roles: Role[] }).roles;
+  expect(roles).toBeDefined();
+  
+  const expectedRole = await getRoleByKey(this, roleKey);
+  expect(expectedRole).toBeTruthy();
+
+  const found = roles.some(role => role.id === expectedRole!.id);
+  expect(found).toBe(true);
+});
+
+Then('the results should include the user {string}', async function (this: CustomWorld, userKey: string) {
+  const state = getRbacState(this);
+  const expectedUser = getStoreUser(this, userKey);
+
+  const userIds = (state.lastRole as { userIds: number[] }).userIds;
+  expect(userIds).toBeDefined();
+
+  expect(userIds).toContain(expectedUser.id);
+});
+
+Then('the results should not include the user {string}', async function (this: CustomWorld, userKey: string) {
+  const state = getRbacState(this);
+  const expectedUser = getStoreUser(this, userKey);
+
+  const userIds = (state.lastRole as { userIds: number[] }).userIds;
+  expect(userIds).toBeDefined();
+
+  expect(userIds).not.toContain(expectedUser.id);
+});
+
+Then('the results should include exactly these permissions:', async function (this: CustomWorld, dataTable) {
+  const state = getRbacState(this);
+  const permissions = (state.lastRole as { permissions: string[] }).permissions;
+  expect(permissions).toBeDefined();
+  
+  const expectedPermissions = dataTable.raw().flat().filter(Boolean);
+  expect(permissions.sort()).toEqual(expectedPermissions.sort());
 });

@@ -177,6 +177,10 @@ export class InternalSystemPersona {
     return await this.world.rolesApi.getRoleByStub(stub, this.getAuthContextPayload());
   }
 
+  async getAllRoles(): Promise<Role[]> {
+    return await this.world.rolesApi.getAllRoles(this.getAuthContextPayload());
+  }
+
   async getRolePermissions(roleId: number): Promise<string[]> {
     return await this.world.rolesApi.getRolePermissions(roleId, this.getAuthContextPayload());
   }

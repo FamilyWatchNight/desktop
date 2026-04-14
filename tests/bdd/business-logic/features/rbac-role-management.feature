@@ -60,3 +60,22 @@ Feature: RBAC role management
     And no users have the role assigned
     When I delete the role
     Then deleting the role should succeed
+
+  Scenario: Listing all roles includes all system roles and any custom roles
+    Given a role "custom-role" exists
+    When I retrieve all roles
+    Then the results should include the role "admin"
+    And the results should include the role "influencer"
+    And the results should include the role "host"
+    And the results should include the role "custom-role"
+
+  Scenario: Finding users with a specific role only returns those users
+    Given a role "assigned-role" exists
+    And a role "other-role" exists
+    And a user "user1" exists with the role "assigned-role" assigned
+    And a user "user2" exists with the role "other-role" assigned
+    And a user "user3" exists with no roles assigned
+    When I find all users with the role "assigned-role"
+    Then the results should include the user "user1"
+    And the results should not include the user "user2"
+    And the results should not include the user "user3"
