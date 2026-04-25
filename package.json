@@ -58,7 +58,7 @@
     "vite": "^8.0.8"
   },
   "dependencies": {
-    "better-sqlite3": "^12.8.0",
+    "better-sqlite3": "^12.9.0",
     "csv-parse": "^6.2.1",
     "electron-store": "^11.0.2",
     "express": "^5.2.1",
