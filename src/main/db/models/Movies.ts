@@ -7,6 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import type Database from 'better-sqlite3';
+import { normalizeTitle } from '../../utils/text';
 
 export interface MovieRow {
   id: number;
@@ -46,7 +47,6 @@ export default class MoviesModel {
   private getByIdStmt!: Database.Statement;
   private getByWatchmodeIdStmt!: Database.Statement;
   private getByTmdbIdStmt!: Database.Statement;
-  private getAllStmt!: Database.Statement;
   private updateStmt!: Database.Statement;
   private deleteStmt!: Database.Statement;
   private searchByTitleStmt!: Database.Statement;
@@ -72,10 +72,6 @@ export default class MoviesModel {
 
     this.getByTmdbIdStmt = this.db.prepare(`
       SELECT * FROM movies WHERE tmdb_id = ?
-    `);
-
-    this.getAllStmt = this.db.prepare(`
-      SELECT * FROM movies ORDER BY normalized_title
     `);
 
     this.updateStmt = this.db.prepare(`
@@ -122,11 +118,6 @@ export default class MoviesModel {
     return row ? this.formatMovie(row) : null;
   }
 
-  getAll(): Movie[] {
-    const rows = this.getAllStmt.all() as MovieRow[];
-    return rows.map((row) => this.formatMovie(row));
-  }
-
   update(id: number, movieData: MovieData): boolean {
     const { watchmode_id, tmdb_id, original_title, normalized_title, year, popularity, has_video } = movieData;
     const result = this.updateStmt.run(
@@ -170,7 +161,7 @@ export default class MoviesModel {
         original_title: !existing.original_title || existing.original_title.trim() === '' ? title : existing.original_title,
         normalized_title:
           !existing.original_title || existing.original_title.trim() === ''
-            ? this.normalizeTitle(title)
+            ? normalizeTitle(title)
             : existing.normalized_title
       };
       this.update(existing.id, updateData);
@@ -180,7 +171,7 @@ export default class MoviesModel {
       watchmode_id: watchmodeId,
       tmdb_id: tmdbId,
       original_title: title,
-      normalized_title: this.normalizeTitle(title),
+      normalized_title: normalizeTitle(title),
       year: year,
       popularity: null,
       has_video: false
@@ -207,7 +198,7 @@ export default class MoviesModel {
           !existing.original_title || existing.original_title.trim() === '' ? title : existing.original_title,
         normalized_title:
           !existing.original_title || existing.original_title.trim() === ''
-            ? this.normalizeTitle(title)
+            ? normalizeTitle(title)
             : existing.normalized_title
       };
       this.update(existing.id, updateData);
@@ -217,7 +208,7 @@ export default class MoviesModel {
       watchmode_id: null,
       tmdb_id: tmdbId,
       original_title: title,
-      normalized_title: this.normalizeTitle(title),
+      normalized_title: normalizeTitle(title),
       year: null,
       popularity,
       has_video
@@ -236,17 +227,5 @@ export default class MoviesModel {
       popularity: row.popularity,
       has_video: Boolean(row.has_video)
     };
-  }
-
-  normalizeTitle(title: string): string {
-    return title
-      // 1. Normalize accented characters → base letters
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '')
-      // 2. Normalize quotes
-      .replace(/[""]/g, '"')
-      .replace(/['']/g, "'")
-      // 3. Normalize dashes
-      .replace(/[–—―]/g, '-');
   }
 }

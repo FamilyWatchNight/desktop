@@ -1,25 +1,25 @@
 {
   "default": {
-    "paths": ["tests/component/**/*.feature"],
+    "paths": ["tests/bdd/business-logic/features/**/*.feature"],
     "requireModule": ["ts-node/register/transpile-only"],
-    "require": ["tests/support/**/*.ts", "tests/component/**/*.ts"],
+    "require": ["tests/bdd/**/*.ts"],
     "format": ["progress-bar", "html:test-results/reports/cucumber-report.html"],
     "timeout": 60000,
     "publishQuiet": true
   },
   "smoke": {
-    "paths": ["tests/component/**/*.feature"],
+    "paths": ["tests/bdd/business-logic/features/**/*.feature"],
     "requireModule": ["ts-node/register/transpile-only"],
-    "require": ["tests/support/**/*.ts", "tests/component/**/*.ts"],
+    "require": ["tests/bdd/**/*.ts"],
     "format": ["progress-bar", "html:test-results/reports/cucumber-report.html"],
     "tags": "@smoke",
     "timeout": 60000,
     "publishQuiet": true
   },
   "component": {
-    "paths": ["tests/component/**/*.feature"],
+    "paths": ["tests/bdd/business-logic/features/**/*.feature"],
     "requireModule": ["ts-node/register/transpile-only"],
-    "require": ["tests/support/**/*.ts", "tests/component/**/*.ts"],
+    "require": ["tests/bdd/**/*.ts"],
     "format": ["progress-bar", "html:test-results/reports/cucumber-report.html"],
     "tags": "@integration",
     "timeout": 60000,

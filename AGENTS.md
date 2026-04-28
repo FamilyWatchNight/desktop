@@ -12,6 +12,7 @@ A cross-platform app for managing movie selection for a Family Watch Night
 - **On scope questions**: If unsure whether to expand/reduce scope, ask first
 - **Implementation choices**: When multiple valid approaches exist, surface them for human decision-making
 - **Documentation Updates**: Always use HumanAgent Chat to propose documentation changes before implementing them
+- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via HumanAgent Chat to confirm completion status and receive guidance on next steps.
 
 **Never assume work is done. Always ask.**
 
@@ -21,18 +22,53 @@ A cross-platform app for managing movie selection for a Family Watch Night
 - **Documentation Changes**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in HumanAgent Chat before implementation
 - **Complex Decisions**: When multiple valid approaches exist, surface them in HumanAgent Chat for human decision-making
 - **Scope Clarification**: Use HumanAgent Chat to confirm understanding of requirements and scope before proceeding with implementation
+- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via HumanAgent Chat to confirm completion status and receive guidance on next steps.
 
-### Testing Validation Flow
+---
+
+# Testing in Family Watch Night
+
+## Test Architecture Overview
+
+This project uses a three-layer BDD architecture inspired by *BDD in Action*:
+
+1. **Business Logic Layer** (`tests/bdd/business-logic/`): Feature files and step definitions that express business scenarios in domain language
+2. **Business Flow Layer** (`tests/bdd/business-flow/personas/`): Persona classes (e.g., `InternalSystemPersona`) that translate domain intent into actionable steps
+3. **Technical Layer** (`tests/bdd/technical/`): Test hooks, infrastructure, and low-level integrations with the app
+
+**Key principle**: Business Logic steps must not call the Technical layer directly. They go through personas, which maintain a stable domain-facing API for test scenarios.
+
+### Test Structure
+- **Unit tests** (Jest): Located in `tests/unit/`, for isolated business logic
+  - Execute: `npm run test:unit`
+- **Feature tests** (Cucumber/BDD): Located in `tests/bdd/`
+  - Execute: `npm run test:features`
+  - Feature scenarios in `tests/bdd/business-logic/features/`
+  - Step definitions in `tests/bdd/business-logic/steps/`
+  - Personas (domain-facing APIs) in `tests/bdd/business-flow/personas/`
+  - Test hooks and infrastructure in `tests/bdd/technical/`
+
+### Test State Management
+
+Tests store scenario-specific data using a hierarchical state store via `world.getStateStore(namespace)`. This allows:
+- **Keyed state**: Store multiple instances by key (e.g., `state.roles.set('editor', role)`)
+- **Last-created state**: Store the most recent instance for un-keyed access (e.g., `state.lastRole`)
+
+When adding features with stateful test scenarios, use this pattern to maintain separation between setup/helpers and the scenario context.
+
+### Validation Flow
 When writing tests:
 1. **Before writing the first test**: Ask to validate the test approach and confirm test coverage strategy
-2. **Before each additional test**: Ask to validate the previous test worked as intended
+2. **Before each test scenario**: Ask to validate the previous test worked as intended
 3. **Never assume test completeness**: Verify sufficient coverage with human before marking done
-4. **Test Architecture Awareness**: Understand test levels (@smoke, @integration, unit) and their purposes
-5. **Isolation Verification**: Confirm test stores and databases are properly isolated between runs
-6. **Data Persistence Patterns**: Use established module variable patterns for test data
-7. **Service Interface Matching**: Ensure service methods match test hook expectations
+4. **Test Architecture Compliance**: Ensure Business Logic layers do not directly call Technical layers; route through personas
+5. **State Isolation**: Confirm test state is properly isolated between runs and namespaced appropriately
+6. **Persona Contract**: Ensure persona methods match test hook expectations and are stable for step definitions
+7. **Integration hook validation**: Use `npm run build:main:for-integration-testing` when modifying `src/main/testing-active/TestHooksImpl.ts` or related test hooks so compile-time mismatches are caught before running feature tests.
 
-See Testing section below for specific constraints.
+---
+
+# Agent Implementation Guidance
 
 ---
 
@@ -86,6 +122,19 @@ The renderer's API client automatically detects its environment and selects the 
   - Accessors for application test hooks `./tests/support/domains/`
   - Test orchestration infrastructure in `./tests/infrastructure/`
 
+### Test Hooks
+- Service logic cannot be tested via Jest unit tests because it runs inside the Electron main process
+- Testing hooks, exposed only for integration testing, live in `src/main/testing-active`
+- The `InternalSystemPersona` in `tests/business-flow/personas/internal-system.ts` uses a test api in
+  `tests/technical/hooks` to call those hooks that run in the electron main process
+- Only serializable data can cross the hook boundary from Cucumber to Electron
+- NEVER, under any circumstances, change anything in `src/main/testing`. That folder's contents is
+  overwritten at build time.
+- If any compile, build, or test failure points to a problem in `src/main/testing` and you believe that
+  you need to change a file in that folder to resolve the error, instead make the change to the
+  equivalent file in the `src/main/testing-active` folder. Those files will be copied into `src/main/testing`
+  at build time, so your changes there will take effect at the next build.
+
 ### Validation Flow
 Before writing tests:
 1. Get approval on test approach and coverage strategy
@@ -100,9 +149,9 @@ This project uses structured documentation to prevent stale guidance and capture
 
 ## Key Documents
 
-- **ARCHITECTURE_ANALYSIS.md**: "Living" documentation of system design, patterns, infrastructure
+- **ARCHITECTURE_ANALYSIS.md**: "Living" documentation of system design, application architecture, and how testing infrastructure integrates with the main application
 - **DECISIONS.md**: Record of significant architectural and implementation decisions (created as-needed)
-- **AGENTS.md**: This file — agent workflow, conventions, and guidance
+- **AGENTS.md**: This file — agent workflow, conventions, testing patterns, and guidance
 
 ## Agent Approach to Documentation
 
@@ -126,6 +175,60 @@ This project uses structured documentation to prevent stale guidance and capture
 
 ---
 
+# Implementation Guidelines
+
+## Validation and Testing Protocol
+After any substantive code change, immediately run relevant tests (unit, smoke, feature) to validate functionality. If tests fail, iterate up to three targeted fixes; if still failing, summarize root cause and options.
+
+## Exploration Strategy
+When researching complex questions or searching large codebases, use the Explore subagent for thorough, read-only investigations to avoid cluttering the main conversation.
+
+## Dependency Management
+Prefer minimal, pinned, widely-used libraries. Always update package manifests and lockfiles appropriately when adding dependencies.
+
+## Code Generation Standards
+For non-trivial code generation, produce complete runnable solutions including source files, minimal runner/test harness, README with usage/troubleshooting, and updated dependency manifests.
+
+## Security Integration
+When implementing features, always import and use security functions from `src/main/security/` (e.g., `safeJoin`, `assertPathInsideAllowedDirs`). Validate, normalize, and bounds-check all user inputs.
+
+## Build and Environment Awareness
+Before assuming build requirements or project structure, verify by checking common config files (package.json, etc.) or quick exploration. Adapt to existing patterns.
+
+## Memory Usage Guidelines
+Actively consult and update user/session/repo memories for patterns, preferences, and lessons learned. Record mistakes that could be common.
+
+## Question-Asking Protocol
+When multiple approaches exist or scope is unclear, use the vscode_askQuestions tool to gather user preferences before proceeding.
+
+## Response Formatting
+Keep answers short and impersonal. Use proper Markdown, KaTeX for math, and strict file linkification rules (no backticks on paths, use [path](path) format).
+
+## Error Handling
+Never invent APIs, paths, or commands; verify with tools first. If uncertain, gather context before acting.
+
+## File Placement and Directory Structure Analysis
+When creating new files (especially tests, components, or features), first examine the directory structure of existing similar files to identify established patterns. Check for subdirectories and naming conventions used for related functionality. If the appropriate location isn't immediately clear from existing patterns, ask for clarification before creating files. Document and follow the project's directory hierarchy conventions (e.g., test features in subdirectories under `tests/component/` like `smoke/` or `workflows/`).
+
+## Test Organization Conventions
+- Unit tests: Place in `tests/unit/` with descriptive names.
+- Feature tests: Place feature files and steps in appropriate subdirectories under `tests/component/` (e.g., `smoke/` for health checks, `workflows/` for business logic flows).
+- Avoid placing new test files at the root level of test directories unless that's the established pattern for that type.
+
+## Naming and Export Conventions
+Examine existing file names, class names, and export patterns for similar functionality. Ensure consistency in naming: e.g., Service classes use singular nouns (MovieService, UserService), Model classes follow established plural/singular patterns (MoviesModel, UsersModel). Check export styles: Use named exports for services (export class ServiceName), default exports for models if that's the pattern.
+
+## Implementation Pattern Matching
+Analyze how existing classes handle dependencies: e.g., avoid constructor dependency injection if other services use lazy binding via factory methods like `getModels()`. Compare method signatures and implementations: Look at how CRUD operations, error handling, and data flow are structured in similar classes. Follow established architectural patterns: e.g., services as pure business logic without transport concerns, models handling type conversion.
+
+## Code Structure Review Checklist
+Before finalizing a new class or file, cross-reference with 2-3 similar existing implementations. Verify that constructor patterns, method organization, and data access match the established style. If patterns conflict or aren't clear, ask for clarification on the preferred approach.
+
+## Test Quality Guidelines
+Avoid creating tests that don't actually validate the behavior they claim to test. Tests should provide genuine confidence in functionality, not false positives. Placeholder tests for future features should be clearly marked and not included in test suites until they can perform meaningful validation. Focus on tests that verify specific, observable outcomes rather than just checking that methods exist or return non-null values.
+
+---
+
 # Development Commands
 
 ```pwsh
@@ -133,8 +236,13 @@ npm run dev             # Concurrent build:watch + vite + debug (development)
 npm run test:unit       # Jest unit tests
 npm run tests:features  # Cucumber feature tests
 npm run test            # All tests
-npm run build           # Production build
+npm run build           # Full production build (slow - includes signing)
+npm run pack            # Production build without final executable/installer (faster validation)
+npm run build:main      # Main process TypeScript compilation only
+npm run build:renderer  # Renderer process build only
 ```
+
+**Build Validation Guidance**: For development validation, use `npm run build:main` for quick TypeScript checking of the main process, or `npm run pack` for comprehensive build validation without the slow code signing step. Reserve `npm run build` for final production releases.
 
 **Pattern Research**: Before implementing new features, thoroughly examine existing similar implementations to understand established patterns and conventions.
 
@@ -155,8 +263,8 @@ All user-facing text must be translatable:
 - Text exposed in UI should use i18next keys, not hardcoded strings
 - LocalizationService manages locale switching and translation loading
 - Locale files live in `./assets/locales/{locale}/` as JSON (e.g., `en/common.json`, `dev/common.json`)
-- When adding UI text, add corresponding translation keys to the appropriate files
-- `dev` text is the English text with underscores (___) affixed to the start and end.
+- **When adding new translation keys, update BOTH `en` and `dev` locale files**
+- `dev` text is the English text with underscores (___) affixed to the start and end for easy identification
 
 ## Security
 

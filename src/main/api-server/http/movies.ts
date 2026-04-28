@@ -13,10 +13,6 @@ import { route } from './utils';
 const movieService = new MovieService();
 
 export function registerMovieRoutes(app: Express): void {
-  app.post('/api/movies',
-    route((req: Request) => movieService.create(req.body))
-  );
-
   app.get('/api/movies/:id',
     route((req: Request) => movieService.getById(Number(req.params.id)))
   );
@@ -34,21 +30,7 @@ export function registerMovieRoutes(app: Express): void {
       if (req.query.searchTerm) {
         return movieService.searchByTitle(String(req.query.searchTerm));
       }
-      return movieService.getAll();
-    })
-  );
-
-  app.put('/api/movies/:id',
-    route((req: Request) => {
-      const success = movieService.update(Number(req.params.id), req.body);
-      return { success };
-    })
-  );
-
-  app.delete('/api/movies/:id',
-    route((req: Request) => {
-      const success = movieService.delete(Number(req.params.id));
-      return { success };
+      throw new Error('searchTerm query parameter is required');
     })
   );
 }

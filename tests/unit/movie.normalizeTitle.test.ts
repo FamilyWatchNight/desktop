@@ -6,23 +6,9 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { initMockDatabase, getModels } from '../../src/main/database';
+import { normalizeTitle } from '../../src/main/utils/text';
 
-const mockStatement = {
-  run: jest.fn(),
-  get: jest.fn(),
-  all: jest.fn(),
-};
-
-test('db/models/Movies/normalizeTitle test', () => {
-  const db = {
-    prepare: jest.fn(() => mockStatement),
-    exec: jest.fn(),
-  };
-
-  initMockDatabase(db as never);
-
-  const movies = getModels().movies;
+test('normalizeTitle utility function', () => {
 
   const testCases: Array<{ input: string; expected: string }> = [
     { input: '"Café Society"', expected: '"Cafe Society"' },
@@ -38,7 +24,7 @@ test('db/models/Movies/normalizeTitle test', () => {
   ];
 
   testCases.forEach(({ input, expected }) => {
-    const normalized = movies.normalizeTitle(input);
+    const normalized = normalizeTitle(input);
     expect(normalized).toBe(expected);
   });
 });

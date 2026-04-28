@@ -10,6 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import { safeJoin, assertPathInsideAllowedDirs } from '../security/pathGuards';
 import { app } from 'electron';
+import { AuthContext } from '../auth/context-manager';
 
 const isTestMode = process.env.NODE_ENV === 'test';
 const isDevMode = !(app && app.isPackaged);
@@ -98,6 +99,13 @@ export class LocalizationService {
     this.localesPath = localesPath;
   }
 
+  private validateAuthContext(_authContext?: AuthContext): void {
+    // No-op - translations available to all users including unauthenticated.
+    // We still have a validateAuthContext method to enforce the pattern that 
+    // all service methods must accept an optional authContext and validate it,
+    // even if in this case there are no actual restrictions.
+  }
+
   /**
    * Build the full path to a locale file and ensure it stays within the locales root directory.
    */
@@ -109,7 +117,8 @@ export class LocalizationService {
     return candidatePath;
   }
 
-  async getLocaleFile(namespace: string, language: string): Promise<Record<string, string>> {
+  async getLocaleFile(namespace: string, language: string, authContext?: AuthContext): Promise<Record<string, string>> {
+    this.validateAuthContext(authContext);
     const filePath = this.getLocaleFilePath(normalizeLanguage(language), normalizeNamespace(namespace));
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8');
@@ -120,7 +129,8 @@ export class LocalizationService {
     }
   }
 
-  async saveMissingKey(namespace: string, language: string, key: string, fallbackValue: string): Promise<void> {
+  async saveMissingKey(namespace: string, language: string, key: string, fallbackValue: string, authContext?: AuthContext): Promise<void> {
+    this.validateAuthContext(authContext);
     if (!isDevMode && !isTestMode) {
       // Client-side protections should keep us from getting here, but guard against accidental calls in production just in case.
       throw new Error('Cannot save missing keys in production mode');

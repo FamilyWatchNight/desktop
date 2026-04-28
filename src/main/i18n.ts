@@ -1,12 +1,31 @@
 import i18n from 'i18next';
 import Backend from 'i18next-fs-backend';
 import path from 'path';
-import { app } from 'electron';
 
-const isDevMode = !app.isPackaged;
-const i18nPath = path.join(app.getAppPath(), 'assets/locales');
+let app;
+try {
+  // Electron may not be available in unit tests
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  app = require('electron').app;
+} catch {
+  app = undefined;
+}
 
-export const appLanguage = ( process.env.NODE_ENV === 'test' ) ? 'test' : isDevMode ? 'dev' : app.getLocale();
+const isDevMode = typeof app !== 'undefined' ? !app.isPackaged : true;
+const isTestMode = process.env.NODE_ENV === 'test';
+const i18nPath = path.join(
+  typeof app !== 'undefined' ? app.getAppPath() : process.cwd(),
+  'assets/locales'
+);
+
+export const appLanguage =
+  isTestMode
+    ? 'test'
+    : isDevMode
+    ? 'dev'
+    : typeof app !== 'undefined'
+    ? app.getLocale()
+    : 'en';
 
 i18n
   .use(Backend)
@@ -23,8 +42,8 @@ i18n
     interpolation: { escapeValue: false},
     lng: appLanguage,
     load: 'all',
-    ns: ['main', 'common'],
-    parseMissingKeyHandler: (key) => `[!!!${key}!!!]`,
+    ns: ['main', 'common', 'auth'],
+    parseMissingKeyHandler: isTestMode ? undefined : (key) => `[!!!${key}!!!]`,
     preload: ['en'],
     saveMissing: true,
     saveMissingPlurals: true,
