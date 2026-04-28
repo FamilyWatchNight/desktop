@@ -25,7 +25,7 @@ export class Settings {
    */
   async initializeMockSettings(testSettings?: Record<string, unknown>, authContext?: AuthContextPayload): Promise<void> {
     await withTestHooks(this.app, async (hooks, testSettings, authContext) => {
-      hooks.settings.initializeMockSettings(testSettings, authContext);
+      return hooks.settings.initializeMockSettings(testSettings, authContext);
     }, testSettings, authContext);
   }
 
@@ -43,7 +43,7 @@ export class Settings {
    */
   async setSetting(key: string, value: unknown, authContext?: AuthContextPayload): Promise<void> {
     return await withTestHooks(this.app, async (hooks, key, value, authContext) => {
-      hooks.settings.set(key, value, authContext);
+      return hooks.settings.set(key, value, authContext);
     }, key, value, authContext);
   }
 
@@ -61,7 +61,7 @@ export class Settings {
    */
   async saveSettings(settings: Record<string, unknown>, authContext?: AuthContextPayload): Promise<void> {
     return await withTestHooks(this.app, async (hooks, settings, authContext) => {
-      hooks.settings.save(settings, authContext);
+      return hooks.settings.save(settings, authContext);
     }, settings, authContext);
   }
 }

@@ -40,7 +40,10 @@ export class CustomWorld extends World {
    */
   getStateStore(storeName: string): Record<string, unknown> {
     if (!this.scenarioState[storeName]) {
-      this.scenarioState[storeName] = {};
+      this.scenarioState[storeName] = {
+        latest: null,
+        all: new Map<string, unknown>()
+      };
     }
     return this.scenarioState[storeName];
   }
@@ -51,6 +54,89 @@ export class CustomWorld extends World {
 
   clearAllStateStores(): void {
     this.scenarioState = {};
+  }
+
+  setLastError(error?: Error | unknown, errorMessage?: string): void {
+    const state = this.getStateStore('lastError');
+    state.error = error;
+    state.errorMessage = errorMessage;
+  }
+
+  clearLastError(): void {
+    this.clearStateStore('lastError');
+  }
+
+  getLastError(): { error?: Error | unknown; errorMessage?: string } {
+    const state = this.getStateStore('lastError');
+    return {
+      error: state.error as Error | unknown |undefined,
+      errorMessage: state.errorMessage as string | undefined
+    };
+  }
+
+  getStateObjectStore(objectType: string): unknown {
+    const stateObjectStore = this.getStateStore("objects");
+
+    // Object stores can be indexed by both object type and a key to a specific object. Introduce another level of nesting.  
+    if (!stateObjectStore[objectType]) {
+      stateObjectStore[objectType] = {
+        latest: null,
+        all: new Map<string, unknown>()
+      };
+    }
+    return stateObjectStore[objectType];
+  }
+
+  setStateObject(objectType: string, value: unknown, key?: string): void {
+    const objectStore = this.getStateObjectStore(objectType) as { latest: unknown; all: Map<string, unknown> };
+    if (key) {
+      objectStore.all.set(key, value);
+    }
+    objectStore.latest = value;
+  }
+  
+  getStateObject(objectType: string, key?: string): unknown | null {
+    const objectStore = this.getStateObjectStore(objectType) as { latest: unknown; all: Map<string, unknown> };
+
+    if (key) {
+      const object = objectStore.all.get(key);
+      if (object === undefined) {
+        throw new Error(`No object found in store for type "${objectType}" with key "${key}"`);
+      }
+      return object;
+    } else {
+      const object = objectStore.latest;
+      if (object === undefined) {
+        throw new Error(`No latest object found in store for type "${objectType}"`);
+      }
+      return objectStore.latest ?? null;
+    }
+  }
+
+  getStateReturnStore(): unknown {
+    return this.getStateStore("returnValues");
+  }
+
+  setStateReturn(value: unknown, callType?: string): void {
+    const returnStore = this.getStateReturnStore() as { latest: unknown; all: Map<string, unknown> };
+    if (callType) {
+      returnStore.all.set(callType, value);
+    }
+    returnStore.latest = value;
+  }
+  
+  getStateReturn(callType?: string): unknown | null {
+    const returnStore = this.getStateReturnStore() as { latest: unknown; all: Map<string, unknown> };
+
+    if (callType) {
+      const returnValue = returnStore.all.get(callType);
+      if (returnValue === undefined) {
+        throw new Error(`No return value found in store for type "${callType}"`);
+      }
+      return returnValue;
+    } else {
+      return returnStore.latest ?? null;
+    }
   }
 
   async launchApp(): Promise<void> {

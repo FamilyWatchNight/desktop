@@ -45,7 +45,7 @@ export class InternalSystemPersona {
     }
     if (this.customPermissions !== null) {
       return {
-        userId: 1, // Test user ID
+        userId: 0, // Test user ID
         permissions: this.customPermissions
       };
     }
@@ -146,6 +146,10 @@ export class InternalSystemPersona {
   //
   // Movie operations
   //
+  async getMovieById(id: number) {
+    return await this.world.moviesApi.getMovieById(id, this.getAuthContextPayload());
+  }
+
   async getMovieByTmdbId(tmdbId: string) {
     return await this.world.moviesApi.getMovieByTmdbId(tmdbId, this.getAuthContextPayload());
   }
@@ -246,7 +250,7 @@ export class InternalSystemPersona {
   async authenticateUser(username: string, password: string): Promise<AuthenticatedUser | null> {
     const result = await this.world.usersApi.authenticateUser(username, password, this.getAuthContextPayload());
     if (result?.id) {
-      this.runAsUser(result.id as number);
+      await this.runAsUser(result.id as number);
     }
     return result;
   }
@@ -322,7 +326,8 @@ export class InternalSystemPersona {
     this.customPermissions = null;
 
     // Build authContext with the user's actual permissions from the system
-    const permissions = await this.getUserPermissions(userId);
+    const systemAuthContextPayload = { userId: -1, permissions: ['can-admin'] } as AuthContextPayload;
+    const permissions = await this.world.usersApi.getUserPermissions(userId, systemAuthContextPayload);
     this.authContext = createAuthContext(userId, permissions);
   }
 

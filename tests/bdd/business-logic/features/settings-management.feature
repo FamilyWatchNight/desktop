@@ -1,4 +1,4 @@
-@integration
+@integration @settings
 Feature: Settings Management
   As a user
   I want to manage application settings
@@ -67,3 +67,74 @@ Feature: Settings Management
         "tmdbApiKey": "test-key"
       }
       """
+
+  @auth
+  Scenario: SettingsService.get requires can-admin permission
+    Given I run unauthenticated
+    When I attempt to request the "webPort" setting
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to request the "webPort" setting
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to request the "webPort" setting
+    Then no error should be thrown
+
+  @auth
+  Scenario: SettingsService.set requires can-admin permission
+    Given I run unauthenticated
+    When I attempt to set the "webPort" setting to 5000
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to set the "webPort" setting to 5000
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to set the "webPort" setting to 5000
+    Then no error should be thrown
+
+  @auth
+  Scenario: SettingsService.load requires can-admin permission
+    Given I run unauthenticated
+    When I attempt to request all settings
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to request all settings
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to request all settings
+    Then no error should be thrown
+
+  @auth
+  Scenario: SettingsService.save requires can-admin permission
+    Given I run unauthenticated
+    When I attempt to save the following settings:
+      """
+      {
+        "webPort": 7000
+      }
+      """
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to save the following settings:
+      """
+      {
+        "webPort": 7000
+      }
+      """
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to save the following settings:
+      """
+      {
+        "webPort": 7000
+      }
+      """
+    Then no error should be thrown

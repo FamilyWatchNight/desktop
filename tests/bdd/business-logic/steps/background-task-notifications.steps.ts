@@ -10,32 +10,24 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { CustomWorld } from '../../technical/infrastructure/world';
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
+import { attemptAsync } from '../../technical/infrastructure/utils';
 
 function getSystemPersona(world: CustomWorld): InternalSystemPersona {
   const state = world.getStateStore('personas');
   if (!state.system) {
     state.system = new InternalSystemPersona(world);
   }
-  return state.system;
+  return state.system as InternalSystemPersona;
 }
 
-function backgroundTaskState(world: CustomWorld) {
-  return world.getStateStore('backgroundTasks');
-}
-
-function storeTaskReference(world: CustomWorld, refName: string, taskId: string): void {
-  const state = backgroundTaskState(world);
-  if (!state.taskReferences) {
-    state.taskReferences = new Map<string, string>();
-  }
-  (state.taskReferences as Map<string, string>).set(refName, taskId);
+function setStoreTask(world: CustomWorld, taskId: string | undefined, refName?: string) {
+  world.setStateObject('tasks', taskId, refName);
 }
 
 function getTaskRefName(world: CustomWorld, taskId: string): string | undefined {
-  const state = backgroundTaskState(world);
-  const taskRefs = state.taskReferences as Map<string, string>;
-  if (!taskRefs) return undefined;
-  for (const [refName, id] of taskRefs.entries()) {
+  const objectStore = world.getStateObjectStore('tasks') as { latest: unknown; all: Map<string, unknown> } | undefined;
+  if (!objectStore?.all) return undefined;
+  for (const [refName, id] of objectStore.all.entries()) {
     if (id === taskId) {
       return refName;
     }
@@ -48,20 +40,23 @@ Given('event recording is cleared', async function (this: CustomWorld) {
   system.clearRecordedEvents();
 });
 
-When('a background task {string} is enqueued', async function (this: CustomWorld, refName: string) {
-  const system = getSystemPersona(this);
+async function enqueueTask(world: CustomWorld, refName: string) {
+  const system = getSystemPersona(world);
   await system.initDatabase();
   await system.setupTestTaskType();
-  
-  // Enqueue with the standard test task type
   const result = await system.enqueueTask('test-background-task', { refName });
-  expect((result as { success: boolean }).success).toBe(true);
-  
-  // Store mapping from reference name to task ID
-  const taskResult = result as { success: boolean; taskId?: string };
-  if (taskResult.taskId) {
-    storeTaskReference(this, refName, taskResult.taskId);
-  }
+  expect((result as { success: boolean; }).success).toBe(true);
+  const taskResult = result as { success: boolean; taskId?: string; };
+  setStoreTask(world, taskResult.taskId ?? undefined, refName);
+  return result;
+}
+
+When('a background task {string} is enqueued', async function (this: CustomWorld, refName: string) {
+  await enqueueTask(this, refName);
+});
+
+When('I attempt to enqueue a background task {string}', async function (this: CustomWorld, refName: string) {
+  await attemptAsync(this, async () => { await enqueueTask(this, refName); });
 });
 
 When('I set the task progress to current={int}, max={int}, description={string}', async function (
@@ -173,5 +168,75 @@ Then('the most recent {string} event should have {int} queued tasks', async func
   const queue = (eventData.queue as unknown[]) || [];
 
   expect(queue.length).toBe(expectedQueueCount);
+});
+
+async function getTaskState(world: CustomWorld) {
+  world.setStateReturn(undefined, "getTaskState");
+  const system = getSystemPersona(world);
+  const state = await system.getTaskState();
+  world.setStateReturn(state, "getTaskState");
+  return state;
+}
+
+When('I attempt to get the background task state', async function (this: CustomWorld) {
+  await attemptAsync(this, async () => { await getTaskState(this); });
+});
+
+async function cancelActiveTask(world: CustomWorld) {
+  world.setStateReturn(undefined, "cancelActiveTask");
+  const system = getSystemPersona(world);
+  const result = await system.cancelActiveTask();
+  world.setStateReturn(result, "cancelActiveTask");
+  return result;
+}
+
+When('I cancel the active background task', async function (this: CustomWorld) {
+  await cancelActiveTask(this);
+});
+
+When('I attempt to cancel the active background task', async function (this: CustomWorld) {
+  await attemptAsync(this, async() => { await cancelActiveTask(this); });
+});
+
+async function removeQueuedTask(world: CustomWorld) {
+  world.setStateReturn(undefined, "removeQueuedTask");
+  const system = getSystemPersona(world);
+  const taskState = await system.getTaskState();
+  const state = taskState as { active: unknown; queue: Array<{ id: string; }>; };
+  if (state.queue && state.queue.length > 0) {
+    const taskToRemove = state.queue[0];
+    const removeResult = await system.removeQueuedTask(taskToRemove.id);
+    world.setStateReturn(removeResult, "removeQueuedTask");
+    return removeResult;
+  }
+  throw new Error('No queued tasks to remove');
+}
+
+When('I remove the queued background task', async function (this: CustomWorld) {
+  await removeQueuedTask(this);
+});
+
+When('I attempt to remove the queued background task', async function (this: CustomWorld) {
+  await attemptAsync(this, async () => { await removeQueuedTask(this); });
+});
+
+Then('the background task state should contain the active task', async function (this: CustomWorld) {
+  const state = this.getStateReturn("getTaskState");
+
+  expect(state).toBeDefined();
+  expect(state).toHaveProperty('active');
+  expect(state).toHaveProperty('queue');
+});
+
+Then('the active background task should be cancelled', async function (this: CustomWorld) {
+  const result = this.getStateReturn("cancelActiveTask") as Record<string, unknown> | undefined;
+  expect(result).toBeDefined();
+  expect((result as any)?.success).toBe(true);
+});
+
+Then('the queued background task should be removed successfully', async function (this: CustomWorld) {
+  const result = this.getStateReturn("removeQueuedTask") as Record<string, unknown> | undefined;
+  expect(result).toBeDefined();
+  expect((result as any)?.success).toBe(true);
 });
 

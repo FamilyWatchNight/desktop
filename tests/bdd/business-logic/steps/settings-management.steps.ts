@@ -10,6 +10,7 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { CustomWorld } from '../../technical/infrastructure/world';
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
+import { attemptAsync } from '../../technical/infrastructure/utils';
 
 function settingsState(world: CustomWorld) {
   return world.getStateStore('settingsManagement');
@@ -20,7 +21,7 @@ function getSystemPersona(world: CustomWorld): InternalSystemPersona {
   if (!state.system) {
     state.system = new InternalSystemPersona(world);
   }
-  return state.system;
+  return state.system as InternalSystemPersona;
 }
 
 Given('the application is running with default settings', async function (this: CustomWorld) {
@@ -29,60 +30,94 @@ Given('the application is running with default settings', async function (this: 
   system.initializeSettings();
 });
 
-When('I save the following settings:', async function (this: CustomWorld, settingsJson: string) {
+async function saveSettings(world: CustomWorld, settingsJson: string) {
   const settings = JSON.parse(settingsJson);
-  const system = getSystemPersona(this);
-  for (const key in settings) {
-    system.setSetting(key, settings[key]);
-  }
+  const system = getSystemPersona(world);
+  return await system.saveSettings(settings);
+}
+
+When('I save the following settings:', async function (this: CustomWorld, settingsJson: string) {
+  await saveSettings(this, settingsJson);
 });
+
+When('I attempt to save the following settings:', async function (this: CustomWorld, settingsJson: string) {
+  await attemptAsync(this, async () => { await saveSettings(this, settingsJson); });
+});
+
+async function setSetting(world: CustomWorld, key: string, value: unknown) {
+  const system = getSystemPersona(world);
+  return await system.setSetting(key, value);
+}
 
 When('I set the {string} setting to {int}', async function (this: CustomWorld, key: string, value: number) {
-  const system = getSystemPersona(this);
-  system.setSetting(key, value);
+  await setSetting(this, key, value);
 });
+
+When('I attempt to set the {string} setting to {int}', async function (this: CustomWorld, key: string, value: number) {
+  await attemptAsync(this, async () => { await setSetting(this, key, value); });
+});
+
 When('I set the {string} setting to {string}', async function (this: CustomWorld, key: string, value: string) {
-  const system = getSystemPersona(this);
-  system.setSetting(key, value);
+  await setSetting(this, key, value);
 });
+
+When('I attempt to set the {string} setting to {string}', async function (this: CustomWorld, key: string, value: string) {
+  await attemptAsync(this, async () => { await setSetting(this, key, value); });
+});
+
+async function loadSettings(world: CustomWorld) {
+  world.setStateReturn(undefined, "loadSettings");
+  const system = getSystemPersona(world);
+  const settings = await system.loadSettings();
+  world.setStateObject("settings", settings);
+  return settings;
+}
 
 When('I request all settings', async function (this: CustomWorld) {
-  const state = settingsState(this);
-  const system = getSystemPersona(this);
-  state.currentSettings = await system.loadSettings();
+  await loadSettings(this);
 });
 
+When('I attempt to request all settings', async function (this: CustomWorld) {
+  await attemptAsync(this, async () => { await loadSettings(this); });
+});
+
+async function getSetting(world: CustomWorld, key: string) {
+  const settings = (world.getStateObject("settings") as Record<string, unknown>) ?? {};
+  settings[key] = undefined;
+  const system = getSystemPersona(world);
+  const value = await system.getSetting(key);
+  settings[key] = value;
+  world.setStateObject("settings", settings);
+  return value;
+}
+
 When('I request the {string} setting', async function (this: CustomWorld, key: string) {
-  const state = settingsState(this);
-  const system = getSystemPersona(this);
-  const currentSettings = (state.currentSettings as Record<string, unknown> | undefined) ?? {};
-  currentSettings[key] = await system.getSetting(key);
-  state.currentSettings = currentSettings;
+  await getSetting(this, key);
+});
+
+When('I attempt to request the {string} setting', async function (this: CustomWorld, key: string) {
+  await attemptAsync(this, async () => { await getSetting(this, key); });
 });
 
 Then('I should receive settings that include the following:', async function (this: CustomWorld, expectedSettingsJson: string) {
-  const state = settingsState(this);
-  const currentSettings = state.currentSettings as Record<string, unknown> | undefined;
+  const currentSettings = (this.getStateObject("settings") as Record<string, unknown>) ?? {};
   expect(currentSettings).toBeDefined();
 
-  const current = currentSettings as Record<string, unknown>;
   const expectedSettings = JSON.parse(expectedSettingsJson);
   for (const key in expectedSettings) {
-    expect(current).toHaveProperty(key);
-    expect(current[key]).toEqual(expectedSettings[key]);
+    expect(currentSettings).toHaveProperty(key);
+    expect(currentSettings[key]).toEqual(expectedSettings[key]);
   }
 });
 
 Then('I should receive a {string} setting with value {int}', async function (this: CustomWorld, key: string, expectedValue: number) {
-  const state = settingsState(this);
-  const currentSettings = state.currentSettings as Record<string, unknown> | undefined;
+  const currentSettings = (this.getStateObject("settings") as Record<string, unknown>) ?? {};
   expect(currentSettings).toBeDefined();
   expect(currentSettings).toHaveProperty(key);
   expect(currentSettings![key]).toEqual(expectedValue);
 });
 Then('I should receive a {string} setting with value {string}', async function (this: CustomWorld, key: string, expectedValue: string) {
-  const state = settingsState(this);
-  const currentSettings = state.currentSettings as Record<string, unknown> | undefined;
+  const currentSettings = (this.getStateObject("settings") as Record<string, unknown>) ?? {};
   expect(currentSettings).toBeDefined();
   expect(currentSettings).toHaveProperty(key);
   expect(currentSettings![key]).toEqual(expectedValue);

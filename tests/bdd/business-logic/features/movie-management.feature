@@ -67,3 +67,64 @@ Feature: Import Movies
   Scenario: Movies missing from TMDB are handled gracefully
     When I look up the movie with Watchmode ID "11083261"
     Then the movie should have a null popularity value
+
+  @auth
+  Scenario: MovieService.getById requires authentication
+    Given stub TMDB data is loaded from
+      """
+      {"adult":false,"id":120249,"original_title":"Test Movie","popularity":1.0,"video":false}
+      """
+    
+    Given I run unauthenticated
+    When I attempt to get movie by ID 1
+    Then an AuthenticationError should be thrown
+    
+    Given I run authenticated with no explicit permissions
+    When I attempt to get movie by ID 1
+    Then no error should be thrown
+
+  @auth
+  Scenario: MovieService.getByTmdbId requires authentication
+    Given stub TMDB data is loaded from
+      """
+      {"adult":false,"id":120249,"original_title":"Test Movie","popularity":1.0,"video":false}
+      """
+    
+    Given I run unauthenticated
+    When I attempt to look up the movie with TMDB ID "120249"
+    Then an AuthenticationError should be thrown
+    
+    Given I run authenticated with no explicit permissions
+    When I attempt to look up the movie with TMDB ID "120249"
+    Then no error should be thrown
+
+  @auth
+  Scenario: MovieService.getByWatchmodeId requires authentication
+    Given stub Watchmode data is loaded from
+      """
+      Watchmode ID,IMDB ID,TMDB ID,TMDB Type,Title,Year
+      "1288","tt0130430","120249","movie","Test Movie","1974"
+      """ 
+
+    Given I run unauthenticated
+    When I attempt to look up the movie with Watchmode ID "1288"
+    Then an AuthenticationError should be thrown
+    
+    Given I run authenticated with no explicit permissions
+    When I attempt to look up the movie with Watchmode ID "1288"
+    Then no error should be thrown
+
+  @auth
+  Scenario: MovieService.searchByTitle requires authentication
+    Given stub TMDB data is loaded from
+      """
+      {"adult":false,"id":120249,"original_title":"Test Movie","popularity":1.0,"video":false}
+      """
+    
+    Given I run unauthenticated
+    When I attempt to search movies by title "Test"
+    Then an AuthenticationError should be thrown
+    
+    Given I run authenticated with no explicit permissions
+    When I attempt to search movies by title "Test"
+    Then no error should be thrown

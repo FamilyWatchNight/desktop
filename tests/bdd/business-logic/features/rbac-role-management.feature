@@ -46,20 +46,20 @@ Feature: RBAC role management
 
   Scenario: A system role cannot be deleted, even if no users have it assigned
     Given no users have the system role "admin" assigned
-    When I delete the system role "admin"
-    Then deleting the role should fail
+    When I attempt to delete the system role "admin"
+    Then an error should be thrown
 
   Scenario: A custom role assigned to a user cannot be deleted
     Given a custom role exists
     And a user exists with the role assigned
-    When I delete the role
-    Then deleting the role should fail
+    When I attempt to delete the role
+    Then an error should be thrown
 
   Scenario: A custom role not assigned to any user can be deleted
     Given a custom role exists
     And no users have the role assigned
     When I delete the role
-    Then deleting the role should succeed
+    Then the role should no longer exist
 
   Scenario: Listing all roles includes all system roles and any custom roles
     Given a role "custom-role" exists
@@ -79,3 +79,156 @@ Feature: RBAC role management
     Then the results should include the user "user1"
     And the results should not include the user "user2"
     And the results should not include the user "user3"
+
+  @auth
+  Scenario: RoleService.createRole requires can-admin permission
+    Given I run unauthenticated
+    When I attempt to create a role
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to create a role
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to create a role
+    Then no error should be thrown
+
+  @auth
+  Scenario: RoleService.getRoleById requires can-admin permission
+    Given a custom role exists
+    
+    Given I run unauthenticated
+    When I attempt to get the role
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to get the role
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to get the role
+    Then no error should be thrown
+
+  @auth
+  Scenario: RoleService.getRoleBySystemStub requires can-admin permission
+    Given I run unauthenticated
+    When I attempt to get the system role "admin"
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to get the system role "admin"
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to get the system role "admin"
+    Then no error should be thrown
+
+  @auth
+  Scenario: RoleService.getAllRoles requires can-admin permission
+    Given I run unauthenticated
+    When I attempt to retrieve all roles
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to retrieve all roles
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to retrieve all roles
+    Then no error should be thrown
+
+  @auth
+  Scenario: RoleService.updateRole requires can-admin permission
+    Given a custom role exists
+    
+    Given I run unauthenticated
+    When I attempt to hide the role
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to hide the role
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to hide the role
+    Then no error should be thrown
+
+  @auth
+  Scenario: RoleService.deleteRole requires can-admin permission
+    Given a custom role exists
+    And no users have the role assigned
+    
+    Given I run unauthenticated
+    When I attempt to delete the role
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to delete the role
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to delete the role
+    Then no error should be thrown
+
+  @auth
+  Scenario: RoleService.setPermissionsForRole requires can-admin permission
+    Given a custom role exists
+    
+    Given I run unauthenticated
+    When I attempt to update the role's permissions to be empty
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to update the role's permissions to be empty
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to update the role's permissions to be empty
+    Then no error should be thrown
+
+  @auth
+  Scenario: RoleService.getPermissionsForRole requires can-admin permission
+    Given a role exists with the permissions "can-vote, can-rate"
+    
+    Given I run unauthenticated
+    When I attempt to get permissions for the role
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to get permissions for the role
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to get permissions for the role
+    Then no error should be thrown
+
+  @auth
+  Scenario: RoleService.getAllPermissions requires can-admin permission
+    Given I run unauthenticated
+    When I attempt to retrieve all defined permissions
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to retrieve all defined permissions
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to retrieve all defined permissions
+    Then no error should be thrown
+
+  @auth
+  Scenario: RoleService.duplicateRole requires can-admin permission
+    Given a role "base-role" exists
+    
+    Given I run unauthenticated
+    When I attempt to duplicate the role "base-role" to create a new role "copy-role"
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to duplicate the role "base-role" to create a new role "copy-role"
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to duplicate the role "base-role" to create a new role "copy-role"
+    Then no error should be thrown

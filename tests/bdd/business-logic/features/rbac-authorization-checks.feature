@@ -13,12 +13,12 @@ Feature: RBAC authorization checks
 
   Scenario: Users with assigned roles have correct permissions
     Given a user exists with no roles assigned
-    And a role exists
+    And a custom role exists
     When I assign the role to the user
     Then the user should have exactly the permissions originally assigned to the role
 
   Scenario: Setting empty permissions on an assigned role removes user's existing permissions
-    Given a role exists
+    Given a custom role exists
     And a user exists with only the role assigned
     When I update the role's permissions to be empty
     Then the user should have no permissions

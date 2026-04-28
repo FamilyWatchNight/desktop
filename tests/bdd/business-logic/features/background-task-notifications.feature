@@ -1,4 +1,4 @@
-@integration
+@integration @background-tasks
 Feature: Background Task Event Notifications
 
   Background:
@@ -34,4 +34,73 @@ Feature: Background Task Event Notifications
     When I complete the task
     Then "second-task" should be the active task
     And the most recent "background-task-update" event should have 0 queued tasks
+
+  @auth
+  Scenario: BackgroundTaskService.enqueue requires can-admin permission
+    Given event recording is cleared
+    
+    Given I run unauthenticated
+    When I attempt to enqueue a background task "test-task"
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to enqueue a background task "test-task"
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to enqueue a background task "test-task"
+    Then no error should be thrown
+
+  @auth
+  Scenario: BackgroundTaskService.getState requires can-admin permission
+    Given event recording is cleared
+    And a background task "state-test" is enqueued
+    
+    Given I run unauthenticated
+    When I attempt to get the background task state
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to get the background task state
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to get the background task state
+    Then no error should be thrown
+
+  @auth
+  Scenario: BackgroundTaskService.cancelActive requires can-admin permission
+    Given event recording is cleared
+    And a background task "cancel-test" is enqueued
+    
+    Given I run unauthenticated
+    When I attempt to cancel the active background task
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to cancel the active background task
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to cancel the active background task
+    Then no error should be thrown
+
+  @auth
+  Scenario: BackgroundTaskService.removeQueued requires can-admin permission
+    Given event recording is cleared
+    And a background task "first" is enqueued
+    And a background task "second" is enqueued
+    And a background task "third" is enqueued
+    
+    Given I run unauthenticated
+    When I attempt to remove the queued background task
+    Then an AuthenticationError should be thrown
+    
+    Given I run without the permissions "can-admin"
+    When I attempt to remove the queued background task
+    Then an AuthorizationError should be thrown
+    
+    Given I run with the permissions "can-admin"
+    When I attempt to remove the queued background task
+    Then no error should be thrown
 

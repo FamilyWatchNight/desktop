@@ -31,6 +31,15 @@ export class Movies {
   }
 
   /**
+   * Get a movie by its database ID
+   */
+  async getMovieById(id: number, authContext?: AuthContextPayload): Promise<MovieData | undefined> {
+    return await withTestHooks(this.app, async (hooks, id, authContext) => {
+      return hooks.movies.getById(id, authContext);
+    }, id, authContext);
+  }
+
+  /**
    * Get a movie by its TMDB ID
    */
   async getMovieByTmdbId(tmdbId: string, authContext?: AuthContextPayload): Promise<MovieData | undefined> {
