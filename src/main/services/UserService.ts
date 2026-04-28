@@ -92,14 +92,14 @@ export class UserService {
   }
 
   async authenticateUser(username: string, password: string, authContext?: AuthContext): Promise<AuthenticatedUser | null> {
-    if (authContext) {
-      // If already authenticated, do not allow re-authentication (to prevent abuse of this method)
-      throw new AuthorizationError(this.t('errors.mustBeLoggedOut'));
-    }
-
     const { users, userProfiles } = getModels();
     const userRow = users.getByUsername(username);
     if (!userRow) return null;
+
+    if (authContext && authContext.userId !== userRow.id) {
+      // If already authenticated, do not allow re-authentication as someone else (to prevent abuse of this method)
+      throw new AuthorizationError(this.t('errors.mustBeLoggedOut'));
+    }
 
     let isValid = false;
 
