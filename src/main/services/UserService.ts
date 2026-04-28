@@ -19,6 +19,7 @@ import { type UserProfile, type UserProfileData } from '../db/models/UserProfile
 import { type PermissionStub, PERMISSIONS } from '../auth/permissions';
 import { AuthContext } from '../auth/context-manager';
 import { AuthenticationError, AuthorizationError } from '../auth/errors';
+import log from 'electron-log/main';
 
 export interface CreateUserData extends UserData {}
 
@@ -83,9 +84,9 @@ export class UserService {
       const profile = userProfiles.getByUserId(userId);
       return { ...user, profile };
     } catch (error) {
-      console.error('[UserService.createUser] Error creating user:', error, 'data:', data);
+      log.error('[UserService.createUser] Error creating user:', error, 'data:', data);
       if (error instanceof Error) {
-        console.error('[UserService.createUser] Stack:', error.stack);
+        log.error('[UserService.createUser] Stack:', error.stack);
       }
       throw error;
     }

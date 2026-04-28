@@ -18,6 +18,7 @@ import UserRolesModel from './db/models/UserRoles';
 import { getAppDataRoot } from './paths';
 import i18n from './i18n';
 import { DEFAULT_ROLES } from './auth/permissions';
+import log from 'electron-log/main';
 
 interface DbModels {
   movies: MoviesModel;
@@ -43,7 +44,7 @@ function runMigrations(): void {
   const migrationsDir = path.join(__dirname, 'db', 'migrations');
 
   if (!fs.existsSync(migrationsDir)) {
-    console.error('No migrations directory found');
+    log.error('No migrations directory found');
     return;
   }
 
@@ -52,7 +53,7 @@ function runMigrations(): void {
   for (const file of migrationFiles) {
     const filePath = path.join(migrationsDir, file);
     const sql = fs.readFileSync(filePath, 'utf8');
-    console.info(`Running migration: ${file}`);
+    log.info(`Running migration: ${file}`);
     db.exec(sql);
   }
 }
@@ -84,7 +85,7 @@ export function runSeed(): void {
       insertRolePermission.run(roleId, stub, now);
     }
   }
-  console.info('Seeded default roles');
+  log.info('Seeded default roles');
 }
 
 /**

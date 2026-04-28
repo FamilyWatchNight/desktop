@@ -7,6 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import WebSocket from 'ws';
+import log from 'electron-log/main';
 
 interface WebSocketWithHeartbeat extends WebSocket {
   isAlive?: boolean;
@@ -22,7 +23,7 @@ export function initializeWebSocketServer(server: any): void {
     // Verify connection came from localhost (inherited from HTTP server's host validation)
     const clientIp = req.socket.remoteAddress;
     if (clientIp !== '127.0.0.1' && clientIp !== '::1' && !clientIp?.startsWith('127.0.0.1')) {
-      console.warn(`WebSocket connection rejected from non-localhost address: ${clientIp}`);
+      log.warn(`WebSocket connection rejected from non-localhost address: ${clientIp}`);
       ws.close(1008, 'Forbidden');
       return;
     }
@@ -35,7 +36,7 @@ export function initializeWebSocketServer(server: any): void {
     });
 
     ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
+      log.error('WebSocket error:', error);
       clients.delete(ws);
     });
 
@@ -80,7 +81,7 @@ export function initializeWebSocketServer(server: any): void {
 
 export function broadcast(eventType: string, data: any): void {
   if (!wss) {
-    console.warn('WebSocket server not initialized');
+    log.warn('WebSocket server not initialized');
     return;
   }
 
@@ -88,7 +89,7 @@ export function broadcast(eventType: string, data: any): void {
   const message = JSON.stringify({ type: eventType, data });
   
   if (message.length > 1024 * 1024) { // 1MB message limit
-    console.warn('WebSocket message too large, skipping broadcast');
+    log.warn('WebSocket message too large, skipping broadcast');
     return;
   }
 
@@ -96,7 +97,7 @@ export function broadcast(eventType: string, data: any): void {
     if (client.readyState === WebSocket.OPEN) {
       client.send(message, (error) => {
         if (error) {
-          console.error('Failed to send WebSocket message:', error);
+          log.error('Failed to send WebSocket message:', error);
           clients.delete(client);
         }
       });

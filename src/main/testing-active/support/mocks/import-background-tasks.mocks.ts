@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import fs from 'fs';
 import zlib from 'zlib';
 import { Readable } from 'stream';
+import log from 'electron-log/main';
 
 /**
  * Creates a mock download function for TMDB that returns a readable stream
@@ -34,10 +35,10 @@ export function createMockDownloadJsonGzStream(
 
         // Check if dataSource is a file path that exists, or raw content
         if (fs.existsSync(dataSource)) {
-          console.debug(dataSource, 'is a file path');
+          log.debug(dataSource, 'is a file path');
           jsonContent = fs.readFileSync(dataSource, 'utf8');
         } else {
-          console.debug(dataSource, 'is raw content');
+          log.debug(dataSource, 'is raw content');
           jsonContent = dataSource;
         }
 

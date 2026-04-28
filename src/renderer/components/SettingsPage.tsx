@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiClient } from '../api-client';
+import log from 'electron-log/renderer';
 
 const apiClient = createApiClient();
 
@@ -40,7 +41,7 @@ export default function SettingsPage(): React.ReactElement {
           if (result.data.tmdbApiKey != null) setTmdbApiKey(String(result.data.tmdbApiKey));
         }
       } catch (error) {
-        console.error('Failed to load settings:', error);
+        log.error('Failed to load settings:', error);
       }
     }
     void loadSettings();
@@ -110,7 +111,7 @@ export default function SettingsPage(): React.ReactElement {
           if (result.data.tmdbApiKey != null) setTmdbApiKey(String(result.data.tmdbApiKey));
         }
       } catch (error) {
-        console.error('Failed to load settings:', error);
+        log.error('Failed to load settings:', error);
       }
     }
     void load();

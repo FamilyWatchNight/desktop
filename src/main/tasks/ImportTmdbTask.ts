@@ -14,6 +14,7 @@ import zlib from 'zlib';
 import BackgroundTask from './BackgroundTask';
 import type { TaskContext } from './BackgroundTask';
 import { getModels } from '../database';
+import log from 'electron-log/main';
 
 type DownloadJsonGzStream = (abortSignal: AbortSignal, dateFileSpec: string) => Promise<NodeJS.ReadableStream>;
 
@@ -192,7 +193,7 @@ export default class ImportTmdbTask extends BackgroundTask {
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') throw new Error('Task cancelled');
       if (context.isCancelled()) throw new Error('Task cancelled');
-      console.error('ImportTmdbTask error:', error);
+      log.error('ImportTmdbTask error:', error);
       throw error;
     } finally {
       if (gzFilePath && fs.existsSync(gzFilePath)) fs.unlinkSync(gzFilePath);

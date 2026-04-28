@@ -27,7 +27,6 @@ Before({ timeout: 60 * 1000 }, async function (this: CustomWorld) {
 
   // Set up test isolation for file system
   tempAppDataDir = path.join(os.tmpdir(), 'test-app-data-' + Date.now());
-  console.log('[Hooks.Before] tempAppDataDir:', tempAppDataDir);
   fs.mkdirSync(tempAppDataDir, { recursive: true });
 
   originalGetAppDataRoot = paths.getAppDataRoot;

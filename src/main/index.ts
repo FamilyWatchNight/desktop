@@ -19,6 +19,7 @@ import i18n from "./i18n";
 import { settingsService } from "./api-server/ipc/instances";
 import { initialize as initializeEventNotificationManager } from "./event-notification-manager";
 import { createSystemContext } from './auth/context-manager';
+import log from 'electron-log/main';
 
 let tray: Tray | null = null;
 const webServer = express();
@@ -70,9 +71,42 @@ function createTray(): void {
 
 app.on("ready", () => {
   const isDevMode = !app.isPackaged;
+  const isTestMode = process.env.NODE_ENV === "test";
+
+  log.transports.file.level = false;
+  log.transports.console.level = isTestMode ? "warn" : isDevMode ? "debug" : "error";
+  if (process.env.LOG_LEVEL) {
+    switch (process.env.LOG_LEVEL.toLowerCase()) {
+      case "silly":
+        log.transports.console.level = "silly";
+        break;
+      case "debug":
+        log.transports.console.level = "debug";
+        break;
+      case "verbose":
+        log.transports.console.level = "verbose";
+        break;
+      case "info":
+        log.transports.console.level = "info";
+        break;
+      case "warn":
+        log.transports.console.level = "warn";
+        break;
+      case "error":
+        log.transports.console.level = "error";
+        break;
+      default:
+        console.warn(
+          `Invalid LOG_LEVEL "${process.env.LOG_LEVEL}" specified. Using default level: ${log.transports.console.level}`,
+        );
+    }
+  }
+  // Initialize the logger to be available in renderer process
+  log.initialize();
+
   const locale = process.env.NODE_ENV=="test" ? "test" : ( isDevMode ? "dev" : app.getLocale() );
 
-  console.log(`App is ready. Locale: ${locale}, isDev: ${isDevMode}, NODE_ENV: ${process.env.NODE_ENV}`);
+  log.info(`App is ready. Locale: ${locale}, isDev: ${isDevMode}, NODE_ENV: ${process.env.NODE_ENV}, log level: ${log.transports.console.level}`);
 
   i18n.changeLanguage(locale).then(() => {
     db.initDatabase();
@@ -87,7 +121,7 @@ app.on("ready", () => {
       server.startServer(webServer, port);
       initializeEventNotificationManager();
     } catch (error) {
-      console.error(
+      log.error(
         "Failed to load settings, using default port:",
         (error as Error).message,
       );

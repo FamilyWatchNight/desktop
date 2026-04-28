@@ -8,6 +8,7 @@ the Free Software Foundation, version 3.
 
 import type Database from 'better-sqlite3';
 import bcrypt from 'bcryptjs';
+import log from 'electron-log/main';
 
 export interface UserRow {
   id: number;
@@ -89,9 +90,9 @@ export default class UsersModel {
 
       return Number(result.lastInsertRowid);
     } catch (error) {
-      console.error('[UsersModel.create] Error creating user:', error, 'data:', data);
+      log.error('[UsersModel.create] Error creating user:', error, 'data:', data);
       if (error instanceof Error) {
-        console.error('[UsersModel.create] Stack:', error.stack);
+        log.error('[UsersModel.create] Stack:', error.stack);
       }
       throw error;
     }
