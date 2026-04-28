@@ -12,6 +12,7 @@ import express, { type Express, type Request, type Response } from 'express';
 import RateLimit from 'express-rate-limit';
 import { app } from 'electron';
 import { registerHttpRoutes, initializeWebSocketServer } from './api-server';
+import log from 'electron-log/main';
 
 const isDevMode = !app.isPackaged;
 const rootDir = app.getAppPath();
@@ -50,7 +51,7 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
       }
       res.send(html);
     } catch (err) {
-      console.error('Failed to read index.html', err);
+      log.error('Failed to read index.html', err);
       res.status(500).send('Internal Server Error');
     }
   });
@@ -64,7 +65,7 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
   app.use(express.static(publicPath));
 
   const server = app.listen(port, 'localhost', () => {
-    console.info(`Web server listening on http://localhost:${port}`);
+    log.info(`Web server listening on http://localhost:${port}`);
   });
 
   // Initialize WebSocket server for real-time notifications

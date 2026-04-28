@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiClient } from '../api-client';
 import '../styles/components/BackgroundTasksPage.scss';
+import log from 'electron-log/renderer';
 
 const apiClient = createApiClient();
 
@@ -37,7 +38,7 @@ export default function BackgroundTasksPage(): React.ReactElement {
           setQueue(state.queue as TaskPayload[] ?? []);
         }
       } catch (err) {
-        console.error('Failed to load background tasks:', err);
+        log.error('Failed to load background tasks:', err);
       }
     }
     void load();
@@ -56,18 +57,18 @@ export default function BackgroundTasksPage(): React.ReactElement {
   const cancelActiveTask = async (): Promise<void> => {
     try {
       const result = await apiClient.backgroundTasks.cancelActiveBackgroundTask() as { success?: boolean; error?: string } | undefined;
-      if (!result?.success) console.error('Failed to cancel active task:', result?.error);
+      if (!result?.success) log.error('Failed to cancel active task:', result?.error);
     } catch (err) {
-      console.error('Error cancelling task:', err);
+      log.error('Error cancelling task:', err);
     }
   };
 
   const removeQueuedTask = async (taskId: string): Promise<void> => {
     try {
       const result = await apiClient.backgroundTasks.removeQueuedBackgroundTask(taskId) as { success?: boolean; error?: string } | undefined;
-      if (!result?.success) console.error('Failed to remove queued task:', result?.error);
+      if (!result?.success) log.error('Failed to remove queued task:', result?.error);
     } catch (err) {
-      console.error('Error removing task:', err);
+      log.error('Error removing task:', err);
     }
   };
 

@@ -30,7 +30,7 @@ export const appLanguage =
 i18n
   .use(Backend)
   .init({
-    debug: isDevMode,
+    debug: !isTestMode && isDevMode,
 
     backend: {
       loadPath: path.join(i18nPath, '{{lng}}/{{ns}}.json'),

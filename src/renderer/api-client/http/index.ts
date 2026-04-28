@@ -3,6 +3,7 @@ import { HttpMovieApi } from './movies';
 import { HttpSettingsApi } from './settings';
 import { HttpBackgroundTaskApi } from './background-tasks';
 import { HttpAppApi } from './app';
+import log from 'electron-log/renderer';
 
 class HttpApiClient implements ApiClient {
   private eventListeners: Map<string, Set<(data: any) => void>> = new Map();
@@ -50,7 +51,7 @@ class HttpApiClient implements ApiClient {
           listeners.forEach(callback => callback(data));
         }
       } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
+        log.error('Failed to parse WebSocket message:', error);
       }
     };
 
@@ -59,7 +60,7 @@ class HttpApiClient implements ApiClient {
     };
 
     this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      log.error('WebSocket error:', error);
     };
   }
 }

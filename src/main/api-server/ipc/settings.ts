@@ -8,6 +8,7 @@ the Free Software Foundation, version 3.
 
 import { ipcMain } from 'electron';
 import { settingsService } from './instances';
+import log from 'electron-log/main';
 
 export function registerSettingsIpcHandlers() {
   
@@ -17,7 +18,7 @@ export function registerSettingsIpcHandlers() {
       const settings = settingsService.load();
       return { success: true, data: settings };
     } catch (error) {
-      console.error('Error loading settings:', (error as Error).message);
+      log.error('Error loading settings:', (error as Error).message);
       return { success: false, error: (error as Error).message };
     }
   });
@@ -25,10 +26,10 @@ export function registerSettingsIpcHandlers() {
   ipcMain.handle('save-settings', async (_event, settings: Record<string, unknown>) => {
     try {
       settingsService.save(settings);
-      console.info('Settings saved:', settings);
+      log.info('Settings saved:', settings);
       return { success: true };
     } catch (error) {
-      console.error('Error saving settings:', (error as Error).message);
+      log.error('Error saving settings:', (error as Error).message);
       return { success: false, error: (error as Error).message };
     }
   });

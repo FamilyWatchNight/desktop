@@ -14,6 +14,7 @@ import { parse } from 'csv-parse/sync';
 import BackgroundTask from './BackgroundTask';
 import type { TaskContext } from './BackgroundTask';
 import { getModels } from '../database';
+import log from 'electron-log/main';
 
 type DownloadCsvStream = (abortSignal: AbortSignal) => Promise<NodeJS.ReadableStream>;
 
@@ -162,7 +163,7 @@ export default class ImportWatchmodeTask extends BackgroundTask {
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') throw new Error('Task cancelled');
       if (context.isCancelled()) throw new Error('Task cancelled');
-      console.error('ImportWatchmodeTask error:', error);
+      log.error('ImportWatchmodeTask error:', error);
       throw error;
     } finally {
       if (tempFilePath && fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
