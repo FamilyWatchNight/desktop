@@ -8,6 +8,13 @@ the Free Software Foundation, version 3.
 
 import { ElectronApplication } from 'playwright';
 import type { TestHooks } from '../../../../src/main/testing-active/TestHooksImpl';
+import { CustomWorld } from './world';
+
+
+export interface SerializedError {
+  name: string;
+  message: string;
+}
 
 function normalizeTestHookArg(value: unknown): unknown {
   if (Buffer.isBuffer(value)) {
@@ -29,6 +36,22 @@ function normalizeTestHookArg(value: unknown): unknown {
   }
 
   return value;
+}
+
+export function parseSerializedError(error: unknown): SerializedError | null {
+  if (error instanceof Error) {
+    const firstLine = error.message.split('\n')[0];
+    if (firstLine.startsWith('electronApplication.evaluate: Error: ')) {
+      const jsonPart = firstLine.replace('electronApplication.evaluate: Error: ', '');
+      try {
+        return JSON.parse(jsonPart) as SerializedError;
+      } catch {
+        return null
+      }
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -61,7 +84,6 @@ export async function withTestHooks<T, A extends unknown[]>(
       }
 
       const hookFn = eval(`(${fnSource})`);
-
       return hookFn(appWithTestHooks.testHooks, ...fnArgs);
     },
     {
@@ -69,4 +91,18 @@ export async function withTestHooks<T, A extends unknown[]>(
       fnArgs: normalizedArgs,
     }
   );
+}
+
+export async function attemptAsync(world: CustomWorld, fn: () => Promise<void>): Promise<void> {
+  world.clearLastError();
+  try {
+    await fn();
+  } catch (error) {
+    const serialized = parseSerializedError(error);
+    if (serialized) {
+      world.setLastError(serialized);
+    } else {
+      world.setLastError(error);
+    }
+  }
 }
