@@ -105,7 +105,7 @@ export class UserService {
 
     if (userRow.password_hash) {
       // This user has a password. Validate it.
-      isValid = await bcrypt.compare(password, userRow.password_hash)
+      isValid = await bcrypt.compare(password, userRow.password_hash);
     }
     else {
       // If no password set, only an empty or missing password is accepted

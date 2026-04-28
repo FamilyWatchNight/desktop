@@ -12,10 +12,6 @@ import { CustomWorld } from '../../technical/infrastructure/world';
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
 import { attemptAsync } from '../../technical/infrastructure/utils';
 
-function settingsState(world: CustomWorld) {
-  return world.getStateStore('settingsManagement');
-}
-
 function getSystemPersona(world: CustomWorld): InternalSystemPersona {
   const state = world.getStateStore('personas');
   if (!state.system) {

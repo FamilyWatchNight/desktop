@@ -19,8 +19,8 @@ export function normalizeTitle(title: string): string {
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     // 2. Normalize quotes
-    .replace(/[""]/g, '"')
-    .replace(/['']/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
     // 3. Normalize dashes
     .replace(/[–—―]/g, '-');
 }

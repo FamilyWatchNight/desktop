@@ -6,7 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { After, Before, Status } from '@cucumber/cucumber';
+import { After, Before } from '@cucumber/cucumber';
 import { CustomWorld } from './world';
 import { createSystemContext } from '../../../../src/main/auth/context-manager';
 import * as paths from '../../../../src/main/paths';
