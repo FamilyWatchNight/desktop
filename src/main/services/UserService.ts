@@ -68,7 +68,7 @@ export class UserService {
     } else {
       // Normal mode: require authentication and permissions
       if (!authContext) {
-        throw new AuthorizationError(this.t('errors.cannotBootstrapAdmin'));
+        throw new AuthenticationError(this.t('errors.cannotBootstrapAdmin'));
       }
       if (!authContext.hasPermission('can-manage-users')) {
         throw new AuthorizationError(this.t('errors.insufficientPermissions'));
