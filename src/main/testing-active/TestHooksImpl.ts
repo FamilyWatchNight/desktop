@@ -19,6 +19,8 @@ import ImportWatchmodeTask from "../tasks/ImportWatchmodeTask";
 import { createAuthContext, type AuthContextPayload } from '../auth/context-manager';
 import { MovieService, SettingsService, BackgroundTaskService, UserService, RoleService } from '../services';
 import { executeServiceMethod } from '../utils/error-serialization';
+import { initialize as initializeSettingsManager } from '../settings-manager';
+import * as backgroundTaskManager from '../background-task-manager';
 
 const movieService = new MovieService();
 const settingsService = new SettingsService();
@@ -177,7 +179,7 @@ export function getTestHooks(): TestHooks {
     settings: {
       initializeMockSettings: async (testSettings?: Record<string, unknown>) => {
         const store = createMockElectronStore(testSettings);
-        return settingsService.initialize(store);
+        return initializeSettingsManager(store);
       },
       get: async (key: string, authContext?: AuthContextPayload | undefined) => {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
@@ -220,7 +222,7 @@ export function getTestHooks(): TestHooks {
       findEventByType,
       filterEventsByType,
       setupEventRecording: () => {
-        backgroundTaskService.setNotifyFn((state) => {
+        backgroundTaskManager.setNotifyFn((state) => {
           recordEvent('background-task-update', state);
         });
       }

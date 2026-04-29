@@ -17,6 +17,7 @@ import type { TestHooks } from "./testing/TestHooksImpl";
 import { getTestHooks } from "./testing/TestHooksImpl";
 import i18n from "./i18n";
 import { settingsService } from "./api-server/ipc/instances";
+import { initialize as initializeSettingsManager } from "./settings-manager";
 import { initialize as initializeEventNotificationManager } from "./event-notification-manager";
 import { createSystemContext } from './auth/context-manager';
 import log from 'electron-log/main';
@@ -110,7 +111,7 @@ app.on("ready", () => {
 
   i18n.changeLanguage(locale).then(() => {
     db.initDatabase();
-    settingsService.initialize().then(() => {
+initializeSettingsManager().then(() => {
       createTray();
       registerIpcHandlers();
 
