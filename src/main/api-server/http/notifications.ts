@@ -6,20 +6,20 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import WebSocket from 'ws';
+import WebSocket, { WebSocketServer } from 'ws';
 import log from 'electron-log/main';
 
 interface WebSocketWithHeartbeat extends WebSocket {
   isAlive?: boolean;
 }
 
-let wss: WebSocket.Server | null = null;
+let wss: WebSocketServer | null = null;
 const clients = new Set<WebSocket>();
 
 export function initializeWebSocketServer(server: any): void {
-  wss = new WebSocket.Server({ server, perMessageDeflate: false });
+  wss = new WebSocketServer({ server, perMessageDeflate: false });
 
-  wss.on('connection', (ws: WebSocketWithHeartbeat, req) => {
+  wss.on('connection', (ws: WebSocketWithHeartbeat, req: any) => {
     // Verify connection came from localhost (inherited from HTTP server's host validation)
     const clientIp = req.socket.remoteAddress;
     if (clientIp !== '127.0.0.1' && clientIp !== '::1' && !clientIp?.startsWith('127.0.0.1')) {

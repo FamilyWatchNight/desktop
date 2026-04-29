@@ -75,7 +75,7 @@ export interface TestHooks {
     searchByTitle: (searchTerm: string, authContext?: AuthContextPayload) => Promise<import('../db/models/Movies').Movie[]>;
   };
   settings: {
-    initializeMockSettings: (testSettings?: Record<string, unknown>) => void;
+    initializeMockSettings: (testSettings?: Record<string, unknown>) => Promise<void>;
     get: (key: string, authContext?: AuthContextPayload) => Promise<unknown>;
     set: (key: string, value: unknown, authContext?: AuthContextPayload) => Promise<void>;
     load: (authContext?: AuthContextPayload) => Promise<Record<string, unknown>>;
@@ -175,9 +175,9 @@ export function getTestHooks(): TestHooks {
       }
     },
     settings: {
-      initializeMockSettings (testSettings?: Record<string, unknown>) {
+      initializeMockSettings: async (testSettings?: Record<string, unknown>) => {
         const store = createMockElectronStore(testSettings);
-        settingsService.initialize(store);
+        return settingsService.initialize(store);
       },
       get: async (key: string, authContext?: AuthContextPayload | undefined) => {
         const ctx = authContext ? createAuthContext(authContext.userId, authContext.permissions) : undefined;
