@@ -20,6 +20,7 @@ import { createAuthContext, type AuthContextPayload } from '../auth/context-mana
 import { MovieService, SettingsService, BackgroundTaskService, UserService, RoleService } from '../services';
 import { executeServiceMethod } from '../utils/error-serialization';
 import { initialize as initializeSettingsManager } from '../settings-manager';
+import * as backgroundTaskManager from '../background-task-manager';
 
 const movieService = new MovieService();
 const settingsService = new SettingsService();
@@ -221,7 +222,7 @@ export function getTestHooks(): TestHooks {
       findEventByType,
       filterEventsByType,
       setupEventRecording: () => {
-        backgroundTaskService.setNotifyFn((state) => {
+        backgroundTaskManager.setNotifyFn((state) => {
           recordEvent('background-task-update', state);
         });
       }
