@@ -110,24 +110,25 @@ app.on("ready", () => {
 
   i18n.changeLanguage(locale).then(() => {
     db.initDatabase();
-    settingsService.initialize();
-    createTray();
-    registerIpcHandlers();
+    settingsService.initialize().then(() => {
+      createTray();
+      registerIpcHandlers();
 
-    const systemAuthContext = createSystemContext();
+      const systemAuthContext = createSystemContext();
 
-    try {
-      const port = (settingsService.get("webPort", systemAuthContext) as number) || 3000;
-      server.startServer(webServer, port);
-      initializeEventNotificationManager();
-    } catch (error) {
-      log.error(
-        "Failed to load settings, using default port:",
-        (error as Error).message,
-      );
-      server.startServer(webServer, 3000);
-      initializeEventNotificationManager();
-    }
+      try {
+        const port = (settingsService.get("webPort", systemAuthContext) as number) || 3000;
+        server.startServer(webServer, port);
+        initializeEventNotificationManager();
+      } catch (error) {
+        log.error(
+          "Failed to load settings, using default port:",
+          (error as Error).message,
+        );
+        server.startServer(webServer, 3000);
+        initializeEventNotificationManager();
+      }
+    });
   });
 });
 

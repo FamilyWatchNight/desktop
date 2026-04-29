@@ -9,7 +9,6 @@ the Free Software Foundation, version 3.
 import path from 'path';
 import fs from 'fs';
 import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
 import i18n from '../i18n';
 import { getDb, getModels } from '../database';
 import { getAppDataRoot } from '../paths';
@@ -263,6 +262,7 @@ export class UserService {
 
     // Generate filename
     const ext = mimeType === 'image/jpeg' ? 'jpg' : 'png';
+    const { v4:uuidv4 } = await import('uuid');
     const filename = `${uuidv4()}.${ext}`;
     const filePath = safeJoin(imagesDir, filename);
 

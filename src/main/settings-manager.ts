@@ -6,8 +6,6 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import Store from 'electron-store';
-
 const DEFAULT_SETTINGS: Record<string, unknown> = {
   webPort: 3000,
   watchmodeApiKey: '',
@@ -23,11 +21,12 @@ export type StoreLike = {
 export default class SettingsManager {
   private store?: StoreLike;
 
-  initialize(store?: StoreLike): void {
+  async initialize(store?: StoreLike): Promise<void> {
     if (store !== undefined) {
       this.store = store;
     }
     else {
+      const { default: Store } = await import('electron-store');
       this.store = new Store() as unknown as StoreLike;
     }
   }

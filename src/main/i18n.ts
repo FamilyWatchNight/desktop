@@ -27,9 +27,8 @@ export const appLanguage =
     ? app.getLocale()
     : 'en';
 
-i18n
-  .use(Backend)
-  .init({
+i18n.use(Backend);
+i18n.init({
     debug: !isTestMode && isDevMode,
 
     backend: {
@@ -38,12 +37,11 @@ i18n
     },
     defaultNS: 'main',
     fallbackLng: ( process.env.NODE_ENV === 'test' ) ? 'test' : isDevMode ? 'dev' : 'en',
-    initImmediate: false, 
     interpolation: { escapeValue: false},
     lng: appLanguage,
     load: 'all',
     ns: ['main', 'common', 'auth'],
-    parseMissingKeyHandler: isTestMode ? undefined : (key) => `[!!!${key}!!!]`,
+    parseMissingKeyHandler: isTestMode ? undefined : (key: any) => `[!!!${key}!!!]`,
     preload: ['en'],
     saveMissing: true,
     saveMissingPlurals: true,

@@ -221,7 +221,7 @@ export class InternalSystemPersona {
   // Settings operations
   //
   async initializeSettings(testSettings?: Record<string, unknown>) {
-    return await this.world.settingsApi.initializeMockSettings(testSettings, this.getAuthContextPayload());
+    return await this.world.settingsApi.initializeMockSettings(testSettings);
   }
 
   async getSetting(key: string) {

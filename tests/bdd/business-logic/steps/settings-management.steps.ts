@@ -23,7 +23,7 @@ function getSystemPersona(world: CustomWorld): InternalSystemPersona {
 Given('the application is running with default settings', async function (this: CustomWorld) {
   // Initialize mock settings to ensure we start with a clean slate
   const system = getSystemPersona(this);
-  system.initializeSettings();
+  await system.initializeSettings();
 });
 
 async function saveSettings(world: CustomWorld, settingsJson: string) {

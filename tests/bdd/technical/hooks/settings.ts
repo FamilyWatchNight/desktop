@@ -23,10 +23,10 @@ export class Settings {
   /**
    * Initialize mock settings for testing purposes. This will clear any existing settings and set the provided test settings.
    */
-  async initializeMockSettings(testSettings?: Record<string, unknown>, authContext?: AuthContextPayload): Promise<void> {
-    await withTestHooks(this.app, async (hooks, testSettings, authContext) => {
-      return hooks.settings.initializeMockSettings(testSettings, authContext);
-    }, testSettings, authContext);
+  async initializeMockSettings(testSettings?: Record<string, unknown>): Promise<void> {
+    await withTestHooks(this.app, async (hooks, testSettings) => {
+      return hooks.settings.initializeMockSettings(testSettings);
+    }, testSettings);
   }
 
   /**

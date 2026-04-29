@@ -29,8 +29,8 @@ export class SettingsService {
     }
   }
 
-  initialize(store?: StoreLike): void {
-    this.settingsManager.initialize(store);
+  async initialize(store?: StoreLike): Promise<void> {
+    await this.settingsManager.initialize(store);
   }
 
   get(key: string, authContext?: AuthContext): unknown {
