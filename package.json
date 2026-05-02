@@ -58,7 +58,7 @@
     "vite": "^8.0.8"
   },
   "dependencies": {
-    "@types/bcryptjs": "^2.4.6",
+    "@types/bcryptjs": "^3.0.0",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.9.0",
     "csv-parse": "^6.2.1",
