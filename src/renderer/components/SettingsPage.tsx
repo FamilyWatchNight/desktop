@@ -9,7 +9,6 @@ the Free Software Foundation, version 3.
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiClient } from '../api-client';
-import log from 'electron-log/renderer';
 
 const apiClient = createApiClient();
 
@@ -33,16 +32,10 @@ export default function SettingsPage(): React.ReactElement {
 
   useEffect(() => {
     async function loadSettings(): Promise<void> {
-      try {
-        const result = await apiClient.settings.loadSettings();
-        if (result?.success && result.data) {
-          if (result.data.webPort != null) setWebPort(String(result.data.webPort));
-          if (result.data.watchmodeApiKey != null) setWatchmodeApiKey(String(result.data.watchmodeApiKey));
-          if (result.data.tmdbApiKey != null) setTmdbApiKey(String(result.data.tmdbApiKey));
-        }
-      } catch (error) {
-        log.error('Failed to load settings:', error);
-      }
+      const result = await apiClient.settings.loadSettings();
+      if (result.webPort != null) setWebPort(String(result.webPort));
+      if (result.watchmodeApiKey != null) setWatchmodeApiKey(String(result.watchmodeApiKey));
+      if (result.tmdbApiKey != null) setTmdbApiKey(String(result.tmdbApiKey));
     }
     void loadSettings();
   }, []);
@@ -74,11 +67,9 @@ export default function SettingsPage(): React.ReactElement {
   const saveSettings = async (): Promise<void> => {
     const settings = { webPort: parseInt(webPort, 10), watchmodeApiKey, tmdbApiKey };
     try {
-      const result = await apiClient.settings.saveSettings(settings);
-      if (result?.success) {
-        showMessage(t('saved'), 'success');
-        setTimeout(() => { setStatusMessage(''); setStatusType(''); }, 3000);
-      }
+      await apiClient.settings.saveSettings(settings);
+      showMessage(t('saved'), 'success');
+      setTimeout(() => { setStatusMessage(''); setStatusType(''); }, 3000);
     } catch (error) {
       showMessage(t('errorSave') + (error instanceof Error ? error.message : String(error)), 'error');
       setTimeout(() => { setStatusMessage(''); setStatusType(''); }, 5000);
@@ -103,16 +94,10 @@ export default function SettingsPage(): React.ReactElement {
 
   const handleCancel = (): void => {
     async function load(): Promise<void> {
-      try {
-        const result = await apiClient.settings.loadSettings();
-        if (result?.success && result.data) {
-          if (result.data.webPort != null) setWebPort(String(result.data.webPort));
-          if (result.data.watchmodeApiKey != null) setWatchmodeApiKey(String(result.data.watchmodeApiKey));
-          if (result.data.tmdbApiKey != null) setTmdbApiKey(String(result.data.tmdbApiKey));
-        }
-      } catch (error) {
-        log.error('Failed to load settings:', error);
-      }
+      const result = await apiClient.settings.loadSettings();
+      if (result.webPort != null) setWebPort(String(result.webPort));
+      if (result.watchmodeApiKey != null) setWatchmodeApiKey(String(result.watchmodeApiKey));
+      if (result.tmdbApiKey != null) setTmdbApiKey(String(result.tmdbApiKey));
     }
     void load();
     setStatusMessage('');
