@@ -49,8 +49,15 @@ After({ timeout: 60 * 1000 }, async function (this: CustomWorld, scenario) {
     userId: systemContext.userId,
     permissions: systemContext.permissions
   };
+
+  if (this.page && this.page.isClosed() === false) {
+    await this.page.close();
+  }
+
+  if (this.browser) {
+    await this.browser.close();
+  }
   
-  // Close database connection
   if (this.app) {
     try {
       // Clean up background tasks first

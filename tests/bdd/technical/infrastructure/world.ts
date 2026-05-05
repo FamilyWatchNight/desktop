@@ -7,7 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import { World, setWorldConstructor, IWorldOptions } from '@cucumber/cucumber';
-import { _electron as electron, ElectronApplication } from 'playwright';
+import { _electron as electron, ElectronApplication, Page, Browser } from 'playwright';
 import { TestData } from '../hooks/data';
 import { Database } from '../hooks/db';
 import { Movies } from '../hooks/movies';
@@ -16,6 +16,9 @@ import { EventNotifications } from '../hooks/event-notifications';
 import { BackgroundTasks } from '../hooks/background-tasks';
 import { Users } from '../hooks/users';
 import { Roles } from '../hooks/roles';
+import { UI } from '../hooks/ui'
+import { findRegisteredStep } from './step-helpers';
+import type { UserPersona } from '../../business-flow/personas/UserPersona';
 
 export class CustomWorld extends World {
   app!: ElectronApplication;
@@ -27,12 +30,18 @@ export class CustomWorld extends World {
   backgroundTasksApi!: BackgroundTasks;
   usersApi!: Users;
   rolesApi!: Roles;
+  uiApi!: UI;
+  renderLocation: 'electron' | 'browser';
+  currentUserPersona?: UserPersona;
+  browser?: Browser;
+  page?: Page;
   
   // Per-scenario state that supports feature-local stores
   scenarioState: Record<string, Record<string, unknown>> = {};
   
   constructor(options: IWorldOptions) {
     super(options);
+    this.renderLocation = process.env.RENDER_LOCATION === 'browser' ? 'browser' : 'electron';
   }
 
   /**
@@ -163,6 +172,7 @@ export class CustomWorld extends World {
     this.backgroundTasksApi = new BackgroundTasks(this.app);
     this.usersApi = new Users(this.app);
     this.rolesApi = new Roles(this.app);
+    this.uiApi = new UI(this.app);
 
     // Initialize test task type registration
     await this.backgroundTasksApi.setupTestTaskType();

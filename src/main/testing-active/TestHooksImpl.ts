@@ -8,6 +8,7 @@ the Free Software Foundation, version 3.
 
 import { app } from 'electron';
 import * as db from '../database';
+import { createAppWindow } from '../window-manager';
 
 import { createMockDownloadJsonGzStream, createMockDownloadCsvStream }  from "./support/mocks/import-background-tasks.mocks";
 import { createMockElectronStore }  from "./support/mocks/electron-store.mocks";
@@ -132,6 +133,9 @@ export interface TestHooks {
     deleteRole: (id: number, authContext?: AuthContextPayload) => Promise<void>;
     duplicateRole: (sourceRoleId: number, authContext?: AuthContextPayload) => Promise<number>;
     getUsersWithRole: (roleId: number, authContext?: AuthContextPayload) => number[];
+  };
+  ui: {
+    openMainWindow: () => Promise<void>;
   };
 }
 
@@ -375,6 +379,11 @@ export function getTestHooks(): TestHooks {
         // This is used only for testing. This isn't something the service layer exposes.
         const models = db.getModels();
         return models.userRoles.getUsersByRoleId(roleId);
+      }
+    },
+    ui: {
+      openMainWindow: async () => {
+        createAppWindow();
       }
     }
   };

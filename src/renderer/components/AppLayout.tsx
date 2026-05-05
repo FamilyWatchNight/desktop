@@ -76,20 +76,21 @@ export default function Layout(): React.ReactElement {
   };
 
   return (
-    <div className="app-layout">
-      <button className="hamburger-button" onClick={toggleMenu} aria-label={t('toggleMenu')}>
+    <div className="app-layout" data-testid="app-layout">
+      <button className="hamburger-button" data-testid="menu-toggle-button" onClick={toggleMenu} aria-label={t('toggleMenu')}>
         <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
         <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
         <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
       </button>
-      {menuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
-      <div className={`side-menu ${menuOpen ? 'open' : ''}`}>
+      {menuOpen && <div className="menu-overlay" data-testid="menu-overlay" onClick={closeMenu}></div>}
+      <div className={`side-menu ${menuOpen ? 'open' : ''}`} data-testid="side-menu">
         <div className="menu-content">
           <div className="menu-nav-section">
             <nav className="menu-nav">
               <button
                 className={`menu-item ${currentPage === 'home' ? 'active' : ''}`}
                 onClick={() => navigateTo('home')}
+                data-testid="menu-home"
               >
                 <svg className="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -102,6 +103,7 @@ export default function Layout(): React.ReactElement {
               <button
                 type="button"
                 className="menu-system-toggle"
+                data-testid="menu-system-toggle"
                 onClick={() => setSystemExpanded(!systemExpanded)}
                 aria-expanded={systemExpanded}
                 aria-controls="menu-system-items"
@@ -117,13 +119,14 @@ export default function Layout(): React.ReactElement {
                 <button
                   className={`menu-item ${currentPage === 'background-tasks' ? 'active' : ''}`}
                   onClick={() => navigateTo('background-tasks')}
+                  data-testid="menu-background-tasks"
                 >
                   <svg className="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M6 2v5l6 5v2l-6 5v5h12v-5l-6-5v-2l6-5V2H6z"/>
                   </svg>
                   <span>{t('menu.backgroundTasks')}</span>
                   {(activeTask || queue.length > 0) && (
-                    <span className="menu-badge">{(activeTask ? 1 : 0) + queue.length}</span>
+                    <span className="menu-badge" data-testid="menu-background-tasks-badge">{(activeTask ? 1 : 0) + queue.length}</span>
                   )}
                 </button>
               </div>
@@ -133,6 +136,7 @@ export default function Layout(): React.ReactElement {
             <button
               className={`menu-item ${currentPage === 'settings' ? 'active' : ''}`}
               onClick={() => navigateTo('settings')}
+              data-testid="menu-settings"
             >
               <svg className="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="3"></circle>
@@ -143,7 +147,7 @@ export default function Layout(): React.ReactElement {
           </div>
         </div>
       </div>
-      <div className="main-content">
+      <div className="main-content" data-testid="main-content">
         {renderPage()}
       </div>
     </div>

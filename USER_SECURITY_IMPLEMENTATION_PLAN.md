@@ -30,7 +30,9 @@ The implementation builds on the existing database schema (users, user_profiles,
 
 ### Stage 4: Basic UI Testing Infrastructure
 - Set up Cucumber UI testing with Playwright for both Electron and browser transports
-- Use environment variables (TEST_TRANSPORT) in hooks to configure transport dynamically
+- Use environment variable ( RENDER_LOCATION = electron | browser ) in hooks to configure whether to target the built-in
+  electron BrowserWindow UI (that uses IPC for its communication) or whether to open up an external browser that connects
+  to the express server via HTTP.
 - Implement basic UI smoke test: open window, click menu, verify Settings page opens
 - Add Cucumber integration tests for the basic UI infrastructure
 - **Commit:** `feat: add basic UI testing infrastructure with Playwright`

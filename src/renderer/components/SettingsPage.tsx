@@ -120,34 +120,34 @@ export default function SettingsPage(): React.ReactElement {
   };
 
   return (
-    <div className="page centered">
+    <div className="page centered" data-testid="page-settings">
       <div className="page-container">
         <h1 className="page-title">{t('title')}</h1>
         <div className="form-group">
-          <label htmlFor="webPort">{t('webPort')}</label>
-          <input type="number" id="webPort" placeholder="3000" value={webPort} onChange={(e) => setWebPort(e.target.value)} />
+          <label htmlFor="webPort" data-testid="settings-webport-label">{t('webPort')}</label>
+          <input type="number" id="webPort" data-testid="settings-webport-input" placeholder="3000" value={webPort} onChange={(e) => setWebPort(e.target.value)} />
         </div>
         <div className="form-group">
-          <label htmlFor="watchmodeApiKey">{t('watchmodeApiKey')}</label>
-          <input type="password" id="watchmodeApiKey" placeholder="" value={watchmodeApiKey} onChange={(e) => setWatchmodeApiKey(e.target.value)} />
+          <label htmlFor="watchmodeApiKey" data-testid="settings-watchmode-api-key-label">{t('watchmodeApiKey')}</label>
+          <input type="password" id="watchmodeApiKey" data-testid="settings-watchmode-api-key-input" placeholder="" value={watchmodeApiKey} onChange={(e) => setWatchmodeApiKey(e.target.value)} />
         </div>
         <div className="form-group">
-          <label htmlFor="tmdbApiKey">{t('tmdbApiKey')}</label>
-          <input type="password" id="tmdbApiKey" placeholder="" value={tmdbApiKey} onChange={(e) => setTmdbApiKey(e.target.value)} />
+          <label htmlFor="tmdbApiKey" data-testid="settings-tmdb-api-key-label">{t('tmdbApiKey')}</label>
+          <input id="tmdbApiKey" data-testid="settings-tmdb-api-key-input" placeholder="" value={tmdbApiKey} onChange={(e) => setTmdbApiKey(e.target.value)} />
         </div>
         <div className="form-group">
-          <label>{t('backgroundTasks')}</label>
+          <label data-testid="settings-background-tasks-label">{t('backgroundTasks')}</label>
           <div className="button-group">
-            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-watchmode')} disabled={activeTask?.type === 'import-watchmode' || queue.some((t) => t.type === 'import-watchmode')}>{t('importWatchmode')}</button>
-            <button type="button" className="btn-secondary" onClick={() => enqueueBackgroundTask('import-tmdb')} disabled={activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')}>{t('importTmdb')}</button>
+            <button type="button" className="btn-secondary" data-testid="settings-import-watchmode-button" onClick={() => enqueueBackgroundTask('import-watchmode')} disabled={activeTask?.type === 'import-watchmode' || queue.some((t) => t.type === 'import-watchmode')}>{t('importWatchmode')}</button>
+            <button type="button" className="btn-secondary" data-testid="settings-import-tmdb-button" onClick={() => enqueueBackgroundTask('import-tmdb')} disabled={activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')}>{t('importTmdb')}</button>
           </div>
-          {backgroundTaskMessage && <div className="message success">{backgroundTaskMessage}</div>}
+          {backgroundTaskMessage && <div className="message success" data-testid="settings-background-task-message">{backgroundTaskMessage}</div>}
         </div>
         <div className="button-group">
-          <button className="btn-primary" onClick={saveSettings}>{t('save')}</button>
-          <button className="btn-secondary" onClick={handleCancel}>{t('button.cancel', { ns: 'common' })}</button>
+          <button className="btn-primary" data-testid="settings-save-button" onClick={saveSettings}>{t('save')}</button>
+          <button className="btn-secondary" data-testid="settings-cancel-button" onClick={handleCancel}>{t('button.cancel', { ns: 'common' })}</button>
         </div>
-        {statusMessage && <div className={`message ${statusType}`}>{statusMessage}</div>}
+        {statusMessage && <div className={`message ${statusType}`} data-testid="settings-status-message">{statusMessage}</div>}
       </div>
     </div>
   );
