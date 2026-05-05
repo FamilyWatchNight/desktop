@@ -6,7 +6,7 @@ export const TIMEOUT = 4000;
 export async function verifyPageIsVisible(world: CustomWorld, pageName: string): Promise<void> {
   const page = await getActivePage(world);
   try {
-    const element = await page.waitForSelector(`[data-testid=page-${pageName}]`, { state: 'visible', timeout: TIMEOUT });
+    await page.waitForSelector(`[data-testid=page-${pageName}]`, { state: 'visible', timeout: TIMEOUT });
   } catch (error) {
     console.error(`Error occurred while waiting for page: ${pageName}`);
     throw error;
