@@ -33,22 +33,69 @@ A cross-platform app for managing movie selection for a Family Watch Night
 This project uses a three-layer BDD architecture inspired by *BDD in Action*:
 
 1. **Business Logic Layer** (`tests/bdd/business-logic/`): Feature files and step definitions that express business scenarios in domain language
-2. **Business Flow Layer** (`tests/bdd/business-flow/personas/`): Persona classes (e.g., `InternalSystemPersona`) that translate domain intent into actionable steps
+2. **Business Flow Layer** (`tests/bdd/business-flow/personas/`): Persona classes (e.g., `InternalSystemPersona`, `UnauthenticatedUser`) that translate domain intent into actionable steps
 3. **Technical Layer** (`tests/bdd/technical/`): Test hooks, infrastructure, and low-level integrations with the app
 
 **Key principle**: Business Logic steps must not call the Technical layer directly. They go through personas, which maintain a stable domain-facing API for test scenarios.
 
-### Test Structure
+### UI Testing Levels
+
+UI tests are structured into two levels of granularity:
+
+1. **Component-Level Testing**: Validates individual UI components in isolation using test-only pages
+   - Tests component behavior and interactions
+   - Uses test-only pages excluded from production builds (similar to test hooks)
+   - Focuses on component functionality rather than user workflows
+
+2. **User Experience Testing**: Validates end-to-end user workflows across multiple pages
+   - Tests complete user journeys and page transitions
+   - Uses domain-level language ("navigate to settings") rather than implementation details
+   - Focuses on what users accomplish, not how they accomplish it
+
+### Transport Abstraction
+
+UI tests support dual transport modes controlled by `RENDER_LOCATION` environment variable:
+- **Electron mode** (`RENDER_LOCATION=electron`): Tests against Electron's built-in BrowserWindow
+- **Browser mode** (`RENDER_LOCATION=browser`): Tests against external browser connecting to Express server
+
+### UI Automation-Friendly Selectors
+- When building UI, assign stable, semantic `data-testid` attributes to interactive controls and page roots.
+- Use `data-testid` for buttons, menu items, links, inputs, tabs, dialogs, and any element the UI test must click or inspect.
+- Keep selectors independent of visible text and translations. For example:
+  - `data-testid="menu-settings"`
+  - `data-testid="page-settings"`
+  - `data-testid="settings-save-button"`
+  - `data-testid="settings-display-name-input"`
+- Treat `data-testid` as part of the UI contract, not only a testing concern. This makes page objects and tests stable even when i18next text changes.
+- Page objects should consume these stable IDs rather than using localized text selectors.
+
+## Test Structure
 - **Unit tests** (Jest): Located in `tests/unit/`, for isolated business logic
   - Execute: `npm run test:unit`
 - **Feature tests** (Cucumber/BDD): Located in `tests/bdd/`
   - Execute: `npm run test:features`
+  - Execute UI tests in Electron: `npm run test:features`
+  - Execute UI tests in Browser: `npm run test:features:browser`
   - Feature scenarios in `tests/bdd/business-logic/features/`
   - Step definitions in `tests/bdd/business-logic/steps/`
-  - Personas (domain-facing APIs) in `tests/bdd/business-flow/personas/`
+  - Personas (domain-facing APIs) in `tests/bdd/business-flow/personas/`.
+    - `internal-system.ts` used for interacting at the system level without the UI
+    - `UserPersona.ts`: base class for interacting with the UI. Default implementations go here, with any persona-specific overrides in classes that extend.
+  - Page objects (UI interaction details) in `tests/bdd/technical/page-objects/`
   - Test hooks and infrastructure in `tests/bdd/technical/`
 
-### Test State Management
+### Test Infrastructure Components
+
+**UI Testing Technical Infrastructure** (`tests/bdd/technical/`):
+- **Playwright Configuration** (`playwright-config.ts`): Centralized Playwright setup for both transports
+- **Page Objects** (`page-objects/`): `BasePage` and concrete page classes (`HomePage`, `SettingsPage`, etc.)
+- **UI Utilities** (`infrastructure/ui-utils.ts`): Cross-cutting UI testing functions (screenshots, waiting, window management)
+
+**System Testing Infrastructure** (`tests/bdd/technical/infrastructure/`):
+- **System Utilities** (`utils.ts`): Functions for interacting with system-level test hooks
+- **UI Utilities** (`ui-utils.ts`): Functions for UI testing concerns (parallel to `utils.ts`)
+
+## Test State Management
 
 Tests store scenario-specific data using a hierarchical state store via `world.getStateStore(namespace)`. This allows:
 - **Keyed state**: Store multiple instances by key (e.g., `state.roles.set('editor', role)`)
@@ -56,7 +103,16 @@ Tests store scenario-specific data using a hierarchical state store via `world.g
 
 When adding features with stateful test scenarios, use this pattern to maintain separation between setup/helpers and the scenario context.
 
-### Validation Flow
+## Test Hooks
+- Service logic cannot be tested via Jest unit tests because it runs inside the Electron main process
+- Testing hooks, exposed only for integration testing, live in `src/main/testing-active`
+- The `InternalSystemPersona` in `tests/bdd/business-flow/personas/internal-system.ts` uses test APIs in `tests/bdd/technical/hooks` to call those hooks that run in the Electron main process
+- UI testing uses Playwright for browser automation with transport abstraction
+- Only serializable data can cross the hook boundary from Cucumber to Electron
+- NEVER, under any circumstances, change anything in `src/main/testing`. That folder's contents is overwritten at build time.
+- If any compile, build, or test failure points to a problem in `src/main/testing` and you believe that you need to change a file in that folder to resolve the error, instead make the change to the equivalent file in the `src/main/testing-active` folder. Those files will be copied into `src/main/testing` at build time, so your changes there will take effect at the next build.
+
+## Validation Flow
 When writing tests:
 1. **Before writing the first test**: Ask to validate the test approach and confirm test coverage strategy
 2. **Before each test scenario**: Ask to validate the previous test worked as intended
@@ -64,7 +120,8 @@ When writing tests:
 4. **Test Architecture Compliance**: Ensure Business Logic layers do not directly call Technical layers; route through personas
 5. **State Isolation**: Confirm test state is properly isolated between runs and namespaced appropriately
 6. **Persona Contract**: Ensure persona methods match test hook expectations and are stable for step definitions
-7. **Integration hook validation**: Use `npm run build:main:for-integration-testing` when modifying `src/main/testing-active/TestHooksImpl.ts` or related test hooks so compile-time mismatches are caught before running feature tests.
+7. **UI Transport Testing**: Test both `RENDER_LOCATION=electron` and `RENDER_LOCATION=browser` for UI features
+8. **Integration hook validation**: Use `npm run build:main:for-integration-testing` when modifying `src/main/testing-active/TestHooksImpl.ts` or related test hooks so compile-time mismatches are caught before running feature tests.
 
 ---
 
@@ -114,26 +171,28 @@ The renderer's API client automatically detects its environment and selects the 
 # Testing
 
 ### Test Structure
-- **Unit tests** (Jest): Located in `./tests/unit/`, for isolated business logic
+- **Unit tests** (Jest): Located in `tests/unit/`, for isolated business logic
   - Execute: `npm run test:unit`
-- **Feature tests** (Cucumber/BDD): Located in `./tests/components/`
-  - Execute: `npm run tests:features`
-  - Feature files and steps in `./tests/component/`
-  - Accessors for application test hooks `./tests/support/domains/`
-  - Test orchestration infrastructure in `./tests/infrastructure/`
+- **Feature tests** (Cucumber/BDD): Located in `tests/bdd/`
+  - Execute: `npm run test:features`
+  - Execute UI tests in Electron: `npm run test:features`
+  - Execute UI tests in Browser: `npm run test:features:browser`
+  - Feature scenarios in `tests/bdd/business-logic/features/`
+  - Step definitions in `tests/bdd/business-logic/steps/`
+  - Personas (domain-facing APIs) in `tests/bdd/business-flow/personas/`.
+    - `internal-system.ts` used for interacting at the system level without the UI
+    - `UserPersona.ts`: base class for interacting with the UI. Default implementations go here, with any persona-specific overrides in classes that extend.
+  - Page objects (UI interaction details) in `tests/bdd/technical/page-objects/`
+  - Test hooks and infrastructure in `tests/bdd/technical/`
 
 ### Test Hooks
 - Service logic cannot be tested via Jest unit tests because it runs inside the Electron main process
 - Testing hooks, exposed only for integration testing, live in `src/main/testing-active`
-- The `InternalSystemPersona` in `tests/business-flow/personas/internal-system.ts` uses a test api in
-  `tests/technical/hooks` to call those hooks that run in the electron main process
+- The `InternalSystemPersona` in `tests/bdd/business-flow/personas/internal-system.ts` uses test APIs in `tests/bdd/technical/hooks` to call those hooks that run in the Electron main process
+- UI testing uses Playwright for browser automation
 - Only serializable data can cross the hook boundary from Cucumber to Electron
-- NEVER, under any circumstances, change anything in `src/main/testing`. That folder's contents is
-  overwritten at build time.
-- If any compile, build, or test failure points to a problem in `src/main/testing` and you believe that
-  you need to change a file in that folder to resolve the error, instead make the change to the
-  equivalent file in the `src/main/testing-active` folder. Those files will be copied into `src/main/testing`
-  at build time, so your changes there will take effect at the next build.
+- NEVER, under any circumstances, change anything in `src/main/testing`. That folder's contents is overwritten at build time.
+- If any compile, build, or test failure points to a problem in `src/main/testing` and you believe that you need to change a file in that folder to resolve the error, instead make the change to the equivalent file in the `src/main/testing-active` folder. Those files will be copied into `src/main/testing` at build time, so your changes there will take effect at the next build.
 
 ### Validation Flow
 Before writing tests:

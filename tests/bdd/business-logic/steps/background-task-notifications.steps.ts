@@ -42,7 +42,6 @@ Given('event recording is cleared', async function (this: CustomWorld) {
 
 async function enqueueTask(world: CustomWorld, refName: string) {
   const system = getSystemPersona(world);
-  await system.initDatabase();
   await system.setupTestTaskType();
   const result = await system.enqueueTask('test-background-task', { refName });
   expect((result as { success: boolean; }).success).toBe(true);
