@@ -224,6 +224,13 @@ Simple render of main layout component.
   2. Subscribes to updates via `apiClient.backgroundTasks.onBackgroundTaskUpdate(callback)`
 - **Pages**: HomePage, SettingsPage, BackgroundTasksPage (imported conditionally)
 
+### UI Automation Selectors
+- The renderer should assign stable `data-testid` attributes to all actionable and focusable UI controls.
+- Use `data-testid` for controls such as buttons, menu items, links, inputs, tabs, and dialog actions.
+- Add page root identifiers for page validation, for example `data-testid="page-home"` and `data-testid="page-settings"`.
+- Prefer semantic, translation-independent values over visible text or i18n keys.
+- This pattern is part of regular UI development and enables Playwright page objects and test automation to remain stable across locales.
+
 ### **[api-client/index.ts](src/renderer/api-client/index.ts)** - Transport Selection
 ```typescript
 function createApiClient(): ApiClient {

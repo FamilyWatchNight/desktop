@@ -124,6 +124,12 @@ function initModels(): void {
 }
 
 export function initDatabase(): void {
+  if (db) {
+    log.info('Database already initialized. Skipping initialization.');
+    return;
+  }
+
+  log.debug('[APP] Initializing database...');
   const sqliteDir = getSqliteDir();
 
   if (!fs.existsSync(sqliteDir)) {
@@ -135,9 +141,17 @@ export function initDatabase(): void {
   runMigrations();
   runSeed();
   initModels();
+  log.debug('[APP] Database Initialized.');
 }
 
 export function initMockDatabase(testDb?: Database.Database | null): void {
+  if (db) {
+    log.warn('Database already initialized. Replacing with Mock database.');
+  }
+  else {
+    log.info('Initializing with Mock database.');
+  }
+
   if (!testDb) {
     db = new Database(':memory:');
   } else {

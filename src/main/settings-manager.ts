@@ -6,6 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import log from 'electron-log/main';
+
 const DEFAULT_SETTINGS: Record<string, unknown> = {
   webPort: 3000,
   watchmodeApiKey: '',
@@ -21,12 +23,21 @@ export type StoreLike = {
 let store: StoreLike | null = null;
 
 export async function initialize(settingsStore?: StoreLike): Promise<void> {
+  if (store) {
+    log.info('Settings already initialized. Skipping initialization.');
+    return;
+  }
+
   if (settingsStore !== undefined) {
     store = settingsStore;
   } else {
     const { default: Store } = await import('electron-store');
     store = new Store() as unknown as StoreLike;
   }
+}
+
+export async function getStatus(): Promise<{ initialized: boolean }> {
+  return { initialized: store !== null };
 }
 
 function getStore(): StoreLike {

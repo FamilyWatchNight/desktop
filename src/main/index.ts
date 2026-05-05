@@ -70,7 +70,7 @@ function createTray(): void {
   });
 }
 
-app.on("ready", () => {
+app.on("ready", async () => {
   const isDevMode = !app.isPackaged;
   const isTestMode = process.env.NODE_ENV === "test";
 
@@ -102,6 +102,7 @@ app.on("ready", () => {
         );
     }
   }
+  log.debug("[APP] App ready event fired");
   // Initialize the logger to be available in renderer process
   log.initialize();
 
@@ -109,38 +110,54 @@ app.on("ready", () => {
 
   log.info(`App is ready. Locale: ${locale}, isDev: ${isDevMode}, NODE_ENV: ${process.env.NODE_ENV}, log level: ${log.transports.console.level}`);
 
-  i18n.changeLanguage(locale).then(() => {
-    db.initDatabase();
-initializeSettingsManager().then(() => {
-      createTray();
-      registerIpcHandlers();
+  await i18n.changeLanguage(locale);
+  log.debug("[APP] i18n initialized");
 
-      const systemAuthContext = createSystemContext();
+  // TEST INTERCEPTION POINT: Await { preInit: true } steps if in test mode
+  const appWithTestHooks = app as typeof app & { testHooks?: any };
+  if (process.env.NODE_ENV === 'test' && appWithTestHooks.testHooks?.appLifecycle?.waitForPreInitSteps) {
+    log.debug("[APP] Waiting for { preInit: true } steps...");
+    await appWithTestHooks.testHooks.appLifecycle.waitForPreInitSteps();
+    log.debug("[APP] PreInit steps completed, continuing initialization");
+  }
+  
+  log.debug("[APP] Initializing database...");
+  db.initDatabase();
+  log.debug("[APP] Database initialized");
 
-      try {
-        const port = (settingsService.get("webPort", systemAuthContext) as number) || 3000;
-        server.startServer(webServer, port);
-        initializeEventNotificationManager();
-      } catch (error) {
-        log.error(
-          "Failed to load settings, using default port:",
-          (error as Error).message,
-        );
-        server.startServer(webServer, 3000);
-        initializeEventNotificationManager();
-      }
-    });
-  });
+  await initializeSettingsManager();
+  log.debug("[APP] Settings initialized");
+  createTray();
+  registerIpcHandlers();
+
+  const systemAuthContext = createSystemContext();
+
+  try {
+    const port = (settingsService.get("webPort", systemAuthContext) as number) || 3000;
+    server.startServer(webServer, port);
+    initializeEventNotificationManager();
+  } catch (error) {
+    log.error(
+      "Failed to load settings, using default port:",
+      (error as Error).message,
+    );
+    server.startServer(webServer, 3000);
+    initializeEventNotificationManager();
+  }
+  log.info("Web server started");
+
+  // Signal app fully ready for tests
+  log.debug("[APP] Signaling app ready for tests");
+  if (process.env.NODE_ENV === 'test') {
+    appWithTestHooks.testHooks?.appLifecycle?.signalAppReady();
+  }
 });
 
-app.on("window-all-closed", () => {});
-
+// If NODE_ENV is set to 'test', register the hooks used for integration testing.
+// Node that build:main populates the testing directory with no-op implementations,
+// and build:main:for-integration-testing populates it with the active implementations,
+// so this code only runs when the testing-active scripts have been used.
 if (process.env.NODE_ENV === "test") {
-  // If NODE_ENV is set to 'test', register the hooks used for integration testing.
-  // Node that build:main populates the testing directory with no-op implementations,
-  // and build:main:for-integration-testing populates it with the active implementations,
-  // so this code only runs when the testing-active scripts have been used.
-
   const appWithTestHooks = app as typeof app & {
     testHooks?: TestHooks;
   };

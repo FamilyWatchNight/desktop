@@ -28,8 +28,8 @@ export interface MovieApi {
 }
 
 export interface SettingsApi {
-  loadSettings(): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }>;
-  saveSettings(settings: Record<string, unknown>): Promise<{ success: boolean; error?: string }>;
+  loadSettings(): Promise< Record<string, unknown>>;
+  saveSettings(settings: Record<string, unknown>): Promise<void>;
   onSettingsSaved(callback: () => void): () => void;
 }
 

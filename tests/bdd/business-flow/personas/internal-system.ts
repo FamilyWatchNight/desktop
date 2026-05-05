@@ -11,6 +11,8 @@ import { AuthenticatedUser } from '../../../../src/main/services/UserService';
 import { Role } from '../../../../src/main/db/models/Roles';
 import { createAuthContext, createSystemContext, type AuthContext, type AuthContextPayload } from '../../../../src/main/auth/context-manager';
 import { PERMISSIONS } from '../../../../src/main/auth/permissions';
+import { Page, Browser } from 'playwright';
+import { withTestHooks } from '../../technical/infrastructure/utils';
 
 /**
  * Internal System Persona - represents trusted backend operations
@@ -34,6 +36,17 @@ export class InternalSystemPersona {
       const app = electron.app as { isReady(): boolean };
       return app.isReady();
     })) as boolean;
+  }
+
+  async openMainWindow(): Promise<{ page: Page; browser?: Browser }> {
+    return await this.world.uiApi.openMainWindow();
+  }
+
+  async signalPreInitComplete(): Promise<void> {
+    // This will call the test hook to signal preInit steps are done
+    await withTestHooks(this.world.app, async (hooks) => {
+      hooks.appLifecycle.signalPreInitComplete();
+    });
   }
 
   //

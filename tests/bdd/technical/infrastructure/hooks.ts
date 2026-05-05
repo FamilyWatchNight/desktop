@@ -13,6 +13,7 @@ import * as paths from '../../../../src/main/paths';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { withTestHooks } from './utils';
 
 // Store original function and temp dir for cleanup
 let originalGetAppDataRoot: () => string;
@@ -20,17 +21,19 @@ let tempAppDataDir: string;
 let originalAppDataEnv: string | undefined;
 let originalHomeEnv: string | undefined;
 
-// Before each scenario - launch the app
-Before({ timeout: 60 * 1000 }, async function (this: CustomWorld) {
+// Before each scenario - launch the app with preInit step support
+Before({ timeout: 60 * 1000 }, async function (this: CustomWorld, scenario: any) {
   // Reset per-scenario state store
   this.clearAllStateStores();
+  this.collectPreInitSteps(scenario);
 
   // Set up test isolation for file system
   tempAppDataDir = path.join(os.tmpdir(), 'test-app-data-' + Date.now());
   fs.mkdirSync(tempAppDataDir, { recursive: true });
 
-  originalGetAppDataRoot = paths.getAppDataRoot;
-  paths.getAppDataRoot = () => tempAppDataDir;
+  const pathsAny = paths as any;
+  originalGetAppDataRoot = pathsAny.getAppDataRoot;
+  pathsAny.getAppDataRoot = () => tempAppDataDir;
 
   // Preserve and override environment variables used by getAppDataRoot
   originalAppDataEnv = process.env.APPDATA;
@@ -38,19 +41,50 @@ Before({ timeout: 60 * 1000 }, async function (this: CustomWorld) {
   process.env.APPDATA = tempAppDataDir;
   process.env.HOME = tempAppDataDir;
 
+  // Phase 1: Launch app (pauses at preInit hook)
   await this.launchApp();
+
+  // Phase 2: Execute the preInit steps collected earlier
+  await this.executePreInitSteps();
+
+  // If the preInit steps didn't initialize the settings and database, do it here.
+  const dbStatus = await this.dbApi.getStatus();
+  if (!dbStatus.dbInitialized) {
+    await this.dbApi.initMockDatabase();
+  }
+  const settingsStatus = await this.settingsApi.getStatus();
+  if (!settingsStatus.initialized) {
+    await this.settingsApi.initializeMockSettings();
+  }
+
+  // Phase 3: Signal app to continue with ready handler
+  await withTestHooks(this.app, async (hooks) => {
+    hooks.appLifecycle.signalPreInitComplete();
+  });
+
+  // Phase 4: Wait for app to be fully ready
+  await withTestHooks(this.app, async (hooks) => {
+    return hooks.appLifecycle.waitForAppReady();
+  });
 });
 
 // After each scenario - cleanup
-After({ timeout: 60 * 1000 }, async function (this: CustomWorld, scenario) {
+After({ timeout: 60 * 1000 }, async function (this: CustomWorld) {
 
   const systemContext = createSystemContext();
   const authContextPayload = {
     userId: systemContext.userId,
     permissions: systemContext.permissions
   };
+
+  if (this.page && this.page.isClosed() === false) {
+    await this.page.close();
+  }
+
+  if (this.browser) {
+    await this.browser.close();
+  }
   
-  // Close database connection
   if (this.app) {
     try {
       // Clean up background tasks first
@@ -58,7 +92,7 @@ After({ timeout: 60 * 1000 }, async function (this: CustomWorld, scenario) {
       if (state.active) {
         await this.backgroundTasksApi.cancelActive(authContextPayload);
       }
-      for (const task of state.queue) {
+      for (const task of state.queue as Array<{ id: string }>) {
         await this.backgroundTasksApi.removeQueued(task.id, authContextPayload);
       }
 
@@ -74,7 +108,7 @@ After({ timeout: 60 * 1000 }, async function (this: CustomWorld, scenario) {
 
   // Restore original paths and environment
   if (originalGetAppDataRoot) {
-    paths.getAppDataRoot = originalGetAppDataRoot;
+    (paths as any).getAppDataRoot = originalGetAppDataRoot;
   }
   if (originalAppDataEnv !== undefined) {
     process.env.APPDATA = originalAppDataEnv;

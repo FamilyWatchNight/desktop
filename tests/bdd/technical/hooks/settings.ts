@@ -21,6 +21,16 @@ export class Settings {
   }
 
   /**
+   * 
+   * Get the initialization status of the settings manager.
+   */
+  async getStatus(): Promise<{ initialized: boolean }> {
+    return await withTestHooks(this.app, async (hooks) => {
+      return hooks.settings.getStatus();
+    });
+  }
+
+  /**
    * Initialize mock settings for testing purposes. This will clear any existing settings and set the provided test settings.
    */
   async initializeMockSettings(testSettings?: Record<string, unknown>): Promise<void> {

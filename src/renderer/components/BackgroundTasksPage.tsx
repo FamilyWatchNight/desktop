@@ -73,38 +73,38 @@ export default function BackgroundTasksPage(): React.ReactElement {
   };
 
   return (
-      <div className="page centered">
+      <div className="page centered" data-testid="page-background-tasks">
       <div className="page-container">
         <h1 className="page-title">{t('title')}</h1>
         <section className="section">
           <h2 className="section-title">{t('activeTask')}</h2>
           {active ? (
-            <div className="active-task">
-              <div className="active-task-label">{active.label}</div>
-              <div className="active-task-step">{active.description ?? t('working')}</div>
+            <div className="active-task" data-testid="background-tasks-active-task">
+              <div className="active-task-label" data-testid="background-tasks-active-task-label">{active.label}</div>
+              <div className="active-task-step" data-testid="background-tasks-active-task-step">{active.description ?? t('working')}</div>
               <div className="progress-bar-wrap">
                 <div className={`progress-bar-fill ${isIndeterminate ? 'indeterminate' : ''}`} style={isIndeterminate ? {} : { width: `${progressPercent}%` }} />
               </div>
-              <div className="progress-text">{isIndeterminate ? t('inProgress') : t('percentComplete', { percent: progressPercent })}</div>
-              <button type="button" className="btn-danger" onClick={cancelActiveTask}>{t('button.cancel', { ns: 'common' })}</button>
+              <div className="progress-text" data-testid="background-tasks-progress-text">{isIndeterminate ? t('inProgress') : t('percentComplete', { percent: progressPercent })}</div>
+              <button type="button" className="btn-danger" data-testid="background-tasks-cancel-button" onClick={cancelActiveTask}>{t('button.cancel', { ns: 'common' })}</button>
             </div>
           ) : (
-            <div className="no-active-task">{t('noActive')}</div>
+            <div className="no-active-task" data-testid="background-tasks-no-active">{t('noActive')}</div>
           )}
         </section>
         <section className="section">
           <h2 className="section-title">{t('queuedTasks')}</h2>
           {queue.length > 0 ? (
-            <ul className="queued-list">
+            <ul className="queued-list" data-testid="background-tasks-queued-list">
               {queue.map((task) => (
-                <li key={task.id} className="queued-item">
-                  <span className="queued-item-label">{task.label}</span>
-                  <button type="button" className="btn-danger" onClick={() => removeQueuedTask(task.id)} aria-label={t('button.removeTask') + ' ' + task.label}>{t('button.removeTask')}</button>
+                <li key={task.id} className="queued-item" data-testid={`background-tasks-queued-item-${task.id}`}>
+                  <span className="queued-item-label" data-testid={`background-tasks-queued-item-label-${task.id}`}>{task.label}</span>
+                  <button type="button" className="btn-danger" data-testid={`background-tasks-remove-queued-task-${task.id}`} onClick={() => removeQueuedTask(task.id)} aria-label={t('button.removeTask') + ' ' + task.label}>{t('button.removeTask')}</button>
                 </li>
               ))}
             </ul>
           ) : (
-            <div className="no-queued-tasks">{t('noneQueued')}</div>
+            <div className="no-queued-tasks" data-testid="background-tasks-none-queued">{t('noneQueued')}</div>
           )}
         </section>
       </div>
