@@ -38,6 +38,10 @@ export class CustomWorld extends World {
   
   // Per-scenario state that supports feature-local stores
   scenarioState: Record<string, Record<string, unknown>> = {};
+
+  // PreInit step management
+  private preInitSteps: Array<{ id?: symbol; fn: Function; args: any[] }> = [];
+  private executedPreInitStepIds: Set<symbol> = new Set();
   
   constructor(options: IWorldOptions) {
     super(options);
@@ -63,6 +67,8 @@ export class CustomWorld extends World {
 
   clearAllStateStores(): void {
     this.scenarioState = {};
+    this.preInitSteps = [];
+    this.executedPreInitStepIds.clear();
   }
 
   setLastError(error?: Error | unknown, errorMessage?: string): void {
@@ -148,18 +154,82 @@ export class CustomWorld extends World {
     }
   }
 
-  async launchApp(): Promise<void> {
+  /**
+   * Collect { preInit: true } steps from the current scenario.
+   * This should be called before launching the app.
+   */
+  collectPreInitSteps(scenario: any): void {
+    this.preInitSteps = [];
+    this.executedPreInitStepIds.clear();
+
+    for (const step of scenario.pickle?.steps || []) {
+      const stepText = step.text;
+      const registered = findRegisteredStep(stepText);
+      if (!registered) {
+        continue;
+      }
+
+      if (!registered.step.options.preInit) {
+        continue;
+      }
+
+      const args = [...registered.args];
+      if (step.argument?.docString?.content !== undefined) {
+        args.push(step.argument.docString.content);
+      } else if (step.argument?.dataTable?.rows) {
+        const rows = step.argument.dataTable.rows.map((row: any) =>
+          row.cells.map((cell: any) => cell.value)
+        );
+        args.push(rows);
+      }
+
+      this.addPreInitStep(registered.step.id, registered.step.fn, args);
+    }
+  }
+
+  async executePreInitSteps(): Promise<void> {
+    for (const step of this.preInitSteps) {
+      await step.fn.apply(this, step.args);
+      if (step.id) {
+        this.markPreInitStepExecuted(step.id);
+      }
+    }
+    this.preInitSteps = [];
+  }
+
+  addPreInitStep(stepId: symbol | undefined, fn: Function, args: any[] = []): void {
+    this.preInitSteps.push({ id: stepId, fn, args });
+  }
+
+  markPreInitStepExecuted(stepId: symbol): void {
+    this.executedPreInitStepIds.add(stepId);
+  }
+
+  hasExecutedPreInitStep(stepId: symbol): boolean {
+    return this.executedPreInitStepIds.has(stepId);
+  }
+
+  /**
+   * Wait for the app to be fully ready after preInit steps complete.
+   * This is now handled directly via test hooks in the Before hook.
+   */
+  async waitForAppReady(): Promise<void> {
+    // Implementation moved to hooks.ts for direct hook access
+    return Promise.resolve();
+  }
+
+  async launchApp(): Promise<ElectronApplication> {
     const debugArgs = (!!process.env.PWDEBUG) ? ['--inspect-brk=9229'] : [];
     const ciArgs = (!!process.env.CI) ? ['--no-sandbox'] : [];
 
-    this.app = await electron.launch({ 
+    this.app = await electron.launch({
       args: ['.', ...debugArgs, ...ciArgs],
       env: {
         ...process.env,
         NODE_ENV: process.env.NODE_ENV || 'test'
       }
     });
-    
+
     this.app.on('console', (msg) => {
       console.log('[app]', msg.text());
     });
@@ -179,6 +249,8 @@ export class CustomWorld extends World {
 
     // Set up event recording for testing
     await this.eventNotificationsApi.setupEventRecording();
+
+    return this.app;
   }
 
   async closeApp(): Promise<void> {

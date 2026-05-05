@@ -20,7 +20,7 @@ import ImportWatchmodeTask from "../tasks/ImportWatchmodeTask";
 import { createAuthContext, type AuthContextPayload } from '../auth/context-manager';
 import { MovieService, SettingsService, BackgroundTaskService, UserService, RoleService } from '../services';
 import { executeServiceMethod } from '../utils/error-serialization';
-import { initialize as initializeSettingsManager } from '../settings-manager';
+import { initialize as initializeSettingsManager, getStatus as getSettingsStatus } from '../settings-manager';
 import * as backgroundTaskManager from '../background-task-manager';
 
 const movieService = new MovieService();
@@ -31,6 +31,16 @@ const roleService = new RoleService();
 
 // Track the actively running mock task instance for test control
 let activeTestTask: InstanceType<typeof MockBackgroundTask> | null = null;
+
+let resolvePreInitPromise: (() => void) | null = null;
+const preReadyPromise: Promise<void> = new Promise((resolve) => {
+  resolvePreInitPromise = resolve;
+});
+
+let resolveAppReadyPromise: (() => void) | null = null;
+const appReadyPromise: Promise<void> = new Promise((resolve) => {
+  resolveAppReadyPromise = resolve;
+});
 
 /**
  * Deserialize a buffer that was JSON-serialized across the Electron boundary.
@@ -78,6 +88,7 @@ export interface TestHooks {
     searchByTitle: (searchTerm: string, authContext?: AuthContextPayload) => Promise<import('../db/models/Movies').Movie[]>;
   };
   settings: {
+    getStatus: () => Promise<{ initialized: boolean }>;
     initializeMockSettings: (testSettings?: Record<string, unknown>) => Promise<void>;
     get: (key: string, authContext?: AuthContextPayload) => Promise<unknown>;
     set: (key: string, value: unknown, authContext?: AuthContextPayload) => Promise<void>;
@@ -137,6 +148,12 @@ export interface TestHooks {
   ui: {
     openMainWindow: () => Promise<void>;
   };
+  appLifecycle: {
+    waitForPreInitSteps: () => Promise<void>;
+    signalPreInitComplete: () => void;
+    waitForAppReady: () => Promise<void>;
+    signalAppReady: () => void;
+  };
 }
 
 export function getTestHooks(): TestHooks {
@@ -181,6 +198,9 @@ export function getTestHooks(): TestHooks {
       }
     },
     settings: {
+      getStatus: async () => {
+        return getSettingsStatus();
+      },
       initializeMockSettings: async (testSettings?: Record<string, unknown>) => {
         const store = createMockElectronStore(testSettings);
         return initializeSettingsManager(store);
@@ -384,6 +404,26 @@ export function getTestHooks(): TestHooks {
     ui: {
       openMainWindow: async () => {
         createAppWindow();
+      }
+    },
+    appLifecycle: {
+      waitForPreInitSteps: async () => {
+        return preReadyPromise;
+      },
+      signalPreInitComplete: () => {
+        if (resolvePreInitPromise) {
+          resolvePreInitPromise();
+          resolvePreInitPromise = null;
+        }
+      },
+      waitForAppReady: async () => {
+        return appReadyPromise;
+      },
+      signalAppReady: () => {
+        if (resolveAppReadyPromise) {
+          resolveAppReadyPromise();
+          resolveAppReadyPromise = null;
+        }
       }
     }
   };

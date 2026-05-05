@@ -11,6 +11,7 @@ import { expect } from '@playwright/test';
 import { CustomWorld } from '../../technical/infrastructure/world';
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
 import { attemptAsync } from '../../technical/infrastructure/utils';
+import { defineGiven } from '../../technical/infrastructure/step-helpers';
 
 function getSystemPersona(world: CustomWorld): InternalSystemPersona {
   const state = world.getStateStore('personas');
@@ -19,6 +20,12 @@ function getSystemPersona(world: CustomWorld): InternalSystemPersona {
   }
   return state.system as InternalSystemPersona;
 }
+
+defineGiven('the application has the following initial settings:', { preInit: true }, async function (this: CustomWorld, settingsJson: string) {
+  const settings = JSON.parse(settingsJson);
+  const system = getSystemPersona(this);
+  await system.initializeSettings(settings);
+});
 
 Given('the application is running with default settings', async function (this: CustomWorld) {
   // Initialize mock settings to ensure we start with a clean slate
