@@ -66,6 +66,17 @@ body {
   }
 }
 
+.grid-row {
+  display: flex;
+  gap: $element-gap;
+  margin-top: 20px;
+
+  & div {
+    flex: 1;
+  }
+}
+
+
 /* Sections */
 .section {
   margin-bottom: $section-gap;
