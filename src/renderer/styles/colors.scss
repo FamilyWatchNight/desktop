@@ -1,21 +1,102 @@
-$background-color: #000000AA;
+@use "sass:color";
+
+$hue-angle: 20;
+
+$hue-red: 0;
+$hue-orange: $hue-angle * 1;
+$hue-gold: $hue-angle * 2;
+$hue-yellow: $hue-angle * 3;
+$hue-lime: $hue-angle * 4;
+$hue-green: $hue-angle * 6;
+$hue-teal: $hue-angle * 8;
+$hue-cyan: $hue-angle * 9.3; // This one needed adjustment to look right.
+$hue-blue: $hue-angle * 10;
+$hue-purple: $hue-angle * 13;
+$hue-magenta: $hue-angle * 15;
+$hue-coral: $hue-angle * 17;
+
+$saturation-core: 50%;
+$lightness-core: 50%;
+$highlight-lightness-adjust: 10%;
+$shadow-lightness-adjust: -10%;
+$gradient-angle: 165deg;
+
+// Some colors needed sat/lightness adjustments to look good in the palette
+$core-red: hsl($hue-red, $saturation-core, $lightness-core);
+$core-orange: hsl($hue-orange, $saturation-core, $lightness-core);
+$core-gold: hsl($hue-gold, $saturation-core, $lightness-core);
+$core-yellow: hsl($hue-yellow, 40%, $lightness-core);
+$core-lime: hsl($hue-lime, $saturation-core, 45%);
+$core-green: hsl($hue-green, $saturation-core, 45%);
+$core-teal: hsl($hue-teal, 40%, 35%);
+$core-cyan: hsl($hue-cyan, 60%, 50%);
+$core-blue: hsl($hue-blue, 100%, 40%);
+$core-purple: hsl($hue-purple, 40%, $lightness-core);
+$core-magenta: hsl($hue-magenta, 40%, $lightness-core);
+$core-coral: hsl($hue-coral, $saturation-core, $lightness-core);
+
+@function make-highlight-color($core-color) {
+  @return color.adjust($core-color, $lightness: $highlight-lightness-adjust);
+}
+
+@function make-shadow-color($core-color) {
+  @return color.adjust($core-color, $lightness: $shadow-lightness-adjust);
+}
+
+@function make-gradient($core-color) {
+  $highlight-color: make-highlight-color($core-color);
+  $shadow-color: make-shadow-color($core-color);
+  @return linear-gradient($gradient-angle, $highlight-color 0%, $core-color 50%, $shadow-color 100%);
+}
+
+/* Original colors, before "Enchanted Theater" palette update */
+$background-color: #000000BB;
 $text-color: #e0e0e0;
 
-$primary-color: #007acc;
-$success-color: #28a745;
-$error-color: #d13438;
+$primary-color: $core-gold;
+$action-color: $core-gold;
+$success-color: $core-green;
+$error-color: $core-red;
 $danger-color: $error-color;
-$warning-color: #ffc107;
-$info-color: #17a2b8;
+$warning-color: $core-yellow;
+$info-color: $core-blue;
 
-$container-background: #2d2d2daa;
+$container-background: color.change(color.to-space($core-blue, rgb), $alpha: 0.07);
 $container-border: #404040;
 $form-background: #2d2d2d;
 $form-border: #404040;
 $input-background: #1e1e1e;
 $input-border: #505050;
 
-
 $shadow-color-base: black;
 $shadow-opacity: 0.5;
 $shadow-color: rgba($shadow-color-base, $shadow-opacity);
+
+:root {
+  /* Core Brand Colors */
+  --core-red: #{$core-red};
+  --core-orange: #{$core-orange};
+  --core-gold: #{$core-gold};
+  --core-yellow: #{$core-yellow};
+  --core-lime: #{$core-lime};
+  --core-green: #{$core-green};
+  --core-teal: #{$core-teal};
+  --core-cyan: #{$core-cyan};
+  --core-blue: #{$core-blue};
+  --core-purple: #{$core-purple};
+  --core-magenta: #{$core-magenta};
+  --core-coral: #{$core-coral};
+
+  --gradient-red: #{make-gradient($core-red)};
+  --gradient-orange: #{make-gradient($core-orange)};
+  --gradient-gold: #{make-gradient($core-gold)};
+  --gradient-yellow: #{make-gradient($core-yellow)};
+  --gradient-lime: #{make-gradient($core-lime)};
+  --gradient-green: #{make-gradient($core-green)};
+  --gradient-teal: #{make-gradient($core-teal)};
+  --gradient-cyan: #{make-gradient($core-cyan)};
+  --gradient-blue: #{make-gradient($core-blue)};
+  --gradient-purple: #{make-gradient($core-purple)};
+  --gradient-magenta: #{make-gradient($core-magenta)};
+  --gradient-coral: #{make-gradient($core-coral)};
+}
