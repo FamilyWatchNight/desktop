@@ -38,6 +38,7 @@ body {
   border-radius: $container-radius;
   border: 1px solid colors.$container-border;
   margin-bottom: $container-gap;
+  backdrop-filter: blur(30px);
 
   &:last-child {
     margin-bottom: 0;

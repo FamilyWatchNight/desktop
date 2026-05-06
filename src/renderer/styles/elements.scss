@@ -51,36 +51,38 @@
 }
 
 @mixin make-button-color($bg-color, $border-color: $bg-color) {
-  background: $bg-color;
-  border-color: $border-color;
+  $highlight-color: colors.make-highlight-color($bg-color);
+  $shadow-color: colors.make-shadow-color($bg-color);
+  background: colors.make-gradient($bg-color);
+  border-top-color: colors.make-highlight-color($highlight-color);
+  border-right-color: $shadow-color;
+  border-bottom-color: colors.make-shadow-color($shadow-color);
+  border-left-color: $shadow-color;
 
   &:hover {
-    background: color.adjust($bg-color, $lightness: -10%);
+    background: colors.make-gradient($highlight-color)
   }
 }
 
 button {
   padding: layout.$element-padding layout.$element-padding * 1.5;
-  border: 1px solid colors.$primary-color;
+  border: 1.25px solid colors.$primary-color;
   border-radius: layout.$element-radius;
-  background: colors.$primary-color;
   color: white;
-  font-size: 16px;
+  font-size: 20px;
   font-family: typography.$body-font-stack;
-  font-weight: 100;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s;
+  text-shadow: -.1px -.35px 1px rgba(0, 0, 0, 0.4);
 
-  &:hover {
-    background: color.adjust(colors.$primary-color, $lightness: -10%);
-  }
+  @include make-button-color(colors.$primary-color);
 
   &.btn-secondary {
     background: none;
-    border-color: rgba(colors.$text-color, 0.5);
+    border-color: rgba(colors.$text-color, 0.2);
 
     &:hover {
-      background: rgba(colors.$primary-color, 0.1);
+      background: rgba(colors.$primary-color, 0.2);
     }
   }
 
