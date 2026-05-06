@@ -1,5 +1,6 @@
 @use "colors";
 @use "layout";
+@use "typography";
 @use "sass:color";
 
 /* Progress Bar */
@@ -64,7 +65,9 @@ button {
   border-radius: layout.$element-radius;
   background: colors.$primary-color;
   color: white;
-  font-weight: 500;
+  font-size: 16px;
+  font-family: typography.$body-font-stack;
+  font-weight: 100;
   cursor: pointer;
   transition: background-color 0.3s;
 
