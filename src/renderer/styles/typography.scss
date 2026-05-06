@@ -6,8 +6,9 @@ $body-font-stack: 'Nunito Sans Variable', -apple-system, BlinkMacSystemFont, 'Se
 body{
   font-size: 16px;
   font-family: $body-font-stack;
+  font-weight: 200;
   font-variation-settings: "YTLC" 520;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 
 h1 {

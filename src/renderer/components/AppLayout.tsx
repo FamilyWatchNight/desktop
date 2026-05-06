@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import '../styles/components/AppLayout.scss';
 import HomePage from './HomePage';
 import SettingsPage from './SettingsPage';
+import StyleboardPage from './StyleboardPage';
 import BackgroundTasksPage from './BackgroundTasksPage';
 import { createApiClient } from '../api-client';
 
@@ -68,6 +69,8 @@ export default function Layout(): React.ReactElement {
         return <HomePage />;
       case 'settings':
         return <SettingsPage />;
+      case 'styleboard':
+        return <StyleboardPage />;
       case 'background-tasks':
         return <BackgroundTasksPage />;
       default:
@@ -128,6 +131,16 @@ export default function Layout(): React.ReactElement {
                   {(activeTask || queue.length > 0) && (
                     <span className="menu-badge" data-testid="menu-background-tasks-badge">{(activeTask ? 1 : 0) + queue.length}</span>
                   )}
+                </button>
+                <button
+                  className={`menu-item ${currentPage === 'styleboard' ? 'active' : ''}`}
+                  onClick={() => navigateTo('styleboard')}
+                  data-testid="menu-styleboard"
+                >
+                  <svg className="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 2v5l6 5v2l-6 5v5h12v-5l-6-5v-2l6-5V2H6z"/>
+                  </svg>
+                  <span>{t('menu.styleboard')}</span>
                 </button>
               </div>
             </div>

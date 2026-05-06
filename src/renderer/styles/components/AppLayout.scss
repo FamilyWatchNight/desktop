@@ -6,6 +6,9 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+@use "../colors";
+@use "sass:color";
+
 /* Layout Styles */
 .app-layout {
   position: relative;
@@ -21,7 +24,7 @@ the Free Software Foundation, version 3.
   top: 20px;
   left: 20px;
   z-index: 1001;
-  background: rgba(45, 45, 45, 0.9);
+  background: colors.$container-background;
   border: 1px solid #404040;
   border-radius: 4px;
   width: 48px;
@@ -79,8 +82,8 @@ the Free Software Foundation, version 3.
   left: 0;
   height: 100vh;
   width: 290px;
-  background: rgba(45, 45, 45, 0.95);
-  backdrop-filter: blur(12px);
+  background: colors.$container-background;
+  backdrop-filter: blur(80px);
   border-right: 1px solid #404040;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
   z-index: 1000;
@@ -205,21 +208,25 @@ the Free Software Foundation, version 3.
   text-align: left;
   width: 100%;
   font-family: inherit;
-}
 
-.menu-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
 
-.menu-item.active {
-  background: rgba(0, 122, 204, 0.2);
-  color: #4da6ff;
-  border-left: 3px solid #007acc;
+  &.active {
+    background: color.change(color.to-space(colors.$core-blue, rgb), $alpha: 0.2);
+    color: colors.make-highlight-color(colors.$core-blue);
+    border-left: 3px solid colors.$core-blue;
+
+    &:hover {
+      color: #ffffff;
+    }
+  }
 }
 
 .menu-item.active .menu-icon {
-  color: #4da6ff;
+  color: colors.make-highlight-color(colors.$core-blue);
 }
 
 .menu-icon {
@@ -235,7 +242,7 @@ the Free Software Foundation, version 3.
 }
 
 .menu-badge {
-  background: #ff6b6b;
+  background: colors.$core-red;
   color: white;
   font-size: 12px;
   font-weight: bold;
