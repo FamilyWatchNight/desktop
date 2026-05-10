@@ -9,10 +9,10 @@ the Free Software Foundation, version 3.
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../styles/components/AppLayout.scss';
-import HomePage from './HomePage';
-import SettingsPage from './SettingsPage';
-import StyleboardPage from './StyleboardPage';
-import BackgroundTasksPage from './BackgroundTasksPage';
+import HomePage from './pages/HomePage';
+import SettingsPage from './pages/SettingsPage';
+import StyleboardPage from './pages/StyleboardPage';
+import BackgroundTasksPage from './pages/BackgroundTasksPage';
 import { createApiClient } from '../api-client';
 
 const apiClient = createApiClient();
