@@ -6,7 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import '../styles/components/StyleboardPage.scss';
+import '../../styles/components/StyleboardPage.scss';
 
 export default function StyleboardPage(): React.ReactElement {
 
