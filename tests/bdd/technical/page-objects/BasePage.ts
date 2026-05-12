@@ -4,6 +4,8 @@ import { TIMEOUT as UI_TIMEOUT } from '../infrastructure/ui-utils';
 import log from 'electron-log';
 
 export abstract class BasePage {
+  private pageErrorsListening = false;
+
   constructor(protected world: CustomWorld) {}
 
   protected async getPage(): Promise<Page> {
@@ -13,7 +15,7 @@ export abstract class BasePage {
     }
     
     // First time setup - attach browser error listeners
-    if (!(this.world as any).pageErrorsListening) {
+    if (!this.pageErrorsListening) {
       const page = this.world.page;
       
       // Capture console errors
@@ -40,7 +42,7 @@ export abstract class BasePage {
         }
       });
       
-      (this.world as any).pageErrorsListening = true;
+      this.pageErrorsListening = true;
     }
     
     return this.world.page;
