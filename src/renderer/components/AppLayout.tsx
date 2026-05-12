@@ -28,7 +28,7 @@ interface TaskPayload {
 }
 
 export default function Layout(): React.ReactElement {
-  const { t } = useTranslation( "layout" );
+  const { t } = useTranslation(['layout', 'common']);
   const [menuOpen, setMenuOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
   const [systemExpanded, setSystemExpanded] = useState(false);
@@ -80,11 +80,14 @@ export default function Layout(): React.ReactElement {
 
   return (
     <div className="app-layout" data-testid="app-layout">
-      <button className="hamburger-button" data-testid="menu-toggle-button" onClick={toggleMenu} aria-label={t('toggleMenu')}>
-        <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
-        <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
-        <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
-      </button>
+      <header className="app-header" data-testid="app-header">
+        <button className="hamburger-button" data-testid="menu-toggle-button" onClick={toggleMenu} aria-label={t('toggleMenu')}>
+          <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
+          <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
+          <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
+        </button>
+        <h1 className="app-title" data-testid="app-title">{t('app.name', { ns: 'common' })}</h1>
+      </header>
       {menuOpen && <div className="menu-overlay" data-testid="menu-overlay" onClick={closeMenu}></div>}
       <div className={`side-menu ${menuOpen ? 'open' : ''}`} data-testid="side-menu">
         <div className="menu-content">
