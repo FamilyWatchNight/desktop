@@ -106,7 +106,7 @@ app.on("ready", async () => {
   // Initialize the logger to be available in renderer process
   log.initialize();
 
-  const locale = process.env.NODE_ENV=="test" ? "test" : ( isDevMode ? "dev" : app.getLocale() );
+  const locale = process.env.NODE_ENV === "test" ? "test" : ( isDevMode ? "dev" : app.getLocale() );
 
   log.info(`App is ready. Locale: ${locale}, isDev: ${isDevMode}, NODE_ENV: ${process.env.NODE_ENV}, log level: ${log.transports.console.level}`);
 
