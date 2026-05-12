@@ -74,7 +74,7 @@ app.on("ready", async () => {
   const isDevMode = !app.isPackaged;
   const isTestMode = process.env.NODE_ENV === "test";
 
-  log.transports.file.enabled = false;
+  log.transports.file.level = false;
   log.transports.console.level = isTestMode ? "warn" : isDevMode ? "debug" : "error";
   if (process.env.LOG_LEVEL) {
     switch (process.env.LOG_LEVEL.toLowerCase()) {
