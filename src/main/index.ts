@@ -162,7 +162,7 @@ app.on('window-all-closed', () => {
 });
 
 // If NODE_ENV is set to 'test', register the hooks used for integration testing.
-// Node that build:main populates the testing directory with no-op implementations,
+// Note that build:main populates the testing directory with no-op implementations,
 // and build:main:for-integration-testing populates it with the active implementations,
 // so this code only runs when the testing-active scripts have been used.
 if (process.env.NODE_ENV === "test") {
