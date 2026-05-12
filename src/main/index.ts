@@ -106,7 +106,7 @@ app.on("ready", async () => {
   // Initialize the logger to be available in renderer process
   log.initialize();
 
-  const locale = process.env.NODE_ENV=="test" ? "test" : ( isDevMode ? "dev" : app.getLocale() );
+  const locale = process.env.NODE_ENV === "test" ? "test" : ( isDevMode ? "dev" : app.getLocale() );
 
   log.info(`App is ready. Locale: ${locale}, isDev: ${isDevMode}, NODE_ENV: ${process.env.NODE_ENV}, log level: ${log.transports.console.level}`);
 
@@ -162,7 +162,7 @@ app.on('window-all-closed', () => {
 });
 
 // If NODE_ENV is set to 'test', register the hooks used for integration testing.
-// Node that build:main populates the testing directory with no-op implementations,
+// Note that build:main populates the testing directory with no-op implementations,
 // and build:main:for-integration-testing populates it with the active implementations,
 // so this code only runs when the testing-active scripts have been used.
 if (process.env.NODE_ENV === "test") {
@@ -184,7 +184,7 @@ if (process.env.NODE_ENV === "test") {
     }
   ).__testCallbacks = {
     createTaskContext: () => ({
-      abortSignal: null as unknown as AbortSignal,
+      abortSignal: new AbortController().signal,
       reportProgress: () => {},
       isCancelled: () => false,
     }),
