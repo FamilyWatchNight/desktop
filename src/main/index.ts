@@ -184,7 +184,7 @@ if (process.env.NODE_ENV === "test") {
     }
   ).__testCallbacks = {
     createTaskContext: () => ({
-      abortSignal: null as unknown as AbortSignal,
+      abortSignal: new AbortController().signal,
       reportProgress: () => {},
       isCancelled: () => false,
     }),
