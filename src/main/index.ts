@@ -153,6 +153,14 @@ app.on("ready", async () => {
   }
 });
 
+app.on("will-quit", () => {
+  db.closeDatabase();
+});
+
+app.on('window-all-closed', () => {
+  // Prevent default quit behavior so app stays running in tray
+});
+
 // If NODE_ENV is set to 'test', register the hooks used for integration testing.
 // Node that build:main populates the testing directory with no-op implementations,
 // and build:main:for-integration-testing populates it with the active implementations,
@@ -182,7 +190,3 @@ if (process.env.NODE_ENV === "test") {
     }),
   };
 }
-
-app.on("before-quit", () => {
-  db.closeDatabase();
-});

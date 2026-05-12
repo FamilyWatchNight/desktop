@@ -8,8 +8,8 @@ the Free Software Foundation, version 3.
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { createApiClient } from '../api-client';
-import '../styles/components/BackgroundTasksPage.scss';
+import { createApiClient } from '../../api-client';
+import '../../styles/components/BackgroundTasksPage.scss';
 import log from 'electron-log/renderer';
 
 const apiClient = createApiClient();
