@@ -9,44 +9,69 @@ the Free Software Foundation, version 3.
 @use "../colors";
 @use "sass:color";
 
+:root {
+  --app-header-height: 64px;
+}
+
 /* Layout Styles */
 .app-layout {
   position: relative;
   width: 100%;
   height: 100vh;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--app-header-height);
   display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  background: colors.$container-background;
+  backdrop-filter: blur(30px);
+  border-bottom: 2px solid colors.$glass-shadow-edge;
+  z-index: 1002;
+}
+
+.app-title {
+  margin: 0;
+  color: #e0e0e0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 /* Hamburger Button */
 .hamburger-button {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1001;
-  background: colors.$container-background;
-  border: 1px solid #404040;
-  border-radius: 4px;
-  width: 48px;
-  height: 48px;
+  position: static;
+  background: transparent;
+  border: none;
+  width: 40px;
+  height: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 5px;
   cursor: pointer;
-  transition: background-color 0.3s;
-  backdrop-filter: blur(8px);
+  transition: background-color 0.2s ease;
+  color: #e0e0e0;
+  padding: 0;
 }
 
 .hamburger-button:hover {
-  background: rgba(60, 60, 60, 0.9);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .hamburger-line {
   width: 24px;
   height: 2px;
-  background: #e0e0e0;
+  background: currentColor;
   transition: all 0.3s ease;
   border-radius: 2px;
 }
@@ -84,7 +109,7 @@ the Free Software Foundation, version 3.
   width: 290px;
   background: colors.$container-background;
   backdrop-filter: blur(80px);
-  border-right: 1px solid #404040;
+  border-right: 2px solid colors.$glass-shadow-edge;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
   z-index: 1000;
   transform: translateX(-100%);
@@ -101,7 +126,7 @@ the Free Software Foundation, version 3.
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding-top: 80px; /* Space for hamburger button */
+  padding-top: var(--app-header-height); /* Space for hamburger button */
 }
 
 /* Navigation Section (Scrollable) */
@@ -256,10 +281,9 @@ the Free Software Foundation, version 3.
 
 /* Main Content */
 .main-content {
-  flex: 1;
+  position: relative;
   width: 100%;
-  height: 100vh;
-  overflow-y: auto;
+  min-height: calc(100vh - var(--app-header-height));
   transition: margin-left 0.3s ease;
 }
 
