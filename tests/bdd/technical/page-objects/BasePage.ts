@@ -114,7 +114,7 @@ export abstract class BasePage {
         }
         // Otherwise, return the visible text
         return el.textContent;
-    }) as Promise<string | null>;
+    });
 
     console.log(`[BasePage.getText] Got text for "${name}":`, textValue);
     return textValue;
