@@ -7,6 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import '../../styles/components/StyleboardPage.scss';
+import React from 'react';
 
 export default function StyleboardPage(): React.ReactElement {
 

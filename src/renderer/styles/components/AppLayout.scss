@@ -200,7 +200,7 @@ the Free Software Foundation, version 3.
 }
 
 .menu-system.expanded .menu-system-items {
-  max-height: 120px;
+  max-height: 100vh;
   opacity: 1;
   margin-top: 4px;
 }
@@ -240,7 +240,7 @@ the Free Software Foundation, version 3.
   }
 
   &.active {
-    background: color.change(color.to-space(colors.$core-blue, rgb), $alpha: 0.2);
+    background: color.change(colors.$core-blue, $alpha: 0.2);
     color: colors.make-highlight-color(colors.$core-blue);
     border-left: 3px solid colors.$core-blue;
 
