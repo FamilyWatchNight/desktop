@@ -11,6 +11,7 @@ import path from 'path';
 import { app } from 'electron';
 import { Express, Request } from 'express';
 
+import { appLanguage } from '../../i18n';
 import { LocalizationService } from '../../services';
 
 import { route } from './utils';
@@ -30,7 +31,6 @@ export function registerAppRoutes(app: Express): void {
   app.get(
     '/api/locale',
     route(() => {
-      const { appLanguage } = require('../../i18n');
       return appLanguage;
     }),
   );
@@ -61,6 +61,7 @@ export function registerAppRoutes(app: Express): void {
   app.get(
     '/api/version',
     route(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const appInfoJson = require(path.join(__dirname, '..', 'app-info.json')) as {
         version: string;
       };

@@ -22,8 +22,7 @@ import i18n from '../i18n';
 import { getAppDataRoot } from '../paths';
 import { safeJoin, assertPathInsideAllowedDirs } from '../security';
 
-
-export interface CreateUserData extends UserData {}
+export type CreateUserData = UserData;
 
 export interface AuthenticatedUser extends User {
   profile: UserProfile | null;

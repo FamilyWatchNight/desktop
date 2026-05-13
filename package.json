@@ -28,8 +28,8 @@
     "dev:test": "npm run build:main:for-integration-testing && npm run build:renderer && concurrently \"npm:build:main:watch\" \"npm:renderer:vite\" \"npm:electron:debug\"",
     "pack": "npm run clean && npm run build:main && npm run build:renderer && electron-builder --dir",
     "postinstall": "electron-builder install-app-deps",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "node scripts/use-testing-active.js && eslint .",
+    "lint:fix": "node scripts/use-testing-active.js && eslint . --fix"
   },
   "keywords": [
     "electron",

@@ -31,15 +31,15 @@ Feature: RBAC role management
 
   Scenario: Duplicating a role creates a new custom role with the same permissions and hidden status and an updated name
     Given a role "base-role" exists with display name "Base Role" and hidden status "false"
-    And the role "base-role" has permissions "can-view-movies, can-comment"
+    And the role "base-role" has permissions "can-host, can-rate"
     When I duplicate the role "base-role" to create a new role "copy-of-base-role"
-    Then the role "copy-of-base-role" should have the permissions "can-view-movies, can-comment"
+    Then the role "copy-of-base-role" should have the permissions "can-host, can-rate"
     And the role "copy-of-base-role" should have display name "Copy of Base Role"
     And the role "copy-of-base-role" should not be marked as a system role
     And the role "copy-of-base-role" should not be marked as hidden
     When I hide the role "base-role"
     And I duplicate the role "base-role" to create a new role "copy2-of-base-role"
-    Then the role "copy2-of-base-role" should have the permissions "can-view-movies, can-comment"
+    Then the role "copy2-of-base-role" should have the permissions "can-host, can-rate"
     And the role "copy2-of-base-role" should have display name "Copy of Base Role (2)"
     And the role "copy2-of-base-role" should not be marked as a system role
     And the role "copy2-of-base-role" should be marked as hidden

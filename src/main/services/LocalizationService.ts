@@ -62,7 +62,7 @@ function normalizeNamespace(namespace: string): string {
 }
 
 // Helper to set a nested value on an object given a dot-separated key path.
-function setNestedValue(obj: Record<string, any>, pathStr: string, value: any) {
+function setNestedValue(obj: Record<string, unknown>, pathStr: string, value: unknown) {
   const parts = pathStr.split('.');
 
   const MAX_KEY_SEGMENTS = 100;
@@ -73,7 +73,7 @@ function setNestedValue(obj: Record<string, any>, pathStr: string, value: any) {
   }
 
   // Start with the topmost object
-  let current: Record<string, any> = obj;
+  let current: Record<string, unknown> = obj;
 
   // Iterate through the parts of the path, creating nested objects as needed.
   for (let i = 0; i < parts.length; i++) {
@@ -89,7 +89,7 @@ function setNestedValue(obj: Record<string, any>, pathStr: string, value: any) {
           current[part] = {};
         }
         // Step down into the next level of the object for the next iteration.
-        current = current[part];
+        current = current[part] as Record<string, unknown>;
       }
     }
   }
@@ -107,6 +107,7 @@ export class LocalizationService {
     this.localesPath = localesPath;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private validateAuthContext(_authContext?: AuthContext): void {
     // No-op - translations available to all users including unauthenticated.
     // We still have a validateAuthContext method to enforce the pattern that
@@ -138,7 +139,7 @@ export class LocalizationService {
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8');
       return JSON.parse(content);
-    } catch (error) {
+    } catch {
       // Return empty object if file doesn't exist or is malformed (i18next will handle fallbacks)
       return {};
     }
@@ -192,10 +193,10 @@ export class LocalizationService {
     const current = previous.then(async () => {
       // Re-read file at the moment we have the lock, merging any changes
       // written by earlier callers.
-      let missingKeys: Record<string, any> = {};
+      let missingKeys: Record<string, unknown> = {};
       try {
         const content = await fs.promises.readFile(missingFilePath, 'utf-8');
-        missingKeys = JSON.parse(content);
+        missingKeys = JSON.parse(content) as Record<string, unknown>;
       } catch {
         // File doesn't exist yet. That's not an error. We'll create it later.
       }

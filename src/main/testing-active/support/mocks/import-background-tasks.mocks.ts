@@ -21,14 +21,12 @@ import log from 'electron-log/main';
  *                     Otherwise, it will be treated as raw content.
  */
 export function createMockDownloadJsonGzStream(
-  dataSource: string
-): (
-  abortSignal?: AbortSignal,
-  dateFileSpec?: unknown
-) => Promise<NodeJS.ReadableStream> {
+  dataSource: string,
+): (abortSignal?: AbortSignal, dateFileSpec?: unknown) => Promise<NodeJS.ReadableStream> {
   return async function mockDownloadJsonGzStream(
     abortSignal?: AbortSignal,
-    _dateFileSpec?: unknown
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _dateFileSpec?: unknown,
   ): Promise<NodeJS.ReadableStream> {
     return new Promise((resolve, reject) => {
       try {
@@ -46,8 +44,7 @@ export function createMockDownloadJsonGzStream(
         // Create a stream from the content
         const contentStream: Readable = Readable.from([jsonContent]);
         const gzipStream: zlib.Gzip = zlib.createGzip();
-        const compressedStream: NodeJS.ReadableStream =
-          contentStream.pipe(gzipStream);
+        const compressedStream: NodeJS.ReadableStream = contentStream.pipe(gzipStream);
 
         // Handle abort
         if (abortSignal) {
@@ -85,12 +82,10 @@ export function createMockDownloadJsonGzStream(
  *                     Otherwise, it will be treated as raw content.
  */
 export function createMockDownloadCsvStream(
-  dataSource: string
-): (
-  abortSignal?: AbortSignal
-) => Promise<NodeJS.ReadableStream> {
+  dataSource: string,
+): (abortSignal?: AbortSignal) => Promise<NodeJS.ReadableStream> {
   return async function mockDownloadCsvStream(
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
   ): Promise<NodeJS.ReadableStream> {
     return new Promise((resolve, reject) => {
       try {

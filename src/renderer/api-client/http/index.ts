@@ -8,7 +8,7 @@ import { HttpMovieApi } from './movies';
 import { HttpSettingsApi } from './settings';
 
 class HttpApiClient implements ApiClient {
-  private eventListeners: Map<string, Set<(data: any) => void>> = new Map();
+  private eventListeners: Map<string, Set<(data: unknown) => void>> = new Map();
   private ws: WebSocket | null = null;
 
   app = new HttpAppApi();
@@ -16,7 +16,7 @@ class HttpApiClient implements ApiClient {
   movies = new HttpMovieApi();
   settings = new HttpSettingsApi();
 
-  on(eventType: string, callback: (data: any) => void): void {
+  on(eventType: string, callback: (data: unknown) => void): void {
     if (!this.eventListeners.has(eventType)) {
       this.eventListeners.set(eventType, new Set());
     }
@@ -27,7 +27,7 @@ class HttpApiClient implements ApiClient {
     }
   }
 
-  off(eventType: string, callback: (data: any) => void): void {
+  off(eventType: string, callback: (data: unknown) => void): void {
     const listeners = this.eventListeners.get(eventType);
     if (listeners) {
       listeners.delete(callback);
@@ -50,7 +50,7 @@ class HttpApiClient implements ApiClient {
         const { type, data } = JSON.parse(event.data);
         const listeners = this.eventListeners.get(type);
         if (listeners) {
-          listeners.forEach(callback => callback(data));
+          listeners.forEach((callback) => callback(data));
         }
       } catch (error) {
         log.error('Failed to parse WebSocket message:', error);

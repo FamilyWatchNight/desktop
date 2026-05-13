@@ -1,5 +1,3 @@
- 
-
 function waitFor(cond: () => boolean, timeout = 2000): Promise<void> {
   return new Promise((resolve, reject) => {
     const start = Date.now();
@@ -15,18 +13,23 @@ function waitFor(cond: () => boolean, timeout = 2000): Promise<void> {
   });
 }
 
+interface MockTaskContext {
+  reportProgress(progress: { current: number; max: number; description: string }): void;
+  isCancelled(): boolean;
+}
+
 function makeMockTask(duration = 100, supportsCancel = false) {
   return class {
     static get label() {
       return 'Mock Task';
     }
-    async runTask(_args: Record<string, unknown>, context: any) {
+    async runTask(_args: Record<string, unknown>, context: MockTaskContext) {
       context.reportProgress({ current: 0, max: 2, description: 'start' });
       const start = Date.now();
       while (Date.now() - start < duration) {
         if (supportsCancel && context.isCancelled()) return;
         // small delay
-         
+
         await new Promise((r) => setTimeout(r, 10));
       }
       context.reportProgress({ current: 2, max: 2, description: 'done' });
@@ -43,10 +46,15 @@ describe('background-task-manager', () => {
 
   test('enqueue starts and completes a task', async () => {
     const MockA = makeMockTask(50, false);
-    jest.doMock('../../src/main/tasks/task-registry', () => ({ TASK_REGISTRY: { 'test-a': MockA } }));
+    jest.doMock('../../src/main/tasks/task-registry', () => ({
+      TASK_REGISTRY: { 'test-a': MockA },
+    }));
+    type BackgroundTaskState = { queue: Array<{ id: string }>; active: { status: string } | null };
+    // Use require() here instead of importing at the top because we need to mock before loading the module
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const manager = require('../../src/main/background-task-manager');
-    const states: any[] = [];
-    manager.setNotifyFn((s: any) => states.push(s));
+    const states: BackgroundTaskState[] = [];
+    manager.setNotifyFn((s: BackgroundTaskState) => states.push(s));
 
     const res = manager.enqueue('test-a', {});
     expect(res.success).toBe(true);
@@ -55,17 +63,24 @@ describe('background-task-manager', () => {
     await waitFor(() => states.some((st) => st.queue.length === 0 && st.active === null), 3000);
 
     const hadRunning = states.some((st) => st.active && st.active.status === 'running');
-    const hadCompleted = states.some((st) => st.active && st.active.status === 'completed') || states.some((st) => st.active === null && st.queue.length === 0);
+    const hadCompleted =
+      states.some((st) => st.active && st.active.status === 'completed') ||
+      states.some((st) => st.active === null && st.queue.length === 0);
     expect(hadRunning).toBe(true);
     expect(hadCompleted).toBe(true);
   });
 
   test('cancelActive sets active to cancelled', async () => {
     const MockB = makeMockTask(200, true);
-    jest.doMock('../../src/main/tasks/task-registry', () => ({ TASK_REGISTRY: { 'test-b': MockB } }));
+    jest.doMock('../../src/main/tasks/task-registry', () => ({
+      TASK_REGISTRY: { 'test-b': MockB },
+    }));
+    type BackgroundTaskState = { queue: Array<{ id: string }>; active: { status: string } | null };
+    // Use require() here instead of importing at the top because we need to mock before loading the module
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const manager = require('../../src/main/background-task-manager');
-    const states: any[] = [];
-    manager.setNotifyFn((s: any) => states.push(s));
+    const states: BackgroundTaskState[] = [];
+    manager.setNotifyFn((s: BackgroundTaskState) => states.push(s));
 
     const res = manager.enqueue('test-b', {});
     expect(res.success).toBe(true);
@@ -83,10 +98,15 @@ describe('background-task-manager', () => {
   test('removeQueued removes a queued task', async () => {
     const MockA2 = makeMockTask(200, true);
     const MockB2 = makeMockTask(200, true);
-    jest.doMock('../../src/main/tasks/task-registry', () => ({ TASK_REGISTRY: { 'test-a': MockA2, 'test-b': MockB2 } }));
+    jest.doMock('../../src/main/tasks/task-registry', () => ({
+      TASK_REGISTRY: { 'test-a': MockA2, 'test-b': MockB2 },
+    }));
+    type BackgroundTaskState = { queue: Array<{ id: string }>; active: { status: string } | null };
+    // Use require() here instead of importing at the top because we need to mock before loading the module
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const manager = require('../../src/main/background-task-manager');
-    const states: any[] = [];
-    manager.setNotifyFn((s: any) => states.push(s));
+    const states: BackgroundTaskState[] = [];
+    manager.setNotifyFn((s: BackgroundTaskState) => states.push(s));
 
     const r1 = manager.enqueue('test-a', {});
     expect(r1.success).toBe(true);
@@ -95,12 +115,12 @@ describe('background-task-manager', () => {
 
     // ensure second is queued
     await waitFor(() => manager.getState().queue.length >= 1, 1000);
-    const queued = manager.getState().queue.map((q: any) => q.id);
+    const queued = manager.getState().queue.map((q: { id: string }) => q.id);
     expect(queued).toContain(r2.taskId);
 
     const removeRes = manager.removeQueued(r2.taskId as string);
     expect(removeRes.success).toBe(true);
-    const q2 = manager.getState().queue.map((q: any) => q.id);
+    const q2 = manager.getState().queue.map((q: { id: string }) => q.id);
     expect(q2).not.toContain(r2.taskId);
   });
 });

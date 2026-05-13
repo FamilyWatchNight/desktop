@@ -14,7 +14,7 @@ export function setWindow(window: BrowserWindow): void {
   mainWindow = window;
 }
 
-export function broadcast(eventType: string, data: any): void {
+export function broadcast(eventType: string, data: unknown): void {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send(eventType, data);
   }
