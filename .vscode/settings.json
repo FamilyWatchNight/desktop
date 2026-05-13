@@ -1,4 +1,13 @@
 {
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+
+  "files.eol": "\n",
   "debug.node.autoAttach": "on",
   "debug.onTaskErrors": "prompt",
   "[javascript]": {
@@ -16,12 +25,8 @@
   "playwright.env": {
     "NODE_ENV": "test"
   },
-  "cucumber.glue": [
-    "tests/bdd/business-logic/steps/**/*.steps.ts",
-  ],
-  "cucumber.features": [
-    "tests/bdd/business-logic/features/**/*.feature",
-  ],
+  "cucumber.glue": ["tests/bdd/business-logic/steps/**/*.steps.ts"],
+  "cucumber.features": ["tests/bdd/business-logic/features/**/*.feature"],
   "files.watcherExclude": {
     "**/node_modules/**": true
   },
@@ -32,9 +37,7 @@
     "NODE_ENV": "test"
   },
   "git.enableCommitSigning": true,
-  "i18n-ally.localesPaths": [
-    "assets/locales"
-  ],
+  "i18n-ally.localesPaths": ["assets/locales"],
   "i18n-ally.dirStructure": "dir",
   "i18n-ally.keystyle": "nested",
   "i18n-ally.namespace": true,
