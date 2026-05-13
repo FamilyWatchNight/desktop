@@ -1,7 +1,7 @@
 export async function callApi(path: string, options: RequestInit = {}) {
   const res = await fetch(path, {
     headers: { 'Content-Type': 'application/json' },
-    ...options
+    ...options,
   });
   const json = await res.json();
   if (!json.success) {

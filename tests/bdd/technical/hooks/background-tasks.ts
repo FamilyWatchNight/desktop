@@ -24,37 +24,60 @@ export class BackgroundTasks {
   /**
    * Enqueue a background task
    */
-  async enqueue(taskType: string, args?: Record<string, unknown>, authContext?: AuthContextPayload): Promise<unknown> {
-    return await withTestHooks(this.app, async (hooks, taskType, args, authContext) => {
-      return hooks.backgroundTasks.enqueue(taskType, args, authContext);
-    }, taskType, args, authContext);
+  async enqueue(
+    taskType: string,
+    args?: Record<string, unknown>,
+    authContext?: AuthContextPayload,
+  ): Promise<unknown> {
+    return await withTestHooks(
+      this.app,
+      async (hooks, taskType, args, authContext) => {
+        return hooks.backgroundTasks.enqueue(taskType, args, authContext);
+      },
+      taskType,
+      args,
+      authContext,
+    );
   }
 
   /**
    * Get the current background task state
    */
   async getState(authContext?: AuthContextPayload): Promise<{ active: unknown; queue: unknown[] }> {
-    return await withTestHooks(this.app, async (hooks, authContext) => {
-      return hooks.backgroundTasks.getState(authContext);
-    }, authContext);
+    return await withTestHooks(
+      this.app,
+      async (hooks, authContext) => {
+        return hooks.backgroundTasks.getState(authContext);
+      },
+      authContext,
+    );
   }
 
   /**
    * Cancel the active background task
    */
   async cancelActive(authContext?: AuthContextPayload): Promise<unknown> {
-    return await withTestHooks(this.app, async (hooks, authContext) => {
-      return hooks.backgroundTasks.cancelActive(authContext);
-    }, authContext);
+    return await withTestHooks(
+      this.app,
+      async (hooks, authContext) => {
+        return hooks.backgroundTasks.cancelActive(authContext);
+      },
+      authContext,
+    );
   }
 
   /**
    * Remove a queued background task
    */
   async removeQueued(taskId: string, authContext?: AuthContextPayload): Promise<unknown> {
-    return await withTestHooks(this.app, async (hooks, taskId, authContext) => {
-      return hooks.backgroundTasks.removeQueued(taskId, authContext);
-    }, taskId, authContext);
+    return await withTestHooks(
+      this.app,
+      async (hooks, taskId, authContext) => {
+        return hooks.backgroundTasks.removeQueued(taskId, authContext);
+      },
+      taskId,
+      authContext,
+    );
   }
 
   /**
@@ -70,27 +93,45 @@ export class BackgroundTasks {
    * Control active mock task progress
    */
   async setTaskProgress(current: number, max: number, description: string): Promise<void> {
-    return await withTestHooks(this.app, async (hooks, current, max, description) => {
-      hooks.testTasks.setTaskProgress(current, max, description);
-    }, current, max, description);
+    return await withTestHooks(
+      this.app,
+      async (hooks, current, max, description) => {
+        hooks.testTasks.setTaskProgress(current, max, description);
+      },
+      current,
+      max,
+      description,
+    );
   }
 
   async setTaskDescription(description: string): Promise<void> {
-    return await withTestHooks(this.app, async (hooks, description) => {
-      hooks.testTasks.setTaskDescription(description);
-    }, description);
+    return await withTestHooks(
+      this.app,
+      async (hooks, description) => {
+        hooks.testTasks.setTaskDescription(description);
+      },
+      description,
+    );
   }
 
   async setTaskCurrent(current: number): Promise<void> {
-    return await withTestHooks(this.app, async (hooks, current) => {
-      hooks.testTasks.setTaskCurrent(current);
-    }, current);
+    return await withTestHooks(
+      this.app,
+      async (hooks, current) => {
+        hooks.testTasks.setTaskCurrent(current);
+      },
+      current,
+    );
   }
 
   async setTaskMax(max: number): Promise<void> {
-    return await withTestHooks(this.app, async (hooks, max) => {
-      hooks.testTasks.setTaskMax(max);
-    }, max);
+    return await withTestHooks(
+      this.app,
+      async (hooks, max) => {
+        hooks.testTasks.setTaskMax(max);
+      },
+      max,
+    );
   }
 
   async completeTask(): Promise<void> {
@@ -98,6 +139,4 @@ export class BackgroundTasks {
       hooks.testTasks.completeTask();
     });
   }
-
 }
-

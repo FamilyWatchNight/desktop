@@ -17,21 +17,21 @@ export class Database {
     this.app = app;
   }
 
-    async initMockDatabase(): Promise<void> {
-      await withTestHooks(this.app, async (hooks) => {
-        return hooks.db.initMockDatabase();
-      });
-    }
-  
-    async closeDatabase(): Promise<void> {
-      await withTestHooks(this.app, async (hooks) => {
-        return hooks.db.closeDatabase();
-      });
-    }
-
-    async getStatus(): Promise<{ dbInitialized: boolean; dbConnected: boolean }> {
-      return await withTestHooks(this.app, async (hooks) => {
-        return hooks.db.getStatus();
-      });
-    }
+  async initMockDatabase(): Promise<void> {
+    await withTestHooks(this.app, async (hooks) => {
+      return hooks.db.initMockDatabase();
+    });
   }
+
+  async closeDatabase(): Promise<void> {
+    await withTestHooks(this.app, async (hooks) => {
+      return hooks.db.closeDatabase();
+    });
+  }
+
+  async getStatus(): Promise<{ dbInitialized: boolean; dbConnected: boolean }> {
+    return await withTestHooks(this.app, async (hooks) => {
+      return hooks.db.getStatus();
+    });
+  }
+}

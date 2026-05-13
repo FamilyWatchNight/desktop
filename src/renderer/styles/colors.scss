@@ -1,4 +1,4 @@
-@use "sass:color";
+@use 'sass:color';
 
 $hue-angle: 20;
 
@@ -46,11 +46,16 @@ $core-coral: hsl($hue-coral, $saturation-core, $lightness-core);
 @function make-gradient($core-color) {
   $highlight-color: make-highlight-color($core-color);
   $shadow-color: make-shadow-color($core-color);
-  @return linear-gradient($gradient-angle, $highlight-color 0%, $core-color 50%, $shadow-color 100%);
+  @return linear-gradient(
+    $gradient-angle,
+    $highlight-color 0%,
+    $core-color 50%,
+    $shadow-color 100%
+  );
 }
 
 /* Original colors, before "Enchanted Theater" palette update */
-$background-color: #000000BB;
+$background-color: #000000bb;
 $text-color: #e0e0e0;
 
 $primary-color: $core-gold;

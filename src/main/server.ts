@@ -16,13 +16,11 @@ import RateLimit from 'express-rate-limit';
 
 import { registerHttpRoutes, initializeWebSocketServer } from './api-server';
 
-
 const isDevMode = !app.isPackaged;
 const rootDir = app.getAppPath();
 const publicPath = path.join(rootDir, 'dist', 'renderer');
 
 export function startServer(app: Express, port: number): ReturnType<Express['listen']> {
-
   // set up rate limiter: maximum of five requests per minute
   const limiter = RateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
@@ -47,10 +45,7 @@ export function startServer(app: Express, port: number): ReturnType<Express['lis
     try {
       let html = fs.readFileSync(indexPath, 'utf-8');
       if (isDevMode) {
-        html = html.replace(
-          '</head>',
-          '<script>window.isDevMode = true;</script></head>'
-        );
+        html = html.replace('</head>', '<script>window.isDevMode = true;</script></head>');
       }
       res.send(html);
     } catch (err) {

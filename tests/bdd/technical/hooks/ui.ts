@@ -24,13 +24,12 @@ export class UI {
       const page = await browser.newPage();
 
       const webPort = await withTestHooks(this.app, async (hooks) => {
-        return await hooks.settings.get("webPort") || 3000;
+        return (await hooks.settings.get('webPort')) || 3000;
       });
 
       await page.goto(`http://localhost:${webPort}`);
       return { page, browser };
-    }
-    else {
+    } else {
       await withTestHooks(this.app, async (hooks) => {
         await hooks.ui.openMainWindow();
       });

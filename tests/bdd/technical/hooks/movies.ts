@@ -26,44 +26,74 @@ export class Movies {
    * Get all movies from the database via the electron API
    */
   async getAllMovies(authContext?: AuthContextPayload): Promise<MovieData[]> {
-    return await withTestHooks(this.app, async (hooks, authContext) => {
-      return hooks.movies.getAll(authContext);
-    }, authContext);
+    return await withTestHooks(
+      this.app,
+      async (hooks, authContext) => {
+        return hooks.movies.getAll(authContext);
+      },
+      authContext,
+    );
   }
 
   /**
    * Get a movie by its database ID
    */
   async getMovieById(id: number, authContext?: AuthContextPayload): Promise<MovieData | undefined> {
-    return await withTestHooks(this.app, async (hooks, id, authContext) => {
-      return hooks.movies.getById(id, authContext);
-    }, id, authContext);
+    return await withTestHooks(
+      this.app,
+      async (hooks, id, authContext) => {
+        return hooks.movies.getById(id, authContext);
+      },
+      id,
+      authContext,
+    );
   }
 
   /**
    * Get a movie by its TMDB ID
    */
-  async getMovieByTmdbId(tmdbId: string, authContext?: AuthContextPayload): Promise<MovieData | undefined> {
-    return await withTestHooks(this.app, async (hooks, tmdbId, authContext) => {
-      return hooks.movies.getByTmdbId(tmdbId, authContext);
-    }, tmdbId, authContext);
+  async getMovieByTmdbId(
+    tmdbId: string,
+    authContext?: AuthContextPayload,
+  ): Promise<MovieData | undefined> {
+    return await withTestHooks(
+      this.app,
+      async (hooks, tmdbId, authContext) => {
+        return hooks.movies.getByTmdbId(tmdbId, authContext);
+      },
+      tmdbId,
+      authContext,
+    );
   }
 
   /**
    * Get a movie by its Watchmode ID
    */
-  async getMovieByWatchmodeId(watchmodeId: string, authContext?: AuthContextPayload): Promise<MovieData | undefined> {
-    return await withTestHooks(this.app, async (hooks, watchmodeId, authContext) => {
-      return hooks.movies.getByWatchmodeId(watchmodeId, authContext);
-    }, watchmodeId, authContext);
+  async getMovieByWatchmodeId(
+    watchmodeId: string,
+    authContext?: AuthContextPayload,
+  ): Promise<MovieData | undefined> {
+    return await withTestHooks(
+      this.app,
+      async (hooks, watchmodeId, authContext) => {
+        return hooks.movies.getByWatchmodeId(watchmodeId, authContext);
+      },
+      watchmodeId,
+      authContext,
+    );
   }
 
   /**
    * Search for movies by title
    */
   async searchByTitle(searchTerm: string, authContext?: AuthContextPayload): Promise<MovieData[]> {
-    return await withTestHooks(this.app, async (hooks, searchTerm, authContext) => {
-      return hooks.movies.searchByTitle(searchTerm, authContext);
-    }, searchTerm, authContext);
+    return await withTestHooks(
+      this.app,
+      async (hooks, searchTerm, authContext) => {
+        return hooks.movies.searchByTitle(searchTerm, authContext);
+      },
+      searchTerm,
+      authContext,
+    );
   }
 }

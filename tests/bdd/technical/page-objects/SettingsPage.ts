@@ -11,10 +11,12 @@ export class SettingsPage extends BasePage {
     importWatchmodeButton: '[data-testid="settings-import-watchmode-button"]',
     importTmdbButton: '[data-testid="settings-import-tmdb-button"]',
     statusMessage: '[data-testid="settings-status-message"]',
-    backgroundTaskMessage: '[data-testid="settings-background-task-message"]'
+    backgroundTaskMessage: '[data-testid="settings-background-task-message"]',
   };
 
-  async getTextForSetting(key: 'webPort' | 'watchmodeApiKey' | 'tmdbApiKey'): Promise<string | null> {
+  async getTextForSetting(
+    key: 'webPort' | 'watchmodeApiKey' | 'tmdbApiKey',
+  ): Promise<string | null> {
     const selectorKey = `${key}Input` as keyof typeof this.selectors;
     const selector = this.selectors[selectorKey];
     if (!selector) {
@@ -31,7 +33,7 @@ export class SettingsPage extends BasePage {
     return this.getText('watchmodeApiKeyInput');
   }
 
-  async getTmdbApiKey(): Promise<string | null> { 
+  async getTmdbApiKey(): Promise<string | null> {
     return this.getText('tmdbApiKeyInput');
-  }   
+  }
 }

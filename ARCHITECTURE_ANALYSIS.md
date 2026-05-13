@@ -13,21 +13,27 @@ The testing infrastructure uses a three-layer BDD architecture to verify busines
 Located in `src/main/services/`, services are stateless, framework-agnostic classes that encapsulate core business logic. Full method signatures are available in the source code; this section describes key responsibilities and patterns.
 
 ### **MovieService**
+
 - **Responsibility**: Movie CRUD operations and search
 
 ### **SettingsService**
+
 - **Responsibility**: Application settings persistence
 
 ### **BackgroundTaskService**
+
 - **Responsibility**: Long-running asynchronous task coordination and progress reporting
 
 ### **UserService**
+
 - **Responsibility**: User authentication and profile management
 
 ### **RoleService**
+
 - **Responsibility**: Role-based access control (RBAC): create, update, delete roles and manage permission assignments
 
 ### **LocalizationService**
+
 - **Responsibility**: Multi-language translation file management
 - **Key Details** (security-critical pattern):
   - **File I/O with security validation**: Uses `assertPathInsideAllowedDirs()` to prevent path traversal
@@ -42,6 +48,7 @@ Located in `src/main/services/`, services are stateless, framework-agnostic clas
 The main process orchestrates the entire application. Key files and their roles:
 
 ### **[index.ts](index.ts)** - Application Entry Point
+
 ```
 app.on('ready'):
   1. Initialize i18n with locale (test/dev/app.getLocale())
@@ -51,10 +58,12 @@ app.on('ready'):
   5. Register IPC handlers
   6. Start HTTP server on configured port
 ```
+
 - **Tray integration**: Double-click/click to focus window, quit option
 - **Test mode**: Sets `app.testHooks` for integration testing when NODE_ENV=test
 
 ### **[window-manager.ts](window-manager.ts)** - Window Lifecycle
+
 - Singleton pattern: reuses existing window if not destroyed
 - Creates BrowserWindow with:
   - Context isolation + preload script for security
@@ -63,7 +72,9 @@ app.on('ready'):
 - Sends updates via `mainWindow.webContents.send('background-task-update', ...)`
 
 ### **[preload.ts](preload.ts)** - IPC Surface Definition
+
 Defines and exposes all available IPC channels via `contextBridge`:
+
 ```typescript
 window.electron = {
   app: { getAppVersion, getAppLocale, getServerPort, ... },
@@ -72,11 +83,13 @@ window.electron = {
   settings: { loadSettings, saveSettings, ... }
 }
 ```
+
 - **Security model**: contextBridge prevents renderer from accessing full Node.js API
 - **Dual mode**: Each method maps to an ipcRenderer.invoke() call
 - **Test mode**: When NODE_ENV=test, exposes `window.testApi` for test hooks
 
 ### **[server.ts](server.ts)** - Express Server Setup
+
 - **Security layers**:
   1. Rate limiting: 100 requests/minute per client
   2. Host validation: only accepts localhost or 127.0.0.1 (prevents DNS rebind attacks)
@@ -88,6 +101,7 @@ window.electron = {
 - **Port**: Configurable via settings (default 3000)
 
 ### **[database.ts](database.ts)** - SQLite Management
+
 - **Platform-specific app data paths**:
   - Windows: `%APPDATA%/FamilyWatchNight/sqlite/`
   - macOS: `~/Library/Application Support/FamilyWatchNight/sqlite/`
@@ -100,13 +114,17 @@ window.electron = {
 - **Exports**: `initDatabase()`, `initMockDatabase()`, `getModels()`, `closeDatabase()`
 
 ### **[api-server.ts](api-server.ts)** - Re-export Hub
+
 Simple barrel file re-exporting HTTP and IPC handler registration functions:
+
 ```typescript
-export { registerHttpRoutes, registerAppRoutes, registerIpcHandlers }
+export { registerHttpRoutes, registerAppRoutes, registerIpcHandlers };
 ```
+
 Used by `index.ts` to cleanly register all handlers.
 
 ### **[api-server/ipc/index.ts](api-server/ipc/index.ts)** - IPC Orchestrator
+
 - Removes all handlers before re-registering (idempotent, safe for reloads)
 - Imports and chains handler registration:
   - `registerAppIpcHandlers()`
@@ -116,6 +134,7 @@ Used by `index.ts` to cleanly register all handlers.
 - **Test mode**: Registers `test:get-db-status` handler when NODE_ENV=test
 
 ### **[api-server/http/index.ts](api-server/http/index.ts)** - HTTP Orchestrator
+
 ```typescript
 registerHttpRoutes(app: Express) {
   registerAppRoutes(app)
@@ -124,32 +143,37 @@ registerHttpRoutes(app: Express) {
   registerSettingsRoutes(app)
 }
 ```
+
 Each function adds routes to the Express app using the centralized service instances.
 
 ### **[background-task-manager.ts](background-task-manager.ts)** - Task Queue Engine
+
 Manages task lifecycle without using a queue library:
+
 ```
 State machine:
   • queue: [] (pending tasks)
   • active: null (running)
-  
+
 enqueue() → adds to queue, starts processing if idle
 processQueue() → takes first queued task, sets as active
 runTask() → executes with TaskContext (progress reporting, cancellation)
   When complete → active = null → processQueue() (runs next queued task)
 ```
+
 - **Progress reporting**: Tasks call `context.reportProgress({current, max, description})`
 - **Cancellation**: Active task can be cancelled, next task starts immediately
 - **Notifications**: Calls `notifyFn()` on state changes (observed by window-manager)
 
 ### **[ipc-handlers.ts](ipc-handlers.ts)** - LEGACY
+
 This file is being refactored into modular handlers. Currently contains duplicated Movie/Settings/BackgroundTask handlers that should migrate to `api-server/ipc/` structure.
 
 ---
 
 ## 3. Testing Architecture
 
-Family Watch Night uses a **three-layer BDD architecture** inspired by *BDD in Action* to separate business-facing test scenarios from technical implementation details:
+Family Watch Night uses a **three-layer BDD architecture** inspired by _BDD in Action_ to separate business-facing test scenarios from technical implementation details:
 
 1. **Business Logic Layer** (`tests/bdd/business-logic/`): Feature files and step definitions expressing business scenarios in domain language
 2. **Business Flow Layer** (`tests/bdd/business-flow/personas/`): Persona classes (e.g., `InternalSystemPersona`) that translate domain intent into actionable steps
@@ -194,6 +218,7 @@ Family Watch Night uses a **three-layer BDD architecture** inspired by *BDD in A
 - **Test hook** (`src/main/testing-active/TestHooksImpl.ts`): Executes the actual `roleService.create()`
 
 This layering ensures that:
+
 - Personas provide a stable API for step definitions
 - Technical implementation changes don't break step definitions
 - State is centralized and scenario-scoped
@@ -206,25 +231,29 @@ This layering ensures that:
 The renderer is a React SPA that communicates with services via the dual API layer.
 
 ### **[App.tsx](src/renderer/App.tsx)** - Root Component
+
 ```typescript
 export default function App() {
   return <AppLayout />
 }
 ```
+
 Simple render of main layout component.
 
 ### **[AppLayout.tsx](src/renderer/components/AppLayout.tsx)** - Main Layout Container
+
 - **API Client**: `createApiClient()` factory instantiates IPC or HTTP client
 - **State**:
   - `currentPage`: home, settings, background-tasks
   - `activeTask`, `queue`: background task state
   - `menuOpen`: hamburger menu state
-- **Lifecycle**: 
+- **Lifecycle**:
   1. On mount: fetches initial background task state via `apiClient.backgroundTasks.getBackgroundTasks()`
   2. Subscribes to updates via `apiClient.backgroundTasks.onBackgroundTaskUpdate(callback)`
 - **Pages**: HomePage, SettingsPage, BackgroundTasksPage (imported conditionally)
 
 ### UI Automation Selectors
+
 - The renderer should assign stable `data-testid` attributes to all actionable and focusable UI controls.
 - Use `data-testid` for controls such as buttons, menu items, links, inputs, tabs, and dialog actions.
 - Add page root identifiers for page validation, for example `data-testid="page-home"` and `data-testid="page-settings"`.
@@ -232,45 +261,55 @@ Simple render of main layout component.
 - This pattern is part of regular UI development and enables Playwright page objects and test automation to remain stable across locales.
 
 ### **[api-client/index.ts](src/renderer/api-client/index.ts)** - Transport Selection
+
 ```typescript
 function createApiClient(): ApiClient {
   if (typeof window !== 'undefined' && (window as any).electron) {
-    return (window as any).electron  // IPC mode: use preload-exposed API
+    return (window as any).electron; // IPC mode: use preload-exposed API
   }
-  return createHttpApiClient()  // HTTP mode: direct REST calls
+  return createHttpApiClient(); // HTTP mode: direct REST calls
 }
 ```
+
 **This is the key architectural pattern**: Same interface, two backends. Enables:
+
 - Electron app's window communicates via IPC
 - The same UI is available to remote browsers or future mobile APPs over HTTP
 
 ### **[api-client/http/index.ts](src/renderer/api-client/http/index.ts)** - HTTP Adapter
+
 Implements `ApiClient` interface using `fetch()` to make HTTP calls:
+
 ```typescript
 export function createHttpApiClient(): ApiClient {
   return {
     app: new HttpAppApi(),
     backgroundTasks: new HttpBackgroundTaskApi(),
     movies: new HttpMovieApi(),
-    settings: new HttpSettingsApi()
-  }
+    settings: new HttpSettingsApi(),
+  };
 }
 ```
+
 Each class contains methods like `getAll()` that `fetch('/api/movies')`.
 
 ### **[api-client/types.ts](src/renderer/api-client/types.ts)** - API Contract
+
 Defines TypeScript interface that both IPC and HTTP implementations must satisfy:
+
 ```typescript
 interface ApiClient {
-  app: AppApi
-  backgroundTasks: BackgroundTasksApi
-  movies: MoviesApi
-  settings: SettingsApi
+  app: AppApi;
+  backgroundTasks: BackgroundTasksApi;
+  movies: MoviesApi;
+  settings: SettingsApi;
 }
 ```
+
 Forces consistency between both adapters.
 
 ### **Other Components**
+
 - **HomePage.tsx** - Movie list/search, likely imports tasks
 - **SettingsPage.tsx** - Application settings UI
 - **BackgroundTasksPage.tsx** - Task queue visualization
@@ -280,12 +319,15 @@ Forces consistency between both adapters.
 ## 5. Database
 
 ### **Storage Location**
+
 Platform-specific standard locations stored by `database.ts`:
+
 - Windows: `%APPDATA%\FamilyWatchNight\sqlite\FamilyWatchNight.db`
 - macOS: `~/Library/Application Support/FamilyWatchNight/sqlite/FamilyWatchNight.db`
 - Linux: `~/.config/FamilyWatchNight/sqlite/FamilyWatchNight.db`
 
 ### **Migrations** (`src/main/db/migrations/`)
+
 - Run sequentially at startup via `runMigrations()` in database.ts
 - Each migration is read as raw SQL and executed with `db.exec(sql)`
 - Migrations are idempotent (use CREATE TABLE IF NOT EXISTS)
@@ -293,11 +335,13 @@ Platform-specific standard locations stored by `database.ts`:
 ### **Models** (`src/main/db/models/`)
 
 **Pattern**: One TypeScript class per table, encapsulating all SQL operations using prepared statements. All models follow consistent patterns:
+
 - **Performance**: Pre-compiled prepared statements with `?` placeholders
 - **Type conversion**: SQLite stores numbers and booleans; models convert to/from TypeScript types
 - **Query methods**: `create()`, `getById()`, `getAll()`, `update()`, `delete()` with table-specific queries as needed
 
 **Current models**:
+
 - **Users**: User accounts and authentication state
 - **UserProfiles**: Extended user data (display name, profile image)
 - **Movies**: Movie catalog with TMDB/Watchmode IDs
@@ -316,6 +360,7 @@ In-memory SQLite (`Database(':memory:')`) enables fast test execution without fi
 The architecture reflects a core principle: **Business logic lives in services, exposure is decoupled.**
 
 ### **Parallel Architecture**
+
 ```
 Services (Business Logic)
     ↑
@@ -327,60 +372,79 @@ Services (Business Logic)
 ### **HTTP Route Pattern** (`api-server/http/*.ts`)
 
 Example from [movies.ts](src/main/api-server/http/movies.ts):
+
 ```typescript
-const movieService = new MovieService()
+const movieService = new MovieService();
 
 export function registerMovieRoutes(app: Express) {
-  app.post('/api/movies', route((req) => movieService.create(req.body)))
-  app.get('/api/movies/:id', route((req) => movieService.getById(Number(req.params.id))))
-  app.get('/api/movies', route((req) => 
-    req.query.searchTerm 
-      ? movieService.searchByTitle(String(req.query.searchTerm))
-      : movieService.getAll()
-  ))
-  app.put('/api/movies/:id', route((req) => ({
-    success: movieService.update(Number(req.params.id), req.body)
-  })))
-  app.delete('/api/movies/:id', route((req) => ({
-    success: movieService.delete(Number(req.params.id))
-  })))
+  app.post(
+    '/api/movies',
+    route((req) => movieService.create(req.body)),
+  );
+  app.get(
+    '/api/movies/:id',
+    route((req) => movieService.getById(Number(req.params.id))),
+  );
+  app.get(
+    '/api/movies',
+    route((req) =>
+      req.query.searchTerm
+        ? movieService.searchByTitle(String(req.query.searchTerm))
+        : movieService.getAll(),
+    ),
+  );
+  app.put(
+    '/api/movies/:id',
+    route((req) => ({
+      success: movieService.update(Number(req.params.id), req.body),
+    })),
+  );
+  app.delete(
+    '/api/movies/:id',
+    route((req) => ({
+      success: movieService.delete(Number(req.params.id)),
+    })),
+  );
 }
 ```
 
 The `route()` wrapper:
+
 ```typescript
 function route(handler: (req: Request) => any) {
   return async (req: Request, res: Response) => {
     try {
-      const result = await handler(req)
-      res.json(result)
+      const result = await handler(req);
+      res.json(result);
     } catch (error) {
-      res.status(500).json({ error: (error as Error).message })
+      res.status(500).json({ error: (error as Error).message });
     }
-  }
+  };
 }
 ```
+
 Provides consistent error handling across all routes.
 
 ### **IPC Handler Pattern** (`api-server/ipc/*.ts`)
 
 Example from [movies.ts](src/main/api-server/ipc/movies.ts):
+
 ```typescript
-const movieService = new MovieService()
+const movieService = new MovieService();
 
 export function registerMovieIpcHandlers() {
-  ipcMain.handle('movies-create', (_event, movieData) => movieService.create(movieData))
-  ipcMain.handle('movies-get-by-id', (_event, id) => movieService.getById(id))
-  ipcMain.handle('movies-get-all', () => movieService.getAll())
-  ipcMain.handle('movies-search-by-title', (_event, searchTerm) => 
-    movieService.searchByTitle(searchTerm)
-  )
+  ipcMain.handle('movies-create', (_event, movieData) => movieService.create(movieData));
+  ipcMain.handle('movies-get-by-id', (_event, id) => movieService.getById(id));
+  ipcMain.handle('movies-get-all', () => movieService.getAll());
+  ipcMain.handle('movies-search-by-title', (_event, searchTerm) =>
+    movieService.searchByTitle(searchTerm),
+  );
   ipcMain.handle('movies-update', (_event, id, movieData) => ({
-    success: movieService.update(id, movieData)
-  }))
+    success: movieService.update(id, movieData),
+  }));
   ipcMain.handle('movies-delete', (_event, id) => ({
-    success: movieService.delete(id)
-  }))
+    success: movieService.delete(id),
+  }));
 }
 ```
 
@@ -389,12 +453,13 @@ export function registerMovieIpcHandlers() {
 ### **Service Instance Management**
 
 Each API adapter file creates its own service instance:
+
 ```typescript
 // api-server/http/movies.ts
-const movieService = new MovieService()
+const movieService = new MovieService();
 
-// api-server/ipc/movies.ts  
-const movieService = new MovieService()
+// api-server/ipc/movies.ts
+const movieService = new MovieService();
 ```
 
 These can be extracted to shared `instances.ts` for single-instance pattern (currently some files use this approach).
@@ -413,10 +478,11 @@ These can be extracted to shared `instances.ts` for single-instance pattern (cur
 This subsystem coordinates real-time event dispatch across both IPC and HTTP/WebSocket transports.
 
 #### **Roles and Responsibilities**
+
 - **Broadcasters (Services)**
-  - Services that emit asynchronous state events implement a standard callback API. 
-  - Example: `BackgroundTaskService` exposes `setNotifyFn(fn)` and `clearNotifyFn(fn)`. 
-  - These services are *producers* of events, some of which may be interesting to the renderer via API
+  - Services that emit asynchronous state events implement a standard callback API.
+  - Example: `BackgroundTaskService` exposes `setNotifyFn(fn)` and `clearNotifyFn(fn)`.
+  - These services are _producers_ of events, some of which may be interesting to the renderer via API
 
 - **EventNotificationManager**
   - Used to make events available to the renderer.
@@ -429,6 +495,7 @@ This subsystem coordinates real-time event dispatch across both IPC and HTTP/Web
   - **HTTP/WebSocket transport** (`api-server/http/notifications.ts`) implements `broadcast(eventType, data)` to send updates over WebSockets to connected clients.
 
 #### **Sample Event Flow**
+
 1. `BackgroundTaskService` emits update via callback supplied from `EventNotificationManager`.
 2. `EventNotificationManager` receives background task state and calls:
    - `ipcNotifications.broadcast('background-task-update', state)`
@@ -441,32 +508,33 @@ This subsystem coordinates real-time event dispatch across both IPC and HTTP/Web
 
 ### **Package.json Scripts**
 
-| Script | Purpose |
-|--------|---------|
-| `npm run dev` | **Main dev command** - runs 3 processes in parallel (build watch, vite, electron debug) |
-| `npm run build:main` | Compiles TypeScript, generates app-info.json, copies migrations |
-| `npm run build:renderer` | Vite build for React + CSS |
-| `npm run test:unit` | Jest unit tests |
-| `npm run test:smoke` | Cucumber smoke tests (basic health checks) |
-| `npm run test:component` | Cucumber integration tests (full workflows) |
-| `npm run test:features` | All Cucumber tests |
-| `npm run build` | Production: clean + build main + build renderer + package with electron-builder |
+| Script                   | Purpose                                                                                 |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `npm run dev`            | **Main dev command** - runs 3 processes in parallel (build watch, vite, electron debug) |
+| `npm run build:main`     | Compiles TypeScript, generates app-info.json, copies migrations                         |
+| `npm run build:renderer` | Vite build for React + CSS                                                              |
+| `npm run test:unit`      | Jest unit tests                                                                         |
+| `npm run test:smoke`     | Cucumber smoke tests (basic health checks)                                              |
+| `npm run test:component` | Cucumber integration tests (full workflows)                                             |
+| `npm run test:features`  | All Cucumber tests                                                                      |
+| `npm run build`          | Production: clean + build main + build renderer + package with electron-builder         |
 
 ### **Key Dependencies**
 
-| Category | Package | Usage |
-|----------|---------|-------|
-| **Framework** | electron 41.x | Desktop runtime |
-| **Server** | express 5.x | HTTP API |
-| **Database** | better-sqlite3 12.x | Embedded SQLite |
-| **Renderer** | react 19.x, react-i18next | UI framework + i18n |
-| **i18n** | i18next, i18next-fs-backend | Multi-language support |
-| **Testing** | jest, playwright, @cucumber/cucumber | Testing frameworks |
-| **Build** | vite, electron-builder, typescript | Compilation + packaging |
+| Category      | Package                              | Usage                   |
+| ------------- | ------------------------------------ | ----------------------- |
+| **Framework** | electron 41.x                        | Desktop runtime         |
+| **Server**    | express 5.x                          | HTTP API                |
+| **Database**  | better-sqlite3 12.x                  | Embedded SQLite         |
+| **Renderer**  | react 19.x, react-i18next            | UI framework + i18n     |
+| **i18n**      | i18next, i18next-fs-backend          | Multi-language support  |
+| **Testing**   | jest, playwright, @cucumber/cucumber | Testing frameworks      |
+| **Build**     | vite, electron-builder, typescript   | Compilation + packaging |
 
 ### **Build Modes**
 
 #### **Production Build** (`npm run build`)
+
 ```
 1. Clean dist/
 2. Build main (uses testing-noop stubs)
@@ -475,12 +543,15 @@ This subsystem coordinates real-time event dispatch across both IPC and HTTP/Web
 ```
 
 #### **Integration Testing Build**
+
 ```
 npm run build:main:for-integration-testing
 ```
+
 Uses `testing-active` implementations instead of no-op stubs, enabling test hooks access.
 
 #### **Development Mode** (`npm run dev`)
+
 ```
 concurrently:
   • npm run build:main:watch - TypeScript watch mode
@@ -520,91 +591,111 @@ npm run test
 ## 7. Common Patterns and Conventions
 
 ### **Pattern: Service-First Architecture**
+
 - All business logic lives in `src/main/services/`
 - Services are stateless, framework-agnostic
 - IPC/HTTP are thin adapters over services
 - **Benefit**: Easy to test, refactor, or change transports
 
 ### **Pattern: Idempotent IPC Handler Registration**
+
 ```typescript
 export function registerIpcHandlers() {
   // Remove all old handlers first
-  channels.forEach(ch => {
-    try { ipcMain.removeHandler(ch) } catch { }
-  })
-  
+  channels.forEach((ch) => {
+    try {
+      ipcMain.removeHandler(ch);
+    } catch {}
+  });
+
   // Guard against initializing twice
-  if (handlersRegistered) return
-  handlersRegistered = true
-  
+  if (handlersRegistered) return;
+  handlersRegistered = true;
+
   // Register new handlers
-  registerAppIpcHandlers()
+  registerAppIpcHandlers();
   // ...
 }
 ```
+
 Allows hot-reload and multiple calls safely.
 
 ### **Pattern: Prepared Statements with Type Conversion**
+
 ```typescript
 run(watchmode_id, tmdb_id, ..., has_video) {
   const result = stmt.run(watchmode_id, tmdb_id, ..., has_video ? 1 : 0)
   return result.lastInsertRowid as number
 }
 ```
+
 SQLite stores booleans as 0/1; model converts to/from boolean.
 
 ### **Pattern: Barrel Exports**
+
 Each module directory has `index.ts` re-exporting key classes:
+
 ```typescript
 // src/main/services/index.ts
-export { MovieService } from './MovieService'
-export { SettingsService } from './SettingsService'
+export { MovieService } from './MovieService';
+export { SettingsService } from './SettingsService';
 // ...
 ```
+
 Enables clean imports: `import { MovieService } from './services'`
 
 ### **Pattern: Error Wrapping in HTTP**
+
 ```typescript
-app.post('/api/movies', route((req) => movieService.create(req.body)))
+app.post(
+  '/api/movies',
+  route((req) => movieService.create(req.body)),
+);
 
 // route() wrapper:
 async (req, res) => {
   try {
-    const result = await handler(req)
-    res.json(result)
+    const result = await handler(req);
+    res.json(result);
   } catch (error) {
-    res.status(500).json({ error: (error as Error).message })
+    res.status(500).json({ error: (error as Error).message });
   }
-}
+};
 ```
+
 All HTTP errors are caught and formatted consistently.
 
 ### **Pattern: Task Registry**
+
 ```typescript
 // src/main/tasks/task-registry.ts
 const TASK_REGISTRY = {
   'import-tmdb': ImportTmdbTask,
   'import-watchmode': ImportWatchmodeTask,
-} as const
+} as const;
 
-type TaskRegistryType = keyof typeof TASK_REGISTRY
+type TaskRegistryType = keyof typeof TASK_REGISTRY;
 ```
+
 Provides type-safe task enqueueing: `enqueue('import-tmdb', args)`
 
 ### **Pattern: Test Hooks via Electron**
+
 ```typescript
 // In test:
-const appWithTestHooks = app as typeof app & { testHooks?: TestHooks }
-appWithTestHooks.testHooks.db.initMockDatabase()
+const appWithTestHooks = app as typeof app & { testHooks?: TestHooks };
+appWithTestHooks.testHooks.db.initMockDatabase();
 
 // In main process:
 if (process.env.NODE_ENV === 'test') {
-  appWithTestHooks.testHooks = getTestHooks()
+  appWithTestHooks.testHooks = getTestHooks();
 }
 ```
+
 Allows test context to access main process state directly.
 
 ### **Pattern: Security Validation**
+
 ```typescript
 export function assertPathInsideAllowedDirs(unsafePath: string, safeRoot?: string): string {
   // Validates path doesn't escape allowed root
@@ -612,9 +703,11 @@ export function assertPathInsideAllowedDirs(unsafePath: string, safeRoot?: strin
   // Throws if invalid
 }
 ```
+
 Used by LocalizationService and other file operations.
 
 ### **Pattern: Locale Normalization**
+
 ```typescript
 function normalizeLanguage(language: string): string {
   // Validate: alphabetic language codes only
@@ -622,6 +715,7 @@ function normalizeLanguage(language: string): string {
   // Return normalized 'll' or 'll-RR' format
 }
 ```
+
 Security: Prevents injection attacks in locale strings.
 
 ---
@@ -629,19 +723,22 @@ Security: Prevents injection attacks in locale strings.
 ## 8. Testing Patterns
 
 ### **Unit Tests** (`tests/unit/`)
+
 - Framework: Jest
 - Focus: Pure logic without Electron
 - Example: [movie.normalizeTitle.test.ts](tests/unit/movie.normalizeTitle.test.ts)
+
 ```typescript
 describe('title normalization', () => {
   test('removes diacritics', () => {
-    const result = movies.normalizeTitle('Amélie')
-    expect(result).toBe('Amelie')
-  })
-})
+    const result = movies.normalizeTitle('Amélie');
+    expect(result).toBe('Amelie');
+  });
+});
 ```
 
 ### **Integration Tests** (`tests/component/`)
+
 - Framework: Cucumber BDD + Playwright
 - Focus: Full application workflows
 - Structure: Feature files in `smoke/` and `workflows/` for integration scenarios
@@ -655,14 +752,16 @@ describe('title normalization', () => {
 ## 9. Test Architecture Evolution
 
 ### **Current State (March 2026)**
+
 - **Smoke Tests**: Basic app health via Cucumber @smoke tags
-- **Integration Tests**: Full workflows via Cucumber @integration tags  
+- **Integration Tests**: Full workflows via Cucumber @integration tags
 - **Unit Tests**: Pure logic testing with Jest
 - **Isolation**: Automatic test store/database clearing
 - **Data Persistence**: Module variables for scenario state
 - **Coverage**: Settings management, movie operations, background tasks
 
 ### **Key Components**
+
 - Test hooks provide direct service access in NODE_ENV=test
 - Dual transport testing (IPC + HTTP surfaces)
 - Playwright launches full Electron app for integration
@@ -671,6 +770,7 @@ describe('title normalization', () => {
 ### **Test Infrastructure**
 
 #### **Test Mode Activation**
+
 ```bash
 # Build for integration testing
 npm run build:main:for-integration-testing
@@ -681,26 +781,30 @@ NODE_ENV=test npm run test:features
 ```
 
 #### **Test Database**
+
 ```typescript
 // In test setup
-const Database = require('../infrastructure/db')
-await db.initMockDatabase()  // In-memory SQLite
+const Database = require('../infrastructure/db');
+await db.initMockDatabase(); // In-memory SQLite
 ```
 
 #### **Test Fixtures**
+
 - [domains/db.ts](tests/features/domains/db.ts) - Data setup helpers
 - [domains/movies.ts](tests/features/domains/movies.ts) - Movie test helpers
 
 #### **World Context** (Cucumber)
+
 ```typescript
 // tests/features/infrastructure/world.ts
 export class CustomWorld extends World {
-  public app!: ElectronApplication
-  public page!: Page
-  public database!: Database
+  public app!: ElectronApplication;
+  public page!: Page;
+  public database!: Database;
   // ... shared test context
 }
 ```
+
 Provides shared fixture state across step definitions. Also maps task reference names to task IDs to support deterministic feature test assertions.
 
 ### **Test Mocking Strategy**
@@ -716,11 +820,11 @@ Provides shared fixture state across step definitions. Also maps task reference 
 
 ### **Common Patterns**
 
-| Pattern | Purpose |
-|---------|---------|
-| `withTestHooks(app, fn)` | Run code with access to main process internals |
-| Stub CSV/JSON | Pre-load test database with realistic data |
-| Scenario tagging | @import @tmdb @missing-data for test organization |
+| Pattern                  | Purpose                                           |
+| ------------------------ | ------------------------------------------------- |
+| `withTestHooks(app, fn)` | Run code with access to main process internals    |
+| Stub CSV/JSON            | Pre-load test database with realistic data        |
+| Scenario tagging         | @import @tmdb @missing-data for test organization |
 
 ---
 

@@ -68,7 +68,11 @@ export default class ImportWatchmodeTask extends BackgroundTask {
     });
   }
 
-  private async processFile(filePath: string, totalBytes: number, context: TaskContext): Promise<void> {
+  private async processFile(
+    filePath: string,
+    totalBytes: number,
+    context: TaskContext,
+  ): Promise<void> {
     const models = getModels();
     const fileStream = fs.createReadStream(filePath);
     let bytesRead = 0;
@@ -86,7 +90,7 @@ export default class ImportWatchmodeTask extends BackgroundTask {
       } else {
         const records = parse(normalizedLine + '\n', {
           columns: headers as unknown as string[],
-          trim: true
+          trim: true,
         }) as Record<string, string>[];
         const record = records[0];
         if (record) {
@@ -106,27 +110,29 @@ export default class ImportWatchmodeTask extends BackgroundTask {
 
     return new Promise((resolve, reject) => {
       fileStream.on('data', (chunk: Buffer | string) => {
-        processingPromise = processingPromise.then(async () => {
-          buffer += chunk.toString();
-          let index: number;
-          while ((index = buffer.indexOf('\n')) !== -1) {
-            if (context.isCancelled()) throw new Error('Task cancelled');
-            const line = buffer.slice(0, index);
-            buffer = buffer.slice(index + 1);
-            bytesRead += Buffer.byteLength(line, 'utf8') + 1;
-            await processLine(line);
-            const currentTime = Date.now();
-            if (currentTime - lastProgressTime >= 100) {
-              await new Promise((r) => setTimeout(r, 0));
-              context.reportProgress({
-                current: bytesRead,
-                max: totalBytes,
-                description: `Processing records... ${linesProcessed} titles processed`
-              });
-              lastProgressTime = currentTime;
+        processingPromise = processingPromise
+          .then(async () => {
+            buffer += chunk.toString();
+            let index: number;
+            while ((index = buffer.indexOf('\n')) !== -1) {
+              if (context.isCancelled()) throw new Error('Task cancelled');
+              const line = buffer.slice(0, index);
+              buffer = buffer.slice(index + 1);
+              bytesRead += Buffer.byteLength(line, 'utf8') + 1;
+              await processLine(line);
+              const currentTime = Date.now();
+              if (currentTime - lastProgressTime >= 100) {
+                await new Promise((r) => setTimeout(r, 0));
+                context.reportProgress({
+                  current: bytesRead,
+                  max: totalBytes,
+                  description: `Processing records... ${linesProcessed} titles processed`,
+                });
+                lastProgressTime = currentTime;
+              }
             }
-          }
-        }).catch(reject);
+          })
+          .catch(reject);
       });
 
       fileStream.on('end', () => {
@@ -139,7 +145,7 @@ export default class ImportWatchmodeTask extends BackgroundTask {
             context.reportProgress({
               current: totalBytes,
               max: totalBytes,
-              description: `Processing records... ${linesProcessed} titles processed`
+              description: `Processing records... ${linesProcessed} titles processed`,
             });
           })
           .then(resolve)

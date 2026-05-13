@@ -149,10 +149,7 @@ describe('Security Utilities', () => {
         return;
       }
 
-      expect(() => assertPathInsideAllowedDirs(link, temp)).toThrow(
-        'Symlink escape detected',
-      );
+      expect(() => assertPathInsideAllowedDirs(link, temp)).toThrow('Symlink escape detected');
     });
   });
-
 });

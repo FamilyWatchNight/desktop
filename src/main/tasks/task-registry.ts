@@ -10,16 +10,13 @@ import type BackgroundTask from './BackgroundTask';
 import ImportTmdbTask from './ImportTmdbTask';
 import ImportWatchmodeTask from './ImportWatchmodeTask';
 
-export const TASK_REGISTRY_VALUES = [
-  'import-watchmode',
-  'import-tmdb',
-] as const;
+export const TASK_REGISTRY_VALUES = ['import-watchmode', 'import-tmdb'] as const;
 
-export type TaskRegistryType = typeof TASK_REGISTRY_VALUES[number];
+export type TaskRegistryType = (typeof TASK_REGISTRY_VALUES)[number];
 
 export const TASK_REGISTRY: Record<string, new () => BackgroundTask> = {
   'import-watchmode': ImportWatchmodeTask,
-  'import-tmdb': ImportTmdbTask
+  'import-tmdb': ImportTmdbTask,
 };
 
 export function isTaskRegistryType(value: string): value is TaskRegistryType {

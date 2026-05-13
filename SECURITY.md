@@ -4,10 +4,10 @@
 
 This project is still in a pre-alpha, proof-of-concept phase. It has not been rigorously analyzed for security. Use of this application in its current state should be considered highly risky.
 
-| Version      | Supported          |
-| ------------ | ------------------ |
-| 0.0.x        | :x:                |
-| Future Beta  | :white_check_mark: |
+| Version     | Supported          |
+| ----------- | ------------------ |
+| 0.0.x       | :x:                |
+| Future Beta | :white_check_mark: |
 
 ## Reporting a Vulnerability
 

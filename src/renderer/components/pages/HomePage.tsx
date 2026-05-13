@@ -7,9 +7,5 @@ the Free Software Foundation, version 3.
 */
 
 export default function HomePage(): React.ReactElement {
-
-  return (
-    <div className="page" data-testid="page-home">
-    </div>
-  );
+  return <div className="page" data-testid="page-home"></div>;
 }

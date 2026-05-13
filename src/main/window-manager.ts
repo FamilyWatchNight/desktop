@@ -29,8 +29,8 @@ export function createAppWindow(): void {
     icon: path.join(app.getAppPath(), 'assets', 'images', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true
-    }
+      contextIsolation: true,
+    },
   });
 
   const startUrl = process.env.ELECTRON_START_URL;

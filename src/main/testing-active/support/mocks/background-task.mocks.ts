@@ -36,7 +36,7 @@ export class MockBackgroundTask implements BackgroundTask {
       this._context.reportProgress({
         current: this._current,
         max: this._max,
-        description: this._description
+        description: this._description,
       });
     }
   }
@@ -48,7 +48,7 @@ export class MockBackgroundTask implements BackgroundTask {
       this._context.reportProgress({
         current: this._current,
         max: this._max,
-        description: this._description
+        description: this._description,
       });
     }
   }
@@ -60,7 +60,7 @@ export class MockBackgroundTask implements BackgroundTask {
       this._context.reportProgress({
         current: this._current,
         max: this._max,
-        description: this._description
+        description: this._description,
       });
     }
   }
@@ -72,7 +72,7 @@ export class MockBackgroundTask implements BackgroundTask {
       this._context.reportProgress({
         current: this._current,
         max: this._max,
-        description: this._description
+        description: this._description,
       });
     }
   }
@@ -94,7 +94,7 @@ export class MockBackgroundTask implements BackgroundTask {
     context.reportProgress({
       current: this._current,
       max: this._max,
-      description: this._description
+      description: this._description,
     });
 
     // Loop until complete, checking for external control
@@ -111,7 +111,7 @@ export class MockBackgroundTask implements BackgroundTask {
     context.reportProgress({
       current: this._max,
       max: this._max,
-      description: this._description
+      description: this._description,
     });
   }
 }

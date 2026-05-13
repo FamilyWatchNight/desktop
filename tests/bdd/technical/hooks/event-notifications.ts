@@ -41,19 +41,31 @@ export class EventNotifications {
   /**
    * Find the first event of a given type
    */
-  async findEventByType(type: string): Promise<{ type: string; data: unknown; timestamp: number } | undefined> {
-    return await withTestHooks(this.app, async (hooks, type) => {
-      return hooks.eventNotifications.findEventByType(type);
-    }, type);
+  async findEventByType(
+    type: string,
+  ): Promise<{ type: string; data: unknown; timestamp: number } | undefined> {
+    return await withTestHooks(
+      this.app,
+      async (hooks, type) => {
+        return hooks.eventNotifications.findEventByType(type);
+      },
+      type,
+    );
   }
 
   /**
    * Get all events of a given type
    */
-  async filterEventsByType(type: string): Promise<Array<{ type: string; data: unknown; timestamp: number }>> {
-    return await withTestHooks(this.app, async (hooks, type) => {
-      return hooks.eventNotifications.filterEventsByType(type);
-    }, type);
+  async filterEventsByType(
+    type: string,
+  ): Promise<Array<{ type: string; data: unknown; timestamp: number }>> {
+    return await withTestHooks(
+      this.app,
+      async (hooks, type) => {
+        return hooks.eventNotifications.filterEventsByType(type);
+      },
+      type,
+    );
   }
 
   /**

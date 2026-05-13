@@ -14,13 +14,15 @@ the Free Software Foundation, version 3.
  * @returns The normalized title
  */
 export function normalizeTitle(title: string): string {
-  return title
-    // 1. Normalize accented characters → base letters
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    // 2. Normalize quotes
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    // 3. Normalize dashes
-    .replace(/[–—―]/g, '-');
+  return (
+    title
+      // 1. Normalize accented characters → base letters
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      // 2. Normalize quotes
+      .replace(/[“”]/g, '"')
+      .replace(/[‘’]/g, "'")
+      // 3. Normalize dashes
+      .replace(/[–—―]/g, '-')
+  );
 }

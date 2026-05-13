@@ -26,8 +26,8 @@ under the GNU General Public License v3.0.
 1. Synchronize changes and push tags to origin
 1. At https://github.com/FamilyWatchNight/desktop/actions, review and approve the pending deployment to the `release` environment.
 1. After the CI build completes, open the newly created Release.
-1. __Generate Release Notes__ and make any changes or clarifications
-1. __Publish__ the Release.
+1. **Generate Release Notes** and make any changes or clarifications
+1. **Publish** the Release.
 
 # First-Time Launch for Developers
 

@@ -32,7 +32,7 @@ module.exports = [
       '@typescript-eslint/no-require-imports': 'off',
     },
   },
-  
+
   {
     files: ['**/*.{ts,tsx}'],
 
@@ -62,14 +62,7 @@ module.exports = [
       'import/order': [
         'error',
         {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-          ],
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
 
           'newlines-between': 'always',
 

@@ -5,7 +5,7 @@ export class HomePage extends BasePage {
   readonly selectors = {
     pageRoot: '[data-testid="page-home"]',
     settingsButton: '[data-testid="menu-settings"]',
-    homeMenuButton: '[data-testid="menu-home"]'
+    homeMenuButton: '[data-testid="menu-home"]',
   };
 
   async openSettings(): Promise<SettingsPage> {
