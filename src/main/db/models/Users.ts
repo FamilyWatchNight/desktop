@@ -6,8 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import type Database from 'better-sqlite3';
 import bcrypt from 'bcryptjs';
+import type Database from 'better-sqlite3';
 import log from 'electron-log/main';
 
 export interface UserRow {
@@ -80,13 +80,7 @@ export default class UsersModel {
     }
 
     try {
-      const result = this.insertStmt.run(
-        data.username,
-        data.email || null,
-        passwordHash,
-        now,
-        now
-      );
+      const result = this.insertStmt.run(data.username, data.email || null, passwordHash, now, now);
 
       return Number(result.lastInsertRowid);
     } catch (error) {
@@ -127,7 +121,7 @@ export default class UsersModel {
       email: row.email,
       lastLoginAt: row.last_login_at,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
     };
   }
 }

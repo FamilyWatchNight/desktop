@@ -1,11 +1,12 @@
+import path from 'path';
+
 import i18n from 'i18next';
 import Backend from 'i18next-fs-backend';
-import path from 'path';
 
 let app;
 try {
   // Electron may not be available in unit tests
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   app = require('electron').app;
 } catch {
   app = undefined;

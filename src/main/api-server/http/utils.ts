@@ -25,7 +25,7 @@ export function envelope(res: Response, data: unknown = null, error?: string): v
  * to short-circuit.
  */
 export function route(
-  handler: (req: Request, res: Response) => unknown
+  handler: (req: Request, res: Response) => unknown,
 ): (req: Request, res: Response) => Promise<void> {
   return async (req: Request, res: Response) => {
     try {

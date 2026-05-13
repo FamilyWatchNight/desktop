@@ -6,8 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import path from 'path';
 import os from 'os';
+import path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const appInfoJson = require('./app-info.json') as { name: string };

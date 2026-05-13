@@ -1,4 +1,5 @@
 import { BackendModule } from 'i18next';
+
 import { createApiClient } from './api-client';
 
 export class ApiBackend implements BackendModule {

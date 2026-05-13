@@ -8,10 +8,11 @@ the Free Software Foundation, version 3.
 
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { CustomWorld } from '../../technical/infrastructure/world';
+
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
 import { generatePngBuffer, generateJpegBuffer } from '../../business-flow/utilities/image-generator';
 import { attemptAsync } from '../../technical/infrastructure/utils';
+import { CustomWorld } from '../../technical/infrastructure/world';
 
 export async function assert(assertion: () => Promise<void> | void, message: string) {
   try {

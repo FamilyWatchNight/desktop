@@ -1,4 +1,5 @@
 import { AppApi } from '../types';
+
 import { callApi } from './utils';
 
 export class HttpAppApi implements AppApi {

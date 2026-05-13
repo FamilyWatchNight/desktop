@@ -83,7 +83,7 @@ contextBridge.exposeInMainWorld('electron', {
   }
 } as ElectronAPI);
 
-if (!!process.env.ELECTRON_START_URL) {
+if (process.env.ELECTRON_START_URL) {
   contextBridge.exposeInMainWorld('isDevMode', true);
 }
 

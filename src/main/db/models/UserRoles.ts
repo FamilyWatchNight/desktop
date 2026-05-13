@@ -43,8 +43,12 @@ export default class UserRolesModel {
 
     this.getByUserIdStmt = this.db.prepare('SELECT * FROM user_roles WHERE user_id = ?');
     this.getByRoleIdStmt = this.db.prepare('SELECT * FROM user_roles WHERE role_id = ?');
-    this.getByUserAndRoleStmt = this.db.prepare('SELECT * FROM user_roles WHERE user_id = ? AND role_id = ?');
-    this.deleteByUserAndRoleStmt = this.db.prepare('DELETE FROM user_roles WHERE user_id = ? AND role_id = ?');
+    this.getByUserAndRoleStmt = this.db.prepare(
+      'SELECT * FROM user_roles WHERE user_id = ? AND role_id = ?',
+    );
+    this.deleteByUserAndRoleStmt = this.db.prepare(
+      'DELETE FROM user_roles WHERE user_id = ? AND role_id = ?',
+    );
   }
 
   assignRoleToUser(userId: number, roleId: number): void {
@@ -64,12 +68,12 @@ export default class UserRolesModel {
 
   getRoleIdsForUser(userId: number): number[] {
     const rows = this.getByUserIdStmt.all(userId) as UserRoleRow[];
-    return rows.map(row => row.role_id);
+    return rows.map((row) => row.role_id);
   }
 
   getUsersByRoleId(roleId: number): number[] {
     const rows = this.getByRoleIdStmt.all(roleId) as UserRoleRow[];
-    return rows.map(row => row.user_id);
+    return rows.map((row) => row.user_id);
   }
 
   hasRole(userId: number, roleId: number): boolean {

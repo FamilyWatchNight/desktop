@@ -1,5 +1,5 @@
-import { ApiClient } from './types';
 import { createHttpApiClient } from './http';
+import { ApiClient } from './types';
 
 export function createApiClient(): ApiClient {
   if (typeof window !== 'undefined' && (window as any).electron) {

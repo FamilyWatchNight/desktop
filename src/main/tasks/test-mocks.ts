@@ -7,8 +7,8 @@ the Free Software Foundation, version 3.
 */
 
 import fs from 'fs';
-import zlib from 'zlib';
 import { Readable } from 'stream';
+import zlib from 'zlib';
 
 export type MockDownloadJsonGzStream = (abortSignal: AbortSignal | null, dateFileSpec: string) => Promise<Readable>;
 export type MockDownloadCsvStream = (abortSignal: AbortSignal | null) => Promise<Readable>;

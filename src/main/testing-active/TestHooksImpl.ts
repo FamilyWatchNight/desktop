@@ -7,21 +7,22 @@ the Free Software Foundation, version 3.
 */
 
 import { app } from 'electron';
-import * as db from '../database';
-import { createAppWindow } from '../window-manager';
 
-import { createMockDownloadJsonGzStream, createMockDownloadCsvStream }  from "./support/mocks/import-background-tasks.mocks";
-import { createMockElectronStore }  from "./support/mocks/electron-store.mocks";
-import { clearRecordedEvents, recordEvent, getRecordedEvents, findEventByType, filterEventsByType }  from "./support/mocks/event-notification.mocks";
-import { MockBackgroundTask } from "./support/mocks/background-task.mocks";
-import { registerTask } from "./support/extensions/task-registry.extensions";
+import { createAuthContext, type AuthContextPayload } from '../auth/context-manager';
+import * as backgroundTaskManager from '../background-task-manager';
+import * as db from '../database';
+import { MovieService, SettingsService, BackgroundTaskService, UserService, RoleService } from '../services';
+import { initialize as initializeSettingsManager, getStatus as getSettingsStatus } from '../settings-manager';
 import ImportTmdbTask from "../tasks/ImportTmdbTask"
 import ImportWatchmodeTask from "../tasks/ImportWatchmodeTask";
-import { createAuthContext, type AuthContextPayload } from '../auth/context-manager';
-import { MovieService, SettingsService, BackgroundTaskService, UserService, RoleService } from '../services';
 import { executeServiceMethod } from '../utils/error-serialization';
-import { initialize as initializeSettingsManager, getStatus as getSettingsStatus } from '../settings-manager';
-import * as backgroundTaskManager from '../background-task-manager';
+import { createAppWindow } from '../window-manager';
+
+import { registerTask } from "./support/extensions/task-registry.extensions";
+import { MockBackgroundTask } from "./support/mocks/background-task.mocks";
+import { createMockElectronStore }  from "./support/mocks/electron-store.mocks";
+import { clearRecordedEvents, recordEvent, getRecordedEvents, findEventByType, filterEventsByType }  from "./support/mocks/event-notification.mocks";
+import { createMockDownloadJsonGzStream, createMockDownloadCsvStream }  from "./support/mocks/import-background-tasks.mocks";
 
 const movieService = new MovieService();
 const settingsService = new SettingsService();

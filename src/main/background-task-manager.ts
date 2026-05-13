@@ -7,9 +7,10 @@ the Free Software Foundation, version 3.
 */
 
 import { EventEmitter } from 'events';
-import { TASK_REGISTRY, type TaskRegistryType } from './tasks/task-registry';
+
 import type BackgroundTask from './tasks/BackgroundTask';
 import type { ProgressReport, TaskContext } from './tasks/BackgroundTask';
+import { TASK_REGISTRY, type TaskRegistryType } from './tasks/task-registry';
 
 interface QueueEntry {
   id: string;
@@ -44,7 +45,7 @@ interface StatePayload {
 let taskIdCounter = 0;
 const queue: QueueEntry[] = [];
 let active: ActiveEntry | null = null;
-let eventEmitter = new EventEmitter();
+const eventEmitter = new EventEmitter();
 
 function generateId(): string {
   return `task-${++taskIdCounter}-${Date.now()}`;

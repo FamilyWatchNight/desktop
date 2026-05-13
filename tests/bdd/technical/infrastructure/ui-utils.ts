@@ -1,5 +1,6 @@
-import type { CustomWorld } from './world';
 import type { Page } from 'playwright';
+
+import type { CustomWorld } from './world';
 
 export const TIMEOUT = 4000;
 

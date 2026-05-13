@@ -7,12 +7,14 @@ the Free Software Foundation, version 3.
 */
 
 import { ipcMain } from 'electron';
+
 import * as db from '../../database';
+
 import { registerAppIpcHandlers } from './app';
-import { registerMovieIpcHandlers } from './movies';
-import { registerSettingsIpcHandlers } from './settings';
 import { registerBackgroundTaskIpcHandlers } from './background-tasks';
+import { registerMovieIpcHandlers } from './movies';
 import { setWindow, broadcast } from './notifications';
+import { registerSettingsIpcHandlers } from './settings';
 
 export { setWindow, broadcast };
 

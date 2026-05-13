@@ -6,14 +6,17 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
 import { After, Before } from '@cucumber/cucumber';
-import { CustomWorld } from './world';
+
 import { createSystemContext } from '../../../../src/main/auth/context-manager';
 import * as paths from '../../../../src/main/paths';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
+
 import { withTestHooks } from './utils';
+import { CustomWorld } from './world';
 
 // Store original function and temp dir for cleanup
 let originalGetAppDataRoot: () => string;

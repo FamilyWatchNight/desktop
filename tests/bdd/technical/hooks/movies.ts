@@ -7,9 +7,10 @@ the Free Software Foundation, version 3.
 */
 
 import { ElectronApplication } from 'playwright';
+
+import { AuthContextPayload } from '../../../src/main/auth/context-manager';
 import { MovieData } from '../../../src/main/db/models/Movies';
 import { withTestHooks } from '../infrastructure/utils';
-import { AuthContextPayload } from '../../../src/main/auth/context-manager';
 
 /**
  * API layer for exposing movie-related functionality in the electron app to Cucumber tests.

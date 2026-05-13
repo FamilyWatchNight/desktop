@@ -7,20 +7,27 @@ the Free Software Foundation, version 3.
 */
 
 import { ipcMain } from 'electron';
-import { localizationService, settingsService } from './instances';
 import { app } from 'electron';
+
+import { localizationService, settingsService } from './instances';
 
 const isDevMode = !app.isPackaged;
 
 export function registerAppIpcHandlers() {
   // application-level handlers
   ipcMain.handle('get-app-version', () => require('electron').app.getVersion());
-  ipcMain.handle('get-app-locale', () => { return require('../../i18n').appLanguage; });
-  ipcMain.handle('locale-get', (_event, namespace: string, language: string) => localizationService.getLocaleFile(namespace, language) );
+  ipcMain.handle('get-app-locale', () => {
+    return require('../../i18n').appLanguage;
+  });
+  ipcMain.handle('locale-get', (_event, namespace: string, language: string) =>
+    localizationService.getLocaleFile(namespace, language),
+  );
 
   if (isDevMode) {
-    ipcMain.handle('locale-missing-key', (_event, namespace: string, language: string, key: string, fallbackValue: string) =>
-      localizationService.saveMissingKey(namespace, language, key, fallbackValue)
+    ipcMain.handle(
+      'locale-missing-key',
+      (_event, namespace: string, language: string, key: string, fallbackValue: string) =>
+        localizationService.saveMissingKey(namespace, language, key, fallbackValue),
     );
   }
 

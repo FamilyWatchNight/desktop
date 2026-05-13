@@ -7,7 +7,9 @@ the Free Software Foundation, version 3.
 */
 
 import { ElectronApplication } from 'playwright';
+
 import type { TestHooks } from '../../../../src/main/testing-active/TestHooksImpl';
+
 import { CustomWorld } from './world';
 
 

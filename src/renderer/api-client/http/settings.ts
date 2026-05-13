@@ -1,6 +1,8 @@
-import { SettingsApi } from '../types';
-import { callApi } from './utils';
 import log from 'electron-log/renderer';
+
+import { SettingsApi } from '../types';
+
+import { callApi } from './utils';
 
 export class HttpSettingsApi implements SettingsApi {
   loadSettings() { return callApi('/api/settings'); }

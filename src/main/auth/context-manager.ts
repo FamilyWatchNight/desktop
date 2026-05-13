@@ -23,7 +23,8 @@ export function createAuthContext(userId: number, permissions: string[]): AuthCo
   return {
     userId,
     permissions,
-    hasPermission: (permission: string) => permissions.includes('can-admin') || permissions.includes(permission)
+    hasPermission: (permission: string) =>
+      permissions.includes('can-admin') || permissions.includes(permission),
   };
 }
 
@@ -33,6 +34,3 @@ export function createAuthContext(userId: number, permissions: string[]): AuthCo
 export function createSystemContext(): AuthContext {
   return createAuthContext(-1, ['can-admin']);
 }
-
-
-

@@ -63,7 +63,7 @@ export default class UserProfilesModel {
       data.displayName || null,
       data.profileImagePath || null,
       now,
-      now
+      now,
     );
 
     return Number(result.lastInsertRowid);
@@ -76,29 +76,25 @@ export default class UserProfilesModel {
 
   update(userId: number, data: UserProfileData): void {
     this.db.exec('BEGIN EXCLUSIVE');
-    
+
     try {
       // Fetch current profile
       const current = this.getByUserId(userId);
       if (!current) {
         throw new Error('User profile not found');
       }
-      
+
       // Merge changes with current data
       const merged = {
         displayName: data.displayName !== undefined ? data.displayName : current.displayName,
-        profileImagePath: data.profileImagePath !== undefined ? data.profileImagePath : current.profileImagePath
+        profileImagePath:
+          data.profileImagePath !== undefined ? data.profileImagePath : current.profileImagePath,
       };
-      
+
       // Update with merged data
       const now = new Date().toISOString();
-      this.updateStmt.run(
-        merged.displayName,
-        merged.profileImagePath,
-        now,
-        userId
-      );
-      
+      this.updateStmt.run(merged.displayName, merged.profileImagePath, now, userId);
+
       this.db.exec('COMMIT');
     } catch (error) {
       this.db.exec('ROLLBACK');
@@ -113,7 +109,7 @@ export default class UserProfilesModel {
       displayName: row.display_name,
       profileImagePath: row.profile_image_path,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
     };
   }
 }

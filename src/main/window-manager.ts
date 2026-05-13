@@ -6,8 +6,10 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { app, BrowserWindow } from 'electron';
 import path from 'path';
+
+import { app, BrowserWindow } from 'electron';
+
 import { setWindow } from './api-server';
 
 let mainWindow: BrowserWindow | null = null;

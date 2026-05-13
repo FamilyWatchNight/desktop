@@ -8,17 +8,20 @@ the Free Software Foundation, version 3.
 
 import { World, setWorldConstructor, IWorldOptions } from '@cucumber/cucumber';
 import { _electron as electron, ElectronApplication, Page, Browser } from 'playwright';
+
+import type { UserPersona } from '../../business-flow/personas/UserPersona';
+import { BackgroundTasks } from '../hooks/background-tasks';
 import { TestData } from '../hooks/data';
 import { Database } from '../hooks/db';
-import { Movies } from '../hooks/movies';
-import { Settings } from '../hooks/settings';
 import { EventNotifications } from '../hooks/event-notifications';
-import { BackgroundTasks } from '../hooks/background-tasks';
-import { Users } from '../hooks/users';
+import { Movies } from '../hooks/movies';
 import { Roles } from '../hooks/roles';
+import { Settings } from '../hooks/settings';
 import { UI } from '../hooks/ui'
+import { Users } from '../hooks/users';
+
 import { findRegisteredStep } from './step-helpers';
-import type { UserPersona } from '../../business-flow/personas/UserPersona';
+
 
 export class CustomWorld extends World {
   app!: ElectronApplication;
@@ -219,8 +222,8 @@ export class CustomWorld extends World {
   }
 
   async launchApp(): Promise<ElectronApplication> {
-    const debugArgs = (!!process.env.PWDEBUG) ? ['--inspect-brk=9229'] : [];
-    const ciArgs = (!!process.env.CI) ? ['--no-sandbox'] : [];
+    const debugArgs = (process.env.PWDEBUG) ? ['--inspect-brk=9229'] : [];
+    const ciArgs = (process.env.CI) ? ['--no-sandbox'] : [];
 
     this.app = await electron.launch({
       args: ['.', ...debugArgs, ...ciArgs],

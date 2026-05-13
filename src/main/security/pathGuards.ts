@@ -1,7 +1,8 @@
-import fs from "fs";
-import os from "os";
-import path from "path";
-import { app } from "electron";
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+
+import { app } from 'electron';
 
 /**
  * Safely joins path segments while preventing path traversal.
@@ -12,8 +13,8 @@ export function safeJoin(base: string, ...segments: string[]): string {
 
   const relative = path.relative(resolvedBase, resolvedPath);
 
-  if (relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error("Path traversal detected");
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error('Path traversal detected');
   }
 
   return resolvedPath;
@@ -22,10 +23,7 @@ export function safeJoin(base: string, ...segments: string[]): string {
 /**
  * Ensures the resolved real filesystem path does not escape the allowed root.
  */
-export function assertNoSymlinkEscape(
-  targetPath: string,
-  allowedRoot: string,
-): void {
+export function assertNoSymlinkEscape(targetPath: string, allowedRoot: string): void {
   let realTarget = targetPath;
   try {
     realTarget = fs.realpathSync(targetPath);
@@ -44,7 +42,7 @@ export function assertNoSymlinkEscape(
 
   const relative = path.relative(realRoot, realTarget);
 
-  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
     throw new Error(`Symlink escape detected: ${targetPath}`);
   }
 }
@@ -58,9 +56,7 @@ function assertNormalizedAbsolute(targetPath: string) {
   const resolved = path.resolve(targetPath);
 
   if (resolved !== targetPath) {
-    throw new Error(
-      `Expected fully normalized absolute path but got: ${targetPath}`,
-    );
+    throw new Error(`Expected fully normalized absolute path but got: ${targetPath}`);
   }
 }
 
@@ -69,19 +65,15 @@ function assertNormalizedAbsolute(targetPath: string) {
  *
  * Protects against path traversal and arbitrary file writes.
  */
-export function assertPathInsideAllowedDirs(
-  unsafePath: string,
-  safeRoot?: string,
-): string {
-
+export function assertPathInsideAllowedDirs(unsafePath: string, safeRoot?: string): string {
   function isInside(root: string, target: string) {
     const relative = path.relative(root, target);
 
-    return !relative.startsWith("..") && !path.isAbsolute(relative);
+    return !relative.startsWith('..') && !path.isAbsolute(relative);
   }
 
-  if (!unsafePath || typeof unsafePath !== "string") {
-    throw new Error("Invalid path");
+  if (!unsafePath || typeof unsafePath !== 'string') {
+    throw new Error('Invalid path');
   }
 
   const resolvedTarget = path.resolve(unsafePath);
@@ -110,9 +102,8 @@ export function assertPathInsideAllowedDirs(
 
   if (allowedRoot === undefined) {
     throw new Error(`Path is outside allowed directories: ${resolvedTarget}`);
-  }
-  else {
-      assertNoSymlinkEscape(resolvedTarget, allowedRoot);
+  } else {
+    assertNoSymlinkEscape(resolvedTarget, allowedRoot);
   }
 
   return resolvedTarget;

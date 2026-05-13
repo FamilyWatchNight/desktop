@@ -6,11 +6,11 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import * as backgroundTaskManager from '../background-task-manager';
-import type { TaskRegistryType } from '../tasks/task-registry';
-import i18n from '../i18n';
 import { AuthContext } from '../auth/context-manager';
 import { AuthenticationError, AuthorizationError } from '../auth/errors';
+import * as backgroundTaskManager from '../background-task-manager';
+import i18n from '../i18n';
+import type { TaskRegistryType } from '../tasks/task-registry';
 
 export class BackgroundTaskService {
   private t = i18n.getFixedT(null, 'auth');
@@ -24,7 +24,11 @@ export class BackgroundTaskService {
     }
   }
 
-  enqueue(taskType: TaskRegistryType, args: Record<string, unknown> = {}, authContext?: AuthContext): { success: boolean; taskId?: string; error?: string } {
+  enqueue(
+    taskType: TaskRegistryType,
+    args: Record<string, unknown> = {},
+    authContext?: AuthContext,
+  ): { success: boolean; taskId?: string; error?: string } {
     this.validateAuthContext(authContext);
     return backgroundTaskManager.enqueue(taskType, args);
   }
@@ -44,7 +48,3 @@ export class BackgroundTaskService {
     return backgroundTaskManager.removeQueued(taskId);
   }
 }
-
-
-
-

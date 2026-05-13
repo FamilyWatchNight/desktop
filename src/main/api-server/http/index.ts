@@ -7,11 +7,12 @@ the Free Software Foundation, version 3.
 */
 
 import { Express } from 'express';
+
 import { registerAppRoutes } from './app';
 import { registerBackgroundTaskRoutes } from './background-tasks';
 import { registerMovieRoutes } from './movies';
-import { registerSettingsRoutes } from './settings';
 import { initializeWebSocketServer, broadcast } from './notifications';
+import { registerSettingsRoutes } from './settings';
 
 export { initializeWebSocketServer, broadcast };
 

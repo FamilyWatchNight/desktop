@@ -1,7 +1,8 @@
 import { Given } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { CustomWorld } from '../../technical/infrastructure/world';
+
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
+import { CustomWorld } from '../../technical/infrastructure/world';
 
 function getSystemPersona(world: CustomWorld): InternalSystemPersona {
   const state = world.getStateStore('personas');

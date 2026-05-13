@@ -1,11 +1,13 @@
 import { Given, When, Then } from '@cucumber/cucumber';
-import { verifyPageIsVisible } from '../../technical/infrastructure/ui-utils';
-import { UnauthenticatedUserPersona } from '../../business-flow/personas/UnauthenticatedUserPersona';
-import { CustomWorld } from '../../technical/infrastructure/world';
-import { TIMEOUT as UI_TIMEOUT } from '../../technical/infrastructure/ui-utils';
 import { expect } from 'playwright/test';
-import { assert } from './user-service.steps';
+
+import { UnauthenticatedUserPersona } from '../../business-flow/personas/UnauthenticatedUserPersona';
+import { verifyPageIsVisible } from '../../technical/infrastructure/ui-utils';
+import { TIMEOUT as UI_TIMEOUT } from '../../technical/infrastructure/ui-utils';
+import { CustomWorld } from '../../technical/infrastructure/world';
 import { SettingsPage } from '../../technical/page-objects/SettingsPage';
+
+import { assert } from './user-service.steps';
 
 
 const STEP_TIMEOUT = UI_TIMEOUT + 1000;

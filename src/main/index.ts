@@ -6,21 +6,25 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { app, Menu, Tray } from "electron";
-import { registerIpcHandlers } from "./api-server/ipc";
-import { createAppWindow } from "./window-manager";
 import path from "path";
+
+import { app, Menu, Tray } from "electron";
+import log from 'electron-log/main';
 import express from "express";
-import * as server from "./server";
+
+import { registerIpcHandlers } from "./api-server/ipc";
+import { settingsService } from "./api-server/ipc/instances";
+import { createSystemContext } from './auth/context-manager';
 import * as db from "./database";
+import { initialize as initializeEventNotificationManager } from "./event-notification-manager";
+import i18n from "./i18n";
+import * as server from "./server";
+import { initialize as initializeSettingsManager } from "./settings-manager";
 import type { TestHooks } from "./testing/TestHooksImpl";
 import { getTestHooks } from "./testing/TestHooksImpl";
-import i18n from "./i18n";
-import { settingsService } from "./api-server/ipc/instances";
-import { initialize as initializeSettingsManager } from "./settings-manager";
-import { initialize as initializeEventNotificationManager } from "./event-notification-manager";
-import { createSystemContext } from './auth/context-manager';
-import log from 'electron-log/main';
+import { createAppWindow } from "./window-manager";
+
+
 
 let tray: Tray | null = null;
 const webServer = express();

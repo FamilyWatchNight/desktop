@@ -7,6 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import type Database from 'better-sqlite3';
+
 import type { PermissionStub } from '../../auth/permissions';
 
 export interface RolePermissionRow {
@@ -75,15 +76,15 @@ export default class RolePermissionsModel {
 
   getPermissionsForRole(roleId: number): Permission[] {
     const rows = this.getByRoleStmt.all(roleId) as RolePermissionRow[];
-    return rows.map(row => ({
+    return rows.map((row) => ({
       id: row.id,
-      stub: row.permission_stub
+      stub: row.permission_stub,
     }));
   }
 
   getRolesForPermission(permissionStub: PermissionStub): number[] {
     const rows = this.getByPermissionStmt.all(permissionStub) as Array<{ role_id: number }>;
-    return rows.map(row => row.role_id);
+    return rows.map((row) => row.role_id);
   }
 
   setPermissionsForRole(roleId: number, permissionStubs: PermissionStub[]): void {

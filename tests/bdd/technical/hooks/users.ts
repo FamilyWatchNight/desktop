@@ -7,9 +7,10 @@ the Free Software Foundation, version 3.
 */
 
 import { ElectronApplication } from 'playwright';
-import { withTestHooks } from '../infrastructure/utils';
-import { AuthenticatedUser } from '../../../src/main/services/UserService';
+
 import { type AuthContextPayload } from '../../../src/main/auth/context-manager';
+import { AuthenticatedUser } from '../../../src/main/services/UserService';
+import { withTestHooks } from '../infrastructure/utils';
 
 /**
  * API layer for exposing user-related functionality in the electron app to Cucumber tests.

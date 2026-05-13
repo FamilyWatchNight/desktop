@@ -7,6 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import { ElectronApplication } from "playwright";
+
 import { withTestHooks } from "../infrastructure/utils";
 
 export class TestData {

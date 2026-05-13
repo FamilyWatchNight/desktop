@@ -6,13 +6,14 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { CustomWorld } from '../../technical/infrastructure/world';
-import { AuthenticatedUser } from '../../../../src/main/services/UserService';
-import { Role } from '../../../../src/main/db/models/Roles';
+import { Page, Browser } from 'playwright';
+
 import { createAuthContext, createSystemContext, type AuthContext, type AuthContextPayload } from '../../../../src/main/auth/context-manager';
 import { PERMISSIONS } from '../../../../src/main/auth/permissions';
-import { Page, Browser } from 'playwright';
+import { Role } from '../../../../src/main/db/models/Roles';
+import { AuthenticatedUser } from '../../../../src/main/services/UserService';
 import { withTestHooks } from '../../technical/infrastructure/utils';
+import { CustomWorld } from '../../technical/infrastructure/world';
 
 /**
  * Internal System Persona - represents trusted backend operations

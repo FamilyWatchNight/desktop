@@ -6,19 +6,22 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+
 import bcrypt from 'bcryptjs';
-import i18n from '../i18n';
-import { getDb, getModels } from '../database';
-import { getAppDataRoot } from '../paths';
-import { safeJoin, assertPathInsideAllowedDirs } from '../security';
-import { type User, type UserData } from '../db/models/Users';
-import { type UserProfile, type UserProfileData } from '../db/models/UserProfiles';
-import { type PermissionStub, PERMISSIONS } from '../auth/permissions';
+import log from 'electron-log/main';
+
 import { AuthContext } from '../auth/context-manager';
 import { AuthenticationError, AuthorizationError } from '../auth/errors';
-import log from 'electron-log/main';
+import { type PermissionStub, PERMISSIONS } from '../auth/permissions';
+import { getDb, getModels } from '../database';
+import { type UserProfile, type UserProfileData } from '../db/models/UserProfiles';
+import { type User, type UserData } from '../db/models/Users';
+import i18n from '../i18n';
+import { getAppDataRoot } from '../paths';
+import { safeJoin, assertPathInsideAllowedDirs } from '../security';
+
 
 export interface CreateUserData extends UserData {}
 
@@ -45,22 +48,23 @@ export class UserService {
     }
 
     // Allow self-access or user manager access
-    const canAccess = (targetUserId && authContext.userId === targetUserId) ||
-                     authContext.hasPermission('can-manage-users');
+    const canAccess =
+      (targetUserId && authContext.userId === targetUserId) ||
+      authContext.hasPermission('can-manage-users');
 
     if (!canAccess) {
       throw new AuthorizationError(this.t('errors.insufficientPermissions'));
     }
   }
-  
+
   private hasUsers(): boolean {
     const db = getDb();
     if (!db) throw new Error('Database not initialized');
-    
+
     const result = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
     return result.count > 0;
   }
-  
+
   async createUser(data: CreateUserData, authContext?: AuthContext): Promise<AuthenticatedUser> {
     // Bootstrap mode: allow creating first user without authentication
     if (!this.hasUsers()) {
@@ -91,7 +95,11 @@ export class UserService {
     }
   }
 
-  async authenticateUser(username: string, password: string, authContext?: AuthContext): Promise<AuthenticatedUser | null> {
+  async authenticateUser(
+    username: string,
+    password: string,
+    authContext?: AuthContext,
+  ): Promise<AuthenticatedUser | null> {
     const { users, userProfiles } = getModels();
     const userRow = users.getByUsername(username);
     if (!userRow) return null;
@@ -106,8 +114,7 @@ export class UserService {
     if (userRow.password_hash) {
       // This user has a password. Validate it.
       isValid = await bcrypt.compare(password, userRow.password_hash);
-    }
-    else {
+    } else {
       // If no password set, only an empty or missing password is accepted
       if (password === '' || password === null || password === undefined) {
         isValid = true;
@@ -127,7 +134,8 @@ export class UserService {
     let canSeeUserDetails = false;
 
     if (authContext) {
-      canSeeUserDetails = authContext.userId === id || authContext.hasPermission('can-manage-users');
+      canSeeUserDetails =
+        authContext.userId === id || authContext.hasPermission('can-manage-users');
     }
 
     const { users, userProfiles } = getModels();
@@ -139,12 +147,21 @@ export class UserService {
     if (canSeeUserDetails) {
       return { ...user, profile };
     } else {
-      return { username: user.username, profile: { displayName: profile?.displayName || null, profileImagePath: profile?.profileImagePath || null } };
+      return {
+        username: user.username,
+        profile: {
+          displayName: profile?.displayName || null,
+          profileImagePath: profile?.profileImagePath || null,
+        },
+      };
     }
-  
   }
 
-  async updateUserProfile(userId: number, data: UserProfileData, authContext?: AuthContext): Promise<void> {
+  async updateUserProfile(
+    userId: number,
+    data: UserProfileData,
+    authContext?: AuthContext,
+  ): Promise<void> {
     this.validateAuthContext(authContext, userId);
 
     const { userProfiles } = getModels();
@@ -156,14 +173,21 @@ export class UserService {
     }
   }
 
-  async changePassword(userId: number, newPassword: string, authContext?: AuthContext): Promise<void> {
+  async changePassword(
+    userId: number,
+    newPassword: string,
+    authContext?: AuthContext,
+  ): Promise<void> {
     this.validateAuthContext(authContext, userId);
 
     const { users } = getModels();
     await users.updatePassword(userId, newPassword);
   }
 
-  getUsersWithPermissions(permissions: PermissionStub[], authContext?: AuthContext): BasicUserInfo[] {
+  getUsersWithPermissions(
+    permissions: PermissionStub[],
+    authContext?: AuthContext,
+  ): BasicUserInfo[] {
     if (authContext) {
       // We really don't expect this ever to be called when someone is logged in.
       // The purpose is to get a list of users who *can* log in.
@@ -187,7 +211,9 @@ export class UserService {
       WHERE rp.permission_stub IN (${placeholders})
     `;
 
-    const userIds = (db.prepare(query).all(...permissions) as Array<{ id: number }>).map(row => row.id);
+    const userIds = (db.prepare(query).all(...permissions) as Array<{ id: number }>).map(
+      (row) => row.id,
+    );
 
     // Check for can-admin (grants all permissions)
     const adminUsers = this.getUsersWithAdminPermission();
@@ -223,10 +249,10 @@ export class UserService {
       WHERE rp.permission_stub = 'can-admin'
     `;
 
-    const userIds = (db.prepare(query).all() as Array<{ id: number }>).map(row => row.id);
+    const userIds = (db.prepare(query).all() as Array<{ id: number }>).map((row) => row.id);
 
     return userIds
-      .map(userId => {
+      .map((userId) => {
         const user = users.getById(userId);
         if (!user) return null;
         const profile = userProfiles.getByUserId(userId);
@@ -239,7 +265,12 @@ export class UserService {
     return path.join(getAppDataRoot(), 'profile-images');
   }
 
-  async saveProfileImage(userId: number, imageBuffer: Buffer, mimeType: string, authContext?: AuthContext): Promise<string> {
+  async saveProfileImage(
+    userId: number,
+    imageBuffer: Buffer,
+    mimeType: string,
+    authContext?: AuthContext,
+  ): Promise<string> {
     this.validateAuthContext(authContext, userId);
 
     // Validate mime type
@@ -262,7 +293,7 @@ export class UserService {
 
     // Generate filename
     const ext = mimeType === 'image/jpeg' ? 'jpg' : 'png';
-    const { v4:uuidv4 } = await import('uuid');
+    const { v4: uuidv4 } = await import('uuid');
     const filename = `${uuidv4()}.${ext}`;
     const filePath = safeJoin(imagesDir, filename);
 
@@ -312,7 +343,7 @@ export class UserService {
     `;
 
     const rows = db.prepare(query).all(userId) as Array<{ permission_stub: PermissionStub }>;
-    return rows.map(row => row.permission_stub);
+    return rows.map((row) => row.permission_stub);
   }
 
   getUserPermissions(userId: number, authContext?: AuthContext): PermissionInfo[] {
@@ -321,18 +352,18 @@ export class UserService {
 
     // If can-admin, return all possible permissions
     if (permissionStubs.includes('can-admin')) {
-      return PERMISSIONS.map(p => ({
+      return PERMISSIONS.map((p) => ({
         stub: p.stub,
-        displayName: this.t(p.displayNameKey)
+        displayName: this.t(p.displayNameKey),
       }));
     }
 
     // Otherwise return only the user's permissions
-    return permissionStubs.map(stub => {
-      const permissionDef = PERMISSIONS.find(p => p.stub === stub);
+    return permissionStubs.map((stub) => {
+      const permissionDef = PERMISSIONS.find((p) => p.stub === stub);
       return {
         stub,
-        displayName: this.t(permissionDef?.displayNameKey || 'common.unknown')
+        displayName: this.t(permissionDef?.displayNameKey || 'common.unknown'),
       };
     });
   }
@@ -348,7 +379,7 @@ export class UserService {
     if (!authContext) {
       throw new AuthenticationError(this.t('errors.authenticationRequired'));
     }
-    
+
     if (!authContext.hasPermission('can-manage-users')) {
       throw new AuthorizationError(this.t('errors.insufficientPermissions'));
     }
@@ -372,7 +403,7 @@ export class UserService {
     if (!authContext) {
       throw new AuthenticationError(this.t('errors.authenticationRequired'));
     }
-    
+
     if (!authContext.hasPermission('can-manage-users')) {
       throw new AuthorizationError(this.t('errors.insufficientPermissions'));
     }
@@ -385,8 +416,4 @@ export class UserService {
     const { userRoles } = getModels();
     userRoles.removeRoleFromUser(userId, roleId);
   }
-
 }
-
-
-

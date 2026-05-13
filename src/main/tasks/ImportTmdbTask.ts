@@ -6,15 +6,18 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import https from 'https';
 import fs from 'fs';
-import path from 'path';
+import https from 'https';
 import os from 'os';
+import path from 'path';
 import zlib from 'zlib';
+
+import log from 'electron-log/main';
+
+import { getModels } from '../database';
+
 import BackgroundTask from './BackgroundTask';
 import type { TaskContext } from './BackgroundTask';
-import { getModels } from '../database';
-import log from 'electron-log/main';
 
 type DownloadJsonGzStream = (abortSignal: AbortSignal, dateFileSpec: string) => Promise<NodeJS.ReadableStream>;
 

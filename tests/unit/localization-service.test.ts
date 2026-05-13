@@ -1,6 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+
 import { LocalizationService } from '../../src/main/services/LocalizationService';
 
 describe('LocalizationService (missing-key persistence)', () => {

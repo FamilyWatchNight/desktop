@@ -1,8 +1,9 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { CustomWorld } from '../../technical/infrastructure/world';
+
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
 import { attemptAsync } from '../../technical/infrastructure/utils';
+import { CustomWorld } from '../../technical/infrastructure/world';
 
 /**
  * Wraps a Playwright assertion to ensure custom messages show up in Cucumber.

@@ -7,9 +7,12 @@ the Free Software Foundation, version 3.
 */
 
 import { ipcMain } from 'electron';
+
 import { settingsService } from './instances';
 
 export function registerSettingsIpcHandlers() {
   ipcMain.handle('load-settings', async () => settingsService.load());
-  ipcMain.handle('save-settings', async (_event, settings: Record<string, unknown>) => settingsService.save(settings));
+  ipcMain.handle('save-settings', async (_event, settings: Record<string, unknown>) =>
+    settingsService.save(settings),
+  );
 }

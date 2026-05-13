@@ -1,9 +1,11 @@
+import log from 'electron-log/renderer';
+
 import { ApiClient } from '../types';
+
+import { HttpAppApi } from './app';
+import { HttpBackgroundTaskApi } from './background-tasks';
 import { HttpMovieApi } from './movies';
 import { HttpSettingsApi } from './settings';
-import { HttpBackgroundTaskApi } from './background-tasks';
-import { HttpAppApi } from './app';
-import log from 'electron-log/renderer';
 
 class HttpApiClient implements ApiClient {
   private eventListeners: Map<string, Set<(data: any) => void>> = new Map();

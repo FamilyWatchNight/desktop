@@ -1,5 +1,6 @@
 import i18n, { LanguageDetectorAsyncModule } from 'i18next';
 import { initReactI18next } from 'react-i18next';
+
 import { createApiClient } from './api-client';
 import ApiBackend from './i18n-backend';
 

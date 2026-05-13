@@ -1,4 +1,5 @@
 import { BackgroundTaskApi } from '../types';
+
 import { callApi } from './utils';
 
 export class HttpBackgroundTaskApi implements BackgroundTaskApi {

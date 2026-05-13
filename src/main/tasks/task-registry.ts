@@ -7,8 +7,8 @@ the Free Software Foundation, version 3.
 */
 
 import type BackgroundTask from './BackgroundTask';
-import ImportWatchmodeTask from './ImportWatchmodeTask';
 import ImportTmdbTask from './ImportTmdbTask';
+import ImportWatchmodeTask from './ImportWatchmodeTask';
 
 export const TASK_REGISTRY_VALUES = [
   'import-watchmode',

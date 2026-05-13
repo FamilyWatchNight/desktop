@@ -6,13 +6,13 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import i18n from '../i18n';
-import * as db from '../database';
-import { type Role, type RoleData } from '../db/models/Roles';
-import type { PermissionStub } from '../auth/permissions';
-import { PERMISSIONS } from '../auth/permissions';
 import { AuthContext } from '../auth/context-manager';
 import { AuthenticationError, AuthorizationError } from '../auth/errors';
+import type { PermissionStub } from '../auth/permissions';
+import { PERMISSIONS } from '../auth/permissions';
+import * as db from '../database';
+import { type Role, type RoleData } from '../db/models/Roles';
+import i18n from '../i18n';
 
 export interface RoleWithPermissions extends Role {
   permissions: PermissionInfo[];
@@ -69,9 +69,12 @@ export class RoleService {
     if (!existingRole) {
       throw new Error(this.t('errors.roleNotFound', 'Role not found'));
     }
-    
+
     // Prevent updating system roles (except display name and isHidden)
-    if (existingRole.systemStub && (data.systemStub !== undefined || data.displayName === undefined)) {
+    if (
+      existingRole.systemStub &&
+      (data.systemStub !== undefined || data.displayName === undefined)
+    ) {
       throw new AuthorizationError(this.t('errors.cannotModifySystemRole'));
     }
 
@@ -94,14 +97,20 @@ export class RoleService {
     // Check if role is in use
     const usersWithRole = models.userRoles.getUsersByRoleId(id);
     if (usersWithRole.length > 0) {
-      throw new Error(this.t('errors.roleInUse', 'Role is assigned to users and cannot be deleted'));
+      throw new Error(
+        this.t('errors.roleInUse', 'Role is assigned to users and cannot be deleted'),
+      );
     }
 
     models.roles.delete(id);
   }
 
   // Permission management
-  setPermissionsForRole(roleId: number, permissionStubs: PermissionStub[], authContext?: AuthContext): void {
+  setPermissionsForRole(
+    roleId: number,
+    permissionStubs: PermissionStub[],
+    authContext?: AuthContext,
+  ): void {
     this.validateAuthContext(authContext);
 
     const models = db.getModels();
@@ -122,19 +131,19 @@ export class RoleService {
     this.validateAuthContext(authContext);
     const models = db.getModels();
     const permissionStubs = models.rolePermissions.getPermissionsForRole(roleId);
-    return permissionStubs.map(stub => ({
+    return permissionStubs.map((stub) => ({
       stub: stub.stub as PermissionStub,
       displayName: this.t(
-        PERMISSIONS.find(p => p.stub === stub.stub)?.displayNameKey || 'common.unknown'
-      )
+        PERMISSIONS.find((p) => p.stub === stub.stub)?.displayNameKey || 'common.unknown',
+      ),
     }));
   }
 
   getAllPermissions(authContext?: AuthContext): PermissionInfo[] {
     this.validateAuthContext(authContext);
-    return PERMISSIONS.map(permission => ({
+    return PERMISSIONS.map((permission) => ({
       stub: permission.stub,
-      displayName: this.t(permission.displayNameKey)
+      displayName: this.t(permission.displayNameKey),
     }));
   }
 
@@ -164,17 +173,17 @@ export class RoleService {
     const newRoleId = models.roles.create({
       displayName,
       systemStub: null, // Duplicates are never system roles
-      isHidden: sourceRole.isHidden
+      isHidden: sourceRole.isHidden,
     });
 
     // Copy the permissions
     if (permissionStubs.length > 0) {
-      models.rolePermissions.setPermissionsForRole(newRoleId, permissionStubs.map(p => p.stub));
+      models.rolePermissions.setPermissionsForRole(
+        newRoleId,
+        permissionStubs.map((p) => p.stub),
+      );
     }
 
     return newRoleId;
   }
 }
-
-
-

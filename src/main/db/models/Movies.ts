@@ -7,6 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import type Database from 'better-sqlite3';
+
 import { normalizeTitle } from '../../utils/text';
 
 export interface MovieRow {
@@ -90,7 +91,8 @@ export default class MoviesModel {
   }
 
   create(movieData: MovieData): number {
-    const { watchmode_id, tmdb_id, original_title, normalized_title, year, popularity, has_video } = movieData;
+    const { watchmode_id, tmdb_id, original_title, normalized_title, year, popularity, has_video } =
+      movieData;
     const result = this.insertStmt.run(
       watchmode_id,
       tmdb_id,
@@ -98,7 +100,7 @@ export default class MoviesModel {
       normalized_title,
       year,
       popularity,
-      has_video ? 1 : 0
+      has_video ? 1 : 0,
     );
     return Number(result.lastInsertRowid);
   }
@@ -119,7 +121,8 @@ export default class MoviesModel {
   }
 
   update(id: number, movieData: MovieData): boolean {
-    const { watchmode_id, tmdb_id, original_title, normalized_title, year, popularity, has_video } = movieData;
+    const { watchmode_id, tmdb_id, original_title, normalized_title, year, popularity, has_video } =
+      movieData;
     const result = this.updateStmt.run(
       watchmode_id,
       tmdb_id,
@@ -128,7 +131,7 @@ export default class MoviesModel {
       year,
       popularity,
       has_video ? 1 : 0,
-      id
+      id,
     );
     return result.changes > 0;
   }
@@ -147,7 +150,7 @@ export default class MoviesModel {
     watchmodeId: string,
     tmdbId: string,
     title: string,
-    year: string | null
+    year: string | null,
   ): number {
     const existing = this.getByWatchmodeId(watchmodeId);
 
@@ -158,11 +161,14 @@ export default class MoviesModel {
         year: year,
         popularity: existing.popularity,
         has_video: existing.has_video,
-        original_title: !existing.original_title || existing.original_title.trim() === '' ? title : existing.original_title,
+        original_title:
+          !existing.original_title || existing.original_title.trim() === ''
+            ? title
+            : existing.original_title,
         normalized_title:
           !existing.original_title || existing.original_title.trim() === ''
             ? normalizeTitle(title)
-            : existing.normalized_title
+            : existing.normalized_title,
       };
       this.update(existing.id, updateData);
       return existing.id;
@@ -174,7 +180,7 @@ export default class MoviesModel {
       normalized_title: normalizeTitle(title),
       year: year,
       popularity: null,
-      has_video: false
+      has_video: false,
     };
     return this.create(movieData);
   }
@@ -183,7 +189,7 @@ export default class MoviesModel {
     tmdbId: string,
     title: string,
     popularity: number | null,
-    has_video: boolean
+    has_video: boolean,
   ): number {
     const existing = this.getByTmdbId(tmdbId);
 
@@ -195,11 +201,13 @@ export default class MoviesModel {
         popularity,
         has_video,
         original_title:
-          !existing.original_title || existing.original_title.trim() === '' ? title : existing.original_title,
+          !existing.original_title || existing.original_title.trim() === ''
+            ? title
+            : existing.original_title,
         normalized_title:
           !existing.original_title || existing.original_title.trim() === ''
             ? normalizeTitle(title)
-            : existing.normalized_title
+            : existing.normalized_title,
       };
       this.update(existing.id, updateData);
       return existing.id;
@@ -211,7 +219,7 @@ export default class MoviesModel {
       normalized_title: normalizeTitle(title),
       year: null,
       popularity,
-      has_video
+      has_video,
     };
     return this.create(movieData);
   }
@@ -225,7 +233,7 @@ export default class MoviesModel {
       normalized_title: row.normalized_title,
       year: row.year,
       popularity: row.popularity,
-      has_video: Boolean(row.has_video)
+      has_video: Boolean(row.has_video),
     };
   }
 }

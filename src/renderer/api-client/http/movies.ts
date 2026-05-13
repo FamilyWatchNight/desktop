@@ -1,4 +1,5 @@
 import { MovieApi } from '../types';
+
 import { callApi } from './utils';
 
 export class HttpMovieApi implements MovieApi {

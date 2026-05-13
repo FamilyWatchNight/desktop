@@ -6,8 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import WebSocket, { WebSocketServer } from 'ws';
 import log from 'electron-log/main';
+import WebSocket, { WebSocketServer } from 'ws';
 
 interface WebSocketWithHeartbeat extends WebSocket {
   isAlive?: boolean;
@@ -87,8 +87,9 @@ export function broadcast(eventType: string, data: any): void {
 
   // Sanitize message data to prevent injection attacks
   const message = JSON.stringify({ type: eventType, data });
-  
-  if (message.length > 1024 * 1024) { // 1MB message limit
+
+  if (message.length > 1024 * 1024) {
+    // 1MB message limit
     log.warn('WebSocket message too large, skipping broadcast');
     return;
   }

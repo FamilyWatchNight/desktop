@@ -7,9 +7,10 @@ the Free Software Foundation, version 3.
 */
 
 import { ElectronApplication } from 'playwright';
-import { withTestHooks } from '../infrastructure/utils';
-import { Role } from '../../../../src/main/db/models/Roles';
+
 import { type AuthContextPayload } from '../../../../src/main/auth/context-manager';
+import { Role } from '../../../../src/main/db/models/Roles';
+import { withTestHooks } from '../infrastructure/utils';
 
 /**
  * API layer for exposing role-related functionality in the electron app to Cucumber tests.

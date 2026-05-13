@@ -7,8 +7,9 @@ the Free Software Foundation, version 3.
 */
 
 import fs from 'fs';
-import zlib from 'zlib';
 import { Readable } from 'stream';
+import zlib from 'zlib';
+
 import log from 'electron-log/main';
 
 /**

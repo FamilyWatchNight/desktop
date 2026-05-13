@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+ 
 
 function waitFor(cond: () => boolean, timeout = 2000): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -26,7 +26,7 @@ function makeMockTask(duration = 100, supportsCancel = false) {
       while (Date.now() - start < duration) {
         if (supportsCancel && context.isCancelled()) return;
         // small delay
-        // eslint-disable-next-line no-await-in-loop
+         
         await new Promise((r) => setTimeout(r, 10));
       }
       context.reportProgress({ current: 2, max: 2, description: 'done' });

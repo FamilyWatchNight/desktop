@@ -6,19 +6,21 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import Database from 'better-sqlite3';
-import path from 'path';
 import fs from 'fs';
-import MoviesModel from './db/models/Movies';
-import UsersModel from './db/models/Users';
-import UserProfilesModel from './db/models/UserProfiles';
-import RolesModel from './db/models/Roles';
-import RolePermissionsModel from './db/models/RolePermissions';
-import UserRolesModel from './db/models/UserRoles';
-import { getAppDataRoot } from './paths';
-import i18n from './i18n';
-import { DEFAULT_ROLES } from './auth/permissions';
+import path from 'path';
+
+import Database from 'better-sqlite3';
 import log from 'electron-log/main';
+
+import { DEFAULT_ROLES } from './auth/permissions';
+import MoviesModel from './db/models/Movies';
+import RolePermissionsModel from './db/models/RolePermissions';
+import RolesModel from './db/models/Roles';
+import UserProfilesModel from './db/models/UserProfiles';
+import UserRolesModel from './db/models/UserRoles';
+import UsersModel from './db/models/Users';
+import i18n from './i18n';
+import { getAppDataRoot } from './paths';
 
 interface DbModels {
   movies: MoviesModel;

@@ -1,6 +1,6 @@
 {
-    "menu":{
-        "open-app": "___Open App___",
-        "quit": "___Quit___"
-    }
+  "menu": {
+    "open-app": "___Open App___",
+    "quit": "___Quit___"
+  }
 }

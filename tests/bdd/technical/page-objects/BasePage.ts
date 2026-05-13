@@ -1,7 +1,9 @@
-import type { CustomWorld } from '../infrastructure/world';
-import type { Page } from 'playwright';
-import { TIMEOUT as UI_TIMEOUT } from '../infrastructure/ui-utils';
 import log from 'electron-log';
+import type { Page } from 'playwright';
+
+import { TIMEOUT as UI_TIMEOUT } from '../infrastructure/ui-utils';
+import type { CustomWorld } from '../infrastructure/world';
+
 
 export abstract class BasePage {
   private pageErrorsListening = false;

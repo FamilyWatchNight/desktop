@@ -8,11 +8,14 @@ the Free Software Foundation, version 3.
 
 import fs from 'fs';
 import path from 'path';
+
+import { app } from 'electron';
+import log from 'electron-log/main';
 import express, { type Express, type Request, type Response } from 'express';
 import RateLimit from 'express-rate-limit';
-import { app } from 'electron';
+
 import { registerHttpRoutes, initializeWebSocketServer } from './api-server';
-import log from 'electron-log/main';
+
 
 const isDevMode = !app.isPackaged;
 const rootDir = app.getAppPath();
@@ -21,7 +24,7 @@ const publicPath = path.join(rootDir, 'dist', 'renderer');
 export function startServer(app: Express, port: number): ReturnType<Express['listen']> {
 
   // set up rate limiter: maximum of five requests per minute
-  var limiter = RateLimit({
+  const limiter = RateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
     limit: 100, // max 100 requests per windowMs
   });
