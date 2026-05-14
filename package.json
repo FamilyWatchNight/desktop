@@ -73,7 +73,7 @@
     "@fontsource-variable/nunito-sans": "^5.2.7",
     "@types/bcryptjs": "^3.0.0",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.9.0",
+    "better-sqlite3": "^12.10.0",
     "csv-parse": "^6.2.1",
     "electron-log": "^5.4.4",
     "electron-store": "^11.0.2",
