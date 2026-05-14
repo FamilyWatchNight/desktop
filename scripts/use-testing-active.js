@@ -29,7 +29,7 @@ for (const file of existingFiles) {
   }
 }
 
-// Replace with no-op versions
+// Replace with active versions
 const files = fs.readdirSync(srcDir);
 for (const file of files) {
   if (fs.lstatSync(path.join(srcDir, file)).isDirectory()) {
@@ -40,3 +40,34 @@ for (const file of files) {
 }
 
 console.info('Copied testing-active files to src/main/testing');
+
+const rendererSrcDir = path.join(__dirname, '..', 'src', 'renderer', 'testing-active');
+const rendererDestDir = path.join(__dirname, '..', 'src', 'renderer', 'testing');
+
+if (fs.existsSync(rendererSrcDir)) {
+  fs.mkdirSync(rendererDestDir, { recursive: true });
+
+  const existingRendererFiles = fs.readdirSync(rendererDestDir);
+  for (const file of existingRendererFiles) {
+    if (fs.lstatSync(path.join(rendererDestDir, file)).isDirectory()) {
+      fs.rmSync(path.join(rendererDestDir, file), { recursive: true, force: true });
+    } else if (file !== 'README.md') {
+      fs.rmSync(path.join(rendererDestDir, file));
+    }
+  }
+
+  const rendererFiles = fs.readdirSync(rendererSrcDir);
+  for (const file of rendererFiles) {
+    if (fs.lstatSync(path.join(rendererSrcDir, file)).isDirectory()) {
+      fs.cpSync(path.join(rendererSrcDir, file), path.join(rendererDestDir, file), {
+        recursive: true,
+      });
+    } else if (file !== 'README.md') {
+      fs.copyFileSync(path.join(rendererSrcDir, file), path.join(rendererDestDir, file));
+    }
+  }
+
+  console.info('Copied testing-active files to src/renderer/testing');
+} else {
+  console.warn('No src/renderer/testing-active directory found');
+}

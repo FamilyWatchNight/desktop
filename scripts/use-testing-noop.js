@@ -41,6 +41,37 @@ for (const file of files) {
 
 console.info('Copied testing-noop files to src/main/testing');
 
+const rendererSrcDir = path.join(__dirname, '..', 'src', 'renderer', 'testing-noop');
+const rendererDestDir = path.join(__dirname, '..', 'src', 'renderer', 'testing');
+
+if (fs.existsSync(rendererSrcDir)) {
+  fs.mkdirSync(rendererDestDir, { recursive: true });
+
+  const existingRendererFiles = fs.readdirSync(rendererDestDir);
+  for (const file of existingRendererFiles) {
+    if (fs.lstatSync(path.join(rendererDestDir, file)).isDirectory()) {
+      fs.rmSync(path.join(rendererDestDir, file), { recursive: true, force: true });
+    } else if (file !== 'README.md') {
+      fs.rmSync(path.join(rendererDestDir, file));
+    }
+  }
+
+  const rendererFiles = fs.readdirSync(rendererSrcDir);
+  for (const file of rendererFiles) {
+    if (fs.lstatSync(path.join(rendererSrcDir, file)).isDirectory()) {
+      fs.cpSync(path.join(rendererSrcDir, file), path.join(rendererDestDir, file), {
+        recursive: true,
+      });
+    } else if (file !== 'README.md') {
+      fs.copyFileSync(path.join(rendererSrcDir, file), path.join(rendererDestDir, file));
+    }
+  }
+
+  console.info('Copied testing-noop files to src/renderer/testing');
+} else {
+  console.warn('No src/renderer/testing-noop directory found');
+}
+
 const testDir = path.join(__dirname, '..', 'dist', 'tests');
 
 if (fs.existsSync(testDir)) {
