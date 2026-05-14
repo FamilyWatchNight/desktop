@@ -6,17 +6,23 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import https from 'https';
 import fs from 'fs';
-import path from 'path';
+import https from 'https';
 import os from 'os';
+import path from 'path';
 import zlib from 'zlib';
-import BackgroundTask from './BackgroundTask';
-import type { TaskContext } from './BackgroundTask';
-import { getModels } from '../database';
+
 import log from 'electron-log/main';
 
-type DownloadJsonGzStream = (abortSignal: AbortSignal, dateFileSpec: string) => Promise<NodeJS.ReadableStream>;
+import { getModels } from '../database';
+
+import BackgroundTask from './BackgroundTask';
+import type { TaskContext } from './BackgroundTask';
+
+type DownloadJsonGzStream = (
+  abortSignal: AbortSignal,
+  dateFileSpec: string,
+) => Promise<NodeJS.ReadableStream>;
 
 export default class ImportTmdbTask extends BackgroundTask {
   private downloader: DownloadJsonGzStream | null;
@@ -34,7 +40,10 @@ export default class ImportTmdbTask extends BackgroundTask {
     return this.downloader ?? this.downloadJsonGzStream.bind(this);
   }
 
-  async downloadJsonGzStream(abortSignal: AbortSignal, dateFileSpec: string): Promise<NodeJS.ReadableStream> {
+  async downloadJsonGzStream(
+    abortSignal: AbortSignal,
+    dateFileSpec: string,
+  ): Promise<NodeJS.ReadableStream> {
     return new Promise((resolve, reject) => {
       const url = `https://files.tmdb.org/p/exports/movie_ids_${dateFileSpec}.json.gz`;
       const req = https.get(url, { signal: abortSignal }, (res) => {
@@ -107,7 +116,11 @@ export default class ImportTmdbTask extends BackgroundTask {
     });
   }
 
-  private async processFile(filePath: string, totalBytes: number, context: TaskContext): Promise<void> {
+  private async processFile(
+    filePath: string,
+    totalBytes: number,
+    context: TaskContext,
+  ): Promise<void> {
     const models = getModels();
     const fileStream = fs.createReadStream(filePath);
     let bytesRead = 0;
@@ -136,27 +149,29 @@ export default class ImportTmdbTask extends BackgroundTask {
 
     return new Promise((resolve, reject) => {
       fileStream.on('data', (chunk: Buffer | string) => {
-        processingPromise = processingPromise.then(async () => {
-          buffer += chunk.toString();
-          let index: number;
-          while ((index = buffer.indexOf('\n')) !== -1) {
-            if (context.isCancelled()) throw new Error('Task cancelled');
-            const line = buffer.slice(0, index);
-            buffer = buffer.slice(index + 1);
-            bytesRead += Buffer.byteLength(line, 'utf8') + 1;
-            await processLine(line);
-            const currentTime = Date.now();
-            if (currentTime - lastProgressTime >= 100) {
-              await new Promise((r) => setTimeout(r, 0));
-              context.reportProgress({
-                current: bytesRead,
-                max: totalBytes,
-                description: `Processing records... ${linesProcessed} titles processed`
-              });
-              lastProgressTime = currentTime;
+        processingPromise = processingPromise
+          .then(async () => {
+            buffer += chunk.toString();
+            let index: number;
+            while ((index = buffer.indexOf('\n')) !== -1) {
+              if (context.isCancelled()) throw new Error('Task cancelled');
+              const line = buffer.slice(0, index);
+              buffer = buffer.slice(index + 1);
+              bytesRead += Buffer.byteLength(line, 'utf8') + 1;
+              await processLine(line);
+              const currentTime = Date.now();
+              if (currentTime - lastProgressTime >= 100) {
+                await new Promise((r) => setTimeout(r, 0));
+                context.reportProgress({
+                  current: bytesRead,
+                  max: totalBytes,
+                  description: `Processing records... ${linesProcessed} titles processed`,
+                });
+                lastProgressTime = currentTime;
+              }
             }
-          }
-        }).catch(reject);
+          })
+          .catch(reject);
       });
       fileStream.on('end', () => {
         processingPromise
@@ -165,7 +180,7 @@ export default class ImportTmdbTask extends BackgroundTask {
             context.reportProgress({
               current: totalBytes,
               max: totalBytes,
-              description: `Processing records... ${linesProcessed} titles processed`
+              description: `Processing records... ${linesProcessed} titles processed`,
             });
           })
           .then(resolve)

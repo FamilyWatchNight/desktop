@@ -1,13 +1,13 @@
 -- Migration: Create Movies table
 CREATE TABLE IF NOT EXISTS movies (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    watchmode_id TEXT,
-    tmdb_id TEXT,
-    original_title TEXT,
-    normalized_title TEXT,
-    year TEXT,
-    popularity REAL,
-    has_video INTEGER
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  watchmode_id TEXT,
+  tmdb_id TEXT,
+  original_title TEXT,
+  normalized_title TEXT,
+  year TEXT,
+  popularity REAL,
+  has_video INTEGER
 );
 
 -- Create indexes for better performance

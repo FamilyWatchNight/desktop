@@ -18,12 +18,7 @@
           },
           "priority": {
             "type": "string",
-            "enum": [
-              "low",
-              "normal",
-              "high",
-              "urgent"
-            ],
+            "enum": ["low", "normal", "high", "urgent"],
             "description": "Priority level of the request",
             "default": "normal"
           },
@@ -42,16 +37,11 @@
                   "description": "MIME type of the image (e.g., image/png, image/jpeg)"
                 }
               },
-              "required": [
-                "data",
-                "mimeType"
-              ]
+              "required": ["data", "mimeType"]
             }
           }
         },
-        "required": [
-          "message"
-        ]
+        "required": ["message"]
       }
     }
   },

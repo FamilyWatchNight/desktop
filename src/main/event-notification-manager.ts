@@ -6,8 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import * as backgroundTaskManager from './background-task-manager';
 import { broadcastIpc, broadcastHttp } from './api-server';
+import * as backgroundTaskManager from './background-task-manager';
 
 export function initialize(): void {
   backgroundTaskManager.setNotifyFn((state) => {

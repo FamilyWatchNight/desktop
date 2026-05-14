@@ -70,7 +70,7 @@ export default class RolesModel {
       data.displayName,
       data.isHidden ? 1 : 0,
       now,
-      now
+      now,
     );
 
     return Number(result.lastInsertRowid);
@@ -93,34 +93,29 @@ export default class RolesModel {
 
   getAll(): Role[] {
     const rows = this.getAllStmt.all() as RoleRow[];
-    return rows.map(row => this.formatRole(row));
+    return rows.map((row) => this.formatRole(row));
   }
 
   update(id: number, data: Partial<RoleData>): void {
     this.db.exec('BEGIN EXCLUSIVE');
-    
+
     try {
       // Fetch current role
       const current = this.getById(id);
       if (!current) {
         throw new Error('Role not found');
       }
-      
+
       // Merge changes with current data
       const merged = {
         displayName: data.displayName !== undefined ? data.displayName : current.displayName,
-        isHidden: data.isHidden !== undefined ? data.isHidden : current.isHidden
+        isHidden: data.isHidden !== undefined ? data.isHidden : current.isHidden,
       };
-      
+
       // Update with merged data
       const now = new Date().toISOString();
-      this.updateStmt.run(
-        merged.displayName,
-        merged.isHidden ? 1 : 0,
-        now,
-        id
-      );
-      
+      this.updateStmt.run(merged.displayName, merged.isHidden ? 1 : 0, now, id);
+
       this.db.exec('COMMIT');
     } catch (error) {
       this.db.exec('ROLLBACK');
@@ -139,7 +134,7 @@ export default class RolesModel {
       displayName: row.display_name,
       isHidden: row.is_hidden === 1,
       createdAt: row.created_at,
-      updatedAt: row.updated_at
+      updatedAt: row.updated_at,
     };
   }
 }

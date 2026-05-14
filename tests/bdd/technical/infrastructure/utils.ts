@@ -7,9 +7,10 @@ the Free Software Foundation, version 3.
 */
 
 import { ElectronApplication } from 'playwright';
-import type { TestHooks } from '../../../../src/main/testing-active/TestHooksImpl';
-import { CustomWorld } from './world';
 
+import type { TestHooks } from '../../../../src/main/testing-active/TestHooksImpl';
+
+import { CustomWorld } from './world';
 
 export interface SerializedError {
   name: string;
@@ -31,7 +32,7 @@ function normalizeTestHookArg(value: unknown): unknown {
 
   if (value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
     return Object.fromEntries(
-      Object.entries(value).map(([key, entryValue]) => [key, normalizeTestHookArg(entryValue)])
+      Object.entries(value).map(([key, entryValue]) => [key, normalizeTestHookArg(entryValue)]),
     );
   }
 
@@ -46,7 +47,7 @@ export function parseSerializedError(error: unknown): SerializedError | null {
       try {
         return JSON.parse(jsonPart) as SerializedError;
       } catch {
-        return null
+        return null;
       }
     }
   }
@@ -67,10 +68,7 @@ export async function withTestHooks<T, A extends unknown[]>(
   const normalizedArgs = args.map(normalizeTestHookArg) as unknown[];
 
   return app.evaluate(
-    async (
-      { app },
-      payload: { fnSource: string; fnArgs: unknown[] }
-    ) => {
+    async ({ app }, payload: { fnSource: string; fnArgs: unknown[] }) => {
       const { fnSource, fnArgs } = payload;
 
       const appWithTestHooks = app as typeof app & {
@@ -79,7 +77,7 @@ export async function withTestHooks<T, A extends unknown[]>(
 
       if (!appWithTestHooks.testHooks) {
         throw new Error(
-          'Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.'
+          'Test hooks not available. Run `npm run build:main:for-integration testing` and launch the app for testing with NODE_ENV=test.',
         );
       }
 
@@ -89,7 +87,7 @@ export async function withTestHooks<T, A extends unknown[]>(
     {
       fnSource: fnString,
       fnArgs: normalizedArgs,
-    }
+    },
   );
 }
 

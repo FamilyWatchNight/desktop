@@ -7,7 +7,7 @@ export class MenuPanel extends BasePage {
     backgroundTasksButton: '[data-testid="menu-background-tasks"]',
     toggleButton: '[data-testid="menu-toggle-button"]',
     overlay: '[data-testid="menu-overlay"]',
-    sideMenu: '[data-testid="side-menu"]'
+    sideMenu: '[data-testid="side-menu"]',
   };
 
   async isMenuOpen(): Promise<boolean> {

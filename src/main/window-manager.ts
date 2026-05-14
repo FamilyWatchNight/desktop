@@ -6,8 +6,10 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { app, BrowserWindow } from 'electron';
 import path from 'path';
+
+import { app, BrowserWindow } from 'electron';
+
 import { setWindow } from './api-server';
 
 let mainWindow: BrowserWindow | null = null;
@@ -27,8 +29,8 @@ export function createAppWindow(): void {
     icon: path.join(app.getAppPath(), 'assets', 'images', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true
-    }
+      contextIsolation: true,
+    },
   });
 
   const startUrl = process.env.ELECTRON_START_URL;

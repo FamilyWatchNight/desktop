@@ -7,9 +7,10 @@ the Free Software Foundation, version 3.
 */
 
 import { EventEmitter } from 'events';
-import { TASK_REGISTRY, type TaskRegistryType } from './tasks/task-registry';
+
 import type BackgroundTask from './tasks/BackgroundTask';
 import type { ProgressReport, TaskContext } from './tasks/BackgroundTask';
+import { TASK_REGISTRY, type TaskRegistryType } from './tasks/task-registry';
 
 interface QueueEntry {
   id: string;
@@ -44,7 +45,7 @@ interface StatePayload {
 let taskIdCounter = 0;
 const queue: QueueEntry[] = [];
 let active: ActiveEntry | null = null;
-let eventEmitter = new EventEmitter();
+const eventEmitter = new EventEmitter();
 
 function generateId(): string {
   return `task-${++taskIdCounter}-${Date.now()}`;
@@ -52,7 +53,9 @@ function generateId(): string {
 
 function payload(entry: ActiveEntry | QueueEntry | null): TaskPayload | null {
   if (!entry) return null;
-  const TaskClass = TASK_REGISTRY[entry.type as TaskRegistryType] as (new () => BackgroundTask) | undefined;
+  const TaskClass = TASK_REGISTRY[entry.type as TaskRegistryType] as
+    | (new () => BackgroundTask)
+    | undefined;
   const label = TaskClass ? (TaskClass as unknown as typeof BackgroundTask).label : entry.type;
   return {
     id: entry.id,
@@ -61,14 +64,14 @@ function payload(entry: ActiveEntry | QueueEntry | null): TaskPayload | null {
     status: entry.status,
     current: entry.current,
     max: entry.max,
-    description: entry.description ?? ''
+    description: entry.description ?? '',
   };
 }
 
 function emitUpdate(): void {
   eventEmitter.emit('background-tasks.update', {
     active: active ? payload(active) : null,
-    queue: queue.map((e) => payload(e) as TaskPayload)
+    queue: queue.map((e) => payload(e) as TaskPayload),
   });
 }
 
@@ -82,7 +85,7 @@ async function processQueue(): Promise<void> {
     current: undefined,
     max: undefined,
     description: '',
-    cancelled
+    cancelled,
   };
   emitUpdate();
 
@@ -98,7 +101,7 @@ async function processQueue(): Promise<void> {
       emitUpdate();
     },
     isCancelled: () => active?.cancelled?.value ?? false,
-    abortSignal: abortController.signal
+    abortSignal: abortController.signal,
   };
 
   try {
@@ -129,7 +132,7 @@ export function clearNotifyFn(fn: (state: StatePayload) => void): void {
 
 export function enqueue(
   type: TaskRegistryType,
-  args: Record<string, unknown> = {}
+  args: Record<string, unknown> = {},
 ): { success: boolean; taskId?: string; error?: string } {
   const TaskClass = TASK_REGISTRY[type as TaskRegistryType];
   if (!TaskClass) {
@@ -142,7 +145,7 @@ export function enqueue(
     status: 'queued',
     current: undefined,
     max: undefined,
-    description: ''
+    description: '',
   };
   queue.push(entry);
   emitUpdate();
@@ -173,6 +176,6 @@ export function removeQueued(taskId: string): { success: boolean; error?: string
 export function getState(): StatePayload {
   return {
     active: active ? payload(active) : null,
-    queue: queue.map((e) => payload(e) as TaskPayload)
+    queue: queue.map((e) => payload(e) as TaskPayload),
   };
 }

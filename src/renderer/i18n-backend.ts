@@ -1,20 +1,22 @@
 import { BackendModule } from 'i18next';
+
 import { createApiClient } from './api-client';
 
 export class ApiBackend implements BackendModule {
-  type: 'backend' = 'backend';
-  static type: 'backend' = 'backend';
+  type = 'backend' as const;
+  static type = 'backend' as const;
 
   private api = createApiClient().app;
 
-  init(_services: any, _backendOptions: any, _i18nextOptions: any): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  init(_services: unknown, _backendOptions: unknown, _i18nextOptions: unknown): void {
     // no initialization needed for this backend
   }
 
   read(
     language: string,
     namespace: string,
-    callback: (err: any, data: Record<string, string>) => void
+    callback: (err: unknown, data: Record<string, string>) => void,
   ): void {
     this.api
       .getLocaleFile(namespace, language)
@@ -26,7 +28,7 @@ export class ApiBackend implements BackendModule {
     languages: readonly string[],
     namespace: string,
     key: string,
-    fallbackValue: string
+    fallbackValue: string,
   ): void {
     // i18next passes an array of languages; we only care about the first one.
     const language = Array.isArray(languages) ? languages[0] : (languages as unknown as string);
@@ -34,10 +36,11 @@ export class ApiBackend implements BackendModule {
     // Only attempt to save if the API actually exposes the method (dev mode).
     if (this.api.saveMissingKey) {
       // Some implementations may not return a promise, so wrap with Promise.resolve
-      Promise.resolve(this.api.saveMissingKey(namespace, language, key, fallbackValue))
-        .catch(() => {
+      Promise.resolve(this.api.saveMissingKey(namespace, language, key, fallbackValue)).catch(
+        () => {
           // ignore errors; failures aren't critical for missing-key logging
-        });
+        },
+      );
     }
   }
 }

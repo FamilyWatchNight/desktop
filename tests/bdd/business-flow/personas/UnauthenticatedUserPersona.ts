@@ -1,4 +1,3 @@
 import { UserPersona } from './UserPersona';
 
-export class UnauthenticatedUserPersona extends UserPersona {
-}
+export class UnauthenticatedUserPersona extends UserPersona {}

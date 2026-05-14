@@ -51,7 +51,6 @@ jobs:
       - name: Prepare for CI
         run: npm ci
 
-
       - name: Get package version
         id: package_version
         shell: pwsh

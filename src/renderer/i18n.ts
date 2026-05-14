@@ -1,9 +1,14 @@
 import i18n, { LanguageDetectorAsyncModule } from 'i18next';
 import { initReactI18next } from 'react-i18next';
+
 import { createApiClient } from './api-client';
 import ApiBackend from './i18n-backend';
 
-const isDevMode = typeof window !== 'undefined' && (window as any).isDevMode === true;
+interface DevWindow extends Window {
+  isDevMode?: boolean;
+}
+
+const isDevMode = typeof window !== 'undefined' && (window as DevWindow).isDevMode === true;
 
 // Set the UI language based on the language returned by the main process.
 // This allows the UI to match the user's system language without needing a separate language setting in the app.
@@ -14,7 +19,8 @@ const electronDetector: LanguageDetectorAsyncModule = {
   detect: (callback: (lng: string) => void) => {
     const apiClient = createApiClient();
 
-    apiClient.app.getAppLocale()
+    apiClient.app
+      .getAppLocale()
       .then((locale: string) => {
         callback(locale);
       })
@@ -22,7 +28,7 @@ const electronDetector: LanguageDetectorAsyncModule = {
         callback('en'); // Fallback on error
       });
   },
-  cacheUserLanguage: () => {}
+  cacheUserLanguage: () => {},
 };
 
 i18n

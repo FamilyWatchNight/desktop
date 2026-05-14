@@ -6,95 +6,93 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { app, Menu, Tray } from "electron";
-import { registerIpcHandlers } from "./api-server/ipc";
-import { createAppWindow } from "./window-manager";
-import path from "path";
-import express from "express";
-import * as server from "./server";
-import * as db from "./database";
-import type { TestHooks } from "./testing/TestHooksImpl";
-import { getTestHooks } from "./testing/TestHooksImpl";
-import i18n from "./i18n";
-import { settingsService } from "./api-server/ipc/instances";
-import { initialize as initializeSettingsManager } from "./settings-manager";
-import { initialize as initializeEventNotificationManager } from "./event-notification-manager";
-import { createSystemContext } from './auth/context-manager';
+import path from 'path';
+
+import { app, Menu, Tray } from 'electron';
 import log from 'electron-log/main';
+import express from 'express';
+
+import { registerIpcHandlers } from './api-server/ipc';
+import { settingsService } from './api-server/ipc/instances';
+import { createSystemContext } from './auth/context-manager';
+import * as db from './database';
+import { initialize as initializeEventNotificationManager } from './event-notification-manager';
+import i18n from './i18n';
+import * as server from './server';
+import { initialize as initializeSettingsManager } from './settings-manager';
+import type { TestHooks } from './testing/TestHooksImpl';
+import { getTestHooks } from './testing/TestHooksImpl';
+import { createAppWindow } from './window-manager';
 
 let tray: Tray | null = null;
 const webServer = express();
 const t = i18n.t.bind(i18n);
 
-if (process.env.NODE_ENV === "development") {
-  require("electron-reloader")(module, {
+if (process.env.NODE_ENV === 'development') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('electron-reloader')(module, {
     watchRenderer: false,
   });
 }
 
 function createTray(): void {
-  const iconPath = path.join(
-    app.getAppPath(),
-    "assets",
-    "images",
-    "icon.png",
-  );
+  const iconPath = path.join(app.getAppPath(), 'assets', 'images', 'icon.png');
   tray = new Tray(iconPath);
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: t("menu.open-app"),
+      label: t('menu.open-app'),
       click: () => {
         // use createAppWindow which focuses if already open
         createAppWindow();
       },
     },
-    { type: "separator" },
+    { type: 'separator' },
     {
-      label: t("menu.quit"),
+      label: t('menu.quit'),
       click: () => {
         app.quit();
       },
     },
   ]);
 
-  tray.setToolTip(t("app.name", { ns: "common" }));
+  tray.setToolTip(t('app.name', { ns: 'common' }));
   tray.setContextMenu(contextMenu);
 
-  tray.on("click", () => {
+  tray.on('click', () => {
     createAppWindow();
   });
 
-  tray.on("double-click", () => {
+  tray.on('double-click', () => {
     createAppWindow();
   });
 }
 
-app.on("ready", async () => {
+app.on('ready', async () => {
   const isDevMode = !app.isPackaged;
-  const isTestMode = process.env.NODE_ENV === "test";
+  const isTestMode = process.env.NODE_ENV === 'test';
 
   log.transports.file.level = false;
-  log.transports.console.level = isTestMode ? "warn" : isDevMode ? "debug" : "error";
+  log.transports.console.level = isTestMode ? 'warn' : isDevMode ? 'debug' : 'error';
   if (process.env.LOG_LEVEL) {
     switch (process.env.LOG_LEVEL.toLowerCase()) {
-      case "silly":
-        log.transports.console.level = "silly";
+      case 'silly':
+        log.transports.console.level = 'silly';
         break;
-      case "debug":
-        log.transports.console.level = "debug";
+      case 'debug':
+        log.transports.console.level = 'debug';
         break;
-      case "verbose":
-        log.transports.console.level = "verbose";
+      case 'verbose':
+        log.transports.console.level = 'verbose';
         break;
-      case "info":
-        log.transports.console.level = "info";
+      case 'info':
+        log.transports.console.level = 'info';
         break;
-      case "warn":
-        log.transports.console.level = "warn";
+      case 'warn':
+        log.transports.console.level = 'warn';
         break;
-      case "error":
-        log.transports.console.level = "error";
+      case 'error':
+        log.transports.console.level = 'error';
         break;
       default:
         console.warn(
@@ -102,58 +100,68 @@ app.on("ready", async () => {
         );
     }
   }
-  log.debug("[APP] App ready event fired");
+  log.debug('[APP] App ready event fired');
   // Initialize the logger to be available in renderer process
   log.initialize();
 
-  const locale = process.env.NODE_ENV === "test" ? "test" : ( isDevMode ? "dev" : app.getLocale() );
+  const locale = process.env.NODE_ENV === 'test' ? 'test' : isDevMode ? 'dev' : app.getLocale();
 
-  log.info(`App is ready. Locale: ${locale}, isDev: ${isDevMode}, NODE_ENV: ${process.env.NODE_ENV}, log level: ${log.transports.console.level}`);
+  log.info(
+    `App is ready. Locale: ${locale}, isDev: ${isDevMode}, NODE_ENV: ${process.env.NODE_ENV}, log level: ${log.transports.console.level}`,
+  );
 
   await i18n.changeLanguage(locale);
-  log.debug("[APP] i18n initialized");
+  log.debug('[APP] i18n initialized');
 
   // TEST INTERCEPTION POINT: Await { preInit: true } steps if in test mode
-  const appWithTestHooks = app as typeof app & { testHooks?: any };
-  if (process.env.NODE_ENV === 'test' && appWithTestHooks.testHooks?.appLifecycle?.waitForPreInitSteps) {
-    log.debug("[APP] Waiting for { preInit: true } steps...");
+  type AppWithOptionalTestHooks = typeof app & {
+    testHooks?: {
+      appLifecycle?: {
+        waitForPreInitSteps?: () => Promise<void>;
+        signalAppReady?: () => void;
+      };
+    };
+  };
+  const appWithTestHooks = app as AppWithOptionalTestHooks;
+  if (
+    process.env.NODE_ENV === 'test' &&
+    appWithTestHooks.testHooks?.appLifecycle?.waitForPreInitSteps
+  ) {
+    log.debug('[APP] Waiting for { preInit: true } steps...');
     await appWithTestHooks.testHooks.appLifecycle.waitForPreInitSteps();
-    log.debug("[APP] PreInit steps completed, continuing initialization");
+    log.debug('[APP] PreInit steps completed, continuing initialization');
   }
-  
-  log.debug("[APP] Initializing database...");
+
+  log.debug('[APP] Initializing database...');
   db.initDatabase();
-  log.debug("[APP] Database initialized");
+  log.debug('[APP] Database initialized');
 
   await initializeSettingsManager();
-  log.debug("[APP] Settings initialized");
+  log.debug('[APP] Settings initialized');
   createTray();
   registerIpcHandlers();
 
   const systemAuthContext = createSystemContext();
 
   try {
-    const port = (settingsService.get("webPort", systemAuthContext) as number) || 3000;
+    const port = (settingsService.get('webPort', systemAuthContext) as number) || 3000;
     server.startServer(webServer, port);
     initializeEventNotificationManager();
   } catch (error) {
-    log.error(
-      "Failed to load settings, using default port:",
-      (error as Error).message,
-    );
+    log.error('Failed to load settings, using default port:', (error as Error).message);
     server.startServer(webServer, 3000);
     initializeEventNotificationManager();
   }
-  log.info("Web server started");
+  log.info('Web server started');
 
   // Signal app fully ready for tests
-  log.debug("[APP] Signaling app ready for tests");
+  log.debug('[APP] Signaling app ready for tests');
   if (process.env.NODE_ENV === 'test') {
-    appWithTestHooks.testHooks?.appLifecycle?.signalAppReady();
+    appWithTestHooks.testHooks?.appLifecycle?.signalAppReady?.();
   }
 });
 
-app.on("will-quit", () => {
+app.on('will-quit', () => {
   db.closeDatabase();
 });
 
@@ -165,7 +173,7 @@ app.on('window-all-closed', () => {
 // Note that build:main populates the testing directory with no-op implementations,
 // and build:main:for-integration-testing populates it with the active implementations,
 // so this code only runs when the testing-active scripts have been used.
-if (process.env.NODE_ENV === "test") {
+if (process.env.NODE_ENV === 'test') {
   const appWithTestHooks = app as typeof app & {
     testHooks?: TestHooks;
   };
@@ -179,7 +187,7 @@ if (process.env.NODE_ENV === "test") {
   (
     global as unknown as {
       __testCallbacks: {
-        createTaskContext: () => import("./tasks/BackgroundTask").TaskContext;
+        createTaskContext: () => import('./tasks/BackgroundTask').TaskContext;
       };
     }
   ).__testCallbacks = {

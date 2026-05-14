@@ -1,4 +1,6 @@
-@integration @rbac @rbac-authorization-checks
+@integration
+@rbac
+@rbac-authorization-checks
 Feature: RBAC authorization checks
   As an internal service for enforcing access control
   I want to verify permissions are correctly assigned and checked

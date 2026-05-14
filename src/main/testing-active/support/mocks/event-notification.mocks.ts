@@ -29,12 +29,14 @@ export function getRecordedEvents(): Array<{ type: string; data: unknown; timest
   return [...recordedEvents]; // Return copy to prevent external mutation
 }
 
-export function findEventByType(type: string): { type: string; data: unknown; timestamp: number } | undefined {
+export function findEventByType(
+  type: string,
+): { type: string; data: unknown; timestamp: number } | undefined {
   return recordedEvents.find((e) => e.type === type);
 }
 
 export function filterEventsByType(
-  type: string
+  type: string,
 ): Array<{ type: string; data: unknown; timestamp: number }> {
   return recordedEvents.filter((e) => e.type === type);
 }

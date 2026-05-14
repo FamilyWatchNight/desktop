@@ -1,0 +1,6 @@
+node_modules
+dist
+test-results
+src/main/app-info.json
+src/main/testing/*.ts
+src/main/testing/**

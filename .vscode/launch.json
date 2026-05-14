@@ -32,9 +32,7 @@
   "compounds": [
     {
       "name": "Full Debug",
-      "configurations": [
-        "Electron Main",
-        "Electron Renderer"],
+      "configurations": ["Electron Main", "Electron Renderer"],
       "stopAll": true
     }
   ]

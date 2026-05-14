@@ -6,10 +6,11 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { Given, When, Then } from '@cucumber/cucumber';
+import { When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import { CustomWorld } from '../../technical/infrastructure/world';
+
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
+import { CustomWorld } from '../../technical/infrastructure/world';
 
 // Helper to get or create system persona for this scenario
 function getSystemPersona(world: CustomWorld): InternalSystemPersona {

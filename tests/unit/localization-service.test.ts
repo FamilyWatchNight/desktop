@@ -1,6 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+
 import { LocalizationService } from '../../src/main/services/LocalizationService';
 
 describe('LocalizationService (missing-key persistence)', () => {
@@ -16,7 +17,9 @@ describe('LocalizationService (missing-key persistence)', () => {
     // clean up whatever we created
     try {
       fs.rmSync(tempDir, { recursive: true, force: true });
-    } catch {}
+    } catch {
+      /* Ignore any errors trying to clean up. */
+    }
   });
 
   it('creates a missing.json file and writes a simple key', async () => {
@@ -84,8 +87,6 @@ describe('LocalizationService (missing-key persistence)', () => {
   it('rejects invalid parameters', async () => {
     await expect(service.saveMissingKey('invalid*name', 'en', 'key', 'value')).rejects.toThrow();
     await expect(service.saveMissingKey('app', 'bad lang', 'key', 'value')).rejects.toThrow();
-    // non-string key/fallback
-    // @ts-ignore
     await expect(service.saveMissingKey('app', 'en', 123, 456)).rejects.toThrow();
   });
 });

@@ -1,4 +1,6 @@
-@integration @rbac @rbac-role-permissions
+@integration
+@rbac
+@rbac-role-permissions
 Feature: RBAC role permissions
   As an internal service for enforcing access control
   I want to assign and update permissions for roles
@@ -33,4 +35,3 @@ Feature: RBAC role permissions
       | can-unhide-show    |
       | can-update-show    |
       | can-admin          |
-

@@ -7,11 +7,6 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": [
-    "src/renderer/**/*.ts"
-  ],
-  "exclude": [
-    "src/main/**/*",
-    "tests/**/*"
-  ]
+  "include": ["src/renderer/**/*.ts"],
+  "exclude": ["src/main/**/*", "tests/**/*"]
 }

@@ -1,12 +1,16 @@
-import type { CustomWorld } from './world';
 import type { Page } from 'playwright';
+
+import type { CustomWorld } from './world';
 
 export const TIMEOUT = 4000;
 
 export async function verifyPageIsVisible(world: CustomWorld, pageName: string): Promise<void> {
   const page = await getActivePage(world);
   try {
-    await page.waitForSelector(`[data-testid=page-${pageName}]`, { state: 'visible', timeout: TIMEOUT });
+    await page.waitForSelector(`[data-testid=page-${pageName}]`, {
+      state: 'visible',
+      timeout: TIMEOUT,
+    });
   } catch (error) {
     console.error(`Error occurred while waiting for page: ${pageName}`);
     throw error;
@@ -28,7 +32,10 @@ export async function takeScreenshot(world: CustomWorld, name: string): Promise<
   await page.screenshot({ path: `./test-results/screenshots/${name}.png`, fullPage: true });
 }
 
-export async function captureFailureScreenshot(world: CustomWorld, scenarioName: string): Promise<void> {
+export async function captureFailureScreenshot(
+  world: CustomWorld,
+  scenarioName: string,
+): Promise<void> {
   await takeScreenshot(world, scenarioName.replace(/\s+/g, '-'));
 }
 

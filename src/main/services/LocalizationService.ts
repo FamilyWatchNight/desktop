@@ -8,17 +8,19 @@ the Free Software Foundation, version 3.
 
 import fs from 'fs';
 import path from 'path';
-import { safeJoin, assertPathInsideAllowedDirs } from '../security/pathGuards';
+
 import { app } from 'electron';
+
 import { AuthContext } from '../auth/context-manager';
+import { safeJoin, assertPathInsideAllowedDirs } from '../security/pathGuards';
 
 const isTestMode = process.env.NODE_ENV === 'test';
 const isDevMode = !(app && app.isPackaged);
 const defaultLocalesPath = safeJoin(
   // if `app` is missing or doesn't have getAppPath, fall back to cwd so path
   // operations succeed during unit tests.
-  (app && typeof app.getAppPath === 'function') ? app.getAppPath() : process.cwd(),
-  'assets/locales'
+  app && typeof app.getAppPath === 'function' ? app.getAppPath() : process.cwd(),
+  'assets/locales',
 );
 
 function normalizeLanguage(language: string): string {
@@ -32,7 +34,9 @@ function normalizeLanguage(language: string): string {
   }
 
   if (parts.length > 2) {
-    throw new Error('Invalid language: must be either a simple language code or language and region in the form ll-RR');
+    throw new Error(
+      'Invalid language: must be either a simple language code or language and region in the form ll-RR',
+    );
   } else if (parts.length === 2) {
     const region = parts[1].toUpperCase();
     if (!/^[A-Z]{2,8}$/.test(region)) {
@@ -48,24 +52,28 @@ function normalizeLanguage(language: string): string {
 function normalizeNamespace(namespace: string): string {
   const trimmed = namespace.trim().toLowerCase();
 
-  if (! /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/.test(trimmed)) {
-    throw new Error('Invalid namespace: Must be alphanumeric segments separated by single hyphens or underscords.')
+  if (!/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/.test(trimmed)) {
+    throw new Error(
+      'Invalid namespace: Must be alphanumeric segments separated by single hyphens or underscords.',
+    );
   }
 
   return trimmed;
 }
 
 // Helper to set a nested value on an object given a dot-separated key path.
-function setNestedValue(obj: Record<string, any>, pathStr: string, value: any) {
+function setNestedValue(obj: Record<string, unknown>, pathStr: string, value: unknown) {
   const parts = pathStr.split('.');
 
   const MAX_KEY_SEGMENTS = 100;
   if (parts.length > MAX_KEY_SEGMENTS) {
-    throw new Error(`Invalid assignment: Key has too many nested segments (max ${MAX_KEY_SEGMENTS})`);
+    throw new Error(
+      `Invalid assignment: Key has too many nested segments (max ${MAX_KEY_SEGMENTS})`,
+    );
   }
 
   // Start with the topmost object
-  let current: Record<string, any> = obj;
+  let current: Record<string, unknown> = obj;
 
   // Iterate through the parts of the path, creating nested objects as needed.
   for (let i = 0; i < parts.length; i++) {
@@ -81,7 +89,7 @@ function setNestedValue(obj: Record<string, any>, pathStr: string, value: any) {
           current[part] = {};
         }
         // Step down into the next level of the object for the next iteration.
-        current = current[part];
+        current = current[part] as Record<string, unknown>;
       }
     }
   }
@@ -99,9 +107,10 @@ export class LocalizationService {
     this.localesPath = localesPath;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private validateAuthContext(_authContext?: AuthContext): void {
     // No-op - translations available to all users including unauthenticated.
-    // We still have a validateAuthContext method to enforce the pattern that 
+    // We still have a validateAuthContext method to enforce the pattern that
     // all service methods must accept an optional authContext and validate it,
     // even if in this case there are no actual restrictions.
   }
@@ -117,19 +126,32 @@ export class LocalizationService {
     return candidatePath;
   }
 
-  async getLocaleFile(namespace: string, language: string, authContext?: AuthContext): Promise<Record<string, string>> {
+  async getLocaleFile(
+    namespace: string,
+    language: string,
+    authContext?: AuthContext,
+  ): Promise<Record<string, string>> {
     this.validateAuthContext(authContext);
-    const filePath = this.getLocaleFilePath(normalizeLanguage(language), normalizeNamespace(namespace));
+    const filePath = this.getLocaleFilePath(
+      normalizeLanguage(language),
+      normalizeNamespace(namespace),
+    );
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8');
       return JSON.parse(content);
-    } catch (error) {
+    } catch {
       // Return empty object if file doesn't exist or is malformed (i18next will handle fallbacks)
       return {};
     }
   }
 
-  async saveMissingKey(namespace: string, language: string, key: string, fallbackValue: string, authContext?: AuthContext): Promise<void> {
+  async saveMissingKey(
+    namespace: string,
+    language: string,
+    key: string,
+    fallbackValue: string,
+    authContext?: AuthContext,
+  ): Promise<void> {
     this.validateAuthContext(authContext);
     if (!isDevMode && !isTestMode) {
       // Client-side protections should keep us from getting here, but guard against accidental calls in production just in case.
@@ -153,10 +175,16 @@ export class LocalizationService {
     const MAX_KEY_SEGMENTS = 100;
     const segmentCount = trimmedKey.split('.').length;
     if (segmentCount > MAX_KEY_SEGMENTS) {
-      throw new Error(`Invalid assignment: Key has too many nested segments (max ${MAX_KEY_SEGMENTS})`);
+      throw new Error(
+        `Invalid assignment: Key has too many nested segments (max ${MAX_KEY_SEGMENTS})`,
+      );
     }
 
-    const missingFilePath = this.getLocaleFilePath(normalizeLanguage(language), normalizeNamespace(namespace), '.missing');
+    const missingFilePath = this.getLocaleFilePath(
+      normalizeLanguage(language),
+      normalizeNamespace(namespace),
+      '.missing',
+    );
 
     // Queue up operations for this specific file so they execute sequentially.
     const queueKey = missingFilePath;
@@ -165,10 +193,10 @@ export class LocalizationService {
     const current = previous.then(async () => {
       // Re-read file at the moment we have the lock, merging any changes
       // written by earlier callers.
-      let missingKeys: Record<string, any> = {};
+      let missingKeys: Record<string, unknown> = {};
       try {
         const content = await fs.promises.readFile(missingFilePath, 'utf-8');
-        missingKeys = JSON.parse(content);
+        missingKeys = JSON.parse(content) as Record<string, unknown>;
       } catch {
         // File doesn't exist yet. That's not an error. We'll create it later.
       }
@@ -187,11 +215,14 @@ export class LocalizationService {
     });
 
     // store/cleanup the queue entry
-    this.writeQueues.set(queueKey, current.finally(() => {
-      if (this.writeQueues.get(queueKey) === current) {
-        this.writeQueues.delete(queueKey);
-      }
-    }));
+    this.writeQueues.set(
+      queueKey,
+      current.finally(() => {
+        if (this.writeQueues.get(queueKey) === current) {
+          this.writeQueues.delete(queueKey);
+        }
+      }),
+    );
 
     try {
       await current;

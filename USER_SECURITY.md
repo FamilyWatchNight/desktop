@@ -1,4 +1,5 @@
 # Desired Capabilities
+
 - Standard secure logon capabilities, with hashed, salted passwords using the latest security best practices
 - usernames are unique and required. Email addresses are optional.
 - The main "users" table in the SQLite database includes fields needed for authentication and security (such as last login time), but not for role-based authorization, user profile, or preferences. Those will be stored in their own tables, to be created as needed.
@@ -34,7 +35,7 @@
   - Creation of first admin user when no users exist yet
   - Login for existing users.
     - Does not prompt for username/password. Rather, it lists the existing users (who have can-host [or can-admin] permission) with their profile pictures and display names. When one is clicked, it prompts for the password, if any. If no password, then the user is logged on immediately.
-  - User Profile update (conditioned on can-update-profile permission), including changing password, display name, and profile picture 
+  - User Profile update (conditioned on can-update-profile permission), including changing password, display name, and profile picture
   - Add/Edit/Delete existing user (conditioned on can-manage-users permission), including changing password, display name, profile picture, and roles. Users MAY be created with no roles assigned. They can't log in, but we'll have a use for them in the future. Only users with can-admin permission can grant or remove a role with can-admin permission. Prevent removing can-admin permission from one's own account, so there will always be someone with can-admin permission.
   - Add/Edit/Delete roles (conditioned on can-admin permission). System-defined roles (those with system-stubs) cannot be deleted. Users can duplicate roles to create variants, change display names of system roles, and hide roles to prevent their assignment to users. Permissions of system roles cannot be modified. Prevent deleting a role that's assigned to a user.
 - Restrictions listed in the UI workflow above should be enforced in the application logic, not only in the UI.

@@ -6,11 +6,11 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { AuthContext } from '../auth/context-manager';
+import { AuthenticationError } from '../auth/errors';
 import * as db from '../database';
 import type { Movie } from '../db/models/Movies';
 import i18n from '../i18n';
-import { AuthContext } from '../auth/context-manager';
-import { AuthenticationError } from '../auth/errors';
 
 export class MovieService {
   private t = i18n.getFixedT(null, 'auth');

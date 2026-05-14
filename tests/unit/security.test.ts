@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
+
 import { assertPathInsideAllowedDirs, safeJoin } from '../../src/main/security';
 
 describe('Security Utilities', () => {
@@ -148,10 +149,7 @@ describe('Security Utilities', () => {
         return;
       }
 
-      expect(() => assertPathInsideAllowedDirs(link, temp)).toThrow(
-        'Symlink escape detected',
-      );
+      expect(() => assertPathInsideAllowedDirs(link, temp)).toThrow('Symlink escape detected');
     });
   });
-
 });
