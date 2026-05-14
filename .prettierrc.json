@@ -5,5 +5,14 @@
   "semi": true,
   "singleQuote": true,
   "trailingComma": "all",
-  "proseWrap": "preserve"
+  "proseWrap": "preserve",
+  "overrides": [
+    {
+      "files": "*.feature",
+      "options": {
+        "embeddedLanguageFormatting": "off"
+      }
+    }
+  ],
+  "plugins": ["prettier-plugin-gherkin"]
 }

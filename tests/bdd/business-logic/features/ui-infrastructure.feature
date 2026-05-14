@@ -10,6 +10,7 @@ Feature: Basic UI Infrastructure
     When the user navigates to the Settings page
     Then the Settings page is visible
 
+
 #  The following scenario illustrates how to validate that settings that are
 #  configured PRIOR to app launch are correctly applied in the application.
 #  It's commented out right now because viewing settings requires an administrative
