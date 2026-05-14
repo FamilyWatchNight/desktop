@@ -1,4 +1,6 @@
 node_modules
 dist
-build
-coverage
+test-results
+src/main/app-info.json
+src/main/testing/*.ts
+src/main/testing/**
