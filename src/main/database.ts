@@ -6,19 +6,21 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import Database from 'better-sqlite3';
-import path from 'path';
 import fs from 'fs';
-import MoviesModel from './db/models/Movies';
-import UsersModel from './db/models/Users';
-import UserProfilesModel from './db/models/UserProfiles';
-import RolesModel from './db/models/Roles';
-import RolePermissionsModel from './db/models/RolePermissions';
-import UserRolesModel from './db/models/UserRoles';
-import { getAppDataRoot } from './paths';
-import i18n from './i18n';
-import { DEFAULT_ROLES } from './auth/permissions';
+import path from 'path';
+
+import Database from 'better-sqlite3';
 import log from 'electron-log/main';
+
+import { DEFAULT_ROLES } from './auth/permissions';
+import MoviesModel from './db/models/Movies';
+import RolePermissionsModel from './db/models/RolePermissions';
+import RolesModel from './db/models/Roles';
+import UserProfilesModel from './db/models/UserProfiles';
+import UserRolesModel from './db/models/UserRoles';
+import UsersModel from './db/models/Users';
+import i18n from './i18n';
+import { getAppDataRoot } from './paths';
 
 interface DbModels {
   movies: MoviesModel;
@@ -48,7 +50,10 @@ function runMigrations(): void {
     return;
   }
 
-  const migrationFiles = fs.readdirSync(migrationsDir).filter((file) => file.endsWith('.sql')).sort();
+  const migrationFiles = fs
+    .readdirSync(migrationsDir)
+    .filter((file) => file.endsWith('.sql'))
+    .sort();
 
   for (const file of migrationFiles) {
     const filePath = path.join(migrationsDir, file);
@@ -62,22 +67,26 @@ export function runSeed(): void {
   if (!db) {
     throw new Error('Database not initialized');
   }
-  const countResult = db.prepare('SELECT COUNT(*) as count FROM roles').get() as { count: number } | undefined;
+  const countResult = db.prepare('SELECT COUNT(*) as count FROM roles').get() as
+    | { count: number }
+    | undefined;
   const currentCount = countResult?.count ?? 0;
   if (currentCount > 0) {
     return;
   }
   const now = new Date().toISOString();
   const insertRole = db.prepare(
-    'INSERT INTO roles (system_stub, display_name, is_hidden, created_at, updated_at) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO roles (system_stub, display_name, is_hidden, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
   );
   const insertRolePermission = db.prepare(
-    'INSERT INTO role_permissions (role_id, permission_stub, created_at) VALUES (?, ?, ?)'
+    'INSERT INTO role_permissions (role_id, permission_stub, created_at) VALUES (?, ?, ?)',
   );
   for (const role of DEFAULT_ROLES) {
     const translatedName = i18n.t(role.displayNameKey, { ns: 'auth' });
     insertRole.run(role.stub, translatedName, 0, now, now);
-    const roleId = (db.prepare('SELECT last_insert_rowid() as id').get() as { id: number } | undefined)?.id;
+    const roleId = (
+      db.prepare('SELECT last_insert_rowid() as id').get() as { id: number } | undefined
+    )?.id;
     if (typeof roleId !== 'number') {
       continue;
     }
@@ -119,7 +128,7 @@ function initModels(): void {
     userProfiles: new UserProfilesModel(db as Database.Database),
     roles: new RolesModel(db as Database.Database),
     rolePermissions: new RolePermissionsModel(db as Database.Database),
-    userRoles: new UserRolesModel(db as Database.Database)
+    userRoles: new UserRolesModel(db as Database.Database),
   };
 }
 
@@ -147,8 +156,7 @@ export function initDatabase(): void {
 export function initMockDatabase(testDb?: Database.Database | null): void {
   if (db) {
     log.warn('Database already initialized. Replacing with Mock database.');
-  }
-  else {
+  } else {
     log.info('Initializing with Mock database.');
   }
 
@@ -180,6 +188,6 @@ export function getModels(): DbModels {
 export function getStatus(): { dbInitialized: boolean; dbConnected: boolean } {
   return {
     dbInitialized: !!db,
-    dbConnected: !!db
+    dbConnected: !!db,
   };
 }

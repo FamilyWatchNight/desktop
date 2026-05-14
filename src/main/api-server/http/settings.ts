@@ -7,18 +7,22 @@ the Free Software Foundation, version 3.
 */
 
 import { Express, Request } from 'express';
+
 import { settingsService } from '../ipc/instances';
+
 import { route } from './utils';
 
 export function registerSettingsRoutes(app: Express): void {
-  app.get('/api/settings',
-    route(() => settingsService.load())
+  app.get(
+    '/api/settings',
+    route(() => settingsService.load()),
   );
 
-  app.post('/api/settings',
+  app.post(
+    '/api/settings',
     route((req: Request) => {
       settingsService.save(req.body || {});
       return null;
-    })
+    }),
   );
 }

@@ -7,6 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import React from 'react';
+
 import AppLayout from './components/AppLayout';
 import './styles/index.scss';
 

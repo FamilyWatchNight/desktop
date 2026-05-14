@@ -1,4 +1,11 @@
-@integration @settings
+# Copyright (c) 2026 Steve Dwire
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+
+@integration
+@settings
 Feature: Settings Management
   As a user
   I want to manage application settings
@@ -73,11 +80,11 @@ Feature: Settings Management
     Given I run unauthenticated
     When I attempt to request the "webPort" setting
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to request the "webPort" setting
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to request the "webPort" setting
     Then no error should be thrown
@@ -87,11 +94,11 @@ Feature: Settings Management
     Given I run unauthenticated
     When I attempt to set the "webPort" setting to 5000
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to set the "webPort" setting to 5000
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to set the "webPort" setting to 5000
     Then no error should be thrown
@@ -101,11 +108,11 @@ Feature: Settings Management
     Given I run unauthenticated
     When I attempt to request all settings
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to request all settings
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to request all settings
     Then no error should be thrown
@@ -120,7 +127,7 @@ Feature: Settings Management
       }
       """
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to save the following settings:
       """
@@ -129,7 +136,7 @@ Feature: Settings Management
       }
       """
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to save the following settings:
       """

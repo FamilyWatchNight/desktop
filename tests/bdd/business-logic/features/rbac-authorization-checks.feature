@@ -1,4 +1,12 @@
-@integration @rbac @rbac-authorization-checks
+# Copyright (c) 2026 Steve Dwire
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+
+@integration
+@rbac
+@rbac-authorization-checks
 Feature: RBAC authorization checks
   As an internal service for enforcing access control
   I want to verify permissions are correctly assigned and checked

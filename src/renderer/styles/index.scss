@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
 @use 'colors';
 @use 'fonts';
 @use 'layout';
@@ -7,9 +15,9 @@
 /* Add background image to entire app, with blur effect */
 html {
   background-image: url('../images/background.jpg');
-  background-size: cover;        /* key line */
-  background-position: center;   /* keep it centered while cropping */
-  background-repeat: no-repeat;  /* don't tile */
+  background-size: cover; /* key line */
+  background-position: center; /* keep it centered while cropping */
+  background-repeat: no-repeat; /* don't tile */
   background-attachment: fixed;
 }
 

@@ -6,7 +6,12 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { MovieService, SettingsService, BackgroundTaskService, LocalizationService } from '../../services';
+import {
+  MovieService,
+  SettingsService,
+  BackgroundTaskService,
+  LocalizationService,
+} from '../../services';
 
 // shared service instances used by the IPC handlers
 export const backgroundTaskService = new BackgroundTaskService();

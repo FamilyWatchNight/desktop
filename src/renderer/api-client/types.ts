@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
 /* API client types */
 
 export interface AppApi {
@@ -5,7 +13,12 @@ export interface AppApi {
   getAppLocale(): Promise<string>;
   getServerPort(): Promise<number>;
   getLocaleFile(namespace: string, language: string): Promise<Record<string, string>>;
-  saveMissingKey?(namespace: string, language: string, key: string, fallbackValue: string): Promise<void>;
+  saveMissingKey?(
+    namespace: string,
+    language: string,
+    key: string,
+    fallbackValue: string,
+  ): Promise<void>;
 }
 
 export interface BackgroundTaskApi {
@@ -13,7 +26,9 @@ export interface BackgroundTaskApi {
   getBackgroundTasks(): Promise<{ active: unknown; queue: unknown[] }>;
   cancelActiveBackgroundTask(): Promise<unknown>;
   removeQueuedBackgroundTask(taskId: string): Promise<unknown>;
-  onBackgroundTaskUpdate(callback: (state: { active: unknown; queue: unknown[] }) => void): () => void;
+  onBackgroundTaskUpdate(
+    callback: (state: { active: unknown; queue: unknown[] }) => void,
+  ): () => void;
 }
 
 export interface MovieApi {
@@ -28,7 +43,7 @@ export interface MovieApi {
 }
 
 export interface SettingsApi {
-  loadSettings(): Promise< Record<string, unknown>>;
+  loadSettings(): Promise<Record<string, unknown>>;
   saveSettings(settings: Record<string, unknown>): Promise<void>;
   onSettingsSaved(callback: () => void): () => void;
 }

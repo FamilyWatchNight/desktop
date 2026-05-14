@@ -11,7 +11,7 @@ import log from 'electron-log/main';
 const DEFAULT_SETTINGS: Record<string, unknown> = {
   webPort: 3000,
   watchmodeApiKey: '',
-  tmdbApiKey: ''
+  tmdbApiKey: '',
 };
 
 export type StoreLike = {

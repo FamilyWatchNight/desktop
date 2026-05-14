@@ -6,13 +6,19 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { CustomWorld } from '../../technical/infrastructure/world';
-import { AuthenticatedUser } from '../../../../src/main/services/UserService';
-import { Role } from '../../../../src/main/db/models/Roles';
-import { createAuthContext, createSystemContext, type AuthContext, type AuthContextPayload } from '../../../../src/main/auth/context-manager';
-import { PERMISSIONS } from '../../../../src/main/auth/permissions';
 import { Page, Browser } from 'playwright';
+
+import {
+  createAuthContext,
+  createSystemContext,
+  type AuthContext,
+  type AuthContextPayload,
+} from '../../../../src/main/auth/context-manager';
+import { PERMISSIONS } from '../../../../src/main/auth/permissions';
+import { Role } from '../../../../src/main/db/models/Roles';
+import { AuthenticatedUser } from '../../../../src/main/services/UserService';
 import { withTestHooks } from '../../technical/infrastructure/utils';
+import { CustomWorld } from '../../technical/infrastructure/world';
 
 /**
  * Internal System Persona - represents trusted backend operations
@@ -59,17 +65,21 @@ export class InternalSystemPersona {
     if (this.customPermissions !== null) {
       return {
         userId: 0, // Test user ID
-        permissions: this.customPermissions
+        permissions: this.customPermissions,
       };
     }
     return {
       userId: this.authContext.userId,
-      permissions: this.authContext.permissions
+      permissions: this.authContext.permissions,
     };
   }
 
   async enqueueTask(taskType: string, args?: Record<string, unknown>) {
-    return await this.world.backgroundTasksApi.enqueue(taskType, args, this.getAuthContextPayload());
+    return await this.world.backgroundTasksApi.enqueue(
+      taskType,
+      args,
+      this.getAuthContextPayload(),
+    );
   }
 
   async getTaskState() {
@@ -108,7 +118,6 @@ export class InternalSystemPersona {
   async completeTask() {
     return await this.world.backgroundTasksApi.completeTask();
   }
-
 
   //
   // Database operations
@@ -168,7 +177,10 @@ export class InternalSystemPersona {
   }
 
   async getMovieByWatchmodeId(watchmodeId: string) {
-    return await this.world.moviesApi.getMovieByWatchmodeId(watchmodeId, this.getAuthContextPayload());
+    return await this.world.moviesApi.getMovieByWatchmodeId(
+      watchmodeId,
+      this.getAuthContextPayload(),
+    );
   }
 
   async searchMoviesByTitle(searchTerm: string) {
@@ -179,7 +191,11 @@ export class InternalSystemPersona {
   // Role operations
   //
   async createRole(name: string, permissionStubs: string[] = []): Promise<Role> {
-    return await this.world.rolesApi.createRole(name, permissionStubs, this.getAuthContextPayload());
+    return await this.world.rolesApi.createRole(
+      name,
+      permissionStubs,
+      this.getAuthContextPayload(),
+    );
   }
 
   async deleteRole(id: number): Promise<void> {
@@ -215,19 +231,34 @@ export class InternalSystemPersona {
   }
 
   async setRolePermissions(roleId: number, permissionStubs: string[]): Promise<void> {
-    return await this.world.rolesApi.setRolePermissions(roleId, permissionStubs, this.getAuthContextPayload());
+    return await this.world.rolesApi.setRolePermissions(
+      roleId,
+      permissionStubs,
+      this.getAuthContextPayload(),
+    );
   }
 
-  async updateRole(id: number, data: Partial<import('../../../../src/main/db/models/Roles').RoleData>): Promise<void> {
+  async updateRole(
+    id: number,
+    data: Partial<import('../../../../src/main/db/models/Roles').RoleData>,
+  ): Promise<void> {
     return await this.world.rolesApi.updateRole(id, data, this.getAuthContextPayload());
   }
 
   async updateRoleDisplayName(id: number, displayName: string): Promise<void> {
-    return await this.world.rolesApi.updateRoleDisplayName(id, displayName, this.getAuthContextPayload());
+    return await this.world.rolesApi.updateRoleDisplayName(
+      id,
+      displayName,
+      this.getAuthContextPayload(),
+    );
   }
 
   async updateRoleHiddenStatus(id: number, isHidden: boolean): Promise<void> {
-    return await this.world.rolesApi.updateRoleHiddenStatus(id, isHidden, this.getAuthContextPayload());
+    return await this.world.rolesApi.updateRoleHiddenStatus(
+      id,
+      isHidden,
+      this.getAuthContextPayload(),
+    );
   }
 
   //
@@ -256,12 +287,20 @@ export class InternalSystemPersona {
   //
   // User operations
   //
-  async createUser(data: { username: string; email?: string; password?: string }): Promise<AuthenticatedUser> {
+  async createUser(data: {
+    username: string;
+    email?: string;
+    password?: string;
+  }): Promise<AuthenticatedUser> {
     return await this.world.usersApi.createUser(data, this.getAuthContextPayload());
   }
 
   async authenticateUser(username: string, password: string): Promise<AuthenticatedUser | null> {
-    const result = await this.world.usersApi.authenticateUser(username, password, this.getAuthContextPayload());
+    const result = await this.world.usersApi.authenticateUser(
+      username,
+      password,
+      this.getAuthContextPayload(),
+    );
     if (result?.id) {
       await this.runAsUser(result.id as number);
     }
@@ -273,15 +312,30 @@ export class InternalSystemPersona {
   }
 
   async getUsersWithPermissions(permissions: string[]): Promise<AuthenticatedUser[]> {
-    return await this.world.usersApi.getUsersWithPermissions(permissions, this.getAuthContextPayload());
+    return await this.world.usersApi.getUsersWithPermissions(
+      permissions,
+      this.getAuthContextPayload(),
+    );
   }
 
-  async updateUserProfile(id: number, profileData: { displayName?: string | null; profileImagePath?: string | null }): Promise<void> {
-    return await this.world.usersApi.updateUserProfile(id, profileData, this.getAuthContextPayload());
+  async updateUserProfile(
+    id: number,
+    profileData: { displayName?: string | null; profileImagePath?: string | null },
+  ): Promise<void> {
+    return await this.world.usersApi.updateUserProfile(
+      id,
+      profileData,
+      this.getAuthContextPayload(),
+    );
   }
 
   async saveProfileImage(userId: number, imageBuffer: Buffer, mimeType: string): Promise<string> {
-    return await this.world.usersApi.saveProfileImage(userId, imageBuffer, mimeType, this.getAuthContextPayload());
+    return await this.world.usersApi.saveProfileImage(
+      userId,
+      imageBuffer,
+      mimeType,
+      this.getAuthContextPayload(),
+    );
   }
 
   async deleteProfileImage(userId: number): Promise<void> {
@@ -289,7 +343,11 @@ export class InternalSystemPersona {
   }
 
   async changePassword(userId: number, newPassword: string): Promise<void> {
-    return await this.world.usersApi.changePassword(userId, newPassword, this.getAuthContextPayload());
+    return await this.world.usersApi.changePassword(
+      userId,
+      newPassword,
+      this.getAuthContextPayload(),
+    );
   }
 
   async assignRoleToUser(userId: number, roleId: number): Promise<void> {
@@ -297,9 +355,13 @@ export class InternalSystemPersona {
   }
 
   async removeRoleFromUser(userId: number, roleId: number): Promise<void> {
-    return await this.world.usersApi.removeRoleFromUser(userId, roleId, this.getAuthContextPayload());
+    return await this.world.usersApi.removeRoleFromUser(
+      userId,
+      roleId,
+      this.getAuthContextPayload(),
+    );
   }
-  
+
   async getRolesForUser(userId: number): Promise<number[]> {
     return await this.world.usersApi.getRolesForUser(userId, this.getAuthContextPayload());
   }
@@ -327,9 +389,9 @@ export class InternalSystemPersona {
 
   runWithoutPermissions(excludedPermissionStubs: string[]): void {
     this.isUnauthenticated = false;
-    const allPermissions = PERMISSIONS.map(p => p.stub);
+    const allPermissions = PERMISSIONS.map((p) => p.stub);
     const excluded = new Set(['can-admin', ...excludedPermissionStubs]);
-    this.customPermissions = allPermissions.filter(p => !excluded.has(p));
+    this.customPermissions = allPermissions.filter((p) => !excluded.has(p));
   }
 
   async runAsUser(userId: number): Promise<void> {
@@ -339,9 +401,14 @@ export class InternalSystemPersona {
     this.customPermissions = null;
 
     // Build authContext with the user's actual permissions from the system
-    const systemAuthContextPayload = { userId: -1, permissions: ['can-admin'] } as AuthContextPayload;
-    const permissions = await this.world.usersApi.getUserPermissions(userId, systemAuthContextPayload);
+    const systemAuthContextPayload = {
+      userId: -1,
+      permissions: ['can-admin'],
+    } as AuthContextPayload;
+    const permissions = await this.world.usersApi.getUserPermissions(
+      userId,
+      systemAuthContextPayload,
+    );
     this.authContext = createAuthContext(userId, permissions);
   }
-
 }

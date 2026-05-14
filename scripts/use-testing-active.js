@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
 const fs = require('fs');
 const path = require('path');
 
@@ -16,8 +24,7 @@ const existingFiles = fs.readdirSync(destDir);
 for (const file of existingFiles) {
   if (fs.lstatSync(path.join(destDir, file)).isDirectory()) {
     fs.rmSync(path.join(destDir, file), { recursive: true, force: true });
-  }
-  else if (file !== 'README.md') {
+  } else if (file !== 'README.md') {
     fs.rmSync(path.join(destDir, file));
   }
 }
@@ -27,8 +34,7 @@ const files = fs.readdirSync(srcDir);
 for (const file of files) {
   if (fs.lstatSync(path.join(srcDir, file)).isDirectory()) {
     fs.cpSync(path.join(srcDir, file), path.join(destDir, file), { recursive: true });
-  }
-  else if (file !== 'README.md') {
+  } else if (file !== 'README.md') {
     fs.copyFileSync(path.join(srcDir, file), path.join(destDir, file));
   }
 }

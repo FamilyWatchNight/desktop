@@ -1,4 +1,12 @@
-@integration @rbac @rbac-role-permissions
+# Copyright (c) 2026 Steve Dwire
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+
+@integration
+@rbac
+@rbac-role-permissions
 Feature: RBAC role permissions
   As an internal service for enforcing access control
   I want to assign and update permissions for roles
@@ -33,4 +41,3 @@ Feature: RBAC role permissions
       | can-unhide-show    |
       | can-update-show    |
       | can-admin          |
-

@@ -1,12 +1,22 @@
-import { ApiClient } from '../types';
-import { HttpMovieApi } from './movies';
-import { HttpSettingsApi } from './settings';
-import { HttpBackgroundTaskApi } from './background-tasks';
-import { HttpAppApi } from './app';
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
 import log from 'electron-log/renderer';
 
+import { ApiClient } from '../types';
+
+import { HttpAppApi } from './app';
+import { HttpBackgroundTaskApi } from './background-tasks';
+import { HttpMovieApi } from './movies';
+import { HttpSettingsApi } from './settings';
+
 class HttpApiClient implements ApiClient {
-  private eventListeners: Map<string, Set<(data: any) => void>> = new Map();
+  private eventListeners: Map<string, Set<(data: unknown) => void>> = new Map();
   private ws: WebSocket | null = null;
 
   app = new HttpAppApi();
@@ -14,7 +24,7 @@ class HttpApiClient implements ApiClient {
   movies = new HttpMovieApi();
   settings = new HttpSettingsApi();
 
-  on(eventType: string, callback: (data: any) => void): void {
+  on(eventType: string, callback: (data: unknown) => void): void {
     if (!this.eventListeners.has(eventType)) {
       this.eventListeners.set(eventType, new Set());
     }
@@ -25,7 +35,7 @@ class HttpApiClient implements ApiClient {
     }
   }
 
-  off(eventType: string, callback: (data: any) => void): void {
+  off(eventType: string, callback: (data: unknown) => void): void {
     const listeners = this.eventListeners.get(eventType);
     if (listeners) {
       listeners.delete(callback);
@@ -48,7 +58,7 @@ class HttpApiClient implements ApiClient {
         const { type, data } = JSON.parse(event.data);
         const listeners = this.eventListeners.get(type);
         if (listeners) {
-          listeners.forEach(callback => callback(data));
+          listeners.forEach((callback) => callback(data));
         }
       } catch (error) {
         log.error('Failed to parse WebSocket message:', error);

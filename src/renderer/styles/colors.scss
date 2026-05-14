@@ -1,4 +1,12 @@
-@use "sass:color";
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
+@use 'sass:color';
 
 $hue-angle: 20;
 
@@ -46,11 +54,16 @@ $core-coral: hsl($hue-coral, $saturation-core, $lightness-core);
 @function make-gradient($core-color) {
   $highlight-color: make-highlight-color($core-color);
   $shadow-color: make-shadow-color($core-color);
-  @return linear-gradient($gradient-angle, $highlight-color 0%, $core-color 50%, $shadow-color 100%);
+  @return linear-gradient(
+    $gradient-angle,
+    $highlight-color 0%,
+    $core-color 50%,
+    $shadow-color 100%
+  );
 }
 
 /* Original colors, before "Enchanted Theater" palette update */
-$background-color: #000000BB;
+$background-color: #000000bb;
 $text-color: #e0e0e0;
 
 $primary-color: $core-gold;
@@ -62,9 +75,9 @@ $warning-color: $core-yellow;
 $info-color: $core-blue;
 
 $glass-color: color.mix($core-teal, $core-blue, 50%);
-$glass-shadow-edge: color.change(color.to-space(color.change($glass-color, $lightness: 1%), rgb), $alpha: 0.5);
+$glass-shadow-edge: color.change(color.change($glass-color, $lightness: 1%), $alpha: 0.5);
 
-$container-background: color.change(color.to-space($glass-color, rgb), $alpha: 0.07);
+$container-background: color.change($glass-color, $alpha: 0.07);
 $container-border: #404040;
 $form-background: #2d2d2d;
 $form-border: #404040;

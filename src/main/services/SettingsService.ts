@@ -6,10 +6,10 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import * as settingsManager from '../settings-manager';
-import i18n from '../i18n';
 import { AuthContext } from '../auth/context-manager';
 import { AuthenticationError, AuthorizationError } from '../auth/errors';
+import i18n from '../i18n';
+import * as settingsManager from '../settings-manager';
 
 export class SettingsService {
   private t = i18n.getFixedT(null, 'auth');
@@ -43,7 +43,3 @@ export class SettingsService {
     settingsManager.setAll(settings);
   }
 }
-
-
-
-

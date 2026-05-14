@@ -8,12 +8,14 @@ the Free Software Foundation, version 3.
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import '../styles/components/AppLayout.scss';
+import { createApiClient } from '../api-client';
+
+import BackgroundTasksPage from './pages/BackgroundTasksPage';
 import HomePage from './pages/HomePage';
 import SettingsPage from './pages/SettingsPage';
 import StyleboardPage from './pages/StyleboardPage';
-import BackgroundTasksPage from './pages/BackgroundTasksPage';
-import { createApiClient } from '../api-client';
 
 const apiClient = createApiClient();
 
@@ -55,8 +57,8 @@ export default function Layout(): React.ReactElement {
     };
     void load();
     const unsubscribe = apiClient.backgroundTasks.onBackgroundTaskUpdate((state) => {
-      setActiveTask(state?.active as TaskPayload ?? null);
-      setQueue(state?.queue as TaskPayload[] ?? []);
+      setActiveTask((state?.active as TaskPayload) ?? null);
+      setQueue((state?.queue as TaskPayload[]) ?? []);
     });
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
@@ -81,14 +83,23 @@ export default function Layout(): React.ReactElement {
   return (
     <div className="app-layout" data-testid="app-layout">
       <header className="app-header" data-testid="app-header">
-        <button className="hamburger-button" data-testid="menu-toggle-button" onClick={toggleMenu} aria-label={t('toggleMenu')}>
+        <button
+          className="hamburger-button"
+          data-testid="menu-toggle-button"
+          onClick={toggleMenu}
+          aria-label={t('toggleMenu')}
+        >
           <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
           <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
           <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
         </button>
-        <h1 className="app-title" data-testid="app-title">{t('app.name', { ns: 'common' })}</h1>
+        <h1 className="app-title" data-testid="app-title">
+          {t('app.name', { ns: 'common' })}
+        </h1>
       </header>
-      {menuOpen && <div className="menu-overlay" data-testid="menu-overlay" onClick={closeMenu}></div>}
+      {menuOpen && (
+        <div className="menu-overlay" data-testid="menu-overlay" onClick={closeMenu}></div>
+      )}
       <div className={`side-menu ${menuOpen ? 'open' : ''}`} data-testid="side-menu">
         <div className="menu-content">
           <div className="menu-nav-section">
@@ -98,7 +109,13 @@ export default function Layout(): React.ReactElement {
                 onClick={() => navigateTo('home')}
                 data-testid="menu-home"
               >
-                <svg className="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  className="menu-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                   <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
@@ -127,12 +144,20 @@ export default function Layout(): React.ReactElement {
                   onClick={() => navigateTo('background-tasks')}
                   data-testid="menu-background-tasks"
                 >
-                  <svg className="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M6 2v5l6 5v2l-6 5v5h12v-5l-6-5v-2l6-5V2H6z"/>
+                  <svg
+                    className="menu-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M6 2v5l6 5v2l-6 5v5h12v-5l-6-5v-2l6-5V2H6z" />
                   </svg>
                   <span>{t('menu.backgroundTasks')}</span>
                   {(activeTask || queue.length > 0) && (
-                    <span className="menu-badge" data-testid="menu-background-tasks-badge">{(activeTask ? 1 : 0) + queue.length}</span>
+                    <span className="menu-badge" data-testid="menu-background-tasks-badge">
+                      {(activeTask ? 1 : 0) + queue.length}
+                    </span>
                   )}
                 </button>
                 <button
@@ -140,8 +165,14 @@ export default function Layout(): React.ReactElement {
                   onClick={() => navigateTo('styleboard')}
                   data-testid="menu-styleboard"
                 >
-                  <svg className="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M6 2v5l6 5v2l-6 5v5h12v-5l-6-5v-2l6-5V2H6z"/>
+                  <svg
+                    className="menu-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M6 2v5l6 5v2l-6 5v5h12v-5l-6-5v-2l6-5V2H6z" />
                   </svg>
                   <span>{t('menu.styleboard')}</span>
                 </button>
@@ -154,7 +185,13 @@ export default function Layout(): React.ReactElement {
               onClick={() => navigateTo('settings')}
               data-testid="menu-settings"
             >
-              <svg className="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                className="menu-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <circle cx="12" cy="12" r="3"></circle>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
               </svg>

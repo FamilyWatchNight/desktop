@@ -19,7 +19,7 @@ export const PERMISSIONS = [
   { stub: 'can-hide-show', displayNameKey: 'permissions.canHideShow' },
   { stub: 'can-unhide-show', displayNameKey: 'permissions.canUnhideShow' },
   { stub: 'can-update-show', displayNameKey: 'permissions.canUpdateShow' },
-  { stub: 'can-admin', displayNameKey: 'permissions.canAdmin' }
+  { stub: 'can-admin', displayNameKey: 'permissions.canAdmin' },
 ] as const;
 
 export type PermissionStub = (typeof PERMISSIONS)[number]['stub'];
@@ -44,8 +44,8 @@ export const DEFAULT_ROLES: ReadonlyArray<{
       'can-rate',
       'can-update-profile',
       'can-hide-show',
-      'can-update-show'
-    ]
+      'can-update-show',
+    ],
   },
-  { stub: 'host', displayNameKey: 'roles.host', permissionStubs: ['can-host'] }
+  { stub: 'host', displayNameKey: 'roles.host', permissionStubs: ['can-host'] },
 ];

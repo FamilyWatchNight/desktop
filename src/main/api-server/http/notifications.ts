@@ -6,8 +6,10 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import WebSocket, { WebSocketServer } from 'ws';
+import type { IncomingMessage, Server } from 'http';
+
 import log from 'electron-log/main';
+import WebSocket, { WebSocketServer } from 'ws';
 
 interface WebSocketWithHeartbeat extends WebSocket {
   isAlive?: boolean;
@@ -16,10 +18,10 @@ interface WebSocketWithHeartbeat extends WebSocket {
 let wss: WebSocketServer | null = null;
 const clients = new Set<WebSocket>();
 
-export function initializeWebSocketServer(server: any): void {
+export function initializeWebSocketServer(server: Server): void {
   wss = new WebSocketServer({ server, perMessageDeflate: false });
 
-  wss.on('connection', (ws: WebSocketWithHeartbeat, req: any) => {
+  wss.on('connection', (ws: WebSocketWithHeartbeat, req: IncomingMessage) => {
     // Verify connection came from localhost (inherited from HTTP server's host validation)
     const clientIp = req.socket.remoteAddress;
     if (clientIp !== '127.0.0.1' && clientIp !== '::1' && !clientIp?.startsWith('127.0.0.1')) {
@@ -62,7 +64,7 @@ export function initializeWebSocketServer(server: any): void {
 
   // Browser sends heartbeat pings periodically
   const heartbeatInterval = setInterval(() => {
-    wss?.clients.forEach((ws: any) => {
+    wss?.clients.forEach((ws: WebSocketWithHeartbeat) => {
       if (!ws.isAlive) {
         ws.terminate();
         clients.delete(ws);
@@ -79,7 +81,7 @@ export function initializeWebSocketServer(server: any): void {
   });
 }
 
-export function broadcast(eventType: string, data: any): void {
+export function broadcast(eventType: string, data: unknown): void {
   if (!wss) {
     log.warn('WebSocket server not initialized');
     return;
@@ -87,8 +89,9 @@ export function broadcast(eventType: string, data: any): void {
 
   // Sanitize message data to prevent injection attacks
   const message = JSON.stringify({ type: eventType, data });
-  
-  if (message.length > 1024 * 1024) { // 1MB message limit
+
+  if (message.length > 1024 * 1024) {
+    // 1MB message limit
     log.warn('WebSocket message too large, skipping broadcast');
     return;
   }

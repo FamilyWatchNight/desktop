@@ -1,6 +1,11 @@
-/**
- * Serializable payload for AuthContext (used in transport layers like IPC, HTTP, test hooks)
- */
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
 export interface AuthContextPayload {
   userId: number;
   permissions: string[];
@@ -23,7 +28,8 @@ export function createAuthContext(userId: number, permissions: string[]): AuthCo
   return {
     userId,
     permissions,
-    hasPermission: (permission: string) => permissions.includes('can-admin') || permissions.includes(permission)
+    hasPermission: (permission: string) =>
+      permissions.includes('can-admin') || permissions.includes(permission),
   };
 }
 
@@ -33,6 +39,3 @@ export function createAuthContext(userId: number, permissions: string[]): AuthCo
 export function createSystemContext(): AuthContext {
   return createAuthContext(-1, ['can-admin']);
 }
-
-
-

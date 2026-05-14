@@ -1,3 +1,9 @@
+# Copyright (c) 2026 Steve Dwire
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+
 @ui
 Feature: Basic UI Infrastructure
   As a user
@@ -9,6 +15,7 @@ Feature: Basic UI Infrastructure
     Given I open the app window as an unauthenticated user
     When the user navigates to the Settings page
     Then the Settings page is visible
+
 
 #  The following scenario illustrates how to validate that settings that are
 #  configured PRIOR to app launch are correctly applied in the application.

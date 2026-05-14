@@ -6,8 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-@use "../colors";
-@use "sass:color";
+@use '../colors';
+@use 'sass:color';
 
 :root {
   --app-header-height: 64px;
@@ -165,7 +165,9 @@ the Free Software Foundation, version 3.
   text-transform: uppercase;
   letter-spacing: 0.5px;
   cursor: pointer;
-  transition: color 0.2s, background-color 0.2s;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
   font-family: inherit;
   text-align: left;
 }
@@ -196,11 +198,14 @@ the Free Software Foundation, version 3.
   overflow: hidden;
   max-height: 0;
   opacity: 0;
-  transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.2s ease;
+  transition:
+    max-height 0.25s ease,
+    opacity 0.2s ease,
+    margin-top 0.2s ease;
 }
 
 .menu-system.expanded .menu-system-items {
-  max-height: 120px;
+  max-height: 100vh;
   opacity: 1;
   margin-top: 4px;
 }
@@ -240,7 +245,7 @@ the Free Software Foundation, version 3.
   }
 
   &.active {
-    background: color.change(color.to-space(colors.$core-blue, rgb), $alpha: 0.2);
+    background: color.change(colors.$core-blue, $alpha: 0.2);
     color: colors.make-highlight-color(colors.$core-blue);
     border-left: 3px solid colors.$core-blue;
 

@@ -1,4 +1,12 @@
-@integration @rbac @rbac-role-management
+# Copyright (c) 2026 Steve Dwire
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+
+@integration
+@rbac
+@rbac-role-management
 Feature: RBAC role management
   As an internal service for enforcing access control
   I want to create and manage roles
@@ -31,15 +39,15 @@ Feature: RBAC role management
 
   Scenario: Duplicating a role creates a new custom role with the same permissions and hidden status and an updated name
     Given a role "base-role" exists with display name "Base Role" and hidden status "false"
-    And the role "base-role" has permissions "can-view-movies, can-comment"
+    And the role "base-role" has permissions "can-host, can-rate"
     When I duplicate the role "base-role" to create a new role "copy-of-base-role"
-    Then the role "copy-of-base-role" should have the permissions "can-view-movies, can-comment"
+    Then the role "copy-of-base-role" should have the permissions "can-host, can-rate"
     And the role "copy-of-base-role" should have display name "Copy of Base Role"
     And the role "copy-of-base-role" should not be marked as a system role
     And the role "copy-of-base-role" should not be marked as hidden
     When I hide the role "base-role"
     And I duplicate the role "base-role" to create a new role "copy2-of-base-role"
-    Then the role "copy2-of-base-role" should have the permissions "can-view-movies, can-comment"
+    Then the role "copy2-of-base-role" should have the permissions "can-host, can-rate"
     And the role "copy2-of-base-role" should have display name "Copy of Base Role (2)"
     And the role "copy2-of-base-role" should not be marked as a system role
     And the role "copy2-of-base-role" should be marked as hidden
@@ -85,11 +93,11 @@ Feature: RBAC role management
     Given I run unauthenticated
     When I attempt to create a role
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to create a role
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to create a role
     Then no error should be thrown
@@ -97,15 +105,15 @@ Feature: RBAC role management
   @auth
   Scenario: RoleService.getRoleById requires can-admin permission
     Given a custom role exists
-    
+
     Given I run unauthenticated
     When I attempt to get the role
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to get the role
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to get the role
     Then no error should be thrown
@@ -115,11 +123,11 @@ Feature: RBAC role management
     Given I run unauthenticated
     When I attempt to get the system role "admin"
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to get the system role "admin"
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to get the system role "admin"
     Then no error should be thrown
@@ -129,11 +137,11 @@ Feature: RBAC role management
     Given I run unauthenticated
     When I attempt to retrieve all roles
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to retrieve all roles
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to retrieve all roles
     Then no error should be thrown
@@ -141,15 +149,15 @@ Feature: RBAC role management
   @auth
   Scenario: RoleService.updateRole requires can-admin permission
     Given a custom role exists
-    
+
     Given I run unauthenticated
     When I attempt to hide the role
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to hide the role
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to hide the role
     Then no error should be thrown
@@ -158,15 +166,15 @@ Feature: RBAC role management
   Scenario: RoleService.deleteRole requires can-admin permission
     Given a custom role exists
     And no users have the role assigned
-    
+
     Given I run unauthenticated
     When I attempt to delete the role
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to delete the role
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to delete the role
     Then no error should be thrown
@@ -174,15 +182,15 @@ Feature: RBAC role management
   @auth
   Scenario: RoleService.setPermissionsForRole requires can-admin permission
     Given a custom role exists
-    
+
     Given I run unauthenticated
     When I attempt to update the role's permissions to be empty
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to update the role's permissions to be empty
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to update the role's permissions to be empty
     Then no error should be thrown
@@ -190,15 +198,15 @@ Feature: RBAC role management
   @auth
   Scenario: RoleService.getPermissionsForRole requires can-admin permission
     Given a role exists with the permissions "can-vote, can-rate"
-    
+
     Given I run unauthenticated
     When I attempt to get permissions for the role
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to get permissions for the role
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to get permissions for the role
     Then no error should be thrown
@@ -208,11 +216,11 @@ Feature: RBAC role management
     Given I run unauthenticated
     When I attempt to retrieve all defined permissions
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to retrieve all defined permissions
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to retrieve all defined permissions
     Then no error should be thrown
@@ -220,15 +228,15 @@ Feature: RBAC role management
   @auth
   Scenario: RoleService.duplicateRole requires can-admin permission
     Given a role "base-role" exists
-    
+
     Given I run unauthenticated
     When I attempt to duplicate the role "base-role" to create a new role "copy-role"
     Then an AuthenticationError should be thrown
-    
+
     Given I run without the permissions "can-admin"
     When I attempt to duplicate the role "base-role" to create a new role "copy-role"
     Then an AuthorizationError should be thrown
-    
+
     Given I run with the permissions "can-admin"
     When I attempt to duplicate the role "base-role" to create a new role "copy-role"
     Then no error should be thrown

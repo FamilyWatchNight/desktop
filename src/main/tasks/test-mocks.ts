@@ -7,16 +7,20 @@ the Free Software Foundation, version 3.
 */
 
 import fs from 'fs';
-import zlib from 'zlib';
 import { Readable } from 'stream';
+import zlib from 'zlib';
 
-export type MockDownloadJsonGzStream = (abortSignal: AbortSignal | null, dateFileSpec: string) => Promise<Readable>;
+export type MockDownloadJsonGzStream = (
+  abortSignal: AbortSignal | null,
+  dateFileSpec: string,
+) => Promise<Readable>;
 export type MockDownloadCsvStream = (abortSignal: AbortSignal | null) => Promise<Readable>;
 
 export function createMockDownloadJsonGzStream(dataSource: string): MockDownloadJsonGzStream {
   return async function mockDownloadJsonGzStream(
     abortSignal: AbortSignal | null,
-    _dateFileSpec: string
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _dateFileSpec: string,
   ): Promise<Readable> {
     return new Promise((resolve, reject) => {
       try {
