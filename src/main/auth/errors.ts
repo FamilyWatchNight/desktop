@@ -1,6 +1,11 @@
-/**
- * Authentication and authorization error classes
- */
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
 export class AuthenticationError extends Error {
   constructor(message: string) {
     super(message);
@@ -8,9 +13,6 @@ export class AuthenticationError extends Error {
   }
 }
 
-/**
- * Authorization error - thrown when user lacks required permissions
- */
 export class AuthorizationError extends Error {
   constructor(message: string) {
     super(message);
