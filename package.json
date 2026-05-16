@@ -86,7 +86,7 @@
     "react-dom": "^19.2.6",
     "react-i18next": "^17.0.6",
     "uuid": "^14.0.0",
-    "ws": "^8.20.0"
+    "ws": "^8.20.1"
   },
   "build": {
     "appId": "com.familywatchnight.app",
