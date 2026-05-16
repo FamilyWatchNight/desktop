@@ -48,6 +48,9 @@ UI tests are structured into two levels of granularity:
    - Tests component behavior and interactions
    - Uses test-only pages excluded from production builds (similar to test hooks)
    - Focuses on component functionality rather than user workflows
+   - Builds test pages as real application pages using the same production layout components (`Page`, `Section`, etc.)
+   - Includes live controls within the page so tests verify real app composition, not isolated wrapper components
+   - Test pages are sourced from `src/renderer/testing-active/components/pages/` and registered through `src/renderer/testing-active/index.tsx`
 
 2. **User Experience Testing**: Validates end-to-end user workflows across multiple pages
    - Tests complete user journeys and page transitions
@@ -96,6 +99,7 @@ UI tests support dual transport modes controlled by `RENDER_LOCATION` environmen
 - **Playwright Configuration** (`playwright-config.ts`): Centralized Playwright setup for both transports
 - **Page Objects** (`page-objects/`): `BasePage` and concrete page classes (`HomePage`, `SettingsPage`, etc.)
 - **UI Utilities** (`infrastructure/ui-utils.ts`): Cross-cutting UI testing functions (screenshots, waiting, window management)
+- **Component Test Pages**: Build pages in `src/renderer/testing-active/components/pages/` using the same renderer page framework as production pages, then register them in `src/renderer/testing-active/index.tsx`.
 
 **System Testing Infrastructure** (`tests/bdd/technical/infrastructure/`):
 
@@ -120,6 +124,7 @@ When adding features with stateful test scenarios, use this pattern to maintain 
 - Only serializable data can cross the hook boundary from Cucumber to Electron
 - NEVER, under any circumstances, change anything in `src/main/testing`. That folder's contents is overwritten at build time.
 - If any compile, build, or test failure points to a problem in `src/main/testing` and you believe that you need to change a file in that folder to resolve the error, instead make the change to the equivalent file in the `src/main/testing-active` folder. Those files will be copied into `src/main/testing` at build time, so your changes there will take effect at the next build.
+- Component test pages also live in `testing-active`; they are copied into `src/renderer/testing/` for integration builds by `use-testing-active.js` and should be built like normal renderer pages.
 
 ## Validation Flow
 

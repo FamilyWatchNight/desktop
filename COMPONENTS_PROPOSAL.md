@@ -778,7 +778,7 @@ Following the same pattern used for main process test hooks, component testing w
 #### Directory Structure
 
 ```
-src/renderer/components/testing-active/     # Active test pages and registration helpers
+src/renderer/testing-active/     # Active test pages and registration helpers
 ├── index.ts                                 # Exports registration function and menu builder
 ├── PageTestPage.tsx                         # Tests Page component
 ├── SectionTestPage.tsx                      # Tests Section component
@@ -790,10 +790,10 @@ src/renderer/components/testing-active/     # Active test pages and registration
 ├── MenuItemTestPage.tsx                     # Tests MenuItem component
 └── ExpandableMenuSectionTestPage.tsx        # Tests ExpandableMenuSection component
 
-src/renderer/components/testing/             # Symlink/auto-copied at build time from active or noop
+src/renderer/testing/             # Symlink/auto-copied at build time from active or noop
 └── index.ts
 
-src/renderer/components/testing-noop/        # No-op module (production/test-disabled)
+src/renderer/testing-noop/        # No-op module (production/test-disabled)
 ├── index.ts                                 # Exports empty registration function and no menu
 ```
 
@@ -862,7 +862,7 @@ export function buildTestingMenu(): React.ReactNode | null {
 `AppLayout.tsx` should import the renderer testing module and use its contract directly:
 
 ```tsx
-import * as testing from '../components/testing';
+import * as testing from '../testing';
 
 const testMenuSection = testing.buildTestingMenu?.();
 
@@ -972,7 +972,7 @@ function linkTestingDirectories() {
   linkDirectory('src/main/testing-active', 'src/main/testing');
 
   // Renderer process test pages (new logic)
-  linkDirectory('src/renderer/components/testing-active', 'src/renderer/components/testing');
+  linkDirectory('src/renderer/testing-active', 'src/renderer/testing');
 }
 
 function linkDirectory(source, target) {
@@ -991,7 +991,7 @@ To support test page navigation, AppLayout will need these updates:
 1. **Import the testing module contract**:
 
    ```tsx
-   import * as testing from '../components/testing';
+   import * as testing from '../testing';
    ```
 
 2. **Create a shared page registry** that supports runtime registration.
@@ -1137,7 +1137,7 @@ function linkTestingDirectories() {
   linkDirectory('src/main/testing-active', 'src/main/testing');
 
   // Renderer process test pages (new logic)
-  linkDirectory('src/renderer/components/testing-active', 'src/renderer/components/testing');
+  linkDirectory('src/renderer/testing-active', 'src/renderer/testing');
 }
 
 function linkDirectory(source, target) {
@@ -1221,7 +1221,7 @@ Standardized styles for test control sections:
 
 Priority: High | Duration: ~3 days
 
-- Create test pages directory structure (`src/renderer/components/testing-active/`, `-noop/`)
+- Create test pages directory structure (`src/renderer/testing-active/`, `-noop/`)
 - Extend build scripts (`scripts/use-testing-active.js`, `use-testing-noop.js`) to handle renderer test pages
 - Create `TesterPersona` class in `tests/bdd/business-flow/personas/`
 - Add shared test page styles to `src/renderer/styles/components/test-pages.scss`
@@ -1238,7 +1238,7 @@ Priority: High | Duration: ~1 sprint
 
 **Test Pages:**
 
-- Create `PageTestPage.tsx`, `SectionTestPage.tsx` in `src/renderer/components/testing-active/`
+- Create `PageTestPage.tsx`, `SectionTestPage.tsx` in `src/renderer/testing-active/`
 - Create feature files: `page-component.feature`, `section-component.feature`
 - Create step definitions for layout component testing
 
@@ -1257,7 +1257,7 @@ Priority: High | Duration: ~1 sprint
 
 **Test Pages:**
 
-- Create `FormGroupTestPage.tsx`, `FormInputTestPage.tsx` in `src/renderer/components/testing-active/`
+- Create `FormGroupTestPage.tsx`, `FormInputTestPage.tsx` in `src/renderer/testing-active/`
 - Create feature files for form component testing
 
 **Integration:**
@@ -1340,7 +1340,7 @@ To support test page navigation, AppLayout will need these updates:
 3. **Import Test Pages**: Conditionally import from `testing` directory:
    ```tsx
    // Lazy import that resolves to correct directory at build time
-   import * as TestPages from '../components/testing';
+   import * as TestPages from '../testing';
    ```
 
 ## Build Configuration Additions
@@ -1378,7 +1378,7 @@ No changes needed — existing build process already handles test hook managemen
 5. **Props Flexibility**: Allow `className` prop override for edge cases, or keep styling fully encapsulated?
 6. **Icon Handling**: Extract SVG icon logic into `Icon.tsx` component now, or leave as inline SVGs in components?
 7. **Test Page Navigation**: Should test pages be navigable via AppLayout menu, or only via direct URL (`/testing/page`)?
-8. **Test Page Export**: Should `src/renderer/components/testing/` exports be used directly in pages, or via a test utilities module?
+8. **Test Page Export**: Should `src/renderer/testing/` exports be used directly in pages, or via a test utilities module?
 
 ---
 

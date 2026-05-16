@@ -766,6 +766,8 @@ describe('title normalization', () => {
 - Dual transport testing (IPC + HTTP surfaces)
 - Playwright launches full Electron app for integration
 - Cucumber BDD with Gherkin features for business-readable tests
+- Component test pages are authored in `src/renderer/testing-active/components/pages/`, composed with production `Page`/`Section` layout components, and registered through `src/renderer/testing-active/index.tsx`.
+- During integration builds, `use-testing-active.js` copies these pages into `src/renderer/testing/` so the renderer uses real app page structures for component validation.
 
 ### **Test Infrastructure**
 
