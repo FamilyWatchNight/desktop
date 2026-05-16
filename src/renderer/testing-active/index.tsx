@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import type { PageRegistry } from '../pageRegistry';
+import type { PageRegistry } from '../components/pageRegistry';
 
 import PageTestPage from './components/pages/PageTestPage';
 

@@ -10,9 +10,9 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../api-client';
-import pageRegistry from '../pageRegistry';
 import * as testing from '../testing';
 
+import pageRegistry from './pageRegistry';
 import BackgroundTasksPage from './pages/BackgroundTasksPage';
 import HomePage from './pages/HomePage';
 import SettingsPage from './pages/SettingsPage';
