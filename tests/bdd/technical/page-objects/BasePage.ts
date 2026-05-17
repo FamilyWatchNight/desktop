@@ -131,15 +131,21 @@ export abstract class BasePage {
     const locator = page.locator(selector);
 
     const textValue = await locator.evaluate((el) => {
+      if (!el) {
+        return null;
+      }
+
       // If it's an input/textarea/select, it has a 'value' property
       if ('value' in el) {
-        return el.value;
+        return el.value as string;
       }
-      // Otherwise, return the visible text
-      return el.textContent;
+      if ('textContent' in el) {
+        return el.textContent as string;
+      }
+
+      return null;
     });
 
-    console.log(`[BasePage.getText] Got text for "${name}":`, textValue);
     return textValue;
   }
 }
