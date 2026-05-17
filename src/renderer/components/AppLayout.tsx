@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../api-client';
+import { useNavigation } from '../contexts/NavigationContext';
 import * as testing from '../testing';
 
 import pageRegistry from './pageRegistry';
@@ -36,15 +37,15 @@ interface TaskPayload {
 export default function Layout(): React.ReactElement {
   const { t } = useTranslation(['layout', 'common']);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState('home');
+  const { currentPage, navigateTo } = useNavigation();
   const [systemExpanded, setSystemExpanded] = useState(false);
   const [activeTask, setActiveTask] = useState<TaskPayload | null>(null);
   const [queue, setQueue] = useState<TaskPayload[]>([]);
 
   const toggleMenu = (): void => setMenuOpen(!menuOpen);
   const closeMenu = (): void => setMenuOpen(false);
-  const navigateTo = (page: string): void => {
-    setCurrentPage(page);
+  const navigateAndClose = (page: string): void => {
+    navigateTo(page);
     closeMenu();
   };
 
@@ -89,7 +90,7 @@ export default function Layout(): React.ReactElement {
     }
   };
 
-  const testMenuSection = testing.buildTestingMenu?.(navigateTo);
+  const testMenuSection = testing.buildTestingMenu?.(navigateAndClose);
 
   return (
     <div className="app-layout" data-testid="app-layout">
@@ -152,7 +153,7 @@ export default function Layout(): React.ReactElement {
               <div id="menu-system-items" className="menu-system-items">
                 <button
                   className={`menu-item ${currentPage === 'background-tasks' ? 'active' : ''}`}
-                  onClick={() => navigateTo('background-tasks')}
+                  onClick={() => navigateAndClose('background-tasks')}
                   data-testid="menu-background-tasks"
                 >
                   <svg
@@ -173,7 +174,7 @@ export default function Layout(): React.ReactElement {
                 </button>
                 <button
                   className={`menu-item ${currentPage === 'styleboard' ? 'active' : ''}`}
-                  onClick={() => navigateTo('styleboard')}
+                  onClick={() => navigateAndClose('styleboard')}
                   data-testid="menu-styleboard"
                 >
                   <svg
@@ -194,7 +195,7 @@ export default function Layout(): React.ReactElement {
           <div className="menu-footer">
             <button
               className={`menu-item ${currentPage === 'settings' ? 'active' : ''}`}
-              onClick={() => navigateTo('settings')}
+              onClick={() => navigateAndClose('settings')}
               data-testid="menu-settings"
             >
               <svg
