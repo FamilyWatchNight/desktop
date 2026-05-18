@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../api-client';
 import { useNavigation } from '../contexts/NavigationContext';
+import { PAGE_IDS } from '../pages/PageIds';
 import * as testing from '../testing';
 
 import pageRegistry from './pageRegistry';
@@ -77,13 +78,13 @@ export default function Layout(): React.ReactElement {
     }
 
     switch (currentPage) {
-      case 'home':
+      case PAGE_IDS.HOME:
         return <HomePage />;
-      case 'settings':
+      case PAGE_IDS.SETTINGS:
         return <SettingsPage />;
-      case 'styleboard':
+      case PAGE_IDS.STYLEBOARD:
         return <StyleboardPage />;
-      case 'background-tasks':
+      case PAGE_IDS.BACKGROUND_TASKS:
         return <BackgroundTasksPage />;
       default:
         return <HomePage />;
@@ -117,8 +118,8 @@ export default function Layout(): React.ReactElement {
           <div className="menu-nav-section">
             <nav className="menu-nav">
               <button
-                className={`menu-item ${currentPage === 'home' ? 'active' : ''}`}
-                onClick={() => navigateTo('home')}
+                className={`menu-item ${currentPage === PAGE_IDS.HOME ? 'active' : ''}`}
+                onClick={() => navigateAndClose(PAGE_IDS.HOME)}
                 data-testid="menu-home"
               >
                 <svg
@@ -152,8 +153,8 @@ export default function Layout(): React.ReactElement {
               </button>
               <div id="menu-system-items" className="menu-system-items">
                 <button
-                  className={`menu-item ${currentPage === 'background-tasks' ? 'active' : ''}`}
-                  onClick={() => navigateAndClose('background-tasks')}
+                  className={`menu-item ${currentPage === PAGE_IDS.BACKGROUND_TASKS ? 'active' : ''}`}
+                  onClick={() => navigateAndClose(PAGE_IDS.BACKGROUND_TASKS)}
                   data-testid="menu-background-tasks"
                 >
                   <svg
@@ -173,8 +174,8 @@ export default function Layout(): React.ReactElement {
                   )}
                 </button>
                 <button
-                  className={`menu-item ${currentPage === 'styleboard' ? 'active' : ''}`}
-                  onClick={() => navigateAndClose('styleboard')}
+                  className={`menu-item ${currentPage === PAGE_IDS.STYLEBOARD ? 'active' : ''}`}
+                  onClick={() => navigateAndClose(PAGE_IDS.STYLEBOARD)}
                   data-testid="menu-styleboard"
                 >
                   <svg
@@ -194,8 +195,8 @@ export default function Layout(): React.ReactElement {
           </div>
           <div className="menu-footer">
             <button
-              className={`menu-item ${currentPage === 'settings' ? 'active' : ''}`}
-              onClick={() => navigateAndClose('settings')}
+              className={`menu-item ${currentPage === PAGE_IDS.SETTINGS ? 'active' : ''}`}
+              onClick={() => navigateAndClose(PAGE_IDS.SETTINGS)}
               data-testid="menu-settings"
             >
               <svg

@@ -148,4 +148,37 @@ export abstract class BasePage {
 
     return textValue;
   }
+
+  /**
+   * Navigate to the page represented by this PageObject.
+   * The concrete PageObject class should declare a static `pageId` string.
+   * This calls `window.navigateTo(pageId)` inside the renderer via Playwright.
+   */
+  async navigateToPage(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctor = this.constructor as any;
+    const pageId: string | undefined = ctor.pageId;
+    if (!pageId) {
+      throw new Error(`PageObject ${ctor.name} must declare a static pageId`);
+    }
+
+    const page = await this.getPage();
+    // Invoke the renderer-level navigation function exposed on window
+    await page.evaluate((p) => {
+      type WindowWithNavigateTo = Window & { navigateTo?: (page: string) => void };
+      const fn = (window as WindowWithNavigateTo).navigateTo;
+      if (typeof fn !== 'function') {
+        throw new Error('window.navigateTo is not available');
+      }
+      fn(p);
+    }, pageId);
+
+    // If this PageObject declares a pageRoot selector, wait for it to be visible.
+    if ((this.selectors as Record<string, string>).pageRoot) {
+      await this.waitForVisible('pageRoot', UI_TIMEOUT);
+    } else {
+      // Otherwise wait for network idle shortly to give the renderer a moment to update
+      await page.waitForLoadState('networkidle', { timeout: UI_TIMEOUT }).catch(() => {});
+    }
+  }
 }

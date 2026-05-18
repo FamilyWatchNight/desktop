@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import type { PageRegistry } from '../components/pageRegistry';
 
 import PageFrameworkTestPage from './components/pages/PageFrameworkTestPage';
+import { TEST_PAGE_IDS } from './TestPageIds';
 
 interface TestingMenuSectionProps {
   navigateTo: (page: string) => void;
@@ -37,7 +38,7 @@ function TestingMenuSection({ navigateTo }: TestingMenuSectionProps): React.Reac
           className="menu-item"
           data-testid="menu-testing-page"
           onClick={() => {
-            navigateTo('testing/page-framework');
+            navigateTo(`testing/${TEST_PAGE_IDS.PAGE_FRAMEWORK_TEST}`);
             setExpanded(false);
           }}
         >
@@ -49,7 +50,11 @@ function TestingMenuSection({ navigateTo }: TestingMenuSectionProps): React.Reac
 }
 
 export function registerTestPages(registry: PageRegistry): void {
-  registry.registerPage('testing/page-framework', PageFrameworkTestPage, 'Page Framework Test');
+  registry.registerPage(
+    `testing/${TEST_PAGE_IDS.PAGE_FRAMEWORK_TEST}`,
+    PageFrameworkTestPage,
+    'Page Framework Test',
+  );
 }
 
 export function buildTestingMenu(navigateTo: (page: string) => void): React.ReactNode {
