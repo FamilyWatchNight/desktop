@@ -7,10 +7,11 @@ the Free Software Foundation, version 3.
 */
 
 import log from 'electron-log/renderer';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../../api-client';
+import { Page, Section } from '../elements/layout';
 
 import '../../styles/components/BackgroundTasksPage.scss';
 
@@ -84,80 +85,75 @@ export default function BackgroundTasksPage(): React.ReactElement {
   };
 
   return (
-    <div className="page centered" data-testid="page-background-tasks">
-      <div className="page-container">
-        <h1 className="page-title">{t('title')}</h1>
-        <section className="section">
-          <h2 className="section-title">{t('activeTask')}</h2>
-          {active ? (
-            <div className="active-task" data-testid="background-tasks-active-task">
-              <div className="active-task-label" data-testid="background-tasks-active-task-label">
-                {active.label}
-              </div>
-              <div className="active-task-step" data-testid="background-tasks-active-task-step">
-                {active.description ?? t('working')}
-              </div>
-              <div className="progress-bar-wrap">
-                <div
-                  className={`progress-bar-fill ${isIndeterminate ? 'indeterminate' : ''}`}
-                  style={isIndeterminate ? {} : { width: `${progressPercent}%` }}
-                />
-              </div>
-              <div className="progress-text" data-testid="background-tasks-progress-text">
-                {isIndeterminate
-                  ? t('inProgress')
-                  : t('percentComplete', { percent: progressPercent })}
-              </div>
-              <button
-                type="button"
-                className="btn-danger"
-                data-testid="background-tasks-cancel-button"
-                onClick={cancelActiveTask}
+    <Page centered testId="page-background-tasks" title={t('title')}>
+      <Section title={t('activeTask')} testId="background-tasks-active-section">
+        {active ? (
+          <div className="active-task" data-testid="background-tasks-active-task">
+            <div className="active-task-label" data-testid="background-tasks-active-task-label">
+              {active.label}
+            </div>
+            <div className="active-task-step" data-testid="background-tasks-active-task-step">
+              {active.description ?? t('working')}
+            </div>
+            <div className="progress-bar-wrap">
+              <div
+                className={`progress-bar-fill ${isIndeterminate ? 'indeterminate' : ''}`}
+                style={isIndeterminate ? {} : { width: `${progressPercent}%` }}
+              />
+            </div>
+            <div className="progress-text" data-testid="background-tasks-progress-text">
+              {isIndeterminate
+                ? t('inProgress')
+                : t('percentComplete', { percent: progressPercent })}
+            </div>
+            <button
+              type="button"
+              className="btn-danger"
+              data-testid="background-tasks-cancel-button"
+              onClick={cancelActiveTask}
+            >
+              {t('button.cancel', { ns: 'common' })}
+            </button>
+          </div>
+        ) : (
+          <div className="no-active-task" data-testid="background-tasks-no-active">
+            {t('noActive')}
+          </div>
+        )}
+      </Section>
+      <Section title={t('queuedTasks')} testId="background-tasks-queued-section">
+        {queue.length > 0 ? (
+          <ul className="queued-list" data-testid="background-tasks-queued-list">
+            {queue.map((task) => (
+              <li
+                key={task.id}
+                className="queued-item"
+                data-testid={`background-tasks-queued-item-${task.id}`}
               >
-                {t('button.cancel', { ns: 'common' })}
-              </button>
-            </div>
-          ) : (
-            <div className="no-active-task" data-testid="background-tasks-no-active">
-              {t('noActive')}
-            </div>
-          )}
-        </section>
-        <section className="section">
-          <h2 className="section-title">{t('queuedTasks')}</h2>
-          {queue.length > 0 ? (
-            <ul className="queued-list" data-testid="background-tasks-queued-list">
-              {queue.map((task) => (
-                <li
-                  key={task.id}
-                  className="queued-item"
-                  data-testid={`background-tasks-queued-item-${task.id}`}
+                <span
+                  className="queued-item-label"
+                  data-testid={`background-tasks-queued-item-label-${task.id}`}
                 >
-                  <span
-                    className="queued-item-label"
-                    data-testid={`background-tasks-queued-item-label-${task.id}`}
-                  >
-                    {task.label}
-                  </span>
-                  <button
-                    type="button"
-                    className="btn-danger"
-                    data-testid={`background-tasks-remove-queued-task-${task.id}`}
-                    onClick={() => removeQueuedTask(task.id)}
-                    aria-label={t('button.removeTask') + ' ' + task.label}
-                  >
-                    {t('button.removeTask')}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="no-queued-tasks" data-testid="background-tasks-none-queued">
-              {t('noneQueued')}
-            </div>
-          )}
-        </section>
-      </div>
-    </div>
+                  {task.label}
+                </span>
+                <button
+                  type="button"
+                  className="btn-danger"
+                  data-testid={`background-tasks-remove-queued-task-${task.id}`}
+                  onClick={() => removeQueuedTask(task.id)}
+                  aria-label={t('button.removeTask') + ' ' + task.label}
+                >
+                  {t('button.removeTask')}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="no-queued-tasks" data-testid="background-tasks-none-queued">
+            {t('noneQueued')}
+          </div>
+        )}
+      </Section>
+    </Page>
   );
 }

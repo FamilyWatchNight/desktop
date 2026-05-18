@@ -6,14 +6,15 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import '../../styles/components/StyleboardPage.scss';
 import React from 'react';
+import '../../styles/components/StyleboardPage.scss';
+
+import { Page, Section } from '../elements/layout';
 
 export default function StyleboardPage(): React.ReactElement {
   return (
-    <div className="page centered" data-testid="page-styleboard">
-      <div className="page-container">
-        <h1 className="page-title">h1.page-title Styleboard</h1>
+    <Page centered title="Styleboard" testId="page-styleboard">
+      <Section testId="styleboard-content-section">
         <p>Paragraph text</p>
         <h1>Heading 1</h1>
         <h2>Heading 2</h2>
@@ -32,8 +33,7 @@ export default function StyleboardPage(): React.ReactElement {
           ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
           ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
           reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-          sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-          est laborum.
+          sint occaecat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
         </p>
         <h2>Heading 2</h2>
         <p>
@@ -41,17 +41,18 @@ export default function StyleboardPage(): React.ReactElement {
           ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
           ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
           reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-          sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-          est laborum.
+          sint occaecat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
         </p>
-        <h2>Buttons</h2>
+      </Section>
+      <Section title="Buttons" testId="styleboard-buttons-section">
         <div className="button-group">
           <button>Primary</button>
           <button className="btn-secondary">Secondary</button>
           <button className="btn-danger">Danger</button>
           <button className="btn-success">Success</button>
         </div>
-        <h2>Colors</h2>
+      </Section>
+      <Section title="Colors" testId="styleboard-colors-section">
         <div className="grid-row">
           <div className="color-swatch" style={{ background: 'var(--core-gold)' }}>
             <span>Gold</span>
@@ -93,7 +94,7 @@ export default function StyleboardPage(): React.ReactElement {
             <span>Coral</span>
           </div>
         </div>
-      </div>
-    </div>
+      </Section>
+    </Page>
   );
 }

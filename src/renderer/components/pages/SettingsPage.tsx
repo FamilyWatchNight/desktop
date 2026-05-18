@@ -6,10 +6,11 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../../api-client';
+import { Page, Section } from '../elements/layout';
 
 const apiClient = createApiClient();
 
@@ -121,9 +122,8 @@ export default function SettingsPage(): React.ReactElement {
   };
 
   return (
-    <div className="page centered" data-testid="page-settings">
-      <div className="page-container">
-        <h1 className="page-title">{t('title')}</h1>
+    <Page centered title={t('title')} testId="page-settings">
+      <Section testId="settings-form-section">
         <div className="form-group">
           <label htmlFor="webPort" data-testid="settings-webport-label">
             {t('webPort')}
@@ -162,8 +162,9 @@ export default function SettingsPage(): React.ReactElement {
             onChange={(e) => setTmdbApiKey(e.target.value)}
           />
         </div>
+      </Section>
+      <Section title={t('backgroundTasks')} testId="settings-background-tasks-section">
         <div className="form-group">
-          <label data-testid="settings-background-tasks-label">{t('backgroundTasks')}</label>
           <div className="button-group">
             <button
               type="button"
@@ -195,24 +196,24 @@ export default function SettingsPage(): React.ReactElement {
             </div>
           )}
         </div>
-        <div className="button-group">
-          <button className="btn-primary" data-testid="settings-save-button" onClick={saveSettings}>
-            {t('save')}
-          </button>
-          <button
-            className="btn-secondary"
-            data-testid="settings-cancel-button"
-            onClick={handleCancel}
-          >
-            {t('button.cancel', { ns: 'common' })}
-          </button>
-        </div>
-        {statusMessage && (
-          <div className={`message ${statusType}`} data-testid="settings-status-message">
-            {statusMessage}
-          </div>
-        )}
+      </Section>
+      <div className="button-group">
+        <button className="btn-primary" data-testid="settings-save-button" onClick={saveSettings}>
+          {t('save')}
+        </button>
+        <button
+          className="btn-secondary"
+          data-testid="settings-cancel-button"
+          onClick={handleCancel}
+        >
+          {t('button.cancel', { ns: 'common' })}
+        </button>
       </div>
-    </div>
+      {statusMessage && (
+        <div className={`message ${statusType}`} data-testid="settings-status-message">
+          {statusMessage}
+        </div>
+      )}
+    </Page>
   );
 }
