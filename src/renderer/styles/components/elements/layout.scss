@@ -1,29 +1,36 @@
 @use '../../colors';
 
 $container-radius: 0.5rem;
-$container-padding: 2rem;
-$container-gap: $container-padding;
+$container-padding: 1rem;
+$container-gap: 1rem;
 
-$section-gap: 1rem;
+$page-padding: 2rem;
+$page-gap: $page-padding;
 
 $centered-width: 640px;
 
-@mixin make-container {
-  background: colors.$container-background;
+@mixin make-container-layout {
   padding: $container-padding;
   border-radius: $container-radius;
+}
+@mixin make-container-color {
+  background: colors.$container-background;
   border: 1px solid colors.$container-border;
   backdrop-filter: blur(30px);
+}
+@mixin make-container {
+  @include make-container-layout;
+  @include make-container-color;
 }
 
 // Page Component
 .page {
   min-height: 100%;
-  padding: $container-padding;
+  padding: $page-padding;
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: $section-gap;
+  gap: $page-gap;
 
   &.centered {
     align-items: center;
@@ -38,9 +45,10 @@ $centered-width: 640px;
 
 .page-container {
   @include make-container;
+  padding: $page-padding;
   display: flex;
   flex-direction: column;
-  gap: $container-gap;
+  gap: $page-gap;
   max-width: 100%;
 }
 
@@ -60,7 +68,7 @@ $centered-width: 640px;
   @include make-container;
   display: flex;
   flex-direction: column;
-  gap: $section-gap;
+  gap: $container-gap;
 }
 
 .section-title {

@@ -1,7 +1,16 @@
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
 import React, { useState } from 'react';
 
 import type { PageRegistry } from '../components/pageRegistry';
 
+import FormControlsTestPage from './components/pages/FormControlsTestPage';
 import PageFrameworkTestPage from './components/pages/PageFrameworkTestPage';
 import { TEST_PAGE_IDS } from './TestPageIds';
 
@@ -44,6 +53,17 @@ function TestingMenuSection({ navigateTo }: TestingMenuSectionProps): React.Reac
         >
           <span>Page Framework Test</span>
         </button>
+        <button
+          type="button"
+          className="menu-item"
+          data-testid="menu-testing-form-controls-page"
+          onClick={() => {
+            navigateTo(`testing/${TEST_PAGE_IDS.PAGE_FORM_CONTROLS_TEST}`);
+            setExpanded(false);
+          }}
+        >
+          <span>Form Controls Test</span>
+        </button>
       </div>
     </div>
   );
@@ -54,6 +74,11 @@ export function registerTestPages(registry: PageRegistry): void {
     `testing/${TEST_PAGE_IDS.PAGE_FRAMEWORK_TEST}`,
     PageFrameworkTestPage,
     'Page Framework Test',
+  );
+  registry.registerPage(
+    `testing/${TEST_PAGE_IDS.PAGE_FORM_CONTROLS_TEST}`,
+    FormControlsTestPage,
+    'Form Controls Test',
   );
 }
 

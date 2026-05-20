@@ -1,0 +1,34 @@
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
+import React from 'react';
+
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  className?: string;
+  label?: string;
+  testId?: string;
+}
+
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, label, testId, id, ...rest }, ref) => {
+    const inputElement = <input id={id} className={className} data-testid={testId} ref={ref} {...rest} />;
+
+    if (!label) {
+      return inputElement;
+    }
+
+    return (
+      <label className={className} htmlFor={id}>
+        <span>{label}</span>
+        {inputElement}
+      </label>
+    );
+  },
+);
+
+Input.displayName = 'Input';

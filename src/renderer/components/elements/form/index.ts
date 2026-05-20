@@ -6,9 +6,6 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-export const TEST_PAGE_IDS = {
-  PAGE_FRAMEWORK_TEST: 'page-framework',
-  PAGE_FORM_CONTROLS_TEST: 'form-controls',
-} as const;
-
-export type TestPageId = (typeof TEST_PAGE_IDS)[keyof typeof TEST_PAGE_IDS];
+export { Fieldset } from './Fieldset';
+export { Form } from './Form';
+export { Input } from './Input';
