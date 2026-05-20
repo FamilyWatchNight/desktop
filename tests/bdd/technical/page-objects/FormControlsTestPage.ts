@@ -23,8 +23,10 @@ export class FormControlsTestPage extends BasePage {
     controlledEmailDisplay: '[data-testid="controlled-email-display"]',
     controlledAcceptedTermsDisplay: '[data-testid="controlled-accepted-terms-display"]',
     controlledSubmitCount: '[data-testid="controlled-submit-count"]',
-    controlledPersonalInformationFieldset: '[data-testid="controlled-fieldset-personal-information"]',
-    controlledPersonalInformationLegend: '[data-testid="controlled-fieldset-personal-information"] legend',
+    controlledPersonalInformationFieldset:
+      '[data-testid="controlled-fieldset-personal-information"]',
+    controlledPersonalInformationLegend:
+      '[data-testid="controlled-fieldset-personal-information"] legend',
     controlledPreferencesFieldset: '[data-testid="controlled-fieldset-preferences"]',
     controlledPreferencesLegend: '[data-testid="controlled-fieldset-preferences"] legend',
     uncontrolledNameInput: '[data-testid="uncontrolled-input-name"]',
@@ -35,10 +37,15 @@ export class FormControlsTestPage extends BasePage {
     uncontrolledEmailResult: '[data-testid="uncontrolled-email-result"]',
     uncontrolledAcceptedTermsResult: '[data-testid="uncontrolled-accepted-terms-result"]',
     uncontrolledSubmitCount: '[data-testid="uncontrolled-submit-count"]',
-    uncontrolledPersonalInformationFieldset: '[data-testid="uncontrolled-fieldset-personal-information"]',
-    uncontrolledPersonalInformationLegend: '[data-testid="uncontrolled-fieldset-personal-information"] legend',
+    uncontrolledPersonalInformationFieldset:
+      '[data-testid="uncontrolled-fieldset-personal-information"]',
+    uncontrolledPersonalInformationLegend:
+      '[data-testid="uncontrolled-fieldset-personal-information"] legend',
     uncontrolledPreferencesFieldset: '[data-testid="uncontrolled-fieldset-preferences"]',
     uncontrolledPreferencesLegend: '[data-testid="uncontrolled-fieldset-preferences"] legend',
+    hiddenLabelsDefaultInput: '[data-testid="hidden-label-default-input"]',
+    hiddenLabelsCustomInput: '[data-testid="hidden-label-custom-input"]',
+    hiddenLabelsFieldset: '[data-testid="hidden-labels-fieldset"]',
   };
 
   async waitForVisible(name: string, timeout = 4000): Promise<void> {
@@ -52,8 +59,8 @@ export class FormControlsTestPage extends BasePage {
       normalizedField === 'name'
         ? this.selectors.controlledNameInput
         : normalizedField === 'email'
-        ? this.selectors.controlledEmailInput
-        : undefined;
+          ? this.selectors.controlledEmailInput
+          : undefined;
     if (!selector) {
       throw new Error(`Unsupported controlled input field name: ${fieldName}`);
     }
@@ -68,8 +75,8 @@ export class FormControlsTestPage extends BasePage {
       normalizedField === 'name'
         ? this.selectors.uncontrolledNameInput
         : normalizedField === 'email'
-        ? this.selectors.uncontrolledEmailInput
-        : undefined;
+          ? this.selectors.uncontrolledEmailInput
+          : undefined;
     if (!selector) {
       throw new Error(`Unsupported uncontrolled input field name: ${fieldName}`);
     }
@@ -84,10 +91,10 @@ export class FormControlsTestPage extends BasePage {
       normalizedField === 'name'
         ? this.selectors.controlledNameDisplay
         : normalizedField === 'email'
-        ? this.selectors.controlledEmailDisplay
-        : normalizedField === 'accepted terms'
-        ? this.selectors.controlledAcceptedTermsDisplay
-        : undefined;
+          ? this.selectors.controlledEmailDisplay
+          : normalizedField === 'accepted terms'
+            ? this.selectors.controlledAcceptedTermsDisplay
+            : undefined;
     if (!selector) {
       throw new Error(`Unsupported controlled display field name: ${fieldName}`);
     }
@@ -120,10 +127,10 @@ export class FormControlsTestPage extends BasePage {
       normalizedField === 'name'
         ? this.selectors.uncontrolledNameResult
         : normalizedField === 'email'
-        ? this.selectors.uncontrolledEmailResult
-        : normalizedField === 'accepted terms'
-        ? this.selectors.uncontrolledAcceptedTermsResult
-        : undefined;
+          ? this.selectors.uncontrolledEmailResult
+          : normalizedField === 'accepted terms'
+            ? this.selectors.uncontrolledAcceptedTermsResult
+            : undefined;
     if (!selector) {
       throw new Error(`Unsupported uncontrolled result field name: ${fieldName}`);
     }
@@ -138,12 +145,12 @@ export class FormControlsTestPage extends BasePage {
       normalizedName === 'controlled personal information'
         ? this.selectors.controlledPersonalInformationLegend
         : normalizedName === 'controlled preferences'
-        ? this.selectors.controlledPreferencesLegend
-        : normalizedName === 'uncontrolled personal information'
-        ? this.selectors.uncontrolledPersonalInformationLegend
-        : normalizedName === 'uncontrolled preferences'
-        ? this.selectors.uncontrolledPreferencesLegend
-        : undefined;
+          ? this.selectors.controlledPreferencesLegend
+          : normalizedName === 'uncontrolled personal information'
+            ? this.selectors.uncontrolledPersonalInformationLegend
+            : normalizedName === 'uncontrolled preferences'
+              ? this.selectors.uncontrolledPreferencesLegend
+              : undefined;
 
     if (!selector) {
       throw new Error(`Unsupported fieldset name: ${fieldsetName}`);
@@ -151,5 +158,58 @@ export class FormControlsTestPage extends BasePage {
 
     await page.waitForSelector(selector, { state: 'visible' });
     return page.locator(selector).textContent();
+  }
+
+  async getHiddenLabelInputAriaLabel(inputName: string): Promise<string | null> {
+    const page = await this.getPage();
+    const normalizedName = inputName.toLowerCase();
+    const selector =
+      normalizedName === 'default'
+        ? this.selectors.hiddenLabelsDefaultInput
+        : normalizedName === 'custom'
+          ? this.selectors.hiddenLabelsCustomInput
+          : undefined;
+
+    if (!selector) {
+      throw new Error(`Unsupported hidden label input: ${inputName}`);
+    }
+
+    return page.locator(selector).getAttribute('aria-label');
+  }
+
+  async isHiddenLabelInputVisible(inputName: string): Promise<boolean> {
+    const page = await this.getPage();
+    const normalizedName = inputName.toLowerCase();
+    const selector =
+      normalizedName === 'default'
+        ? this.selectors.hiddenLabelsDefaultInput
+        : normalizedName === 'custom'
+          ? this.selectors.hiddenLabelsCustomInput
+          : undefined;
+
+    if (!selector) {
+      throw new Error(`Unsupported hidden label input: ${inputName}`);
+    }
+
+    return page.locator(selector).isVisible();
+  }
+
+  async doesHiddenLabelInputHaveAVisibleLabelParent(inputName: string): Promise<boolean> {
+    const page = await this.getPage();
+    const normalizedName = inputName.toLowerCase();
+    const selector =
+      normalizedName === 'default'
+        ? this.selectors.hiddenLabelsDefaultInput
+        : normalizedName === 'custom'
+          ? this.selectors.hiddenLabelsCustomInput
+          : undefined;
+
+    if (!selector) {
+      throw new Error(`Unsupported hidden label input: ${inputName}`);
+    }
+
+    const locator = page.locator(selector);
+    const parentTagName = await locator.evaluate((el) => el.parentElement?.tagName);
+    return parentTagName == 'LABEL';
   }
 }

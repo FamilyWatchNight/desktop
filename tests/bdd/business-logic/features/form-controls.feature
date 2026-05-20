@@ -31,3 +31,10 @@ Feature: Form Controls
     And the uncontrolled "Email" result should show "Email: bob@example.com"
     And the uncontrolled form submission count should be 1
     And the "Uncontrolled Personal Information" fieldset should have the legend "Uncontrolled Personal Information"
+
+  Scenario: Inputs with labelVisible=false render aria-label but not visible label elements
+    Given the Form Controls test page is open for testing
+    Then the hidden label "Default" input should have aria-label "Default"
+    And the hidden label "Custom" input should have aria-label "ARIA Custom"
+    And the hidden label "Default" input should be visible without a visible label element
+    And the hidden label "Custom" input should be visible without a visible label element

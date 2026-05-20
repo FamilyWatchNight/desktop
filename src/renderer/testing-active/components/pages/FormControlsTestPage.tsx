@@ -142,6 +142,29 @@ export default function FormControlsTestPage(): React.ReactElement {
             </button>
           </Form>
         </Section>
+        <Section title="Hidden Labels (labelVisible=false)" testId="hidden-labels-section">
+          <Form testId="hidden-labels-form">
+            <Fieldset legend="Inputs with Hidden Labels" testId="hidden-labels-fieldset">
+              <Input
+                id="hidden-label-default"
+                name="default"
+                label="Default"
+                labelVisible={false}
+                placeholder="Default aria-label from label attribute"
+                testId="hidden-label-default-input"
+              />
+              <Input
+                id="hidden-label-custom"
+                name="custom"
+                label="Custom"
+                labelVisible={false}
+                aria-label="ARIA Custom"
+                placeholder="ARIA Custom from aria-label attribute"
+                testId="hidden-label-custom-input"
+              />
+            </Fieldset>
+          </Form>
+        </Section>
       </Page>
       <Section title="Test Controls">
         <h3>Controlled Form</h3>

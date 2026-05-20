@@ -59,10 +59,14 @@ When('I submit the controlled form', { timeout: STEP_TIMEOUT }, async function (
   await pageObject.submitControlledForm();
 });
 
-When('I submit the uncontrolled form', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
-  const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-  await pageObject.submitUncontrolledForm();
-});
+When(
+  'I submit the uncontrolled form',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld) {
+    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
+    await pageObject.submitUncontrolledForm();
+  },
+);
 
 Then(
   'the controlled {string} display should show {string}',
@@ -112,5 +116,27 @@ Then(
     const normalized = fieldsetName.toLowerCase() as 'personal information' | 'preferences';
     const actualLegend = await pageObject.getFieldsetLegend(normalized);
     expect(actualLegend).toBe(expectedLegend);
+  },
+);
+
+Then(
+  'the hidden label {string} input should have aria-label {string}',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, inputName: string, expectedAriaLabel: string) {
+    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
+    const actualAriaLabel = await pageObject.getHiddenLabelInputAriaLabel(inputName);
+    expect(actualAriaLabel).toBe(expectedAriaLabel);
+  },
+);
+
+Then(
+  'the hidden label {string} input should be visible without a visible label element',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, inputName: string) {
+    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
+    const isVisible = await pageObject.isHiddenLabelInputVisible(inputName);
+    expect(isVisible).toBe(true);
+    const hasLabelParent = await pageObject.doesHiddenLabelInputHaveAVisibleLabelParent(inputName);
+    expect(hasLabelParent).toBe(false);
   },
 );

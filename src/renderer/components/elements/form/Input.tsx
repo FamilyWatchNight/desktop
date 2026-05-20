@@ -11,14 +11,26 @@ import React from 'react';
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
   label?: string;
+  labelVisible?: boolean;
   testId?: string;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, testId, id, ...rest }, ref) => {
-    const inputElement = <input id={id} className={className} data-testid={testId} ref={ref} {...rest} />;
+  ({ className, label, labelVisible = true, testId, id, ...rest }, ref) => {
+    // When labelVisible is false, inject aria-label if not already provided
+    const ariaLabel = !labelVisible && !rest['aria-label'] && label ? label : rest['aria-label'];
+    const inputElement = (
+      <input
+        id={id}
+        className={className}
+        data-testid={testId}
+        ref={ref}
+        aria-label={ariaLabel}
+        {...rest}
+      />
+    );
 
-    if (!label) {
+    if (!label || !labelVisible) {
       return inputElement;
     }
 
