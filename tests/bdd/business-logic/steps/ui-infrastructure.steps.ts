@@ -6,14 +6,16 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { Given, When, Then } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from 'playwright/test';
 
 import { UnauthenticatedUserPersona } from '../../business-flow/personas/UnauthenticatedUserPersona';
-import { verifyPageIsVisible } from '../../technical/infrastructure/ui-utils';
-import { TIMEOUT as UI_TIMEOUT } from '../../technical/infrastructure/ui-utils';
+import {
+  TIMEOUT as UI_TIMEOUT,
+  verifyPageIsVisible,
+} from '../../technical/infrastructure/ui-utils';
 import { CustomWorld } from '../../technical/infrastructure/world';
-import { SettingsPage } from '../../technical/page-objects/SettingsPage';
+import { BasePage, SettingsPage } from '../../technical/page-objects';
 
 import { assert } from './user-service.steps';
 
@@ -57,5 +59,71 @@ Then(
         expect(actualValue).toBe(String(expectedValue));
       }, `Expected value of ${key} input field to be "${expectedValue}", but got "${actualValue}".`);
     }
+  },
+);
+
+Then(
+  'the {string} element should say {string}',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, name: string, expectedValue: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    const actualValue = await pageObject.getText(name);
+    expect(actualValue).toBe(expectedValue);
+  },
+);
+
+Then(
+  'the {string} element should say {int}',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, name: string, expectedCount: number) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    const actualCount = await pageObject.getNumber(name);
+    expect(actualCount).toBe(expectedCount);
+  },
+);
+
+Then(
+  'the {string} fieldset should have the legend {string}',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, name: string, expectedLegend: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    const actualLegend = await pageObject.getFieldsetLegendText(name);
+    expect(actualLegend).toBe(expectedLegend);
+  },
+);
+
+Then(
+  'the {string} element should have aria-label {string}',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, name: string, expectedAriaLabel: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    const actualAriaLabel = await pageObject.getAriaLabel(name);
+    expect(actualAriaLabel).toBe(expectedAriaLabel);
+  },
+);
+
+Then(
+  'the {string} input should be visible without a visible label element',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, name: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+
+    const isVisible = await pageObject.isVisible(name);
+    expect(isVisible).toBe(true);
+
+    const locator = await pageObject.getLocator(name);
+    const parentTagName = await locator.evaluate((el) => el.parentElement?.tagName);
+    const normalizedParentTagName = parentTagName?.toLowerCase() ?? null;
+    expect(normalizedParentTagName).not.toBe('label');
+  },
+);
+
+Then(
+  'the {string} element should have id {string}',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, name: string, expectedId: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    const actualId = await pageObject.getId(name);
+    expect(actualId).toBe(expectedId);
   },
 );

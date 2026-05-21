@@ -142,27 +142,72 @@ export default function FormControlsTestPage(): React.ReactElement {
             </button>
           </Form>
         </Section>
+        <Section title="Generated IDs" testId="generated-ids-section">
+          <Form testId="generated-ids-form" autoIdPrefix="form-test">
+            <Input
+              name="generatedName1"
+              label="Generated Name 1"
+              placeholder="No id provided"
+              testId="generated-id-name-input-1"
+            />
+            <Input
+              id="custom-id-email"
+              name="customEmail"
+              type="email"
+              label="Custom Email"
+              placeholder="Explicit id provided"
+              testId="custom-id-email-input"
+            />
+            <Input
+              name="generatedName2"
+              label="Generated Name 2"
+              placeholder="No id provided"
+              testId="generated-id-name-input-2"
+            />
+          </Form>
+        </Section>
+        <Section title="Generated IDs with no Form" testId="formless-generated-ids-section">
+          <Input
+            name="formlessGeneratedName1"
+            label="Formless Generated Name 1"
+            placeholder="No id provided"
+            testId="formless-generated-id-name-input-1"
+          />
+          <Input
+            id="formless-custom-id-email"
+            name="formlessCustomEmail"
+            type="email"
+            label="Formless Custom Email"
+            placeholder="Explicit id provided"
+            testId="formless-custom-id-email-input"
+          />
+          <Input
+            name="formlessGeneratedName2"
+            label="Formless Generated Name 2"
+            placeholder="No id provided"
+            testId="formless-generated-id-name-input-2"
+          />
+        </Section>
+
         <Section title="Hidden Labels (labelVisible=false)" testId="hidden-labels-section">
           <Form testId="hidden-labels-form">
-            <Fieldset legend="Inputs with Hidden Labels" testId="hidden-labels-fieldset">
-              <Input
-                id="hidden-label-default"
-                name="default"
-                label="Default"
-                labelVisible={false}
-                placeholder="Default aria-label from label attribute"
-                testId="hidden-label-default-input"
-              />
-              <Input
-                id="hidden-label-custom"
-                name="custom"
-                label="Custom"
-                labelVisible={false}
-                aria-label="ARIA Custom"
-                placeholder="ARIA Custom from aria-label attribute"
-                testId="hidden-label-custom-input"
-              />
-            </Fieldset>
+            <Input
+              id="hidden-label-default"
+              name="default"
+              label="Default"
+              labelVisible={false}
+              placeholder="Default aria-label from label attribute"
+              testId="hidden-label-default-input"
+            />
+            <Input
+              id="hidden-label-custom"
+              name="custom"
+              label="Custom"
+              labelVisible={false}
+              aria-label="ARIA Custom"
+              placeholder="ARIA Custom from aria-label attribute"
+              testId="hidden-label-custom-input"
+            />
           </Form>
         </Section>
       </Page>

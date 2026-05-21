@@ -11,6 +11,7 @@ import { expect } from '@playwright/test';
 
 import { TesterPersona } from '../../business-flow/personas/TesterPersona';
 import { CustomWorld } from '../../technical/infrastructure/world';
+import { BasePage } from '../../technical/page-objects';
 import { FormControlsTestPage } from '../../technical/page-objects/FormControlsTestPage';
 
 const STEP_TIMEOUT = 10000;
@@ -37,20 +38,11 @@ Given(
 );
 
 When(
-  'I enter {string} into the controlled {string} input',
+  'I enter {string} into the {string} input',
   { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, value: string, inputName: string) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    await pageObject.setControlledInputValue(inputName, value);
-  },
-);
-
-When(
-  'I enter {string} into the uncontrolled {string} input',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, value: string, inputName: string) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    await pageObject.setUncontrolledInputValue(inputName, value);
+  async function (this: CustomWorld, value: string, name: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    await pageObject.setInputValue(name, value);
   },
 );
 
@@ -69,74 +61,12 @@ When(
 );
 
 Then(
-  'the controlled {string} display should show {string}',
+  "the {string} input's label should reference its id",
   { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, inputName: string, expectedValue: string) {
+  async function (this: CustomWorld, name: string) {
     const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const actualValue = await pageObject.getControlledDisplay(inputName);
-    expect(actualValue).toBe(expectedValue);
-  },
-);
-
-Then(
-  'the uncontrolled {string} result should show {string}',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, resultField: string, expectedValue: string) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const actualValue = await pageObject.getUncontrolledResult(resultField);
-    expect(actualValue).toBe(expectedValue);
-  },
-);
-
-Then(
-  'the controlled form submission count should be {int}',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, expectedCount: number) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const actualCount = await pageObject.getControlledSubmitCount();
-    expect(actualCount).toBe(expectedCount);
-  },
-);
-
-Then(
-  'the uncontrolled form submission count should be {int}',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, expectedCount: number) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const actualCount = await pageObject.getUncontrolledSubmitCount();
-    expect(actualCount).toBe(expectedCount);
-  },
-);
-
-Then(
-  'the {string} fieldset should have the legend {string}',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, fieldsetName: string, expectedLegend: string) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const normalized = fieldsetName.toLowerCase() as 'personal information' | 'preferences';
-    const actualLegend = await pageObject.getFieldsetLegend(normalized);
-    expect(actualLegend).toBe(expectedLegend);
-  },
-);
-
-Then(
-  'the hidden label {string} input should have aria-label {string}',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, inputName: string, expectedAriaLabel: string) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const actualAriaLabel = await pageObject.getHiddenLabelInputAriaLabel(inputName);
-    expect(actualAriaLabel).toBe(expectedAriaLabel);
-  },
-);
-
-Then(
-  'the hidden label {string} input should be visible without a visible label element',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, inputName: string) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const isVisible = await pageObject.isHiddenLabelInputVisible(inputName);
-    expect(isVisible).toBe(true);
-    const hasLabelParent = await pageObject.doesHiddenLabelInputHaveAVisibleLabelParent(inputName);
-    expect(hasLabelParent).toBe(false);
+    const inputId = await pageObject.getId(name);
+    const labelFor = await pageObject.getInputLabelForAttribute(name);
+    expect(labelFor).toBe(inputId);
   },
 );

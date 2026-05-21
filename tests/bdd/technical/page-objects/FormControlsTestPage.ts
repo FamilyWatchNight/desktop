@@ -43,64 +43,15 @@ export class FormControlsTestPage extends BasePage {
       '[data-testid="uncontrolled-fieldset-personal-information"] legend',
     uncontrolledPreferencesFieldset: '[data-testid="uncontrolled-fieldset-preferences"]',
     uncontrolledPreferencesLegend: '[data-testid="uncontrolled-fieldset-preferences"] legend',
+    generatedIdNameInput1: '[data-testid="generated-id-name-input-1"]',
+    generatedIdNameInput2: '[data-testid="generated-id-name-input-2"]',
+    customIdEmailInput: '[data-testid="custom-id-email-input"]',
+    formlessGeneratedIdNameInput1: '[data-testid="formless-generated-id-name-input-1"]',
+    formlessGeneratedIdNameInput2: '[data-testid="formless-generated-id-name-input-2"]',
+    formlessCustomIdEmailInput: '[data-testid="formless-custom-id-email-input"]',
     hiddenLabelsDefaultInput: '[data-testid="hidden-label-default-input"]',
     hiddenLabelsCustomInput: '[data-testid="hidden-label-custom-input"]',
-    hiddenLabelsFieldset: '[data-testid="hidden-labels-fieldset"]',
-  };
-
-  async waitForVisible(name: string, timeout = 4000): Promise<void> {
-    await super.waitForVisible(name, timeout);
-  }
-
-  async setControlledInputValue(fieldName: string, value: string): Promise<void> {
-    const page = await this.getPage();
-    const normalizedField = fieldName.toLowerCase();
-    const selector =
-      normalizedField === 'name'
-        ? this.selectors.controlledNameInput
-        : normalizedField === 'email'
-          ? this.selectors.controlledEmailInput
-          : undefined;
-    if (!selector) {
-      throw new Error(`Unsupported controlled input field name: ${fieldName}`);
-    }
-
-    await page.fill(selector, value);
-  }
-
-  async setUncontrolledInputValue(fieldName: string, value: string): Promise<void> {
-    const page = await this.getPage();
-    const normalizedField = fieldName.toLowerCase();
-    const selector =
-      normalizedField === 'name'
-        ? this.selectors.uncontrolledNameInput
-        : normalizedField === 'email'
-          ? this.selectors.uncontrolledEmailInput
-          : undefined;
-    if (!selector) {
-      throw new Error(`Unsupported uncontrolled input field name: ${fieldName}`);
-    }
-
-    await page.fill(selector, value);
-  }
-
-  async getControlledDisplay(fieldName: string): Promise<string | null> {
-    const page = await this.getPage();
-    const normalizedField = fieldName.toLowerCase();
-    const selector =
-      normalizedField === 'name'
-        ? this.selectors.controlledNameDisplay
-        : normalizedField === 'email'
-          ? this.selectors.controlledEmailDisplay
-          : normalizedField === 'accepted terms'
-            ? this.selectors.controlledAcceptedTermsDisplay
-            : undefined;
-    if (!selector) {
-      throw new Error(`Unsupported controlled display field name: ${fieldName}`);
-    }
-
-    return page.locator(selector).textContent();
-  }
+  } as Record<string, string>;
 
   async submitControlledForm(): Promise<void> {
     await this.click('controlledSubmitButton');
@@ -110,105 +61,21 @@ export class FormControlsTestPage extends BasePage {
     await this.click('uncontrolledSubmitButton');
   }
 
-  async getControlledSubmitCount(): Promise<number> {
-    const text = await this.getText('controlledSubmitCount');
-    return Number(text?.replace(/[^0-9]/g, '') ?? 0);
+  async getControlledSubmitCount(): Promise<number | null> {
+    return this.getNumber('controlledSubmitCount');
   }
 
-  async getUncontrolledSubmitCount(): Promise<number> {
-    const text = await this.getText('uncontrolledSubmitCount');
-    return Number(text?.replace(/[^0-9]/g, '') ?? 0);
+  async getUncontrolledSubmitCount(): Promise<number | null> {
+    return this.getNumber('uncontrolledSubmitCount');
   }
 
-  async getUncontrolledResult(fieldName: string): Promise<string | null> {
-    const page = await this.getPage();
-    const normalizedField = fieldName.toLowerCase();
-    const selector =
-      normalizedField === 'name'
-        ? this.selectors.uncontrolledNameResult
-        : normalizedField === 'email'
-          ? this.selectors.uncontrolledEmailResult
-          : normalizedField === 'accepted terms'
-            ? this.selectors.uncontrolledAcceptedTermsResult
-            : undefined;
-    if (!selector) {
-      throw new Error(`Unsupported uncontrolled result field name: ${fieldName}`);
-    }
-
-    return page.locator(selector).textContent();
+  async getInputLabelForAttribute(name: string): Promise<string | null> {
+    const locator = await this.getLocator(name);
+    return locator.evaluate((el) => el.parentElement?.getAttribute('for') ?? null);
   }
 
-  async getFieldsetLegend(fieldsetName: string): Promise<string | null> {
-    const page = await this.getPage();
-    const normalizedName = fieldsetName.toLowerCase();
-    const selector =
-      normalizedName === 'controlled personal information'
-        ? this.selectors.controlledPersonalInformationLegend
-        : normalizedName === 'controlled preferences'
-          ? this.selectors.controlledPreferencesLegend
-          : normalizedName === 'uncontrolled personal information'
-            ? this.selectors.uncontrolledPersonalInformationLegend
-            : normalizedName === 'uncontrolled preferences'
-              ? this.selectors.uncontrolledPreferencesLegend
-              : undefined;
-
-    if (!selector) {
-      throw new Error(`Unsupported fieldset name: ${fieldsetName}`);
-    }
-
-    await page.waitForSelector(selector, { state: 'visible' });
-    return page.locator(selector).textContent();
-  }
-
-  async getHiddenLabelInputAriaLabel(inputName: string): Promise<string | null> {
-    const page = await this.getPage();
-    const normalizedName = inputName.toLowerCase();
-    const selector =
-      normalizedName === 'default'
-        ? this.selectors.hiddenLabelsDefaultInput
-        : normalizedName === 'custom'
-          ? this.selectors.hiddenLabelsCustomInput
-          : undefined;
-
-    if (!selector) {
-      throw new Error(`Unsupported hidden label input: ${inputName}`);
-    }
-
-    return page.locator(selector).getAttribute('aria-label');
-  }
-
-  async isHiddenLabelInputVisible(inputName: string): Promise<boolean> {
-    const page = await this.getPage();
-    const normalizedName = inputName.toLowerCase();
-    const selector =
-      normalizedName === 'default'
-        ? this.selectors.hiddenLabelsDefaultInput
-        : normalizedName === 'custom'
-          ? this.selectors.hiddenLabelsCustomInput
-          : undefined;
-
-    if (!selector) {
-      throw new Error(`Unsupported hidden label input: ${inputName}`);
-    }
-
-    return page.locator(selector).isVisible();
-  }
-
-  async doesHiddenLabelInputHaveAVisibleLabelParent(inputName: string): Promise<boolean> {
-    const page = await this.getPage();
-    const normalizedName = inputName.toLowerCase();
-    const selector =
-      normalizedName === 'default'
-        ? this.selectors.hiddenLabelsDefaultInput
-        : normalizedName === 'custom'
-          ? this.selectors.hiddenLabelsCustomInput
-          : undefined;
-
-    if (!selector) {
-      throw new Error(`Unsupported hidden label input: ${inputName}`);
-    }
-
-    const locator = page.locator(selector);
+  async doesHiddenLabelInputHaveAVisibleLabelParent(name: string): Promise<boolean> {
+    const locator = await this.getLocator(name);
     const parentTagName = await locator.evaluate((el) => el.parentElement?.tagName);
     return parentTagName == 'LABEL';
   }

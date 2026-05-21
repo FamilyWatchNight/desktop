@@ -7,7 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import log from 'electron-log';
-import type { Page } from 'playwright';
+import type { Locator, Page } from 'playwright';
 
 import { TIMEOUT as UI_TIMEOUT } from '../infrastructure/ui-utils';
 import type { CustomWorld } from '../infrastructure/world';
@@ -61,6 +61,21 @@ export abstract class BasePage {
 
   abstract readonly selectors: Record<string, string>;
 
+  getSelector(name: string): string {
+    const selector = this.selectors[name];
+    if (!selector) {
+      throw new Error(`Selector not found for ${name}`);
+    }
+
+    return selector;
+  }
+
+  async getLocator(name: string): Promise<Locator> {
+    const page = await this.getPage();
+    await this.waitForVisible(name);
+    return page.locator(this.getSelector(name));
+  }
+
   async navigate(path: string): Promise<void> {
     const page = await this.getPage();
     await page.goto(path);
@@ -68,10 +83,7 @@ export abstract class BasePage {
 
   async click(name: string): Promise<void> {
     const page = await this.getPage();
-    const selector = this.selectors[name];
-    if (!selector) {
-      throw new Error(`Selector not found for ${name}`);
-    }
+    const selector = this.getSelector(name);
 
     try {
       await page.click(selector, { timeout: UI_TIMEOUT });
@@ -89,24 +101,16 @@ export abstract class BasePage {
   }
 
   async isVisible(name: string): Promise<boolean> {
+    // Don't use this.getLocator, because it uses this.waitForVisible
     const page = await this.getPage();
-    const selector = this.selectors[name];
-    if (!selector) {
-      throw new Error(`Selector not found for ${name}`);
-    }
+    const locator = page.locator(this.getSelector(name));
 
-    return page
-      .locator(selector)
-      .isVisible()
-      .catch(() => false);
+    return locator.isVisible().catch(() => false);
   }
 
   async waitForVisible(name: string, timeout = UI_TIMEOUT): Promise<void> {
     const page = await this.getPage();
-    const selector = this.selectors[name];
-    if (!selector) {
-      throw new Error(`Selector not found for ${name}`);
-    }
+    const selector = this.getSelector(name);
 
     try {
       await page.waitForSelector(selector, { state: 'visible', timeout });
@@ -119,16 +123,17 @@ export abstract class BasePage {
     }
   }
 
-  async getText(name: string, timeout = UI_TIMEOUT): Promise<string | null> {
+  async setInputValue(name: string, value: string): Promise<void> {
     const page = await this.getPage();
+    const selector = this.getSelector(name);
+
+    await page.fill(selector, value);
+  }
+
+  async getText(name: string, timeout = UI_TIMEOUT): Promise<string | null> {
     await this.waitForVisible(name, timeout);
 
-    const selector = this.selectors[name];
-    if (!selector) {
-      throw new Error(`Selector not found for ${name}`);
-    }
-
-    const locator = page.locator(selector);
+    const locator = await this.getLocator(name);
 
     const textValue = await locator.evaluate((el) => {
       if (!el) {
@@ -147,6 +152,29 @@ export abstract class BasePage {
     });
 
     return textValue;
+  }
+
+  async getNumber(name: string, timeout = UI_TIMEOUT): Promise<number | null> {
+    const text = await this.getText(name, timeout);
+    if (text === null) {
+      return null;
+    }
+    return Number(text?.replace(/[^0-9]/g, '') ?? 0);
+  }
+
+  async getId(name: string): Promise<string | null> {
+    const locator = await this.getLocator(name);
+    return locator.getAttribute('id');
+  }
+
+  async getAriaLabel(name: string): Promise<string | null> {
+    const locator = await this.getLocator(name);
+    return locator.getAttribute('aria-label');
+  }
+
+  async getFieldsetLegendText(name: string): Promise<string | null> {
+    const locator = await this.getLocator(name);
+    return locator.locator('legend').textContent();
   }
 
   /**
