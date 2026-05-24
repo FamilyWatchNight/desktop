@@ -8,7 +8,17 @@ the Free Software Foundation, version 3.
 
 import React, { useRef, useState } from 'react';
 
-import { Fieldset, Form, Input } from '../../../components/elements/form';
+import {
+  Checkbox,
+  CheckboxGroup,
+  EmailInput,
+  Fieldset,
+  Form,
+  Radio,
+  RadioGroup,
+  Select,
+  TextInput,
+} from '../../../components/elements/form';
 import { Page, Section } from '../../../components/elements/layout';
 
 export default function FormControlsTestPage(): React.ReactElement {
@@ -17,17 +27,27 @@ export default function FormControlsTestPage(): React.ReactElement {
     email: '',
     acceptedTerms: false,
   });
+  const [controlledNewsletter, setControlledNewsletter] = useState(false);
+  const [controlledPlan, setControlledPlan] = useState<'basic' | 'premium'>('basic');
+  const [controlledGenre, setControlledGenre] = useState('comedy');
   const [controlledSubmitCount, setControlledSubmitCount] = useState(0);
   const [uncontrolledSubmitCount, setUncontrolledSubmitCount] = useState(0);
   const [uncontrolledResult, setUncontrolledResult] = useState({
     name: '',
     email: '',
     acceptedTerms: false,
+    newsletter: false,
+    plan: 'basic',
+    favoriteGenre: 'comedy',
   });
 
   const uncontrolledNameRef = useRef<HTMLInputElement>(null);
   const uncontrolledEmailRef = useRef<HTMLInputElement>(null);
   const uncontrolledAcceptedTermsRef = useRef<HTMLInputElement>(null);
+  const uncontrolledNewsletterRef = useRef<HTMLInputElement>(null);
+  const uncontrolledPlanBasicRef = useRef<HTMLInputElement>(null);
+  const uncontrolledPlanPremiumRef = useRef<HTMLInputElement>(null);
+  const uncontrolledGenreRef = useRef<HTMLSelectElement>(null);
 
   const updateControlledValue = (
     key: 'name' | 'email' | 'acceptedTerms',
@@ -37,6 +57,18 @@ export default function FormControlsTestPage(): React.ReactElement {
       ...previous,
       [key]: value,
     }));
+  };
+
+  const updateControlledNewsletter = (checked: boolean): void => {
+    setControlledNewsletter(checked);
+  };
+
+  const updateControlledPlan = (value: 'basic' | 'premium'): void => {
+    setControlledPlan(value);
+  };
+
+  const updateControlledGenre = (value: string): void => {
+    setControlledGenre(value);
   };
 
   const handleControlledSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
@@ -51,6 +83,13 @@ export default function FormControlsTestPage(): React.ReactElement {
       name: uncontrolledNameRef.current?.value ?? '',
       email: uncontrolledEmailRef.current?.value ?? '',
       acceptedTerms: uncontrolledAcceptedTermsRef.current?.checked ?? false,
+      newsletter: uncontrolledNewsletterRef.current?.checked ?? false,
+      plan: uncontrolledPlanBasicRef.current?.checked
+        ? 'basic'
+        : uncontrolledPlanPremiumRef.current?.checked
+          ? 'premium'
+          : 'basic',
+      favoriteGenre: uncontrolledGenreRef.current?.value ?? 'comedy',
     });
     setUncontrolledSubmitCount((previous) => previous + 1);
   };
@@ -64,7 +103,7 @@ export default function FormControlsTestPage(): React.ReactElement {
               legend="Controlled Personal Information"
               testId="controlled-fieldset-personal-information"
             >
-              <Input
+              <TextInput
                 id="controlled-input-name"
                 name="name"
                 label="Name"
@@ -73,10 +112,9 @@ export default function FormControlsTestPage(): React.ReactElement {
                 onChange={(event) => updateControlledValue('name', event.target.value)}
                 testId="controlled-input-name"
               />
-              <Input
+              <EmailInput
                 id="controlled-input-email"
                 name="email"
-                type="email"
                 label="Email"
                 placeholder="Enter your email"
                 value={controlledState.email}
@@ -85,15 +123,56 @@ export default function FormControlsTestPage(): React.ReactElement {
               />
             </Fieldset>
             <Fieldset legend="Controlled Preferences" testId="controlled-fieldset-preferences">
-              <Input
+              <Checkbox
                 id="controlled-input-accepted-terms"
                 name="acceptedTerms"
-                type="checkbox"
                 label="Accept terms"
                 checked={controlledState.acceptedTerms}
                 onChange={(event) => updateControlledValue('acceptedTerms', event.target.checked)}
                 testId="controlled-input-accepted-terms"
               />
+              <CheckboxGroup legend="Controlled Options" testId="controlled-checkbox-group">
+                <Checkbox
+                  id="controlled-input-newsletter"
+                  name="newsletter"
+                  label="Subscribe to newsletter"
+                  checked={controlledNewsletter}
+                  onChange={(event) => updateControlledNewsletter(event.target.checked)}
+                  testId="controlled-input-newsletter"
+                />
+              </CheckboxGroup>
+              <RadioGroup legend="Account type" testId="controlled-radio-group">
+                <Radio
+                  id="controlled-input-plan-basic"
+                  name="plan"
+                  label="Basic"
+                  value="basic"
+                  checked={controlledPlan === 'basic'}
+                  onChange={() => updateControlledPlan('basic')}
+                  testId="controlled-radio-plan-basic"
+                />
+                <Radio
+                  id="controlled-input-plan-premium"
+                  name="plan"
+                  label="Premium"
+                  value="premium"
+                  checked={controlledPlan === 'premium'}
+                  onChange={() => updateControlledPlan('premium')}
+                  testId="controlled-radio-plan-premium"
+                />
+              </RadioGroup>
+              <Select
+                id="controlled-select-genre"
+                name="favoriteGenre"
+                label="Favorite genre"
+                value={controlledGenre}
+                onChange={(event) => updateControlledGenre(event.target.value)}
+                testId="controlled-select-genre"
+              >
+                <option value="comedy">Comedy</option>
+                <option value="drama">Drama</option>
+                <option value="action">Action</option>
+              </Select>
             </Fieldset>
             <button type="submit" data-testid="controlled-submit-button">
               Submit Controlled Form
@@ -106,7 +185,7 @@ export default function FormControlsTestPage(): React.ReactElement {
               legend="Uncontrolled Personal Information"
               testId="uncontrolled-fieldset-personal-information"
             >
-              <Input
+              <TextInput
                 id="uncontrolled-input-name"
                 name="name"
                 label="Name"
@@ -115,10 +194,9 @@ export default function FormControlsTestPage(): React.ReactElement {
                 ref={uncontrolledNameRef}
                 testId="uncontrolled-input-name"
               />
-              <Input
+              <EmailInput
                 id="uncontrolled-input-email"
                 name="email"
-                type="email"
                 label="Email"
                 placeholder="Enter your email"
                 defaultValue=""
@@ -127,15 +205,55 @@ export default function FormControlsTestPage(): React.ReactElement {
               />
             </Fieldset>
             <Fieldset legend="Uncontrolled Preferences" testId="uncontrolled-fieldset-preferences">
-              <Input
+              <Checkbox
                 id="uncontrolled-input-accepted-terms"
                 name="acceptedTerms"
-                type="checkbox"
                 label="Accept terms"
                 defaultChecked={false}
                 ref={uncontrolledAcceptedTermsRef}
                 testId="uncontrolled-input-accepted-terms"
               />
+              <CheckboxGroup legend="Uncontrolled options" testId="uncontrolled-checkbox-group">
+                <Checkbox
+                  id="uncontrolled-input-newsletter"
+                  name="newsletter"
+                  label="Subscribe to newsletter"
+                  defaultChecked={false}
+                  ref={uncontrolledNewsletterRef}
+                  testId="uncontrolled-input-newsletter"
+                />
+              </CheckboxGroup>
+              <RadioGroup legend="Account type" testId="uncontrolled-radio-group">
+                <Radio
+                  id="uncontrolled-input-plan-basic"
+                  name="plan"
+                  label="Basic"
+                  value="basic"
+                  defaultChecked
+                  ref={uncontrolledPlanBasicRef}
+                  testId="uncontrolled-radio-plan-basic"
+                />
+                <Radio
+                  id="uncontrolled-input-plan-premium"
+                  name="plan"
+                  label="Premium"
+                  value="premium"
+                  ref={uncontrolledPlanPremiumRef}
+                  testId="uncontrolled-radio-plan-premium"
+                />
+              </RadioGroup>
+              <Select
+                id="uncontrolled-select-genre"
+                name="favoriteGenre"
+                label="Favorite genre"
+                defaultValue="comedy"
+                ref={uncontrolledGenreRef}
+                testId="uncontrolled-select-genre"
+              >
+                <option value="comedy">Comedy</option>
+                <option value="drama">Drama</option>
+                <option value="action">Action</option>
+              </Select>
             </Fieldset>
             <button type="submit" data-testid="uncontrolled-submit-button">
               Submit Uncontrolled Form
@@ -144,21 +262,20 @@ export default function FormControlsTestPage(): React.ReactElement {
         </Section>
         <Section title="Generated IDs" testId="generated-ids-section">
           <Form testId="generated-ids-form" autoIdPrefix="form-test">
-            <Input
+            <TextInput
               name="generatedName1"
               label="Generated Name 1"
               placeholder="No id provided"
               testId="generated-id-name-input-1"
             />
-            <Input
+            <TextInput
               id="custom-id-email"
               name="customEmail"
-              type="email"
-              label="Custom Email"
+              label="Custom Email (but plain text input)"
               placeholder="Explicit id provided"
               testId="custom-id-email-input"
             />
-            <Input
+            <TextInput
               name="generatedName2"
               label="Generated Name 2"
               placeholder="No id provided"
@@ -167,21 +284,20 @@ export default function FormControlsTestPage(): React.ReactElement {
           </Form>
         </Section>
         <Section title="Generated IDs with no Form" testId="formless-generated-ids-section">
-          <Input
+          <TextInput
             name="formlessGeneratedName1"
             label="Formless Generated Name 1"
             placeholder="No id provided"
             testId="formless-generated-id-name-input-1"
           />
-          <Input
+          <TextInput
             id="formless-custom-id-email"
             name="formlessCustomEmail"
-            type="email"
-            label="Formless Custom Email"
+            label="Formless Custom Email (but plain text input)"
             placeholder="Explicit id provided"
             testId="formless-custom-id-email-input"
           />
-          <Input
+          <TextInput
             name="formlessGeneratedName2"
             label="Formless Generated Name 2"
             placeholder="No id provided"
@@ -191,7 +307,7 @@ export default function FormControlsTestPage(): React.ReactElement {
 
         <Section title="Hidden Labels (labelVisible=false)" testId="hidden-labels-section">
           <Form testId="hidden-labels-form">
-            <Input
+            <TextInput
               id="hidden-label-default"
               name="default"
               label="Default"
@@ -199,7 +315,7 @@ export default function FormControlsTestPage(): React.ReactElement {
               placeholder="Default aria-label from label attribute"
               testId="hidden-label-default-input"
             />
-            <Input
+            <TextInput
               id="hidden-label-custom"
               name="custom"
               label="Custom"
@@ -219,14 +335,28 @@ export default function FormControlsTestPage(): React.ReactElement {
           <div data-testid="controlled-accepted-terms-display">
             Accepted: {controlledState.acceptedTerms ? 'true' : 'false'}
           </div>
+          <div data-testid="controlled-newsletter-display">
+            Newsletter: {controlledNewsletter ? 'true' : 'false'}
+          </div>
+          <div data-testid="controlled-account-type-display">Account type: {controlledPlan}</div>
+          <div data-testid="controlled-genre-display">Favorite genre: {controlledGenre}</div>
           <div data-testid="controlled-submit-count">Submit count: {controlledSubmitCount}</div>
         </div>
         <h3>Uncontrolled Form</h3>
         <div data-testid="uncontrolled-state-display">
-          <div data-testid="uncontrolled-name-result">Name: {uncontrolledResult.name}</div>
-          <div data-testid="uncontrolled-email-result">Email: {uncontrolledResult.email}</div>
-          <div data-testid="uncontrolled-accepted-terms-result">
+          <div data-testid="uncontrolled-name-display">Name: {uncontrolledResult.name}</div>
+          <div data-testid="uncontrolled-email-display">Email: {uncontrolledResult.email}</div>
+          <div data-testid="uncontrolled-accepted-terms-display">
             Accepted: {uncontrolledResult.acceptedTerms ? 'true' : 'false'}
+          </div>
+          <div data-testid="uncontrolled-newsletter-display">
+            Newsletter: {uncontrolledResult.newsletter ? 'true' : 'false'}
+          </div>
+          <div data-testid="uncontrolled-account-type-display">
+            Account type: {uncontrolledResult.plan}
+          </div>
+          <div data-testid="uncontrolled-genre-display">
+            Favorite genre: {uncontrolledResult.favoriteGenre}
           </div>
           <div data-testid="uncontrolled-submit-count">Submit count: {uncontrolledSubmitCount}</div>
         </div>

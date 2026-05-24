@@ -1,4 +1,7 @@
 @use './layout';
+@use '../../colors';
+
+$field-label-gap: 0.25em;
 
 form {
   display: flex;
@@ -8,20 +11,56 @@ form {
 
 fieldset {
   @include layout.make-container-layout;
+  position: relative;
   display: flex;
+  padding-top: 3em;
   flex-direction: column;
   gap: layout.$container-gap;
+  border: 0;
+  box-shadow:
+    -0.5px -1px 25px colors.$container-border-left,
+    1px 2px 2px colors.$container-border-right,
+    inset 1.25px 2.5px 5px colors.$container-border-bottom;
+
+  legend {
+    top: 1.5em;
+    position: relative;
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+  }
+
+  &.checkbox-group,
+  &.radio-group {
+    box-shadow: none;
+    padding: $field-label-gap 0;
+    gap: $field-label-gap;
+    margin-top: 0;
+
+    legend {
+      top: 0;
+      font-weight: inherit;
+    }
+  }
 }
 
-input,
+input[type='text'],
 input[type='password'],
 input[type='email'],
+input[type='number'],
+select,
 textarea {
   display: block;
   width: 100%;
   font-family: inherit;
   font-size: inherit;
   padding: 0.5rem;
+
+  label:has(&) {
+    display: flex;
+    flex-direction: column;
+    gap: $field-label-gap;
+  }
 }
 
 input[type='checkbox'],

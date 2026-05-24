@@ -1,0 +1,15 @@
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
+let fallbackIdCounter = 1;
+
+export function createFallbackId(prefix = 'input'): string {
+  const id = `${prefix}-${fallbackIdCounter}`;
+  fallbackIdCounter += 1;
+  return id;
+}

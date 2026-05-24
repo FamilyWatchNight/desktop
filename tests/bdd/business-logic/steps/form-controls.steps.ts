@@ -60,6 +60,60 @@ When(
   },
 );
 
+When(
+  'I toggle the {string} checkbox',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, name: string) {
+    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
+    const normalizedName = name.toLowerCase();
+    if (normalizedName.includes('controlled')) {
+      await pageObject.toggleControlledCheckbox(name);
+      return;
+    }
+    if (normalizedName.includes('uncontrolled')) {
+      await pageObject.toggleUncontrolledCheckbox(name);
+      return;
+    }
+    throw new Error(`Unsupported checkbox name: ${name}`);
+  },
+);
+
+When(
+  'I select {string} for the {string} radio group',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, optionValue: string, groupName: string) {
+    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
+    const normalizedGroupName = groupName.toLowerCase();
+    if (normalizedGroupName.includes('uncontrolled')) {
+      await pageObject.selectUncontrolledRadio(groupName, optionValue);
+      return;
+    }
+    if (normalizedGroupName.includes('controlled')) {
+      await pageObject.selectControlledRadio(groupName, optionValue);
+      return;
+    }
+    throw new Error(`Unsupported radio group name: ${groupName}`);
+  },
+);
+
+When(
+  'I choose {string} from the {string} select',
+  { timeout: STEP_TIMEOUT },
+  async function (this: CustomWorld, optionValue: string, fieldName: string) {
+    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
+    const normalizedFieldName = fieldName.toLowerCase();
+    if (normalizedFieldName.includes('uncontrolled')) {
+      await pageObject.chooseUncontrolledSelect(fieldName, optionValue);
+      return;
+    }
+    if (normalizedFieldName.includes('controlled')) {
+      await pageObject.chooseControlledSelect(fieldName, optionValue);
+      return;
+    }
+    throw new Error(`Unsupported select field name: ${fieldName}`);
+  },
+);
+
 Then(
   "the {string} input's label should reference its id",
   { timeout: STEP_TIMEOUT },

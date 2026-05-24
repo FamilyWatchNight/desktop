@@ -27,8 +27,8 @@ Feature: Form Controls
     When I enter "Bob" into the "uncontrolledNameInput" input
     And I enter "bob@example.com" into the "uncontrolledEmailInput" input
     And I submit the uncontrolled form
-    Then the "uncontrolledNameResult" element should say "Name: Bob"
-    And the "uncontrolledEmailResult" element should say "Email: bob@example.com"
+    Then the "uncontrolledNameDisplay" element should say "Name: Bob"
+    And the "uncontrolledEmailDisplay" element should say "Email: bob@example.com"
     And the "uncontrolledSubmitCount" element should say 1
     And the "uncontrolledPersonalInformationFieldset" fieldset should have the legend "Uncontrolled Personal Information"
 
@@ -47,9 +47,28 @@ Feature: Form Controls
     And the "generatedIdNameInput1" input's label should reference its id
     And the "customIdEmailInput" input's label should reference its id
     And the "generatedIdNameInput2" input's label should reference its id
-    And the "formlessGeneratedIdNameInput1" element should have id "input-1"
+    And the "formlessGeneratedIdNameInput1" element should have id "text-1"
     And the "formlessCustomIdEmailInput" element should have id "formless-custom-id-email"
-    And the "formlessGeneratedIdNameInput2" element should have id "input-2"
+    And the "formlessGeneratedIdNameInput2" element should have id "text-2"
     And the "formlessGeneratedIdNameInput1" input's label should reference its id
     And the "formlessCustomIdEmailInput" input's label should reference its id
     And the "formlessGeneratedIdNameInput2" input's label should reference its id
+
+  Scenario: Controlled stage 2 inputs update state through user interaction
+    Given the Form Controls test page is open for testing
+    When I toggle the "controlledNewsletterInput" checkbox
+    And I select "Premium" for the "controlled plan" radio group
+    And I choose "Drama" from the "controlledSelectGenre" select
+    Then the "controlledNewsletterDisplay" element should say "Newsletter: true"
+    And the "controlledAccountTypeDisplay" element should say "Account type: premium"
+    And the "controlledGenreDisplay" element should say "Favorite genre: drama"
+
+  Scenario: Uncontrolled stage 2 inputs submit DOM values
+    Given the Form Controls test page is open for testing
+    When I toggle the "uncontrolledNewsletterInput" checkbox
+    And I select "Premium" for the "uncontrolled plan" radio group
+    And I choose "Action" from the "uncontrolledSelectGenre" select
+    And I submit the uncontrolled form
+    Then the "uncontrolledNewsletterDisplay" element should say "Newsletter: true"
+    And the "uncontrolledAccountTypeDisplay" element should say "Account type: premium"
+    And the "uncontrolledGenreDisplay" element should say "Favorite genre: action"
