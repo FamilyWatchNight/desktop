@@ -73,6 +73,7 @@ UI tests support dual transport modes controlled by `RENDER_LOCATION` environmen
   - `data-testid="page-settings"`
   - `data-testid="settings-save-button"`
   - `data-testid="settings-display-name-input"`
+- Avoid introducing a second layer of human-readable translation between `.feature` text and selector keys. Use the selector keys directly in feature files when those keys are already stable and human-readable.
 - Treat `data-testid` as part of the UI contract, not only a testing concern. This makes page objects and tests stable even when i18next text changes.
 - Page objects should consume these stable IDs rather than using localized text selectors.
 
