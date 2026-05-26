@@ -14,6 +14,8 @@ export interface FormRegistryMeta {
   name?: string;
   type?: string;
   labelVisible?: boolean;
+  // Optional callback to obtain the current value for this field/group
+  getValue?: () => unknown;
 }
 
 export interface FormContextValue {
@@ -23,6 +25,8 @@ export interface FormContextValue {
   hasLabel: (id: string) => boolean;
   registerLabel: (id: string) => void;
   unregisterLabel: (id: string) => void;
+  // Extract a name -> value map from the current form DOM/state
+  getValues: () => Record<string, unknown>;
 }
 
 export const FormContext = createContext<FormContextValue | null>(null);
@@ -34,7 +38,13 @@ export interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
   children?: React.ReactNode;
 }
 
-export function Form({ className, testId, children, autoIdPrefix, ...rest }: FormProps): React.ReactElement {
+export function Form({
+  className,
+  testId,
+  children,
+  autoIdPrefix,
+  ...rest
+}: FormProps): React.ReactElement {
   const counterRef = useRef(1);
   const fieldsRef = useRef(new Map<string, FormRegistryMeta>());
   const labelsRef = useRef(new Set<string>());
@@ -54,6 +64,84 @@ export function Form({ className, testId, children, autoIdPrefix, ...rest }: For
     fieldsRef.current.delete(id);
   }, []);
 
+  const getValues = useCallback((): Record<string, unknown> => {
+    const byName: Record<string, Array<{ id: string; meta: FormRegistryMeta }>> = {};
+
+    for (const [id, meta] of fieldsRef.current.entries()) {
+      if (!meta || !meta.name) continue;
+      const name = meta.name as string;
+      byName[name] = byName[name] || [];
+      byName[name].push({ id, meta });
+    }
+
+    const result: Record<string, unknown> = {};
+
+    for (const [name, entries] of Object.entries(byName)) {
+      // If a group or a single field provided a getValue callback, use it.
+      const groupMetaWithGetter = entries.find((e) => typeof e.meta.getValue === 'function');
+      if (groupMetaWithGetter) {
+        try {
+          result[name] = groupMetaWithGetter.meta.getValue!();
+        } catch {
+          result[name] = null;
+        }
+        continue;
+      }
+
+      // Multiple elements with the same name => treat as grouped inputs
+      if (entries.length > 1) {
+        const sampleType = entries[0].meta.type;
+        if (sampleType === 'radio') {
+          const el = document.querySelector(
+            `input[name="${name}"]:checked`,
+          ) as HTMLInputElement | null;
+          result[name] = el ? el.value : null;
+          continue;
+        }
+
+        if (sampleType === 'checkbox') {
+          const checked = Array.from(
+            document.querySelectorAll(`input[name="${name}"]:checked`),
+          ) as HTMLInputElement[];
+          result[name] = checked.map((c) => c.value);
+          continue;
+        }
+
+        // Fallback: collect values
+        result[name] = entries.map((e) => {
+          const el = document.getElementById(e.id) as HTMLInputElement | HTMLSelectElement | null;
+          if (!el) return null;
+          return 'value' in el ? (el as HTMLInputElement | HTMLSelectElement).value : null;
+        });
+        continue;
+      }
+
+      // Single entry: try getValue or read DOM
+      const single = entries[0];
+      if (typeof single.meta.getValue === 'function') {
+        try {
+          result[name] = single.meta.getValue!();
+        } catch {
+          result[name] = null;
+        }
+        continue;
+      }
+
+      const el = document.getElementById(single.id) as HTMLInputElement | HTMLSelectElement | null;
+      if (!el) {
+        result[name] = null;
+      } else if ('checked' in el && el.type === 'checkbox') {
+        result[name] = (el as HTMLInputElement).checked;
+      } else if ('value' in el) {
+        result[name] = (el as HTMLInputElement | HTMLSelectElement).value;
+      } else {
+        result[name] = null;
+      }
+    }
+
+    return result;
+  }, []);
+
   const hasLabel = useCallback((id: string) => labelsRef.current.has(id), []);
   const registerLabel = useCallback((id: string) => labelsRef.current.add(id), []);
   const unregisterLabel = useCallback((id: string) => labelsRef.current.delete(id), []);
@@ -66,8 +154,17 @@ export function Form({ className, testId, children, autoIdPrefix, ...rest }: For
       hasLabel,
       registerLabel,
       unregisterLabel,
+      getValues,
     }),
-    [generateId, registerField, unregisterField, hasLabel, registerLabel, unregisterLabel],
+    [
+      generateId,
+      registerField,
+      unregisterField,
+      hasLabel,
+      registerLabel,
+      unregisterLabel,
+      getValues,
+    ],
   );
 
   return (

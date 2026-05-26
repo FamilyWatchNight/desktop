@@ -11,10 +11,7 @@ import { expect } from '@playwright/test';
 
 import { TesterPersona } from '../../business-flow/personas/TesterPersona';
 import { CustomWorld } from '../../technical/infrastructure/world';
-import { BasePage } from '../../technical/page-objects';
 import { FormControlsTestPage } from '../../technical/page-objects/FormControlsTestPage';
-
-const STEP_TIMEOUT = 10000;
 
 async function prepareToTestPage(world: CustomWorld, pageObject: FormControlsTestPage) {
   if (!(world.currentUserPersona instanceof TesterPersona)) {
@@ -28,99 +25,34 @@ async function prepareToTestPage(world: CustomWorld, pageObject: FormControlsTes
   await pageObject.navigateToPage();
 }
 
-Given(
-  'the Form Controls test page is open for testing',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld) {
-    const pageObject = new FormControlsTestPage(this);
-    await prepareToTestPage(this, pageObject);
-  },
-);
+Given('the Form Controls test page is open for testing', async function (this: CustomWorld) {
+  const pageObject = new FormControlsTestPage(this);
+  await prepareToTestPage(this, pageObject);
+});
 
-When(
-  'I enter {string} into the {string} input',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, value: string, name: string) {
-    const pageObject = this.getStateObject('pageObject') as BasePage;
-    await pageObject.setInputValue(name, value);
-  },
-);
-
-When('I submit the controlled form', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
+When('I submit the controlled form', async function (this: CustomWorld) {
   const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
   await pageObject.submitControlledForm();
 });
 
-When(
-  'I submit the uncontrolled form',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    await pageObject.submitUncontrolledForm();
-  },
-);
+When('I submit the uncontrolled form', async function (this: CustomWorld) {
+  const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
+  await pageObject.submitUncontrolledForm();
+});
 
-When(
-  'I toggle the {string} checkbox',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, name: string) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const normalizedName = name.toLowerCase();
-    if (normalizedName.includes('controlled')) {
-      await pageObject.toggleControlledCheckbox(name);
-      return;
-    }
-    if (normalizedName.includes('uncontrolled')) {
-      await pageObject.toggleUncontrolledCheckbox(name);
-      return;
-    }
-    throw new Error(`Unsupported checkbox name: ${name}`);
-  },
-);
-
-When(
-  'I select {string} for the {string} radio group',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, optionValue: string, groupName: string) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const normalizedGroupName = groupName.toLowerCase();
-    if (normalizedGroupName.includes('uncontrolled')) {
-      await pageObject.selectUncontrolledRadio(groupName, optionValue);
-      return;
-    }
-    if (normalizedGroupName.includes('controlled')) {
-      await pageObject.selectControlledRadio(groupName, optionValue);
-      return;
-    }
-    throw new Error(`Unsupported radio group name: ${groupName}`);
-  },
-);
-
-When(
-  'I choose {string} from the {string} select',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, optionValue: string, fieldName: string) {
-    const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const normalizedFieldName = fieldName.toLowerCase();
-    if (normalizedFieldName.includes('uncontrolled')) {
-      await pageObject.chooseUncontrolledSelect(fieldName, optionValue);
-      return;
-    }
-    if (normalizedFieldName.includes('controlled')) {
-      await pageObject.chooseControlledSelect(fieldName, optionValue);
-      return;
-    }
-    throw new Error(`Unsupported select field name: ${fieldName}`);
-  },
-);
+When('I request the uncontrolled form values', async function (this: CustomWorld) {
+  const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
+  await pageObject.click('uncontrolledGetValuesButton');
+});
 
 Then(
-  "the {string} input's label should reference its id",
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld, name: string) {
+  'the uncontrolled form values should equal:',
+  async function (this: CustomWorld, expectedJson: string) {
     const pageObject = this.getStateObject('pageObject') as FormControlsTestPage;
-    const inputId = await pageObject.getId(name);
-    const labelFor = await pageObject.getInputLabelForAttribute(name);
-    expect(labelFor).toBe(inputId);
+    const actualJson = await pageObject.getText('uncontrolledValuesJson');
+    expect(actualJson).not.toBeNull();
+    const actualValue = JSON.parse(actualJson ?? '{}');
+    const expectedValue = JSON.parse(expectedJson);
+    expect(actualValue).toStrictEqual(expectedValue);
   },
 );

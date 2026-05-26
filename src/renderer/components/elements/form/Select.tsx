@@ -16,17 +16,23 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
   labelVisible?: boolean;
   testId?: string;
   enabled?: boolean;
+  name: string;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, label, labelVisible = true, testId, id, enabled = true, ...rest }, ref) => {
+    const nameToUse = typeof rest.name === 'string' ? rest.name : undefined;
+    if (!nameToUse) {
+      throw new Error('Select must specify a name prop.');
+    }
+
     const {
       id: inputId,
       ariaLabel,
       disabled,
     } = useFormField({
       id,
-      name: typeof rest.name === 'string' ? rest.name : undefined,
+      name: nameToUse,
       type: 'select',
       label,
       labelVisible,

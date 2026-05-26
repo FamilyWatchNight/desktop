@@ -6,7 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 
 import {
   Checkbox,
@@ -14,6 +14,7 @@ import {
   EmailInput,
   Fieldset,
   Form,
+  FormContext,
   Radio,
   RadioGroup,
   Select,
@@ -28,15 +29,15 @@ export default function FormControlsTestPage(): React.ReactElement {
     acceptedTerms: false,
   });
   const [controlledNewsletter, setControlledNewsletter] = useState(false);
+  const [controlledNotificationMethods, setControlledNotificationMethods] = useState<string[]>([]);
   const [controlledPlan, setControlledPlan] = useState<'basic' | 'premium'>('basic');
   const [controlledGenre, setControlledGenre] = useState('comedy');
-  const [controlledSubmitCount, setControlledSubmitCount] = useState(0);
-  const [uncontrolledSubmitCount, setUncontrolledSubmitCount] = useState(0);
   const [uncontrolledResult, setUncontrolledResult] = useState({
     name: '',
     email: '',
     acceptedTerms: false,
     newsletter: false,
+    notificationMethods: [] as string[],
     plan: 'basic',
     favoriteGenre: 'comedy',
   });
@@ -45,6 +46,9 @@ export default function FormControlsTestPage(): React.ReactElement {
   const uncontrolledEmailRef = useRef<HTMLInputElement>(null);
   const uncontrolledAcceptedTermsRef = useRef<HTMLInputElement>(null);
   const uncontrolledNewsletterRef = useRef<HTMLInputElement>(null);
+  const uncontrolledNotificationEmailRef = useRef<HTMLInputElement>(null);
+  const uncontrolledNotificationSmsRef = useRef<HTMLInputElement>(null);
+  const uncontrolledNotificationPushRef = useRef<HTMLInputElement>(null);
   const uncontrolledPlanBasicRef = useRef<HTMLInputElement>(null);
   const uncontrolledPlanPremiumRef = useRef<HTMLInputElement>(null);
   const uncontrolledGenreRef = useRef<HTMLSelectElement>(null);
@@ -63,6 +67,15 @@ export default function FormControlsTestPage(): React.ReactElement {
     setControlledNewsletter(checked);
   };
 
+  const updateControlledNotificationMethods = (method: string, checked: boolean): void => {
+    setControlledNotificationMethods((previous) => {
+      if (checked) {
+        return previous.includes(method) ? previous : [...previous, method];
+      }
+      return previous.filter((value) => value !== method);
+    });
+  };
+
   const updateControlledPlan = (value: 'basic' | 'premium'): void => {
     setControlledPlan(value);
   };
@@ -73,7 +86,6 @@ export default function FormControlsTestPage(): React.ReactElement {
 
   const handleControlledSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
-    setControlledSubmitCount((previous) => previous + 1);
   };
 
   const handleUncontrolledSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
@@ -84,6 +96,11 @@ export default function FormControlsTestPage(): React.ReactElement {
       email: uncontrolledEmailRef.current?.value ?? '',
       acceptedTerms: uncontrolledAcceptedTermsRef.current?.checked ?? false,
       newsletter: uncontrolledNewsletterRef.current?.checked ?? false,
+      notificationMethods: [
+        uncontrolledNotificationEmailRef.current?.checked ? 'email' : null,
+        uncontrolledNotificationSmsRef.current?.checked ? 'sms' : null,
+        uncontrolledNotificationPushRef.current?.checked ? 'push' : null,
+      ].filter((method): method is string => method !== null),
       plan: uncontrolledPlanBasicRef.current?.checked
         ? 'basic'
         : uncontrolledPlanPremiumRef.current?.checked
@@ -91,8 +108,33 @@ export default function FormControlsTestPage(): React.ReactElement {
           : 'basic',
       favoriteGenre: uncontrolledGenreRef.current?.value ?? 'comedy',
     });
-    setUncontrolledSubmitCount((previous) => previous + 1);
   };
+
+  function FormValuesReporter({
+    buttonTestId,
+    outputTestId,
+  }: {
+    buttonTestId: string;
+    outputTestId: string;
+  }): React.ReactElement {
+    const formContext = useContext(FormContext);
+    const [valuesJson, setValuesJson] = useState('{}');
+
+    return (
+      <div data-testid={`${buttonTestId}-container`}>
+        <button
+          type="button"
+          data-testid={buttonTestId}
+          onClick={() => {
+            setValuesJson(JSON.stringify(formContext?.getValues() ?? {}, null, 2));
+          }}
+        >
+          Get form values
+        </button>
+        <pre data-testid={outputTestId}>{valuesJson}</pre>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -131,20 +173,58 @@ export default function FormControlsTestPage(): React.ReactElement {
                 onChange={(event) => updateControlledValue('acceptedTerms', event.target.checked)}
                 testId="controlled-input-accepted-terms"
               />
-              <CheckboxGroup legend="Controlled Options" testId="controlled-checkbox-group">
+              <CheckboxGroup
+                legend="Controlled Options"
+                testId="controlled-checkbox-group"
+                name="newsletter"
+              >
                 <Checkbox
                   id="controlled-input-newsletter"
-                  name="newsletter"
                   label="Subscribe to newsletter"
                   checked={controlledNewsletter}
                   onChange={(event) => updateControlledNewsletter(event.target.checked)}
                   testId="controlled-input-newsletter"
                 />
               </CheckboxGroup>
-              <RadioGroup legend="Account type" testId="controlled-radio-group">
+              <CheckboxGroup
+                legend="Controlled Notification Methods"
+                testId="controlled-notification-methods-group"
+                name="notificationMethods"
+              >
+                <Checkbox
+                  id="controlled-input-notification-email"
+                  label="Email"
+                  value="email"
+                  checked={controlledNotificationMethods.includes('email')}
+                  onChange={(event) =>
+                    updateControlledNotificationMethods('email', event.target.checked)
+                  }
+                  testId="controlled-input-notification-email"
+                />
+                <Checkbox
+                  id="controlled-input-notification-sms"
+                  label="SMS"
+                  value="sms"
+                  checked={controlledNotificationMethods.includes('sms')}
+                  onChange={(event) =>
+                    updateControlledNotificationMethods('sms', event.target.checked)
+                  }
+                  testId="controlled-input-notification-sms"
+                />
+                <Checkbox
+                  id="controlled-input-notification-push"
+                  label="Push"
+                  value="push"
+                  checked={controlledNotificationMethods.includes('push')}
+                  onChange={(event) =>
+                    updateControlledNotificationMethods('push', event.target.checked)
+                  }
+                  testId="controlled-input-notification-push"
+                />
+              </CheckboxGroup>
+              <RadioGroup legend="Account type" testId="controlled-radio-group" name="plan">
                 <Radio
                   id="controlled-input-plan-basic"
-                  name="plan"
                   label="Basic"
                   value="basic"
                   checked={controlledPlan === 'basic'}
@@ -153,7 +233,6 @@ export default function FormControlsTestPage(): React.ReactElement {
                 />
                 <Radio
                   id="controlled-input-plan-premium"
-                  name="plan"
                   label="Premium"
                   value="premium"
                   checked={controlledPlan === 'premium'}
@@ -213,20 +292,52 @@ export default function FormControlsTestPage(): React.ReactElement {
                 ref={uncontrolledAcceptedTermsRef}
                 testId="uncontrolled-input-accepted-terms"
               />
-              <CheckboxGroup legend="Uncontrolled options" testId="uncontrolled-checkbox-group">
+              <CheckboxGroup
+                legend="Uncontrolled options"
+                testId="uncontrolled-checkbox-group"
+                name="newsletter"
+              >
                 <Checkbox
                   id="uncontrolled-input-newsletter"
-                  name="newsletter"
                   label="Subscribe to newsletter"
                   defaultChecked={false}
                   ref={uncontrolledNewsletterRef}
                   testId="uncontrolled-input-newsletter"
                 />
               </CheckboxGroup>
-              <RadioGroup legend="Account type" testId="uncontrolled-radio-group">
+              <CheckboxGroup
+                legend="Uncontrolled notification methods"
+                testId="uncontrolled-notification-methods-group"
+                name="notificationMethods"
+              >
+                <Checkbox
+                  id="uncontrolled-input-notification-email"
+                  label="Email"
+                  value="email"
+                  defaultChecked={false}
+                  ref={uncontrolledNotificationEmailRef}
+                  testId="uncontrolled-input-notification-email"
+                />
+                <Checkbox
+                  id="uncontrolled-input-notification-sms"
+                  label="SMS"
+                  value="sms"
+                  defaultChecked={false}
+                  ref={uncontrolledNotificationSmsRef}
+                  testId="uncontrolled-input-notification-sms"
+                />
+                <Checkbox
+                  id="uncontrolled-input-notification-push"
+                  label="Push"
+                  value="push"
+                  defaultChecked={false}
+                  ref={uncontrolledNotificationPushRef}
+                  testId="uncontrolled-input-notification-push"
+                />
+              </CheckboxGroup>
+              <RadioGroup legend="Account type" testId="uncontrolled-radio-group" name="plan">
                 <Radio
                   id="uncontrolled-input-plan-basic"
-                  name="plan"
                   label="Basic"
                   value="basic"
                   defaultChecked
@@ -235,7 +346,6 @@ export default function FormControlsTestPage(): React.ReactElement {
                 />
                 <Radio
                   id="uncontrolled-input-plan-premium"
-                  name="plan"
                   label="Premium"
                   value="premium"
                   ref={uncontrolledPlanPremiumRef}
@@ -258,71 +368,9 @@ export default function FormControlsTestPage(): React.ReactElement {
             <button type="submit" data-testid="uncontrolled-submit-button">
               Submit Uncontrolled Form
             </button>
-          </Form>
-        </Section>
-        <Section title="Generated IDs" testId="generated-ids-section">
-          <Form testId="generated-ids-form" autoIdPrefix="form-test">
-            <TextInput
-              name="generatedName1"
-              label="Generated Name 1"
-              placeholder="No id provided"
-              testId="generated-id-name-input-1"
-            />
-            <TextInput
-              id="custom-id-email"
-              name="customEmail"
-              label="Custom Email (but plain text input)"
-              placeholder="Explicit id provided"
-              testId="custom-id-email-input"
-            />
-            <TextInput
-              name="generatedName2"
-              label="Generated Name 2"
-              placeholder="No id provided"
-              testId="generated-id-name-input-2"
-            />
-          </Form>
-        </Section>
-        <Section title="Generated IDs with no Form" testId="formless-generated-ids-section">
-          <TextInput
-            name="formlessGeneratedName1"
-            label="Formless Generated Name 1"
-            placeholder="No id provided"
-            testId="formless-generated-id-name-input-1"
-          />
-          <TextInput
-            id="formless-custom-id-email"
-            name="formlessCustomEmail"
-            label="Formless Custom Email (but plain text input)"
-            placeholder="Explicit id provided"
-            testId="formless-custom-id-email-input"
-          />
-          <TextInput
-            name="formlessGeneratedName2"
-            label="Formless Generated Name 2"
-            placeholder="No id provided"
-            testId="formless-generated-id-name-input-2"
-          />
-        </Section>
-
-        <Section title="Hidden Labels (labelVisible=false)" testId="hidden-labels-section">
-          <Form testId="hidden-labels-form">
-            <TextInput
-              id="hidden-label-default"
-              name="default"
-              label="Default"
-              labelVisible={false}
-              placeholder="Default aria-label from label attribute"
-              testId="hidden-label-default-input"
-            />
-            <TextInput
-              id="hidden-label-custom"
-              name="custom"
-              label="Custom"
-              labelVisible={false}
-              aria-label="ARIA Custom"
-              placeholder="ARIA Custom from aria-label attribute"
-              testId="hidden-label-custom-input"
+            <FormValuesReporter
+              buttonTestId="uncontrolled-get-values-button"
+              outputTestId="uncontrolled-values-json"
             />
           </Form>
         </Section>
@@ -338,9 +386,11 @@ export default function FormControlsTestPage(): React.ReactElement {
           <div data-testid="controlled-newsletter-display">
             Newsletter: {controlledNewsletter ? 'true' : 'false'}
           </div>
+          <div data-testid="controlled-notification-methods-display">
+            Notification methods: {controlledNotificationMethods.join(', ')}
+          </div>
           <div data-testid="controlled-account-type-display">Account type: {controlledPlan}</div>
           <div data-testid="controlled-genre-display">Favorite genre: {controlledGenre}</div>
-          <div data-testid="controlled-submit-count">Submit count: {controlledSubmitCount}</div>
         </div>
         <h3>Uncontrolled Form</h3>
         <div data-testid="uncontrolled-state-display">
@@ -352,13 +402,15 @@ export default function FormControlsTestPage(): React.ReactElement {
           <div data-testid="uncontrolled-newsletter-display">
             Newsletter: {uncontrolledResult.newsletter ? 'true' : 'false'}
           </div>
+          <div data-testid="uncontrolled-notification-methods-display">
+            Notification methods: {uncontrolledResult.notificationMethods.join(', ')}
+          </div>
           <div data-testid="uncontrolled-account-type-display">
             Account type: {uncontrolledResult.plan}
           </div>
           <div data-testid="uncontrolled-genre-display">
             Favorite genre: {uncontrolledResult.favoriteGenre}
           </div>
-          <div data-testid="uncontrolled-submit-count">Submit count: {uncontrolledSubmitCount}</div>
         </div>
       </Section>
     </>

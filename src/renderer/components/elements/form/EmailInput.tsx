@@ -17,6 +17,7 @@ export interface EmailInputProps extends React.InputHTMLAttributes<HTMLInputElem
   testId?: string;
   enabled?: boolean;
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  name: string;
 }
 
 export const EmailInput = forwardRef<HTMLInputElement, EmailInputProps>((props, ref) => (

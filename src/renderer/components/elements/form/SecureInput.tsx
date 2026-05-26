@@ -17,6 +17,7 @@ export interface SecureInputProps extends React.InputHTMLAttributes<HTMLInputEle
   testId?: string;
   enabled?: boolean;
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  name: string;
 }
 
 export const SecureInput = forwardRef<HTMLInputElement, SecureInputProps>((props, ref) => (

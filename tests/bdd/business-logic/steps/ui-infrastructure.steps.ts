@@ -19,35 +19,24 @@ import { BasePage, SettingsPage } from '../../technical/page-objects';
 
 import { assert } from './user-service.steps';
 
-const STEP_TIMEOUT = UI_TIMEOUT + 1000;
+Given('I open the app window as an unauthenticated user', async function (this: CustomWorld) {
+  this.currentUserPersona = new UnauthenticatedUserPersona(this);
+  await this.currentUserPersona.openWindow();
+});
 
-Given(
-  'I open the app window as an unauthenticated user',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld) {
-    this.currentUserPersona = new UnauthenticatedUserPersona(this);
-    await this.currentUserPersona.openWindow();
-  },
-);
+When('the user navigates to the Settings page', async function (this: CustomWorld) {
+  if (!this.currentUserPersona) {
+    throw new Error('No active user persona is set for the scenario');
+  }
+  await this.currentUserPersona.navigateToSettings();
+});
 
-When(
-  'the user navigates to the Settings page',
-  { timeout: STEP_TIMEOUT },
-  async function (this: CustomWorld) {
-    if (!this.currentUserPersona) {
-      throw new Error('No active user persona is set for the scenario');
-    }
-    await this.currentUserPersona.navigateToSettings();
-  },
-);
-
-Then('the Settings page is visible', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
+Then('the Settings page is visible', async function (this: CustomWorld) {
   await verifyPageIsVisible(this, 'settings');
 });
 
 Then(
   'the Settings page should display the following settings:',
-  { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld, expectedSettingsJson: string) {
     const expectedSettings = JSON.parse(expectedSettingsJson);
     const settingsPage = new SettingsPage(this);
@@ -62,9 +51,72 @@ Then(
   },
 );
 
+Given(
+  'the {string} input field has the value {string}',
+  async function (this: CustomWorld, name: string, value: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    await pageObject.setInputText(name, value);
+  },
+);
+
+Given(
+  'the {string} input field has the value {int}',
+  async function (this: CustomWorld, name: string, value: number) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    await pageObject.setInputNumber(name, value);
+  },
+);
+
+When(
+  'I enter {string} into the {string} input',
+  async function (this: CustomWorld, value: string, name: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    await pageObject.setInputText(name, value);
+  },
+);
+
+When(
+  'I enter {int} into the {string} input',
+  async function (this: CustomWorld, value: number, name: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    await pageObject.setInputNumber(name, value);
+  },
+);
+
+Given(
+  'the {string} radio group has {string} selected',
+  async function (this: CustomWorld, optionKeyOrValue: string, groupSelectorName: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    await pageObject.selectRadioByKeyOrValue(groupSelectorName, optionKeyOrValue);
+  },
+);
+
+Given(
+  'the {string} select has {string} chosen',
+  async function (this: CustomWorld, optionKeyOrValue: string, selectSelectorName: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    await pageObject.chooseOptionByKeyOrValue(selectSelectorName, optionKeyOrValue);
+  },
+);
+
+When(
+  'I select {string} for the {string} radio group',
+  async function (this: CustomWorld, optionKeyOrValue: string, groupSelectorName: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    await pageObject.selectRadioByKeyOrValue(groupSelectorName, optionKeyOrValue);
+  },
+);
+
+When(
+  'I choose {string} from the {string} select',
+  async function (this: CustomWorld, optionKeyOrValue: string, selectSelectorName: string) {
+    const pageObject = this.getStateObject('pageObject') as BasePage;
+    await pageObject.chooseOptionByKeyOrValue(selectSelectorName, optionKeyOrValue);
+  },
+);
+
 Then(
   'the {string} element should say {string}',
-  { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld, name: string, expectedValue: string) {
     const pageObject = this.getStateObject('pageObject') as BasePage;
     const actualValue = await pageObject.getText(name);
@@ -74,7 +126,6 @@ Then(
 
 Then(
   'the {string} element should say {int}',
-  { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld, name: string, expectedCount: number) {
     const pageObject = this.getStateObject('pageObject') as BasePage;
     const actualCount = await pageObject.getNumber(name);
@@ -82,9 +133,19 @@ Then(
   },
 );
 
+Given('the {string} checkbox is checked', async function (this: CustomWorld, name: string) {
+  const pageObject = this.getStateObject('pageObject') as BasePage;
+  await pageObject.check(name);
+});
+
+When('I check the {string} checkbox', async function (this: CustomWorld, name: string) {
+  const pageObject = this.getStateObject('pageObject') as BasePage;
+  await pageObject.check(name);
+});
+
 Then(
   'the {string} fieldset should have the legend {string}',
-  { timeout: STEP_TIMEOUT },
+  { timeout: UI_TIMEOUT },
   async function (this: CustomWorld, name: string, expectedLegend: string) {
     const pageObject = this.getStateObject('pageObject') as BasePage;
     const actualLegend = await pageObject.getFieldsetLegendText(name);
@@ -94,7 +155,7 @@ Then(
 
 Then(
   'the {string} element should have aria-label {string}',
-  { timeout: STEP_TIMEOUT },
+  { timeout: UI_TIMEOUT },
   async function (this: CustomWorld, name: string, expectedAriaLabel: string) {
     const pageObject = this.getStateObject('pageObject') as BasePage;
     const actualAriaLabel = await pageObject.getAriaLabel(name);
@@ -104,7 +165,7 @@ Then(
 
 Then(
   'the {string} input should be visible without a visible label element',
-  { timeout: STEP_TIMEOUT },
+  { timeout: UI_TIMEOUT },
   async function (this: CustomWorld, name: string) {
     const pageObject = this.getStateObject('pageObject') as BasePage;
 
@@ -120,7 +181,7 @@ Then(
 
 Then(
   'the {string} element should have id {string}',
-  { timeout: STEP_TIMEOUT },
+  { timeout: UI_TIMEOUT },
   async function (this: CustomWorld, name: string, expectedId: string) {
     const pageObject = this.getStateObject('pageObject') as BasePage;
     const actualId = await pageObject.getId(name);

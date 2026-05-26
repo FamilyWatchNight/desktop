@@ -44,6 +44,9 @@
   "devDependencies": {
     "@cucumber/cucumber": "^12.9.0",
     "@playwright/test": "^1.59.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/better-sqlite3": "^7.6.11",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
@@ -62,6 +65,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
     "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
     "playwright": "^1.59.1",
     "prettier": "^3.8.3",
     "prettier-plugin-gherkin": "^4.0.0",

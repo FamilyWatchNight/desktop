@@ -19,10 +19,15 @@ export class FormControlsTestPage extends BasePage {
     controlledEmailInput: '[data-testid="controlled-input-email"]',
     controlledAcceptedTermsInput: '[data-testid="controlled-input-accepted-terms"]',
     controlledNewsletterInput: '[data-testid="controlled-input-newsletter"]',
+    controlledInputNotificationEmail: '[data-testid="controlled-input-notification-email"]',
+    controlledInputNotificationSms: '[data-testid="controlled-input-notification-sms"]',
+    controlledInputNotificationPush: '[data-testid="controlled-input-notification-push"]',
+    controlledRadioGroup: '[data-testid="controlled-radio-group"]',
     controlledRadioPlanBasic: '[data-testid="controlled-radio-plan-basic"]',
     controlledRadioPlanPremium: '[data-testid="controlled-radio-plan-premium"]',
     controlledSelectGenre: '[data-testid="controlled-select-genre"]',
     controlledNewsletterDisplay: '[data-testid="controlled-newsletter-display"]',
+    controlledNotificationMethodsDisplay: '[data-testid="controlled-notification-methods-display"]',
     controlledAccountTypeDisplay: '[data-testid="controlled-account-type-display"]',
     controlledGenreDisplay: '[data-testid="controlled-genre-display"]',
     controlledSubmitButton: '[data-testid="controlled-submit-button"]',
@@ -40,14 +45,22 @@ export class FormControlsTestPage extends BasePage {
     uncontrolledEmailInput: '[data-testid="uncontrolled-input-email"]',
     uncontrolledAcceptedTermsInput: '[data-testid="uncontrolled-input-accepted-terms"]',
     uncontrolledNewsletterInput: '[data-testid="uncontrolled-input-newsletter"]',
+    uncontrolledInputNotificationEmail: '[data-testid="uncontrolled-input-notification-email"]',
+    uncontrolledInputNotificationSms: '[data-testid="uncontrolled-input-notification-sms"]',
+    uncontrolledInputNotificationPush: '[data-testid="uncontrolled-input-notification-push"]',
+    uncontrolledRadioGroup: '[data-testid="uncontrolled-radio-group"]',
     uncontrolledRadioPlanBasic: '[data-testid="uncontrolled-radio-plan-basic"]',
     uncontrolledRadioPlanPremium: '[data-testid="uncontrolled-radio-plan-premium"]',
     uncontrolledSelectGenre: '[data-testid="uncontrolled-select-genre"]',
     uncontrolledSubmitButton: '[data-testid="uncontrolled-submit-button"]',
+    uncontrolledGetValuesButton: '[data-testid="uncontrolled-get-values-button"]',
+    uncontrolledValuesJson: '[data-testid="uncontrolled-values-json"]',
     uncontrolledNameDisplay: '[data-testid="uncontrolled-name-display"]',
     uncontrolledEmailDisplay: '[data-testid="uncontrolled-email-display"]',
     uncontrolledAcceptedTermsDisplay: '[data-testid="uncontrolled-accepted-terms-result"]',
     uncontrolledNewsletterDisplay: '[data-testid="uncontrolled-newsletter-display"]',
+    uncontrolledNotificationMethodsDisplay:
+      '[data-testid="uncontrolled-notification-methods-display"]',
     uncontrolledAccountTypeDisplay: '[data-testid="uncontrolled-account-type-display"]',
     uncontrolledGenreDisplay: '[data-testid="uncontrolled-genre-display"]',
     uncontrolledSubmitCount: '[data-testid="uncontrolled-submit-count"]',
@@ -57,19 +70,7 @@ export class FormControlsTestPage extends BasePage {
       '[data-testid="uncontrolled-fieldset-personal-information"] legend',
     uncontrolledPreferencesFieldset: '[data-testid="uncontrolled-fieldset-preferences"]',
     uncontrolledPreferencesLegend: '[data-testid="uncontrolled-fieldset-preferences"] legend',
-    generatedIdNameInput1: '[data-testid="generated-id-name-input-1"]',
-    generatedIdNameInput2: '[data-testid="generated-id-name-input-2"]',
-    customIdEmailInput: '[data-testid="custom-id-email-input"]',
-    formlessGeneratedIdNameInput1: '[data-testid="formless-generated-id-name-input-1"]',
-    formlessGeneratedIdNameInput2: '[data-testid="formless-generated-id-name-input-2"]',
-    formlessCustomIdEmailInput: '[data-testid="formless-custom-id-email-input"]',
-    hiddenLabelsDefaultInput: '[data-testid="hidden-label-default-input"]',
-    hiddenLabelsCustomInput: '[data-testid="hidden-label-custom-input"]',
   } as Record<string, string>;
-
-  getSelector(name: string): string {
-    return super.getSelector(name);
-  }
 
   async submitControlledForm(): Promise<void> {
     await this.click('controlledSubmitButton');
@@ -77,86 +78,5 @@ export class FormControlsTestPage extends BasePage {
 
   async submitUncontrolledForm(): Promise<void> {
     await this.click('uncontrolledSubmitButton');
-  }
-
-  async getControlledSubmitCount(): Promise<number | null> {
-    return this.getNumber('controlledSubmitCount');
-  }
-
-  async getUncontrolledSubmitCount(): Promise<number | null> {
-    return this.getNumber('uncontrolledSubmitCount');
-  }
-
-  async getInputLabelForAttribute(name: string): Promise<string | null> {
-    const locator = await this.getLocator(name);
-    return locator.evaluate((el) => el.parentElement?.getAttribute('for') ?? null);
-  }
-
-  async getInputId(name: string): Promise<string | null> {
-    return this.getId(name);
-  }
-
-  async toggleControlledCheckbox(name: string): Promise<void> {
-    const selector = this.getSelector(name);
-    const page = await this.getPage();
-    await page.click(selector);
-  }
-
-  async toggleUncontrolledCheckbox(name: string): Promise<void> {
-    const selector = this.getSelector(name);
-    const page = await this.getPage();
-    await page.click(selector);
-  }
-
-  async selectControlledRadio(_groupName: string, optionValue: string): Promise<void> {
-    const normalizedValue = optionValue.toLowerCase();
-    const selector =
-      normalizedValue === 'basic'
-        ? this.selectors.controlledRadioPlanBasic
-        : normalizedValue === 'premium'
-          ? this.selectors.controlledRadioPlanPremium
-          : undefined;
-
-    if (!selector) {
-      throw new Error(`Unsupported controlled radio option: ${optionValue}`);
-    }
-
-    const page = await this.getPage();
-    await page.click(selector);
-  }
-
-  async selectUncontrolledRadio(_groupName: string, optionValue: string): Promise<void> {
-    const normalizedValue = optionValue.toLowerCase();
-    const selector =
-      normalizedValue === 'basic'
-        ? this.selectors.uncontrolledRadioPlanBasic
-        : normalizedValue === 'premium'
-          ? this.selectors.uncontrolledRadioPlanPremium
-          : undefined;
-
-    if (!selector) {
-      throw new Error(`Unsupported uncontrolled radio option: ${optionValue}`);
-    }
-
-    const page = await this.getPage();
-    await page.click(selector);
-  }
-
-  async chooseControlledSelect(fieldName: string, optionValue: string): Promise<void> {
-    const selector = this.getSelector(fieldName);
-    const page = await this.getPage();
-    await page.selectOption(selector, optionValue.toLowerCase());
-  }
-
-  async chooseUncontrolledSelect(fieldName: string, optionValue: string): Promise<void> {
-    const selector = this.getSelector(fieldName);
-    const page = await this.getPage();
-    await page.selectOption(selector, optionValue.toLowerCase());
-  }
-
-  async doesHiddenLabelInputHaveAVisibleLabelParent(name: string): Promise<boolean> {
-    const locator = await this.getLocator(name);
-    const parentTagName = await locator.evaluate((el) => el.parentElement?.tagName);
-    return parentTagName == 'LABEL';
   }
 }

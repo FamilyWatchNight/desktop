@@ -108,6 +108,28 @@ export abstract class BasePage {
     return locator.isVisible().catch(() => false);
   }
 
+  async isChecked(name: string): Promise<boolean> {
+    const page = await this.getPage();
+    const selector = this.getSelector(name);
+
+    const checkbox = page.locator(selector);
+    return checkbox.isChecked();
+  }
+
+  async check(name: string): Promise<void> {
+    const page = await this.getPage();
+    const selector = this.getSelector(name);
+
+    const checkbox = page.locator(selector);
+    if (!(await checkbox.isChecked())) {
+      await checkbox.click();
+    }
+
+    if (!(await checkbox.isChecked())) {
+      throw new Error(`Checking the "${name}" checkbox failed. Are you sure it's a checkbox?`);
+    }
+  }
+
   async waitForVisible(name: string, timeout = UI_TIMEOUT): Promise<void> {
     const page = await this.getPage();
     const selector = this.getSelector(name);
@@ -123,11 +145,18 @@ export abstract class BasePage {
     }
   }
 
-  async setInputValue(name: string, value: string): Promise<void> {
+  async setInputText(name: string, value: string): Promise<void> {
     const page = await this.getPage();
     const selector = this.getSelector(name);
 
     await page.fill(selector, value);
+  }
+
+  async setInputNumber(name: string, value: number): Promise<void> {
+    const page = await this.getPage();
+    const selector = this.getSelector(name);
+
+    await page.fill(selector, value.toString());
   }
 
   async getText(name: string, timeout = UI_TIMEOUT): Promise<string | null> {
@@ -207,6 +236,74 @@ export abstract class BasePage {
     } else {
       // Otherwise wait for network idle shortly to give the renderer a moment to update
       await page.waitForLoadState('networkidle', { timeout: UI_TIMEOUT }).catch(() => {});
+    }
+  }
+
+  async selectRadioByKeyOrValue(
+    groupSelectorName: string,
+    optionKeyOrValue: string,
+  ): Promise<void> {
+    const page = await this.getPage();
+    const groupSelector = this.getSelector(groupSelectorName);
+    const fieldset = page.locator(groupSelector);
+
+    // Find all radios in this fieldset
+    const radios = fieldset.locator('input[type="radio"]');
+    const count = await radios.count();
+
+    if (count === 0) {
+      throw new Error(`No radio inputs found in fieldset "${groupSelectorName}"`);
+    }
+
+    // Try to find by value attribute first
+    for (let i = 0; i < count; i++) {
+      const radio = radios.nth(i);
+      const value = await radio.getAttribute('value');
+      if (value === optionKeyOrValue) {
+        await radio.click();
+        return;
+      }
+    }
+
+    // Try to find by label text
+    for (let i = 0; i < count; i++) {
+      const radio = radios.nth(i);
+      const id = await radio.getAttribute('id');
+      if (id) {
+        const label = fieldset.locator(`label[for="${id}"]`);
+        const labelText = await label.textContent();
+        if (labelText?.trim() === optionKeyOrValue) {
+          await radio.click();
+          return;
+        }
+      }
+    }
+
+    throw new Error(
+      `No radio option found matching "${optionKeyOrValue}" in fieldset "${groupSelectorName}"`,
+    );
+  }
+
+  async chooseOptionByKeyOrValue(
+    selectSelectorName: string,
+    optionKeyOrValue: string,
+  ): Promise<void> {
+    const page = await this.getPage();
+    const selectSelector = this.getSelector(selectSelectorName);
+    const selectElement = page.locator(selectSelector);
+
+    try {
+      // First try by option value attribute
+      await selectElement.selectOption(optionKeyOrValue);
+    } catch {
+      try {
+        // Then try by visible option text (label)
+        await selectElement.selectOption({ label: optionKeyOrValue });
+      } catch {
+        throw new Error(
+          `No option found in select "${selectSelectorName}" matching "${optionKeyOrValue}" by value or label`,
+        );
+      }
     }
   }
 }

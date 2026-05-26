@@ -17,6 +17,7 @@ export interface TextInputProps extends React.InputHTMLAttributes<HTMLInputEleme
   testId?: string;
   enabled?: boolean;
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  name: string;
 }
 
 const TextInput = forwardRef<HTMLInputElement, TextInputProps>((props, ref) => (
