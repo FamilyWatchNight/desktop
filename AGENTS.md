@@ -199,6 +199,9 @@ The renderer's API client automatically detects its environment and selects the 
   - Execute: `npm run test:features`
   - Execute UI tests in Electron: `npm run test:features`
   - Execute UI tests in Browser: `npm run test:features:browser`
+  - Always run feature tests through the npm scripts rather than invoking `cucumber-js` directly, so the active testing pages and required build hooks are applied.
+  - When running a specific feature subset, pass tags through the npm script, for example:
+    - `npm run test:features -- --tags "@ui and @form-controls"`
   - Feature scenarios in `tests/bdd/business-logic/features/`
   - Step definitions in `tests/bdd/business-logic/steps/`
   - Personas (domain-facing APIs) in `tests/bdd/business-flow/personas/`.
