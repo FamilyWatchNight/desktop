@@ -6,10 +6,12 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../../api-client';
+import { Form, NumberInput, TextInput } from '../elements/form';
+import type { FormContextValue } from '../elements/form/Form';
 import { Page, Section } from '../elements/layout';
 
 const apiClient = createApiClient();
@@ -21,23 +23,34 @@ interface TaskPayload {
   status: string;
 }
 
+interface SettingsFormValues {
+  webPort?: unknown;
+  watchmodeApiKey?: unknown;
+  tmdbApiKey?: unknown;
+}
+
 export default function SettingsPage(): React.ReactElement {
   const { t } = useTranslation('settings');
-  const [webPort, setWebPort] = useState('3000');
-  const [watchmodeApiKey, setWatchmodeApiKey] = useState('');
-  const [tmdbApiKey, setTmdbApiKey] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const [statusType, setStatusType] = useState('');
   const [backgroundTaskMessage, setBackgroundTaskMessage] = useState('');
   const [activeTask, setActiveTask] = useState<TaskPayload | null>(null);
   const [queue, setQueue] = useState<TaskPayload[]>([]);
+  const formContextRef = useRef<FormContextValue | null>(null);
+  const [initialValues, setInitialValues] = useState<SettingsFormValues>({
+    webPort: '3000',
+    watchmodeApiKey: '',
+    tmdbApiKey: '',
+  });
 
   useEffect(() => {
     async function loadSettings(): Promise<void> {
       const result = await apiClient.settings.loadSettings();
-      if (result.webPort != null) setWebPort(String(result.webPort));
-      if (result.watchmodeApiKey != null) setWatchmodeApiKey(String(result.watchmodeApiKey));
-      if (result.tmdbApiKey != null) setTmdbApiKey(String(result.tmdbApiKey));
+      setInitialValues({
+        webPort: result.webPort != null ? String(result.webPort) : '3000',
+        watchmodeApiKey: result.watchmodeApiKey != null ? String(result.watchmodeApiKey) : '',
+        tmdbApiKey: result.tmdbApiKey != null ? String(result.tmdbApiKey) : '',
+      });
     }
     void loadSettings();
   }, []);
@@ -69,8 +82,22 @@ export default function SettingsPage(): React.ReactElement {
   };
 
   const saveSettings = async (): Promise<void> => {
-    const settings = { webPort: parseInt(webPort, 10), watchmodeApiKey, tmdbApiKey };
+    if (!formContextRef.current) {
+      showMessage(t('errorSave') + 'Form context is unavailable', 'error');
+      return;
+    }
+
     try {
+      const values = formContextRef.current.getValues();
+      const settings: Record<string, unknown> = {
+        webPort:
+          typeof values.webPort === 'string' && values.webPort.length > 0
+            ? parseInt(values.webPort, 10)
+            : 3000,
+        watchmodeApiKey: values.watchmodeApiKey != null ? String(values.watchmodeApiKey) : '',
+        tmdbApiKey: values.tmdbApiKey != null ? String(values.tmdbApiKey) : '',
+      };
+
       await apiClient.settings.saveSettings(settings);
       showMessage(t('saved'), 'success');
       setTimeout(() => {
@@ -112,9 +139,11 @@ export default function SettingsPage(): React.ReactElement {
   const handleCancel = (): void => {
     async function load(): Promise<void> {
       const result = await apiClient.settings.loadSettings();
-      if (result.webPort != null) setWebPort(String(result.webPort));
-      if (result.watchmodeApiKey != null) setWatchmodeApiKey(String(result.watchmodeApiKey));
-      if (result.tmdbApiKey != null) setTmdbApiKey(String(result.tmdbApiKey));
+      setInitialValues({
+        webPort: result.webPort != null ? String(result.webPort) : '3000',
+        watchmodeApiKey: result.watchmodeApiKey != null ? String(result.watchmodeApiKey) : '',
+        tmdbApiKey: result.tmdbApiKey != null ? String(result.tmdbApiKey) : '',
+      });
     }
     void load();
     setStatusMessage('');
@@ -123,97 +152,97 @@ export default function SettingsPage(): React.ReactElement {
 
   return (
     <Page centered title={t('title')} testId="page-settings">
-      <Section testId="settings-form-section">
-        <div className="form-group">
-          <label htmlFor="webPort" data-testid="settings-webport-label">
-            {t('webPort')}
-          </label>
-          <input
-            type="number"
-            id="webPort"
-            data-testid="settings-webport-input"
+      <Form
+        key={`settings-form-${String(initialValues.webPort)}-${String(
+          initialValues.watchmodeApiKey,
+        )}-${String(initialValues.tmdbApiKey)}`}
+        testId="settings-form"
+        formContextRef={formContextRef}
+      >
+        <Section testId="settings-form-section">
+          <NumberInput
+            id="settings-webport-input"
+            name="webPort"
+            label={t('webPort')}
             placeholder="3000"
-            value={webPort}
-            onChange={(e) => setWebPort(e.target.value)}
+            defaultValue={initialValues.webPort as string}
+            testId="settings-webport-input"
           />
-        </div>
-        <div className="form-group">
-          <label htmlFor="watchmodeApiKey" data-testid="settings-watchmode-api-key-label">
-            {t('watchmodeApiKey')}
-          </label>
-          <input
-            type="password"
-            id="watchmodeApiKey"
-            data-testid="settings-watchmode-api-key-input"
+          <TextInput
+            id="settings-watchmode-api-key-input"
+            name="watchmodeApiKey"
+            label={t('watchmodeApiKey')}
             placeholder=""
-            value={watchmodeApiKey}
-            onChange={(e) => setWatchmodeApiKey(e.target.value)}
+            defaultValue={initialValues.watchmodeApiKey as string}
+            testId="settings-watchmode-api-key-input"
           />
-        </div>
-        <div className="form-group">
-          <label htmlFor="tmdbApiKey" data-testid="settings-tmdb-api-key-label">
-            {t('tmdbApiKey')}
-          </label>
-          <input
-            id="tmdbApiKey"
-            data-testid="settings-tmdb-api-key-input"
+          <TextInput
+            id="settings-tmdb-api-key-input"
+            name="tmdbApiKey"
+            label={t('tmdbApiKey')}
             placeholder=""
-            value={tmdbApiKey}
-            onChange={(e) => setTmdbApiKey(e.target.value)}
+            defaultValue={initialValues.tmdbApiKey as string}
+            testId="settings-tmdb-api-key-input"
           />
-        </div>
-      </Section>
-      <Section title={t('backgroundTasks')} testId="settings-background-tasks-section">
-        <div className="form-group">
-          <div className="button-group">
-            <button
-              type="button"
-              className="btn-secondary"
-              data-testid="settings-import-watchmode-button"
-              onClick={() => enqueueBackgroundTask('import-watchmode')}
-              disabled={
-                activeTask?.type === 'import-watchmode' ||
-                queue.some((t) => t.type === 'import-watchmode')
-              }
-            >
-              {t('importWatchmode')}
-            </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              data-testid="settings-import-tmdb-button"
-              onClick={() => enqueueBackgroundTask('import-tmdb')}
-              disabled={
-                activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')
-              }
-            >
-              {t('importTmdb')}
-            </button>
-          </div>
-          {backgroundTaskMessage && (
-            <div className="message success" data-testid="settings-background-task-message">
-              {backgroundTaskMessage}
+        </Section>
+        <Section title={t('backgroundTasks')} testId="settings-background-tasks-section">
+          <div className="form-group">
+            <div className="button-group">
+              <button
+                type="button"
+                className="btn-secondary"
+                data-testid="settings-import-watchmode-button"
+                onClick={() => enqueueBackgroundTask('import-watchmode')}
+                disabled={
+                  activeTask?.type === 'import-watchmode' ||
+                  queue.some((t) => t.type === 'import-watchmode')
+                }
+              >
+                {t('importWatchmode')}
+              </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                data-testid="settings-import-tmdb-button"
+                onClick={() => enqueueBackgroundTask('import-tmdb')}
+                disabled={
+                  activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')
+                }
+              >
+                {t('importTmdb')}
+              </button>
             </div>
-          )}
+            {backgroundTaskMessage && (
+              <div className="message success" data-testid="settings-background-task-message">
+                {backgroundTaskMessage}
+              </div>
+            )}
+          </div>
+        </Section>
+        <div className="button-group">
+          <button
+            type="button"
+            className="btn-primary"
+            data-testid="settings-save-button"
+            onClick={saveSettings}
+          >
+            {t('save')}
+          </button>
+          <button
+            type="button"
+            className="btn-secondary"
+            data-testid="settings-cancel-button"
+            onClick={handleCancel}
+          >
+            {t('button.cancel', { ns: 'common' })}
+          </button>
         </div>
-      </Section>
-      <div className="button-group">
-        <button className="btn-primary" data-testid="settings-save-button" onClick={saveSettings}>
-          {t('save')}
-        </button>
-        <button
-          className="btn-secondary"
-          data-testid="settings-cancel-button"
-          onClick={handleCancel}
-        >
-          {t('button.cancel', { ns: 'common' })}
-        </button>
-      </div>
-      {statusMessage && (
-        <div className={`message ${statusType}`} data-testid="settings-status-message">
-          {statusMessage}
-        </div>
-      )}
+        {statusMessage && (
+          <div className={`message ${statusType}`} data-testid="settings-status-message">
+            {statusMessage}
+          </div>
+        )}
+      </Form>
     </Page>
   );
 }
