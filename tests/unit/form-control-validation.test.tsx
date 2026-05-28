@@ -120,4 +120,24 @@ describe('Form control runtime validation', () => {
       'Radio inside a radio group should not specify a name. The group defines the field name.',
     );
   });
+
+  test('Checkbox inside group throws when value is missing', () => {
+    expect(() =>
+      renderToString(
+        <CheckboxGroup name="notificationMethods" testId="notification-group">
+          <Checkbox id="checkbox-1" />
+        </CheckboxGroup>,
+      ),
+    ).toThrow('Checkbox inside a checkbox group must specify a value.');
+  });
+
+  test('Radio inside group throws when value is missing', () => {
+    expect(() =>
+      renderToString(
+        <RadioGroup name="plan" testId="plan-group">
+          <Radio id="radio-1" />
+        </RadioGroup>,
+      ),
+    ).toThrow('Radio inside a radio group must specify a value.');
+  });
 });

@@ -30,6 +30,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       id: inputId,
       ariaLabel,
       disabled,
+      initialValue,
     } = useFormField({
       id,
       name: nameToUse,
@@ -38,21 +39,41 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       labelVisible,
       required: rest.required === true,
       enabled,
-      ariaLabel: (rest as any)['aria-label'],
+      ariaLabel: (rest as Record<string, unknown>)['aria-label'] as string | undefined,
       testId,
     });
 
+    // Compute props: if the caller didn't explicitly provide value/defaultValue and the form provided an initialValue, apply it.
+    const hasExplicitValue = Object.prototype.hasOwnProperty.call(rest, 'value');
+
+    const implicitProps: Record<string, unknown> = {
+      id: inputId,
+      className,
+      'data-testid': testId,
+      ref,
+      'aria-label': ariaLabel,
+      disabled,
+    };
+
+    if (!hasExplicitValue && initialValue !== undefined) {
+      implicitProps.defaultValue = initialValue != null ? String(initialValue) : '';
+    }
+
     const selectElement = (
-      <select
-        id={inputId}
-        className={className}
-        data-testid={testId}
-        ref={ref}
-        aria-label={ariaLabel}
-        disabled={disabled}
-        {...rest}
-      />
+      <select {...(implicitProps as React.SelectHTMLAttributes<HTMLSelectElement>)} {...rest} />
     );
+
+    // If initialValue changes after mount, imperatively update the DOM value so uncontrolled select reflects it.
+    React.useEffect(() => {
+      if (initialValue === undefined) return;
+      try {
+        const el = document.getElementById(inputId) as HTMLSelectElement | null;
+        if (!el) return;
+        el.value = initialValue != null ? String(initialValue) : '';
+      } catch {
+        // ignore
+      }
+    }, [initialValue, inputId]);
 
     if (!label || !labelVisible) {
       return selectElement;

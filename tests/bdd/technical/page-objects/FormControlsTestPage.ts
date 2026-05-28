@@ -31,6 +31,8 @@ export class FormControlsTestPage extends BasePage {
     controlledAccountTypeDisplay: '[data-testid="controlled-account-type-display"]',
     controlledGenreDisplay: '[data-testid="controlled-genre-display"]',
     controlledSubmitButton: '[data-testid="controlled-submit-button"]',
+    controlledValidateButton: '[data-testid="controlled-validate-button"]',
+    controlledResetButton: '[data-testid="controlled-reset-button"]',
     controlledNameDisplay: '[data-testid="controlled-name-display"]',
     controlledEmailDisplay: '[data-testid="controlled-email-display"]',
     controlledAcceptedTermsDisplay: '[data-testid="controlled-accepted-terms-display"]',
@@ -53,7 +55,11 @@ export class FormControlsTestPage extends BasePage {
     uncontrolledRadioPlanPremium: '[data-testid="uncontrolled-radio-plan-premium"]',
     uncontrolledSelectGenre: '[data-testid="uncontrolled-select-genre"]',
     uncontrolledSubmitButton: '[data-testid="uncontrolled-submit-button"]',
+    uncontrolledValidateButton: '[data-testid="uncontrolled-validate-button"]',
+    uncontrolledResetButton: '[data-testid="uncontrolled-reset-button"]',
     uncontrolledGetValuesButton: '[data-testid="uncontrolled-get-values-button"]',
+    uncontrolledInitialValuesTextarea: '[data-testid="uncontrolled-initial-values-textarea"]',
+    uncontrolledSetInitialValuesButton: '[data-testid="uncontrolled-set-initial-values-button"]',
     uncontrolledValuesJson: '[data-testid="uncontrolled-values-json"]',
     uncontrolledNameDisplay: '[data-testid="uncontrolled-name-display"]',
     uncontrolledEmailDisplay: '[data-testid="uncontrolled-email-display"]',
@@ -78,5 +84,147 @@ export class FormControlsTestPage extends BasePage {
 
   async submitUncontrolledForm(): Promise<void> {
     await this.click('uncontrolledSubmitButton');
+  }
+
+  async setUncontrolledFormReady(
+    isReady: boolean,
+    initialValues: Record<string, unknown> | null,
+  ): Promise<void> {
+    // Fill the textarea with the JSON (or empty) and click the Set button
+    if (initialValues) {
+      await this.setInputText(
+        'uncontrolledInitialValuesTextarea',
+        JSON.stringify(initialValues, null, 2),
+      );
+    } else {
+      await this.setInputText('uncontrolledInitialValuesTextarea', '');
+    }
+    if (isReady) {
+      await this.click('uncontrolledSetInitialValuesButton');
+    } else {
+      // If not ready, write invalid JSON and click Set to force not-ready state
+      await this.setInputText('uncontrolledInitialValuesTextarea', '{ invalid');
+      await this.click('uncontrolledSetInitialValuesButton');
+    }
+    // Store initial values in world state for verification
+    if (initialValues) {
+      this.world.setStateObject('uncontrolledInitialValues', initialValues);
+    }
+  }
+
+  private async getInputValue(name: string): Promise<string> {
+    const page = await this.getPage();
+    const selector = this.getSelector(name);
+    const value = await page.locator(selector).inputValue();
+    return value ?? '';
+  }
+
+  private async getSelectValue(name: string): Promise<string> {
+    const page = await this.getPage();
+    const selector = this.getSelector(name);
+    const value = await page.locator(selector).inputValue();
+    return value ?? '';
+  }
+
+  private async isDisabled(name: string): Promise<boolean> {
+    const page = await this.getPage();
+    const selector = this.getSelector(name);
+    const isDisabled = await page.locator(selector).isDisabled();
+    return isDisabled;
+  }
+
+  async verifyUncontrolledFieldsAreDefault(): Promise<void> {
+    // Verify all uncontrolled fields are at their defaults
+    const nameValue = await this.getInputValue('uncontrolledNameInput');
+    const emailValue = await this.getInputValue('uncontrolledEmailInput');
+    const acceptedTermsChecked = await this.isChecked('uncontrolledAcceptedTermsInput');
+    const newsletterChecked = await this.isChecked('uncontrolledNewsletterInput');
+    const genreValue = await this.getSelectValue('uncontrolledSelectGenre');
+
+    const { expect } = await import('@playwright/test');
+    expect(nameValue).toBe('');
+    expect(emailValue).toBe('');
+    expect(acceptedTermsChecked).toBe(false);
+    expect(newsletterChecked).toBe(false);
+    expect(genreValue).toBe('comedy');
+  }
+
+  async verifyUncontrolledFieldsMatchValues(
+    expectedValues: Record<string, unknown>,
+  ): Promise<void> {
+    const { expect } = await import('@playwright/test');
+
+    if (expectedValues.name !== undefined) {
+      const nameValue = await this.getInputValue('uncontrolledNameInput');
+      expect(nameValue).toBe(String(expectedValues.name));
+    }
+
+    if (expectedValues.email !== undefined) {
+      const emailValue = await this.getInputValue('uncontrolledEmailInput');
+      expect(emailValue).toBe(String(expectedValues.email));
+    }
+
+    if (expectedValues.acceptedTerms !== undefined) {
+      const acceptedTermsChecked = await this.isChecked('uncontrolledAcceptedTermsInput');
+      expect(acceptedTermsChecked).toBe(Boolean(expectedValues.acceptedTerms));
+    }
+
+    if (expectedValues.newsletter !== undefined) {
+      const newsletterExpected = expectedValues.newsletter as unknown[];
+      const newsletterChecked = await this.isChecked('uncontrolledNewsletterInput');
+      expect(newsletterChecked).toBe(Boolean(newsletterExpected.includes('yes')));
+    }
+
+    if (expectedValues.favoriteGenre !== undefined) {
+      const genreValue = await this.getSelectValue('uncontrolledSelectGenre');
+      expect(genreValue).toBe(String(expectedValues.favoriteGenre));
+    }
+
+    if (expectedValues.notificationMethods !== undefined) {
+      const notificationMethods = expectedValues.notificationMethods as unknown[];
+      const emailChecked = await this.isChecked('uncontrolledInputNotificationEmail');
+      const smsChecked = await this.isChecked('uncontrolledInputNotificationSms');
+      const pushChecked = await this.isChecked('uncontrolledInputNotificationPush');
+
+      expect(emailChecked).toBe(notificationMethods.includes('email'));
+      expect(smsChecked).toBe(notificationMethods.includes('sms'));
+      expect(pushChecked).toBe(notificationMethods.includes('push'));
+    }
+
+    if (expectedValues.plan !== undefined) {
+      const planBasicChecked = await this.isChecked('uncontrolledRadioPlanBasic');
+      const planPremiumChecked = await this.isChecked('uncontrolledRadioPlanPremium');
+      const expectedPlan = String(expectedValues.plan);
+
+      if (expectedPlan === 'basic') {
+        expect(planBasicChecked).toBe(true);
+        expect(planPremiumChecked).toBe(false);
+      } else if (expectedPlan === 'premium') {
+        expect(planBasicChecked).toBe(false);
+        expect(planPremiumChecked).toBe(true);
+      }
+    }
+  }
+
+  async verifyUncontrolledFieldsDisabled(shouldBeDisabled: boolean): Promise<void> {
+    const { expect } = await import('@playwright/test');
+
+    const fieldSelectors = [
+      'uncontrolledNameInput',
+      'uncontrolledEmailInput',
+      'uncontrolledAcceptedTermsInput',
+      'uncontrolledNewsletterInput',
+      'uncontrolledInputNotificationEmail',
+      'uncontrolledInputNotificationSms',
+      'uncontrolledInputNotificationPush',
+      'uncontrolledRadioPlanBasic',
+      'uncontrolledRadioPlanPremium',
+      'uncontrolledSelectGenre',
+    ];
+
+    for (const selector of fieldSelectors) {
+      const isDisabled = await this.isDisabled(selector);
+      expect(isDisabled).toBe(shouldBeDisabled);
+    }
   }
 }

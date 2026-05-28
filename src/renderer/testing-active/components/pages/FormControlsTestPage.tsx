@@ -8,6 +8,7 @@ the Free Software Foundation, version 3.
 
 import React, { useContext, useRef, useState } from 'react';
 
+import type { FormContextValue } from '../../../components/elements/form';
 import {
   Checkbox,
   CheckboxGroup,
@@ -41,6 +42,28 @@ export default function FormControlsTestPage(): React.ReactElement {
     plan: 'basic',
     favoriteGenre: 'comedy',
   });
+
+  // State for uncontrolled form readiness and initial values
+  const [uncontrolledIsReady, setUncontrolledIsReady] = useState(false);
+  const [uncontrolledInitialValues, setUncontrolledInitialValues] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+
+  const controlledFormRef = useRef<FormContextValue>(null);
+  const uncontrolledFormRef = useRef<FormContextValue>(null);
+
+  // Local handler to apply initial values from textarea input
+  const applyInitialValuesFromText = (text: string) => {
+    try {
+      const parsed = JSON.parse(text);
+      setUncontrolledInitialValues(parsed);
+      setUncontrolledIsReady(true);
+    } catch {
+      setUncontrolledInitialValues(null);
+      setUncontrolledIsReady(false);
+    }
+  };
 
   const uncontrolledNameRef = useRef<HTMLInputElement>(null);
   const uncontrolledEmailRef = useRef<HTMLInputElement>(null);
@@ -140,7 +163,11 @@ export default function FormControlsTestPage(): React.ReactElement {
     <>
       <Page title="Form Controls Test Page" testId="form-controls-component-under-test" centered>
         <Section title="Controlled Form" testId="controlled-form-section">
-          <Form onSubmit={handleControlledSubmit} testId="controlled-form">
+          <Form
+            onSubmit={handleControlledSubmit}
+            testId="controlled-form"
+            formContextRef={controlledFormRef}
+          >
             <Fieldset
               legend="Controlled Personal Information"
               testId="controlled-fieldset-personal-information"
@@ -181,6 +208,7 @@ export default function FormControlsTestPage(): React.ReactElement {
                 <Checkbox
                   id="controlled-input-newsletter"
                   label="Subscribe to newsletter"
+                  value="yes"
                   checked={controlledNewsletter}
                   onChange={(event) => updateControlledNewsletter(event.target.checked)}
                   testId="controlled-input-newsletter"
@@ -259,7 +287,13 @@ export default function FormControlsTestPage(): React.ReactElement {
           </Form>
         </Section>
         <Section title="Uncontrolled Form">
-          <Form onSubmit={handleUncontrolledSubmit} testId="uncontrolled-form">
+          <Form
+            onSubmit={handleUncontrolledSubmit}
+            testId="uncontrolled-form"
+            formContextRef={uncontrolledFormRef}
+            initialValues={uncontrolledInitialValues}
+            isReady={uncontrolledIsReady}
+          >
             <Fieldset
               legend="Uncontrolled Personal Information"
               testId="uncontrolled-fieldset-personal-information"
@@ -301,6 +335,7 @@ export default function FormControlsTestPage(): React.ReactElement {
                   id="uncontrolled-input-newsletter"
                   label="Subscribe to newsletter"
                   defaultChecked={false}
+                  value="yes"
                   ref={uncontrolledNewsletterRef}
                   testId="uncontrolled-input-newsletter"
                 />
@@ -372,6 +407,36 @@ export default function FormControlsTestPage(): React.ReactElement {
               buttonTestId="uncontrolled-get-values-button"
               outputTestId="uncontrolled-values-json"
             />
+            <div style={{ marginTop: 8 }}>
+              <textarea
+                data-testid="uncontrolled-initial-values-textarea"
+                aria-label="Uncontrolled initial values"
+                style={{ width: '100%', minHeight: 120 }}
+                defaultValue={
+                  uncontrolledInitialValues
+                    ? JSON.stringify(uncontrolledInitialValues, null, 2)
+                    : ''
+                }
+                onChange={() => {
+                  /* keep textarea uncontrolled for playwright interactions */
+                }}
+              />
+              <div style={{ marginTop: 6 }}>
+                <button
+                  type="button"
+                  data-testid="uncontrolled-set-initial-values-button"
+                  onClick={() => {
+                    const ta = document.querySelector(
+                      '[data-testid="uncontrolled-initial-values-textarea"]',
+                    ) as HTMLTextAreaElement | null;
+                    if (!ta) return;
+                    applyInitialValuesFromText(ta.value);
+                  }}
+                >
+                  Set Form Values
+                </button>
+              </div>
+            </div>
           </Form>
         </Section>
       </Page>
@@ -411,6 +476,60 @@ export default function FormControlsTestPage(): React.ReactElement {
           <div data-testid="uncontrolled-genre-display">
             Favorite genre: {uncontrolledResult.favoriteGenre}
           </div>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <button
+            type="button"
+            data-testid="controlled-validate-button"
+            onClick={() => {
+              const errors: Record<string, string> = {};
+              if (!controlledState.name) errors.name = 'Name required';
+              if (!controlledState.email || !controlledState.email.includes('@'))
+                errors.email = 'Enter a valid email';
+              controlledFormRef.current?.setErrors?.(errors);
+            }}
+          >
+            Validate Controlled
+          </button>
+          <button
+            type="button"
+            data-testid="controlled-reset-button"
+            onClick={() => {
+              setControlledState({ name: '', email: '', acceptedTerms: false });
+              setControlledNewsletter(false);
+              setControlledNotificationMethods([]);
+              setControlledPlan('basic');
+              setControlledGenre('comedy');
+              controlledFormRef.current?.reset?.();
+              controlledFormRef.current?.setErrors?.({});
+            }}
+          >
+            Reset Controlled
+          </button>
+          <button
+            type="button"
+            data-testid="uncontrolled-validate-button"
+            onClick={() => {
+              const values = uncontrolledFormRef.current?.getValues?.() ?? {};
+              const errors: Record<string, string> = {};
+              if (!values.name) errors.name = 'Name required';
+              if (!values.email || !String(values.email).includes('@'))
+                errors.email = 'Enter a valid email';
+              uncontrolledFormRef.current?.setErrors?.(errors);
+            }}
+          >
+            Validate Uncontrolled
+          </button>
+          <button
+            type="button"
+            data-testid="uncontrolled-reset-button"
+            onClick={() => {
+              uncontrolledFormRef.current?.reset?.();
+              uncontrolledFormRef.current?.setErrors?.({});
+            }}
+          >
+            Reset Uncontrolled
+          </button>
         </div>
       </Section>
     </>

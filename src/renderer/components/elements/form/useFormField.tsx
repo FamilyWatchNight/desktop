@@ -60,7 +60,13 @@ export function useFormField(opts: UseFormFieldOpts) {
     id: inputId,
     ariaLabel,
     testId: opts.testId,
-    disabled: !enabled,
+    // Disabled if explicitly disabled or if the form signals it's not ready
+    disabled: !(enabled && (formContext?.isReady ?? true)),
     labelVisible,
+    // If form provided initialValues and isReady is true, return the initial value for this field
+    initialValue:
+      formContext && opts.name && formContext.isReady && formContext.initialValues
+        ? formContext.initialValues[opts.name]
+        : undefined,
   };
 }

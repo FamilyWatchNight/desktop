@@ -10,7 +10,7 @@ export { Checkbox } from './Checkbox';
 export { CheckboxGroup } from './CheckboxGroup';
 export { EmailInput } from './EmailInput';
 export { Fieldset } from './Fieldset';
-export { Form, FormContext } from './Form';
+export { Form, FormContext, type FormContextValue } from './Form';
 export { NumberInput } from './NumberInput';
 export { Radio } from './Radio';
 export { RadioGroup } from './RadioGroup';
