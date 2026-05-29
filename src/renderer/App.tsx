@@ -10,12 +10,15 @@ import React from 'react';
 
 import AppLayout from './components/AppLayout';
 import { NavigationProvider } from './contexts/NavigationContext';
+import { PageRegistryProvider } from './contexts/PageRegistryContext';
 import './styles/index.scss';
 
 export default function App(): React.ReactElement {
   return (
-    <NavigationProvider>
-      <AppLayout />
-    </NavigationProvider>
+    <PageRegistryProvider>
+      <NavigationProvider>
+        <AppLayout />
+      </NavigationProvider>
+    </PageRegistryProvider>
   );
 }
