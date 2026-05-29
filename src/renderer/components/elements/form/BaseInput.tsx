@@ -176,10 +176,12 @@ const BaseInputImpl = (
   const hasExplicitDefault =
     Object.prototype.hasOwnProperty.call(restWithoutType, 'defaultValue') ||
     Object.prototype.hasOwnProperty.call(restWithoutType, 'defaultChecked');
+  const shouldApplyInitialValue =
+    !hasExplicitValue && !hasExplicitChecked && initialValue !== undefined;
 
   // Apply initialValue when provided by the form and the field is uncontrolled.
   // initialValue takes precedence over any defaultValue/defaultChecked in the markup when the form is ready.
-  if (!hasExplicitValue && !hasExplicitChecked && initialValue !== undefined) {
+  if (shouldApplyInitialValue) {
     if (nativeType === 'checkbox') {
       // For grouped checkbox initialValue may be array
       if (Array.isArray(initialValue)) {
@@ -226,13 +228,14 @@ const BaseInputImpl = (
     />
   );
 
-  // If the form provides an initialValue after mount, update the uncontrolled DOM value
+  // If the form provides an initialValue after mount, update the uncontrolled DOM value.
+  // Only run this effect when the relevant initial value or explicit-control flags change.
+  // This avoids reapplying initial values on unrelated re-renders such as showing a success
+  // message after save.
   React.useEffect(() => {
     if (!internalRef.current) return;
 
     const el = internalRef.current;
-    const hasExplicitValue = Object.prototype.hasOwnProperty.call(restWithoutType, 'value');
-    const hasExplicitChecked = Object.prototype.hasOwnProperty.call(restWithoutType, 'checked');
     const isCheckboxOrRadio = nativeType === 'checkbox' || nativeType === 'radio';
     if (hasExplicitValue && !isCheckboxOrRadio) return; // controlled externally for text-like inputs
     if (hasExplicitChecked) return; // controlled externally for checkbox/radio
@@ -256,7 +259,7 @@ const BaseInputImpl = (
     } catch {
       // ignore DOM assignment errors
     }
-  }, [initialValue, nativeType, restWithoutType]);
+  }, [initialValue, nativeType, hasExplicitValue, hasExplicitChecked]);
 
   if (!label || !labelVisible) {
     return inputElement;

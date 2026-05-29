@@ -106,10 +106,10 @@ export const Form = React.forwardRef<HTMLFormElement, FormProps>(
     }, []);
 
     const getValues = useCallback((): Record<string, unknown> => {
+      const byName: Record<string, Array<{ id: string; meta: FormRegistryMeta }>> = {};
       // Build a map of fields keyed by their `name` attribute. This groups
       // related controls (e.g. checkbox sets or radio options) so we can
       // compute a single logical value for the field name.
-      const byName: Record<string, Array<{ id: string; meta: FormRegistryMeta }>> = {};
 
       for (const [id, meta] of fieldsRef.current.entries()) {
         if (!meta || !meta.name) continue;
