@@ -84,6 +84,7 @@ export default function SettingsPage(): React.ReactElement {
 
       await apiClient.settings.saveSettings(settings);
       showMessage(t('saved'), 'success');
+      setInitialValues(settings); // Update initial values to allow proper reset on Cancel
       setTimeout(() => {
         setStatusMessage('');
         setStatusType('');
