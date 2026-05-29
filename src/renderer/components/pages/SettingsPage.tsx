@@ -37,20 +37,12 @@ export default function SettingsPage(): React.ReactElement {
   const [activeTask, setActiveTask] = useState<TaskPayload | null>(null);
   const [queue, setQueue] = useState<TaskPayload[]>([]);
   const formContextRef = useRef<FormContextValue | null>(null);
-  const [initialValues, setInitialValues] = useState<SettingsFormValues>({
-    webPort: '3000',
-    watchmodeApiKey: '',
-    tmdbApiKey: '',
-  });
+  const [initialValues, setInitialValues] = useState<SettingsFormValues | null>(null);
 
   useEffect(() => {
     async function loadSettings(): Promise<void> {
-      const result = await apiClient.settings.loadSettings();
-      setInitialValues({
-        webPort: result.webPort != null ? String(result.webPort) : '3000',
-        watchmodeApiKey: result.watchmodeApiKey != null ? String(result.watchmodeApiKey) : '',
-        tmdbApiKey: result.tmdbApiKey != null ? String(result.tmdbApiKey) : '',
-      });
+      const result = (await apiClient.settings.loadSettings()) as SettingsFormValues | undefined;
+      setInitialValues(result || {});
     }
     void loadSettings();
   }, []);
@@ -88,15 +80,7 @@ export default function SettingsPage(): React.ReactElement {
     }
 
     try {
-      const values = formContextRef.current.getValues();
-      const settings: Record<string, unknown> = {
-        webPort:
-          typeof values.webPort === 'string' && values.webPort.length > 0
-            ? parseInt(values.webPort, 10)
-            : 3000,
-        watchmodeApiKey: values.watchmodeApiKey != null ? String(values.watchmodeApiKey) : '',
-        tmdbApiKey: values.tmdbApiKey != null ? String(values.tmdbApiKey) : '',
-      };
+      const settings = formContextRef.current.getValues();
 
       await apiClient.settings.saveSettings(settings);
       showMessage(t('saved'), 'success');
@@ -137,15 +121,10 @@ export default function SettingsPage(): React.ReactElement {
   };
 
   const handleCancel = (): void => {
-    async function load(): Promise<void> {
-      const result = await apiClient.settings.loadSettings();
-      setInitialValues({
-        webPort: result.webPort != null ? String(result.webPort) : '3000',
-        watchmodeApiKey: result.watchmodeApiKey != null ? String(result.watchmodeApiKey) : '',
-        tmdbApiKey: result.tmdbApiKey != null ? String(result.tmdbApiKey) : '',
-      });
-    }
-    void load();
+    // Reset the form to the last-provided initialValues recorded by the
+    // Form context. Do not re-fetch from the service — the caller expects
+    // Cancel to be handled locally by the Form.reset() behavior.
+    formContextRef.current?.reset?.();
     setStatusMessage('');
     setStatusType('');
   };
@@ -153,19 +132,17 @@ export default function SettingsPage(): React.ReactElement {
   return (
     <Page centered title={t('title')} testId="page-settings">
       <Form
-        key={`settings-form-${String(initialValues.webPort)}-${String(
-          initialValues.watchmodeApiKey,
-        )}-${String(initialValues.tmdbApiKey)}`}
         testId="settings-form"
         formContextRef={formContextRef}
+        initialValues={initialValues as Record<string, unknown> | undefined}
+        isReady={!!initialValues}
       >
         <Section testId="settings-form-section">
           <NumberInput
             id="settings-webport-input"
             name="webPort"
             label={t('webPort')}
-            placeholder="3000"
-            defaultValue={initialValues.webPort as string}
+            defaultValue={3000}
             testId="settings-webport-input"
           />
           <TextInput
@@ -173,7 +150,6 @@ export default function SettingsPage(): React.ReactElement {
             name="watchmodeApiKey"
             label={t('watchmodeApiKey')}
             placeholder=""
-            defaultValue={initialValues.watchmodeApiKey as string}
             testId="settings-watchmode-api-key-input"
           />
           <TextInput
@@ -181,7 +157,6 @@ export default function SettingsPage(): React.ReactElement {
             name="tmdbApiKey"
             label={t('tmdbApiKey')}
             placeholder=""
-            defaultValue={initialValues.tmdbApiKey as string}
             testId="settings-tmdb-api-key-input"
           />
         </Section>
