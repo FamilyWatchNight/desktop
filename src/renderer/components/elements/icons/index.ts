@@ -6,5 +6,4 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-export { ExpandableMenuSection, type ExpandableMenuSectionProps } from './ExpandableMenuSection';
-export { MenuItem, type MenuItemProps } from './MenuItem';
+export { ChevronIcon, HomeIcon, SettingsIcon, TasksIcon } from './icons';
