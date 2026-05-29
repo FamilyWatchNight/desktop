@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import React from 'react';
 import '../../styles/components/StyleboardPage.scss';
 
+import { Button, ButtonGroup } from '../elements/buttons';
 import { Page, Section } from '../elements/layout';
 
 export default function StyleboardPage(): React.ReactElement {
@@ -45,12 +46,40 @@ export default function StyleboardPage(): React.ReactElement {
         </p>
       </Section>
       <Section title="Buttons" testId="styleboard-buttons-section">
-        <div className="button-group">
-          <button>Primary</button>
-          <button className="btn-secondary">Secondary</button>
-          <button className="btn-danger">Danger</button>
-          <button className="btn-success">Success</button>
-        </div>
+        <h3>Normal</h3>
+        <ButtonGroup>
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="danger">Danger</Button>
+          <Button variant="success">Success</Button>
+        </ButtonGroup>
+        <h3>Compact, Small</h3>
+        <p>Left</p>
+        <ButtonGroup align="left" size="small" spacing="compact">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+        </ButtonGroup>
+        <p>Center</p>
+        <ButtonGroup align="center" size="small" spacing="compact">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="danger">Danger</Button>
+          <Button variant="info">Info</Button>
+          <Button variant="link">Link</Button>
+          <Button variant="success">Success</Button>
+        </ButtonGroup>
+        <p>Right</p>
+        <ButtonGroup align="right" size="small" spacing="compact">
+          <Button variant="secondary">Secondary</Button>
+          <Button>Primary</Button>
+        </ButtonGroup>
+        <h3>Large</h3>
+        <ButtonGroup size="large">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="danger">Danger</Button>
+          <Button variant="success">Success</Button>
+        </ButtonGroup>
       </Section>
       <Section title="Colors" testId="styleboard-colors-section">
         <div className="grid-row">

@@ -47,65 +47,6 @@ the Free Software Foundation, version 3.
   }
 }
 
-/* Buttons */
-.button-group {
-  display: flex;
-  gap: layout.$element-gap;
-
-  & button {
-    flex: 1;
-  }
-}
-
-@mixin make-button-color($bg-color, $border-color: $bg-color) {
-  $highlight-color: colors.make-highlight-color($bg-color);
-  $shadow-color: colors.make-shadow-color($bg-color);
-  background: colors.make-gradient($bg-color);
-  border-top-color: colors.make-highlight-color($highlight-color);
-  border-right-color: $shadow-color;
-  border-bottom-color: colors.make-shadow-color($shadow-color);
-  border-left-color: $shadow-color;
-
-  &:hover {
-    background: colors.make-gradient($highlight-color);
-  }
-}
-
-button {
-  padding: layout.$element-padding layout.$element-padding * 1.5;
-  border: 1.25px solid colors.$primary-color;
-  border-radius: layout.$element-radius;
-  color: white;
-  font-size: 20px;
-  font-family: typography.$body-font-stack;
-  font-weight: 500;
-  cursor: pointer;
-  text-shadow: -0.1px -0.35px 1px rgba(0, 0, 0, 0.4);
-
-  @include make-button-color(colors.$primary-color);
-
-  &.btn-secondary {
-    background: none;
-    border-color: rgba(colors.$text-color, 0.2);
-
-    &:hover {
-      background: rgba(colors.$primary-color, 0.2);
-    }
-  }
-
-  &.btn-danger {
-    @include make-button-color(colors.$danger-color);
-  }
-
-  &.btn-success {
-    @include make-button-color(colors.$success-color);
-  }
-
-  &.btn-info {
-    @include make-button-color(colors.$info-color);
-  }
-}
-
 /* Messages */
 .message {
   padding: layout.$element-padding;

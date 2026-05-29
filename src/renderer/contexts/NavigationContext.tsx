@@ -1,3 +1,11 @@
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
 import type { ReactNode } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
@@ -36,4 +44,8 @@ export function useNavigation(): NavigationContextValue {
   const ctx = useContext(NavigationContext);
   if (!ctx) throw new Error('useNavigation must be used within NavigationProvider');
   return ctx;
+}
+
+export function useOptionalNavigation(): NavigationContextValue | undefined {
+  return useContext(NavigationContext);
 }
