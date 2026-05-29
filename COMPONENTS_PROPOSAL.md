@@ -1265,26 +1265,7 @@ Priority: High | Duration: ~1 sprint
 - Migrate SettingsPage and future forms to new components
 - Test form interactions (focus, validation) via test pages
 
-### Phase 3: Feedback & Container Components + Test Pages
-
-Priority: Medium | Duration: ~1 sprint
-
-**Components:**
-
-- Create `Message`, `ProgressBar`, `Badge` in `src/renderer/components/elements/feedback/`
-- Create `List`, `ListItem` in `src/renderer/components/elements/containers/`
-
-**Test Pages:**
-
-- Create test pages for each feedback component
-- Create list-related test pages
-
-**Integration:**
-
-- Migrate BackgroundTasksPage to new components
-- Validate feedback component behavior via test pages
-
-### Phase 4: Navigation & Button Components + Test Pages
+### Phase 3: Navigation & Button Components + Test Pages
 
 Priority: Medium | Duration: ~1 sprint
 
@@ -1302,6 +1283,25 @@ Priority: Medium | Duration: ~1 sprint
 - Migrate AppLayout to new navigation components
 - Test menu interactions via test pages
 - Refactor menu state management if needed
+
+### Phase 4: Feedback & Container Components + Test Pages
+
+Priority: Medium | Duration: ~1 sprint
+
+**Components:**
+
+- Create `Message`, `ProgressBar`, `Badge` in `src/renderer/components/elements/feedback/`
+- Create `Stack`, `Row` in `src/renderer/components/elements/containers/`
+
+**Test Pages:**
+
+- Create test pages for each feedback component
+- Create list-related test pages
+
+**Integration:**
+
+- Migrate BackgroundTasksPage to new components
+- Validate feedback component behavior via test pages
 
 ### Phase 5: Future-Ready Components
 
