@@ -78,7 +78,7 @@
     "electron-log": "^5.4.4",
     "electron-store": "^11.0.2",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.5.1",
+    "express-rate-limit": "^8.5.2",
     "i18next": "^26.0.10",
     "i18next-fs-backend": "^2.6.5",
     "i18next-http-backend": "^4.0.0",
