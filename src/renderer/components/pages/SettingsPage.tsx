@@ -10,6 +10,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../../api-client';
+import { Button, ButtonGroup } from '../elements/buttons';
 import { Form, NumberInput, TextInput } from '../elements/form';
 import type { FormContextValue } from '../elements/form/Form';
 import { Page, Section } from '../elements/layout';
@@ -162,57 +163,43 @@ export default function SettingsPage(): React.ReactElement {
           />
         </Section>
         <Section title={t('backgroundTasks')} testId="settings-background-tasks-section">
-          <div className="form-group">
-            <div className="button-group">
-              <button
-                type="button"
-                className="btn-secondary"
-                data-testid="settings-import-watchmode-button"
-                onClick={() => enqueueBackgroundTask('import-watchmode')}
-                disabled={
-                  activeTask?.type === 'import-watchmode' ||
-                  queue.some((t) => t.type === 'import-watchmode')
-                }
-              >
-                {t('importWatchmode')}
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                data-testid="settings-import-tmdb-button"
-                onClick={() => enqueueBackgroundTask('import-tmdb')}
-                disabled={
-                  activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')
-                }
-              >
-                {t('importTmdb')}
-              </button>
+          <ButtonGroup size="small" align="center">
+            <Button
+              variant="link"
+              data-testid="settings-import-watchmode-button"
+              onClick={() => enqueueBackgroundTask('import-watchmode')}
+              disabled={
+                activeTask?.type === 'import-watchmode' ||
+                queue.some((t) => t.type === 'import-watchmode')
+              }
+            >
+              {t('importWatchmode')}
+            </Button>
+            <Button
+              variant="link"
+              data-testid="settings-import-tmdb-button"
+              onClick={() => enqueueBackgroundTask('import-tmdb')}
+              disabled={
+                activeTask?.type === 'import-tmdb' || queue.some((t) => t.type === 'import-tmdb')
+              }
+            >
+              {t('importTmdb')}
+            </Button>
+          </ButtonGroup>
+          {backgroundTaskMessage && (
+            <div className="message success" data-testid="settings-background-task-message">
+              {backgroundTaskMessage}
             </div>
-            {backgroundTaskMessage && (
-              <div className="message success" data-testid="settings-background-task-message">
-                {backgroundTaskMessage}
-              </div>
-            )}
-          </div>
+          )}
         </Section>
-        <div className="button-group">
-          <button
-            type="button"
-            className="btn-primary"
-            data-testid="settings-save-button"
-            onClick={saveSettings}
-          >
+        <ButtonGroup>
+          <Button className="btn-primary" data-testid="settings-save-button" onClick={saveSettings}>
             {t('save')}
-          </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            data-testid="settings-cancel-button"
-            onClick={handleCancel}
-          >
+          </Button>
+          <Button variant="secondary" data-testid="settings-cancel-button" onClick={handleCancel}>
             {t('button.cancel', { ns: 'common' })}
-          </button>
-        </div>
+          </Button>
+        </ButtonGroup>
         {statusMessage && (
           <div className={`message ${statusType}`} data-testid="settings-status-message">
             {statusMessage}

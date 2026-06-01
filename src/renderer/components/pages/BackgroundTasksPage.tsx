@@ -11,9 +11,9 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../../api-client';
-import { Page, Section } from '../elements/layout';
-
 import '../../styles/components/BackgroundTasksPage.scss';
+import { Button } from '../elements/buttons';
+import { Page, Section } from '../elements/layout';
 
 const apiClient = createApiClient();
 
@@ -106,14 +106,14 @@ export default function BackgroundTasksPage(): React.ReactElement {
                 ? t('inProgress')
                 : t('percentComplete', { percent: progressPercent })}
             </div>
-            <button
-              type="button"
-              className="btn-danger"
+            <Button
+              variant="danger"
+              size="small"
               data-testid="background-tasks-cancel-button"
               onClick={cancelActiveTask}
             >
               {t('button.cancel', { ns: 'common' })}
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="no-active-task" data-testid="background-tasks-no-active">
@@ -136,15 +136,15 @@ export default function BackgroundTasksPage(): React.ReactElement {
                 >
                   {task.label}
                 </span>
-                <button
-                  type="button"
-                  className="btn-danger"
+                <Button
+                  variant="danger"
+                  size="small"
                   data-testid={`background-tasks-remove-queued-task-${task.id}`}
                   onClick={() => removeQueuedTask(task.id)}
                   aria-label={t('button.removeTask') + ' ' + task.label}
                 >
                   {t('button.removeTask')}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
