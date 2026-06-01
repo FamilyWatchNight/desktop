@@ -18,9 +18,9 @@ the Free Software Foundation, version 3.
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  padding: 0.9rem 1rem;
+  padding: 1rem;
   border: none;
-  border-radius: 0.75rem;
+  border-radius: 0;
   background: transparent;
   color: colors.$text-color;
   font: inherit;
@@ -39,7 +39,8 @@ the Free Software Foundation, version 3.
   &.active {
     background: color.change(colors.$core-blue, $alpha: 0.2);
     color: colors.make-highlight-color(colors.$core-blue);
-    border-left: 3px solid colors.$core-blue;
+    border-left: 0.25rem solid colors.$core-blue;
+    padding-left: 0.75rem;
 
     &:hover {
       color: colors.$max-foreground;
@@ -86,18 +87,20 @@ the Free Software Foundation, version 3.
 }
 
 .expandable-menu-section__header {
-  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.9rem 1rem;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem;
   border: none;
-  border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.04);
-  color: #e0e0e0;
-  font: inherit;
+  border-radius: 0;
+  background: transparent;
+  color: color.change(colors.$text-color, $alpha: 0.8);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
   text-align: left;
+  justify-content: space-between;
   cursor: pointer;
   transition:
     background 0.2s ease,
@@ -122,9 +125,17 @@ the Free Software Foundation, version 3.
 }
 
 .expandable-menu-section__content {
-  margin-top: 0.5rem;
-}
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 0.2s ease,
+    opacity 0.2s ease,
+    margin-top 0.2s ease;
 
-.expandable-menu-section__content[aria-hidden='true'] {
-  display: none;
+  .expandable-menu-section.expanded & {
+    max-height: 100vh;
+    opacity: 1;
+    margin-top: 4px;
+  }
 }
