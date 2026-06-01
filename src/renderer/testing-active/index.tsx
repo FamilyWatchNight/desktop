@@ -76,6 +76,6 @@ export function registerTestPages(registry: PageRegistry): void {
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_BUTTON_TEST}`, ButtonTestPage, 'Button Test');
 }
 
-export function buildTestingMenu(navigateTo: (page: string) => void): React.ReactNode {
-  return <TestingMenuSection navigateTo={navigateTo} />;
+export function buildTestingMenu(): React.ReactNode {
+  return <TestingMenuSection />;
 }
