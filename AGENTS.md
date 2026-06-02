@@ -4,7 +4,7 @@ A cross-platform app for managing movie selection for a Family Watch Night
 
 ## Agent Workflow Guidance
 
-**CRITICAL: Agents should err on the side of asking for human guidance. Before considering any work complete, check in via HumanAgent Chat.**
+**CRITICAL: Agents should err on the side of asking for human guidance. Before considering any work complete, check in via chat.**
 
 ### Checkpoint Strategy
 
@@ -12,19 +12,19 @@ A cross-platform app for managing movie selection for a Family Watch Night
 - **Before completing a task**: Verify the solution matches expectations, ask if anything should be adjusted
 - **On scope questions**: If unsure whether to expand/reduce scope, ask first
 - **Implementation choices**: When multiple valid approaches exist, surface them for human decision-making
-- **Documentation Updates**: Always use HumanAgent Chat to propose documentation changes before implementing them
-- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via HumanAgent Chat to confirm completion status and receive guidance on next steps.
+- **Documentation Updates**: Always use chat to propose documentation changes before implementing them
+- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via chat to confirm completion status and receive guidance on next steps.
 
 **Never assume work is done. Always ask.**
 
 ### Interaction Patterns
 
-**HumanAgent Chat Usage:**
+**Chat Usage:**
 
-- **Documentation Changes**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in HumanAgent Chat before implementation
-- **Complex Decisions**: When multiple valid approaches exist, surface them in HumanAgent Chat for human decision-making
-- **Scope Clarification**: Use HumanAgent Chat to confirm understanding of requirements and scope before proceeding with implementation
-- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via HumanAgent Chat to confirm completion status and receive guidance on next steps.
+- **Documentation Changes**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in chat before implementation
+- **Complex Decisions**: When multiple valid approaches exist, surface them in chat for human decision-making
+- **Scope Clarification**: Use chat to confirm understanding of requirements and scope before proceeding with implementation
+- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via chat to confirm completion status and receive guidance on next steps.
 
 ---
 
@@ -245,7 +245,7 @@ This project uses structured documentation to prevent stale guidance and capture
 **At the start of work:**
 
 - Check if ARCHITECTURE_ANALYSIS.md and DECISIONS.md are still aligned with the current request
-- If you notice a discrepancy between documented decisions and what you're asked to do, raise it via HumanAgent Chat
+- If you notice a discrepancy between documented decisions and what you're asked to do, raise it via chat
 - The human may want to override the documented decision, update documentation, or clarify the request
 
 **During work:**
@@ -255,13 +255,13 @@ This project uses structured documentation to prevent stale guidance and capture
 
 **At the end of work:**
 
-- Near completion, mention via HumanAgent Chat: "I notice the following documentation may need updates: [list]"
+- Near completion, mention via chat: "I notice the following documentation may need updates: [list]"
 - Wait for human approval before making changes
 - Update ARCHITECTURE_ANALYSIS.md if architecture/patterns changed
 - Create or update DECISIONS.md entries only with human guidance
 - Handle document updates as the final step before marking work complete
 
-**Key principle:** Documentation updates should happen in HumanAgent Chat discussion, not autonomously.
+**Key principle:** Documentation updates should happen in chat discussion, not autonomously.
 
 ---
 
@@ -407,7 +407,7 @@ LocalizationService demonstrates comprehensive security:
 
 If you identify security gaps or missing validation patterns:
 
-1. Flag via HumanAgent Chat before implementing
+1. Flag via chat before implementing
 2. Propose additions to `src/main/security/` library for reusable functions
 3. Reference CodeQL findings or security best practices in your proposal
 

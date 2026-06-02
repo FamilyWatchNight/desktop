@@ -1296,7 +1296,7 @@ Priority: Medium | Duration: ~1 sprint
 **Test Pages:**
 
 - Create test pages for each feedback component
-- Create list-related test pages
+- Create stack and row test pages
 
 **Integration:**
 
@@ -1307,7 +1307,7 @@ Priority: Medium | Duration: ~1 sprint
 
 Priority: Low | Duration: As needed
 
-- `Modal`, `Tabs`, `Icon`, `Select`
+- `Modal`, `Tabs`, `Icon`
 - Created with scalable structure, test pages included with examples
 
 ---
