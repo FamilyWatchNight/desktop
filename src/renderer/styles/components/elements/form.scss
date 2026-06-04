@@ -11,16 +11,13 @@ form {
 
 fieldset {
   @include layout.make-container-layout;
+  @include layout.make-inset;
   position: relative;
   display: flex;
   padding-top: 3em;
   flex-direction: column;
   gap: layout.$container-gap;
   border: 0;
-  box-shadow:
-    -0.5px -1px 25px colors.$container-border-left,
-    1px 2px 2px colors.$container-border-right,
-    inset 1.25px 2.5px 5px colors.$container-border-bottom;
 
   legend {
     top: 1.5em;

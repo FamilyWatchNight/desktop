@@ -13,7 +13,7 @@ import type { ButtonSize } from './Button';
 
 export interface ButtonGroupProps {
   children: ReactNode;
-  align?: 'left' | 'center' | 'right' | 'spread';
+  align?: 'start' | 'center' | 'end' | 'spread';
   spacing?: 'compact' | 'normal';
   size?: ButtonSize;
   testId?: string;

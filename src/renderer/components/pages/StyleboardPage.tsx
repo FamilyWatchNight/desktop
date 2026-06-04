@@ -55,7 +55,7 @@ export default function StyleboardPage(): React.ReactElement {
         </ButtonGroup>
         <h3>Compact, Small</h3>
         <p>Left</p>
-        <ButtonGroup align="left" size="small" spacing="compact">
+        <ButtonGroup align="start" size="small" spacing="compact">
           <Button>Primary</Button>
           <Button variant="secondary">Secondary</Button>
         </ButtonGroup>
@@ -69,7 +69,7 @@ export default function StyleboardPage(): React.ReactElement {
           <Button variant="success">Success</Button>
         </ButtonGroup>
         <p>Right</p>
-        <ButtonGroup align="right" size="small" spacing="compact">
+        <ButtonGroup align="end" size="small" spacing="compact">
           <Button variant="secondary">Secondary</Button>
           <Button>Primary</Button>
         </ButtonGroup>

@@ -51,6 +51,10 @@ $core-coral: hsl($hue-coral, $saturation-core, $lightness-core);
   @return color.adjust($core-color, $lightness: $shadow-lightness-adjust);
 }
 
+@function make-text-color($core-color) {
+  @return color.mix($core-color, $text-color, 50%);
+}
+
 @function make-gradient($core-color) {
   $highlight-color: make-highlight-color($core-color);
   $shadow-color: make-shadow-color($core-color);

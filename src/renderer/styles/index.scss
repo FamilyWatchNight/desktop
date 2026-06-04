@@ -15,6 +15,8 @@ the Free Software Foundation, version 3.
 @use 'components/elements/form';
 @use 'components/elements/layout' as layout-components;
 @use 'components/elements/navigation';
+@use 'components/elements/feedback';
+@use 'components/elements/containers';
 
 /* Add background image to entire app, with blur effect */
 html {

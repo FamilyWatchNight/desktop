@@ -64,7 +64,7 @@ the Free Software Foundation, version 3.
   &.btn-link {
     background: transparent;
     border-color: transparent;
-    color: color.mix(colors.$info-color, colors.$text-color, 50%);
+    color: colors.make-text-color(colors.$info-color);
 
     &:hover {
       background: transparent;
@@ -96,7 +96,6 @@ the Free Software Foundation, version 3.
 
 .button--large {
   font-size: 1.5rem;
-  padding: 1rem 1.5rem;
   padding: calc(layout.$element-padding * 1.25) calc(layout.$element-padding * 2);
 }
 
@@ -107,7 +106,7 @@ the Free Software Foundation, version 3.
   align-items: center;
 }
 
-.button-group--left {
+.button-group--start {
   justify-content: flex-start;
 }
 
@@ -115,7 +114,7 @@ the Free Software Foundation, version 3.
   justify-content: center;
 }
 
-.button-group--right {
+.button-group--end {
   justify-content: flex-end;
 }
 
