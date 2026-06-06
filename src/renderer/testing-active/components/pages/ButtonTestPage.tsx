@@ -9,7 +9,7 @@ the Free Software Foundation, version 3.
 import React, { useState } from 'react';
 
 import { Button, ButtonGroup } from '../../../components/elements/buttons';
-import { Page, Section } from '../../../components/elements/layout';
+import { Page, Section } from '../../../components/elements/containers';
 
 export default function ButtonTestPage(): React.ReactElement {
   const [variant, setVariant] = useState<

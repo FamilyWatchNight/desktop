@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
+import { Page, Section } from '../../../components/elements/containers';
 import { Badge } from '../../../components/elements/feedback/Badge';
-import { Page, Section } from '../../../components/elements/layout';
 
 export default function BadgeTestPage(): React.ReactElement {
   const [value, setValue] = useState<string | null>('3');

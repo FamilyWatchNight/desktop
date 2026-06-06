@@ -7,8 +7,8 @@ the Free Software Foundation, version 3.
 */
 
 @use '../../colors';
-@use '../../layout';
 @use '../../typography';
+@use '../../variables';
 @use 'sass:color';
 
 @mixin make-button-color($bg-color, $border-color: $bg-color) {
@@ -30,8 +30,8 @@ the Free Software Foundation, version 3.
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: layout.$element-padding layout.$element-padding * 1.5;
-  border-radius: layout.$element-radius;
+  padding: variables.$element-padding variables.$element-padding * 1.5;
+  border-radius: variables.$element-radius;
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: rgba(255, 255, 255, 0.08);
   color: white;
@@ -87,7 +87,7 @@ the Free Software Foundation, version 3.
 
 .button--small {
   font-size: 0.85rem;
-  padding: calc(layout.$element-padding * 0.5) layout.$element-padding;
+  padding: calc(variables.$element-padding * 0.5) variables.$element-padding;
 }
 
 .button--medium {
@@ -96,13 +96,13 @@ the Free Software Foundation, version 3.
 
 .button--large {
   font-size: 1.5rem;
-  padding: calc(layout.$element-padding * 1.25) calc(layout.$element-padding * 2);
+  padding: calc(variables.$element-padding * 1.25) calc(variables.$element-padding * 2);
 }
 
 .button-group {
   display: flex;
   flex-wrap: wrap;
-  gap: layout.$element-gap;
+  gap: variables.$element-gap;
   align-items: center;
 }
 
@@ -128,5 +128,5 @@ the Free Software Foundation, version 3.
 }
 
 .button-group--compact {
-  gap: calc(layout.$element-gap / 2);
+  gap: calc(variables.$element-gap / 2);
 }

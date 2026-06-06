@@ -11,9 +11,9 @@ import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../../api-client';
 import { Button, ButtonGroup } from '../elements/buttons';
+import { Page, Section } from '../elements/containers';
 import { Form, NumberInput, TextInput } from '../elements/form';
 import type { FormContextValue } from '../elements/form/Form';
-import { Page, Section } from '../elements/layout';
 
 const apiClient = createApiClient();
 

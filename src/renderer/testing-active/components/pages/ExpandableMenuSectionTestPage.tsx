@@ -8,7 +8,7 @@ the Free Software Foundation, version 3.
 
 import React, { useState } from 'react';
 
-import { Page, Section } from '../../../components/elements/layout';
+import { Page, Section } from '../../../components/elements/containers';
 import { ExpandableMenuSection } from '../../../components/elements/navigation';
 
 export default function ExpandableMenuSectionTestPage(): React.ReactElement {

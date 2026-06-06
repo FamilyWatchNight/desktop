@@ -1,5 +1,6 @@
 @use '../../colors';
-@use './layout';
+@use '../../mixins';
+@use '../../variables';
 @use 'sass:color';
 
 .message {
@@ -13,28 +14,28 @@
 
 .message--info {
   background: color.change(colors.$info-color, $alpha: 0.15);
-  @include layout.make-glassy($tint: colors.$info-color);
+  @include mixins.make-glassy($tint: colors.$info-color);
   color: colors.$text-color;
   text-shadow: 0 0 0.75em color.change(colors.$info-color, $lightness: 10%);
 }
 
 .message--success {
   background: color.change(colors.$success-color, $alpha: 0.2);
-  @include layout.make-glassy($tint: colors.$success-color);
+  @include mixins.make-glassy($tint: colors.$success-color);
   color: colors.$text-color;
   text-shadow: 0 0 0.75em color.change(colors.$success-color, $lightness: 10%);
 }
 
 .message--warning {
   background: color.change(colors.$warning-color, $alpha: 0.25);
-  @include layout.make-glassy($tint: colors.$core-orange);
+  @include mixins.make-glassy($tint: colors.$core-orange);
   color: colors.$text-color;
   text-shadow: 0 0 0.75em color.change(colors.$warning-color, $lightness: 10%);
 }
 
 .message--error {
   background: color.change(colors.$error-color, $alpha: 0.3);
-  @include layout.make-glassy($tint: colors.$error-color);
+  @include mixins.make-glassy($tint: colors.$error-color);
   color: colors.make-text-color(colors.$core-yellow);
   text-shadow: 0 0 0.75em color.change(colors.$error-color, $lightness: 10%);
 }
@@ -52,13 +53,13 @@
   background: color.change(colors.$text-color, $alpha: 0.175);
   border-radius: 999px;
   overflow: hidden;
-  @include layout.make-inset;
+  @include mixins.make-inset;
 }
 
 .progress-bar__fill {
   height: 100%;
   background: color.change(colors.$core-blue, $alpha: 0.9);
-  @include layout.make-glassy($depth: 0.25rem);
+  @include mixins.make-glassy($depth: 0.25rem);
   transition: width 0.2s ease;
 }
 

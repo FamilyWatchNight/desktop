@@ -1,27 +1,27 @@
 import React from 'react';
-export type CardVariant = 'glassy' | 'flat' | 'transparent';
-export type CardSize = 'small' | 'medium' | 'large';
+
+import { type ContainerGlossVariant, type ContentSize } from '../../properties/containers';
 
 export interface CardProps {
   title?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  variant?: CardVariant;
-  size?: CardSize;
+  gloss?: ContainerGlossVariant;
+  size?: ContentSize;
   testId?: string;
   className?: string;
 }
 
-export function Card({
+export const Card: React.FC<CardProps> = ({
   title,
   children,
   footer,
-  variant = 'flat',
-  size = 'medium',
+  gloss = 'flat',
+  size = 'normal',
   testId,
   className = '',
-}: CardProps): React.ReactElement {
-  const classes = ['card', `card--${variant}`, `card--${size}`, className]
+}) => {
+  const classes = ['card', `container-gloss-${gloss}`, `container-size-${size}`, className]
     .filter(Boolean)
     .join(' ');
 
@@ -32,4 +32,4 @@ export function Card({
       {footer ? <div className="card__footer">{footer}</div> : null}
     </div>
   );
-}
+};

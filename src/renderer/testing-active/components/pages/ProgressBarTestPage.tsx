@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
+import { Page, Section } from '../../../components/elements/containers';
 import { ProgressBar } from '../../../components/elements/feedback/ProgressBar';
-import { Page, Section } from '../../../components/elements/layout';
 
 export default function ProgressBarTestPage(): React.ReactElement {
   const [current, setCurrent] = useState(25);

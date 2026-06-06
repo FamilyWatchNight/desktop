@@ -10,7 +10,7 @@ import React from 'react';
 import '../../styles/components/StyleboardPage.scss';
 
 import { Button, ButtonGroup } from '../elements/buttons';
-import { Page, Section } from '../elements/layout';
+import { Page, Section, Stack } from '../elements/containers';
 
 export default function StyleboardPage(): React.ReactElement {
   return (
@@ -82,12 +82,12 @@ export default function StyleboardPage(): React.ReactElement {
         </ButtonGroup>
       </Section>
       <Section title="Colors" testId="styleboard-colors-section">
-        <div className="grid-row">
+        <Stack direction="row">
           <div className="color-swatch" style={{ background: 'var(--core-gold)' }}>
             <span>Gold</span>
           </div>
-        </div>
-        <div className="grid-row">
+        </Stack>
+        <Stack direction="row">
           <div className="color-swatch" style={{ background: 'var(--core-red)' }}>
             <span>Red</span>
           </div>
@@ -97,8 +97,8 @@ export default function StyleboardPage(): React.ReactElement {
           <div className="color-swatch" style={{ background: 'var(--core-blue)' }}>
             <span>Blue</span>
           </div>
-        </div>
-        <div className="grid-row">
+        </Stack>
+        <Stack direction="row">
           <div className="color-swatch" style={{ background: 'var(--core-cyan)' }}>
             <span>Cyan</span>
           </div>
@@ -108,8 +108,8 @@ export default function StyleboardPage(): React.ReactElement {
           <div className="color-swatch" style={{ background: 'var(--core-yellow)' }}>
             <span>Yellow</span>
           </div>
-        </div>
-        <div className="grid-row">
+        </Stack>
+        <Stack direction="row">
           <div className="color-swatch" style={{ background: 'var(--core-lime)' }}>
             <span>Lime</span>
           </div>
@@ -122,7 +122,7 @@ export default function StyleboardPage(): React.ReactElement {
           <div className="color-swatch" style={{ background: 'var(--core-coral)' }}>
             <span>Coral</span>
           </div>
-        </div>
+        </Stack>
       </Section>
     </Page>
   );

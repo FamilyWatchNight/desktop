@@ -1,22 +1,23 @@
-@use './layout';
 @use '../../colors';
+@use '../../mixins';
+@use '../../variables';
 
 $field-label-gap: 0.25em;
 
 form {
   display: flex;
   flex-direction: column;
-  gap: layout.$container-gap;
+  gap: variables.$container-gap;
 }
 
 fieldset {
-  @include layout.make-container-layout;
-  @include layout.make-inset;
+  @include mixins.make-container-layout;
+  @include mixins.make-inset;
   position: relative;
   display: flex;
   padding-top: 3em;
   flex-direction: column;
-  gap: layout.$container-gap;
+  gap: variables.$container-gap;
   border: 0;
 
   legend {

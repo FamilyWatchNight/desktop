@@ -2,7 +2,7 @@
 
 import { render, screen } from '@testing-library/react';
 
-import Grid from '../../src/renderer/components/elements/layout/Grid';
+import Grid from '../../src/renderer/components/elements/containers/Grid';
 
 describe('Grid', () => {
   test('renders grid with numeric columns', () => {

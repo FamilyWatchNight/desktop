@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 
+import { Page, Section } from '../../../components/elements/containers';
 import { Card } from '../../../components/elements/containers/Card';
-import { Page, Section } from '../../../components/elements/layout';
+import {
+  type ContainerGlossVariant,
+  type ContentSize,
+} from '../../../components/properties/containers';
 
 export default function CardTestPage(): React.ReactElement {
   const [props, setProps] = useState({
     cardVariant: 'flat',
-    cardSize: 'medium',
+    cardSize: 'normal',
     hasHeader: true,
     headerContent: 'Header',
     hasFooter: true,
@@ -25,8 +29,8 @@ export default function CardTestPage(): React.ReactElement {
             title={props.hasHeader ? <div>{props.headerContent}</div> : undefined}
             footer={props.hasFooter ? <div>{props.footerContent}</div> : undefined}
             testId="card-preview"
-            variant={props.cardVariant as 'flat' | 'glassy'}
-            size={props.cardSize as 'small' | 'medium' | 'large'}
+            gloss={props.cardVariant as ContainerGlossVariant}
+            size={props.cardSize as ContentSize}
           >
             <p>Card body content goes here.</p>
           </Card>
@@ -41,7 +45,7 @@ export default function CardTestPage(): React.ReactElement {
             data-testid="button-size-select"
           >
             <option value="small">small</option>
-            <option value="medium">medium</option>
+            <option value="normal">normal</option>
             <option value="large">large</option>
           </select>
         </label>
@@ -52,9 +56,11 @@ export default function CardTestPage(): React.ReactElement {
             onChange={(e) => updateProp('cardVariant', e.target.value)}
             data-testid="button-variant-select"
           >
-            <option value="flat">flat</option>
             <option value="glassy">glassy</option>
+            <option value="flat">flat</option>
+            <option value="inset">inset</option>
             <option value="transparent">transparent</option>
+            <option value="passthrough">passthrough</option>
           </select>
         </label>
         <label>

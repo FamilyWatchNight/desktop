@@ -17,7 +17,6 @@ import CardTestPage from './components/pages/CardTestPage';
 import ExpandableMenuSectionTestPage from './components/pages/ExpandableMenuSectionTestPage';
 import FormControlsTestPage from './components/pages/FormControlsTestPage';
 import GridTestPage from './components/pages/GridTestPage';
-import ListTestPage from './components/pages/ListTestPage';
 import MenuItemTestPage from './components/pages/MenuItemTestPage';
 import MessageTestPage from './components/pages/MessageTestPage';
 import PageFrameworkTestPage from './components/pages/PageFrameworkTestPage';
@@ -76,11 +75,6 @@ function TestingMenuSection(): React.ReactElement {
         testId="menu-testing-card-page"
       />
       <MenuItem
-        label="List Test"
-        pageId={`testing/${TEST_PAGE_IDS.PAGE_LIST_TEST}`}
-        testId="menu-testing-list-page"
-      />
-      <MenuItem
         label="Stack Test"
         pageId={`testing/${TEST_PAGE_IDS.PAGE_STACK_TEST}`}
         testId="menu-testing-stack-page"
@@ -127,7 +121,6 @@ export function registerTestPages(registry: PageRegistry): void {
   );
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_BADGE_TEST}`, BadgeTestPage, 'Badge Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_CARD_TEST}`, CardTestPage, 'Card Test');
-  registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_LIST_TEST}`, ListTestPage, 'List Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_STACK_TEST}`, StackTestPage, 'Stack Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_GRID_TEST}`, GridTestPage, 'Grid Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_BUTTON_TEST}`, ButtonTestPage, 'Button Test');

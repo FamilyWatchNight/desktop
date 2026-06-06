@@ -8,6 +8,8 @@ the Free Software Foundation, version 3.
 
 import React, { useContext, useRef, useState } from 'react';
 
+import { Button, ButtonGroup } from '../../../components/elements/buttons';
+import { Page, Section } from '../../../components/elements/containers';
 import type { FormContextValue } from '../../../components/elements/form';
 import {
   Checkbox,
@@ -21,7 +23,6 @@ import {
   Select,
   TextInput,
 } from '../../../components/elements/form';
-import { Page, Section } from '../../../components/elements/layout';
 
 export default function FormControlsTestPage(): React.ReactElement {
   const [controlledState, setControlledState] = useState({
@@ -145,15 +146,15 @@ export default function FormControlsTestPage(): React.ReactElement {
 
     return (
       <div data-testid={`${buttonTestId}-container`}>
-        <button
-          type="button"
+        <Button
+          size="small"
           data-testid={buttonTestId}
           onClick={() => {
             setValuesJson(JSON.stringify(formContext?.getValues() ?? {}, null, 2));
           }}
         >
           Get form values
-        </button>
+        </Button>
         <pre data-testid={outputTestId}>{valuesJson}</pre>
       </div>
     );
@@ -281,9 +282,9 @@ export default function FormControlsTestPage(): React.ReactElement {
                 <option value="action">Action</option>
               </Select>
             </Fieldset>
-            <button type="submit" data-testid="controlled-submit-button">
+            <Button type="submit" data-testid="controlled-submit-button">
               Submit Controlled Form
-            </button>
+            </Button>
           </Form>
         </Section>
         <Section title="Uncontrolled Form">
@@ -400,9 +401,13 @@ export default function FormControlsTestPage(): React.ReactElement {
                 <option value="action">Action</option>
               </Select>
             </Fieldset>
-            <button type="submit" data-testid="uncontrolled-submit-button">
+            <Button
+              type="submit"
+              disabled={!uncontrolledIsReady}
+              data-testid="uncontrolled-submit-button"
+            >
               Submit Uncontrolled Form
-            </button>
+            </Button>
             <FormValuesReporter
               buttonTestId="uncontrolled-get-values-button"
               outputTestId="uncontrolled-values-json"
@@ -422,7 +427,8 @@ export default function FormControlsTestPage(): React.ReactElement {
                 }}
               />
               <div style={{ marginTop: 6 }}>
-                <button
+                <Button
+                  size="small"
                   type="button"
                   data-testid="uncontrolled-set-initial-values-button"
                   onClick={() => {
@@ -434,7 +440,7 @@ export default function FormControlsTestPage(): React.ReactElement {
                   }}
                 >
                   Set Form Values
-                </button>
+                </Button>
               </div>
             </div>
           </Form>
@@ -478,58 +484,56 @@ export default function FormControlsTestPage(): React.ReactElement {
           </div>
         </div>
         <div style={{ marginTop: 12 }}>
-          <button
-            type="button"
-            data-testid="controlled-validate-button"
-            onClick={() => {
-              const errors: Record<string, string> = {};
-              if (!controlledState.name) errors.name = 'Name required';
-              if (!controlledState.email || !controlledState.email.includes('@'))
-                errors.email = 'Enter a valid email';
-              controlledFormRef.current?.setErrors?.(errors);
-            }}
-          >
-            Validate Controlled
-          </button>
-          <button
-            type="button"
-            data-testid="controlled-reset-button"
-            onClick={() => {
-              setControlledState({ name: '', email: '', acceptedTerms: false });
-              setControlledNewsletter(false);
-              setControlledNotificationMethods([]);
-              setControlledPlan('basic');
-              setControlledGenre('comedy');
-              controlledFormRef.current?.reset?.();
-              controlledFormRef.current?.setErrors?.({});
-            }}
-          >
-            Reset Controlled
-          </button>
-          <button
-            type="button"
-            data-testid="uncontrolled-validate-button"
-            onClick={() => {
-              const values = uncontrolledFormRef.current?.getValues?.() ?? {};
-              const errors: Record<string, string> = {};
-              if (!values.name) errors.name = 'Name required';
-              if (!values.email || !String(values.email).includes('@'))
-                errors.email = 'Enter a valid email';
-              uncontrolledFormRef.current?.setErrors?.(errors);
-            }}
-          >
-            Validate Uncontrolled
-          </button>
-          <button
-            type="button"
-            data-testid="uncontrolled-reset-button"
-            onClick={() => {
-              uncontrolledFormRef.current?.reset?.();
-              uncontrolledFormRef.current?.setErrors?.({});
-            }}
-          >
-            Reset Uncontrolled
-          </button>
+          <ButtonGroup size="small" spacing="compact">
+            <Button
+              data-testid="controlled-validate-button"
+              onClick={() => {
+                const errors: Record<string, string> = {};
+                if (!controlledState.name) errors.name = 'Name required';
+                if (!controlledState.email || !controlledState.email.includes('@'))
+                  errors.email = 'Enter a valid email';
+                controlledFormRef.current?.setErrors?.(errors);
+              }}
+            >
+              Validate Controlled
+            </Button>
+            <Button
+              data-testid="controlled-reset-button"
+              onClick={() => {
+                setControlledState({ name: '', email: '', acceptedTerms: false });
+                setControlledNewsletter(false);
+                setControlledNotificationMethods([]);
+                setControlledPlan('basic');
+                setControlledGenre('comedy');
+                controlledFormRef.current?.reset?.();
+                controlledFormRef.current?.setErrors?.({});
+              }}
+            >
+              Reset Controlled
+            </Button>
+            <Button
+              data-testid="uncontrolled-validate-button"
+              onClick={() => {
+                const values = uncontrolledFormRef.current?.getValues?.() ?? {};
+                const errors: Record<string, string> = {};
+                if (!values.name) errors.name = 'Name required';
+                if (!values.email || !String(values.email).includes('@'))
+                  errors.email = 'Enter a valid email';
+                uncontrolledFormRef.current?.setErrors?.(errors);
+              }}
+            >
+              Validate Uncontrolled
+            </Button>
+            <Button
+              data-testid="uncontrolled-reset-button"
+              onClick={() => {
+                uncontrolledFormRef.current?.reset?.();
+                uncontrolledFormRef.current?.setErrors?.({});
+              }}
+            >
+              Reset Uncontrolled
+            </Button>
+          </ButtonGroup>
         </div>
       </Section>
     </>

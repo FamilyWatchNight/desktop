@@ -8,18 +8,22 @@ the Free Software Foundation, version 3.
 
 @use 'colors';
 @use 'fonts';
-@use 'layout';
 @use 'typography';
-@use 'elements';
-@use 'components/elements/buttons';
-@use 'components/elements/form';
-@use 'components/elements/layout' as layout-components;
-@use 'components/elements/navigation';
-@use 'components/elements/feedback';
-@use 'components/elements/containers';
+@use 'components/elements';
 
-/* Add background image to entire app, with blur effect */
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 html {
+  /* Full-screen application */
+  height: 100%;
+  margin: 0;
+
+  /* Add background image to entire app, with blur effect */
   background-image: url('../images/background.jpg');
   background-size: cover; /* key line */
   background-position: center; /* keep it centered while cropping */
@@ -28,6 +32,12 @@ html {
 }
 
 body {
+  /* Full-screen application */
+  height: 100%;
+  margin: 0;
+
+  /* dampen the background image with the background color */
   background-color: colors.$background-color;
+
   color: colors.$text-color;
 }

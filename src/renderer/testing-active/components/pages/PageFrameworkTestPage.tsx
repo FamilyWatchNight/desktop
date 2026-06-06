@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Page, Section } from '../../../components/elements/layout';
+import { Page, Section } from '../../../components/elements/containers';
 
 export default function PageFrameworkTestPage(): React.ReactElement {
   const [props, setProps] = useState({

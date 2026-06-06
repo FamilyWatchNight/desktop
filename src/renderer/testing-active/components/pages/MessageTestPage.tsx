@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
+import { Page, Section } from '../../../components/elements/containers';
 import { Message } from '../../../components/elements/feedback/Message';
-import { Page, Section } from '../../../components/elements/layout';
 
 export default function MessageTestPage(): React.ReactElement {
   const [text, setText] = useState('Hello test message');

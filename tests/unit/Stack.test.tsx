@@ -2,7 +2,7 @@
 
 import { render, screen } from '@testing-library/react';
 
-import Stack from '../../src/renderer/components/elements/layout/Stack';
+import Stack from '../../src/renderer/components/elements/containers/Stack';
 
 describe('Stack', () => {
   test('renders children and default column direction', () => {

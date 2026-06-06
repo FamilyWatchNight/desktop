@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
-import { Card } from '../../../components/elements/containers';
-import { Page, Section, Stack } from '../../../components/elements/layout';
+import { Card, Page, Section, Stack } from '../../../components/elements/containers';
 
 export default function StackTestPage(): React.ReactElement {
   const [spacing, setSpacing] = useState<'normal' | 'compact' | 'contiguous'>('normal');

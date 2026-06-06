@@ -13,7 +13,8 @@ import { useTranslation } from 'react-i18next';
 import { createApiClient } from '../../api-client';
 import '../../styles/components/BackgroundTasksPage.scss';
 import { Button } from '../elements/buttons';
-import { Page, Section } from '../elements/layout';
+import { Card, Page, Section, Stack } from '../elements/containers';
+import { ProgressBar } from '../elements/feedback';
 
 const apiClient = createApiClient();
 
@@ -88,20 +89,17 @@ export default function BackgroundTasksPage(): React.ReactElement {
     <Page centered testId="page-background-tasks" title={t('title')}>
       <Section title={t('activeTask')} testId="background-tasks-active-section">
         {active ? (
-          <div className="active-task" data-testid="background-tasks-active-task">
-            <div className="active-task-label" data-testid="background-tasks-active-task-label">
-              {active.label}
-            </div>
-            <div className="active-task-step" data-testid="background-tasks-active-task-step">
+          <Card gloss="flat" title={active.label}>
+            <div data-testid="background-tasks-active-task-step">
               {active.description ?? t('working')}
             </div>
-            <div className="progress-bar-wrap">
-              <div
-                className={`progress-bar-fill ${isIndeterminate ? 'indeterminate' : ''}`}
-                style={isIndeterminate ? {} : { width: `${progressPercent}%` }}
-              />
-            </div>
-            <div className="progress-text" data-testid="background-tasks-progress-text">
+            <ProgressBar
+              isIndeterminate={isIndeterminate}
+              max={active.max}
+              current={active.current}
+              showLabel={false}
+            />
+            <div data-testid="background-tasks-progress-text">
               {isIndeterminate
                 ? t('inProgress')
                 : t('percentComplete', { percent: progressPercent })}
@@ -114,21 +112,20 @@ export default function BackgroundTasksPage(): React.ReactElement {
             >
               {t('button.cancel', { ns: 'common' })}
             </Button>
-          </div>
+          </Card>
         ) : (
-          <div className="no-active-task" data-testid="background-tasks-no-active">
-            {t('noActive')}
-          </div>
+          <Card gloss="flat">{t('noActive')}</Card>
         )}
       </Section>
       <Section title={t('queuedTasks')} testId="background-tasks-queued-section">
         {queue.length > 0 ? (
-          <ul className="queued-list" data-testid="background-tasks-queued-list">
+          <Stack direction="column">
             {queue.map((task) => (
-              <li
+              <Card
                 key={task.id}
                 className="queued-item"
-                data-testid={`background-tasks-queued-item-${task.id}`}
+                gloss="flat"
+                testId={`background-tasks-queued-item-${task.id}`}
               >
                 <span
                   className="queued-item-label"
@@ -139,19 +136,17 @@ export default function BackgroundTasksPage(): React.ReactElement {
                 <Button
                   variant="danger"
                   size="small"
-                  data-testid={`background-tasks-remove-queued-task-${task.id}`}
+                  testId={`background-tasks-remove-queued-task-${task.id}`}
                   onClick={() => removeQueuedTask(task.id)}
                   aria-label={t('button.removeTask') + ' ' + task.label}
                 >
                   {t('button.removeTask')}
                 </Button>
-              </li>
+              </Card>
             ))}
-          </ul>
+          </Stack>
         ) : (
-          <div className="no-queued-tasks" data-testid="background-tasks-none-queued">
-            {t('noneQueued')}
-          </div>
+          <Card gloss="flat">{t('noneQueued')}</Card>
         )}
       </Section>
     </Page>
