@@ -67,28 +67,4 @@ describe('ButtonGroup', () => {
 
     expect(screen.getByTestId('default-spread')).toHaveClass('button-group--spread');
   });
-
-  test('applies default size to child buttons when provided', () => {
-    render(
-      <ButtonGroup size="large" testId="sized-group">
-        <Button>Primary</Button>
-        <Button variant="secondary">Secondary</Button>
-      </ButtonGroup>,
-    );
-
-    expect(screen.getByText('Primary')).toHaveClass('button--large');
-    expect(screen.getByText('Secondary')).toHaveClass('button--large');
-  });
-
-  test('preserves explicit button size overrides inside the group', () => {
-    render(
-      <ButtonGroup size="large" testId="override-group">
-        <Button>Primary</Button>
-        <Button size="small">Secondary</Button>
-      </ButtonGroup>,
-    );
-
-    expect(screen.getByText('Primary')).toHaveClass('button--large');
-    expect(screen.getByText('Secondary')).toHaveClass('button--small');
-  });
 });

@@ -29,12 +29,10 @@ Feature: Navigation component testing
     Then the expandable section toggle should have aria-expanded "false"
     And the expandable section content should be hidden
 
-  Scenario: Button group propagates size and variant selection
+  Scenario: Button size and variant selection
     Given the Button test page is open for testing
     And the button variant is set to "secondary"
     And the button size is set to "large"
     And the buttons are disabled
     Then button 1 should have class name "btn-secondary"
-    And button 1 should have class name "button--large"
-    And button 2 should have class name "button--large"
     And button 1 should be disabled

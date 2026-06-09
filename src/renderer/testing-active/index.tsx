@@ -70,6 +70,11 @@ function TestingMenuSection(): React.ReactElement {
         testId="menu-testing-badge-page"
       />
       <MenuItem
+        label="Button Test"
+        pageId={`testing/${TEST_PAGE_IDS.PAGE_BUTTON_TEST}`}
+        testId="menu-testing-button-page"
+      />
+      <MenuItem
         label="Card Test"
         pageId={`testing/${TEST_PAGE_IDS.PAGE_CARD_TEST}`}
         testId="menu-testing-card-page"
@@ -120,6 +125,7 @@ export function registerTestPages(registry: PageRegistry): void {
     'ProgressBar Test',
   );
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_BADGE_TEST}`, BadgeTestPage, 'Badge Test');
+  registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_BUTTON_TEST}`, ButtonTestPage, 'Badge Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_CARD_TEST}`, CardTestPage, 'Card Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_STACK_TEST}`, StackTestPage, 'Stack Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_GRID_TEST}`, GridTestPage, 'Grid Test');
