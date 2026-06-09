@@ -2,8 +2,6 @@ import React from 'react';
 
 import { ContentSize } from '../../properties';
 
-import { SectionTitle } from './SectionTitle';
-
 export interface SectionProps {
   title?: string;
   children: React.ReactNode;
@@ -12,16 +10,6 @@ export interface SectionProps {
   testId?: string;
 }
 
-/**
- * Section component — semantic section grouping with optional title.
- *
- * @example
- * ```tsx
- * <Section title="API Keys" testId="api-keys-section">
- *   {/* section content *\/}
- * </Section>
- * ```
- */
 export const Section: React.FC<SectionProps> = ({
   title,
   children,
@@ -35,7 +23,7 @@ export const Section: React.FC<SectionProps> = ({
 
   return (
     <section className={classes} data-testid={testId}>
-      {title && <SectionTitle>{title}</SectionTitle>}
+      {title && <h2 className={'section-title'}>{title}</h2>}
       {children}
     </section>
   );
