@@ -1,18 +1,14 @@
 import React from 'react';
 
+import { ContentSize } from '../../properties';
+
 import { SectionTitle } from './SectionTitle';
 
 export interface SectionProps {
-  /** Optional section title */
   title?: string;
-
-  /** Section content */
   children: React.ReactNode;
-
-  /** Optional CSS class name for additional styling */
+  size?: ContentSize;
   className?: string;
-
-  /** Test identifier for automation */
   testId?: string;
 }
 
@@ -26,9 +22,19 @@ export interface SectionProps {
  * </Section>
  * ```
  */
-export const Section: React.FC<SectionProps> = ({ title, children, className = '', testId }) => {
+export const Section: React.FC<SectionProps> = ({
+  title,
+  children,
+  size,
+  className = '',
+  testId,
+}) => {
+  const classes = ['section', 'container', size && `container-size-${size}`, className]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <section className={`section ${className}`.trim()} data-testid={testId}>
+    <section className={classes} data-testid={testId}>
       {title && <SectionTitle>{title}</SectionTitle>}
       {children}
     </section>

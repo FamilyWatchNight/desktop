@@ -23,8 +23,10 @@
 }
 
 @mixin make-container-layout {
-  padding: variables.$container-padding;
-  border-radius: variables.$container-radius;
+  padding: var(--container-padding);
+  gap: var(--container-gap);
+  font-size: var(--font-size);
+  border-radius: variables.$base-container-radius;
 }
 @mixin make-container-color {
   background: colors.$container-background;

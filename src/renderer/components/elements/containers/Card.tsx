@@ -17,11 +17,17 @@ export const Card: React.FC<CardProps> = ({
   children,
   footer,
   gloss = 'flat',
-  size = 'normal',
+  size,
   testId,
   className = '',
 }) => {
-  const classes = ['card', `container-gloss-${gloss}`, `container-size-${size}`, className]
+  const classes = [
+    'card',
+    'container',
+    gloss && `container-gloss-${gloss}`,
+    size && `container-size-${size}`,
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
 

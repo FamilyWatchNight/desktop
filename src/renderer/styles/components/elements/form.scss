@@ -2,12 +2,12 @@
 @use '../../mixins';
 @use '../../variables';
 
-$field-label-gap: 0.25em;
+$field-label-gap: calc(var(--container-gap) / 2);
 
 form {
   display: flex;
   flex-direction: column;
-  gap: variables.$container-gap;
+  gap: var(--container-gap);
 }
 
 fieldset {
@@ -17,7 +17,7 @@ fieldset {
   display: flex;
   padding-top: 3em;
   flex-direction: column;
-  gap: variables.$container-gap;
+  gap: var(--container-gap);
   border: 0;
 
   legend {

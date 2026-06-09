@@ -5,19 +5,39 @@
 @use 'sass:color';
 
 // Common Styles size and gloss
+.container {
+  padding: var(--container-padding);
+  gap: var(--container-gap);
+  font-size: var(--font-size);
+}
 .container-size-small {
-  padding: calc(variables.$container-padding * variables.$small-gap-multiplier);
-  gap: calc(variables.$container-gap * variables.$small-gap-multiplier);
-  font-size: calc(1rem * variables.$small-text-multiplier);
+  --container-padding: calc(
+    #{variables.$base-container-padding} * #{variables.$small-space-multiplier}
+  );
+  --container-gap: calc(#{variables.$base-container-gap} * #{variables.$small-space-multiplier});
+  --element-padding: calc(
+    #{variables.$base-element-padding} * #{variables.$small-space-multiplier}
+  );
+  --element-gap: calc(#{variables.$base-element-gap} * #{variables.$small-space-multiplier});
+  --font-size: calc(#{variables.$base-font-size} * #{variables.$small-text-multiplier});
 }
 .container-size-normal {
-  padding: variables.$container-padding;
-  gap: variables.$container-gap;
+  --container-padding: #{variables.$base-container-padding};
+  --container-gap: #{variables.$base-container-gap};
+  --element-padding: #{variables.$base-element-padding};
+  --element-gap: #{variables.$base-element-gap};
+  --font-size: #{variables.$base-font-size};
 }
 .container-size-large {
-  padding: calc(variables.$container-padding * variables.$large-gap-multiplier);
-  gap: calc(variables.$container-gap * variables.$large-gap-multiplier);
-  font-size: calc(1rem * variables.$large-text-multiplier);
+  --container-padding: calc(
+    #{variables.$base-container-padding} * #{variables.$large-space-multiplier}
+  );
+  --container-gap: calc(#{variables.$base-container-gap} * #{variables.$large-space-multiplier});
+  --element-padding: calc(
+    #{variables.$base-element-padding} * #{variables.$large-space-multiplier}
+  );
+  --element-gap: calc(#{variables.$base-element-gap} * #{variables.$large-space-multiplier});
+  --font-size: calc(#{variables.$base-font-size} * #{variables.$large-text-multiplier});
 }
 
 .container-gloss-glassy {
@@ -30,14 +50,15 @@
 }
 .container-gloss-flat {
   background: color.change(colors.$text-color, $alpha: 0.1);
-  backdrop-filter: 100px;
+  backdrop-filter: blur(100px);
 }
 .container-gloss-transparent {
   background: transparent;
   box-shadow: none;
   backdrop-filter: none;
 }
-.container-gloss-passthrough {
+
+.container.container-gloss-passthrough {
   background: transparent;
   box-shadow: none;
   backdrop-filter: none;
@@ -48,7 +69,7 @@
 .card {
   display: flex;
   flex-direction: column;
-  border-radius: 0.2rem;
+  border-radius: #{variables.$base-element-radius};
 }
 
 .card__header {
@@ -63,7 +84,7 @@
 
 .card__footer {
   border-top: 1px solid color.change(colors.$text-color, $alpha: 0.3);
-  padding-top: variables.$container-gap;
+  padding-top: var(--container-gap);
 }
 
 // Page
@@ -111,7 +132,7 @@
   @include mixins.make-container;
   display: flex;
   flex-direction: column;
-  gap: variables.$container-gap;
+  gap: var(--container-gap);
 }
 
 .section-title {
@@ -123,11 +144,11 @@
 /* Stack & Grid helpers */
 .stack {
   display: flex;
-  gap: variables.$container-gap;
+  gap: var(--container-gap);
 }
 
 .stack--compact {
-  gap: calc(variables.$container-gap / 2);
+  gap: calc(var(--container-gap) / 2);
 }
 
 .stack--contiguous {

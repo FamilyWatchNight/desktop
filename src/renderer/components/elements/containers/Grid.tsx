@@ -1,10 +1,13 @@
 import React from 'react';
 
+import { ContentSize } from '../../properties';
+
 export interface GridProps {
   children: React.ReactNode;
   columns?: number | string; // number -> repeat(cols, 1fr) ; string -> CSS grid-template-columns
   rows?: string;
   gap?: string;
+  size?: ContentSize;
   autoFlow?: React.CSSProperties['gridAutoFlow'];
   alignItems?: React.CSSProperties['alignItems'];
   justifyItems?: React.CSSProperties['justifyItems'];
@@ -17,6 +20,7 @@ export const Grid: React.FC<GridProps> = ({
   columns,
   rows,
   gap = '0.75rem',
+  size,
   autoFlow,
   alignItems,
   justifyItems,
@@ -38,7 +42,9 @@ export const Grid: React.FC<GridProps> = ({
     justifyItems,
   };
 
-  const classes = ['grid', className].filter(Boolean).join(' ');
+  const classes = ['grid', 'container', size && `container-size-${size}`, className]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className={classes} style={style} data-testid={testId}>

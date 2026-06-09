@@ -22,7 +22,7 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 export function Button({
   children,
   variant = 'primary',
-  size = 'medium',
+  size,
   type = 'button',
   testId,
   className = '',
@@ -32,7 +32,7 @@ export function Button({
   const classes = [
     'button',
     variant !== 'primary' ? `btn-${variant}` : '',
-    `button--${size}`,
+    size && `container-size-${size}`,
     className,
   ]
     .filter(Boolean)

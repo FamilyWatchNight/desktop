@@ -11,16 +11,18 @@ $centered-width: 800px;
 $page-padding: 2rem;
 $page-gap: $page-padding;
 
-$container-radius: 0.5rem;
-$container-padding: 1rem;
-$container-gap: 1rem;
+$base-font-size: 16px;
 
-$element-radius: 0.25rem;
-$element-padding: 1rem;
-$element-gap: $element-padding;
+$base-container-radius: 0.5rem;
+$base-container-padding: 1rem;
+$base-container-gap: $base-container-padding;
 
-$large-gap-multiplier: 1.5;
+$base-element-radius: 0.25rem;
+$base-element-padding: 1rem;
+$base-element-gap: $base-element-padding;
+
+$large-space-multiplier: 1.5;
 $large-text-multiplier: 1.25;
 
-$small-gap-multiplier: 0.5;
+$small-space-multiplier: 0.5;
 $small-text-multiplier: 0.75;

@@ -82,12 +82,12 @@ export default function StyleboardPage(): React.ReactElement {
         </ButtonGroup>
       </Section>
       <Section title="Colors" testId="styleboard-colors-section">
-        <Stack direction="row">
+        <Stack direction="row" gloss="passthrough">
           <div className="color-swatch" style={{ background: 'var(--core-gold)' }}>
             <span>Gold</span>
           </div>
         </Stack>
-        <Stack direction="row">
+        <Stack direction="row" gloss="passthrough">
           <div className="color-swatch" style={{ background: 'var(--core-red)' }}>
             <span>Red</span>
           </div>
@@ -98,7 +98,7 @@ export default function StyleboardPage(): React.ReactElement {
             <span>Blue</span>
           </div>
         </Stack>
-        <Stack direction="row">
+        <Stack direction="row" gloss="passthrough">
           <div className="color-swatch" style={{ background: 'var(--core-cyan)' }}>
             <span>Cyan</span>
           </div>
@@ -109,7 +109,7 @@ export default function StyleboardPage(): React.ReactElement {
             <span>Yellow</span>
           </div>
         </Stack>
-        <Stack direction="row">
+        <Stack direction="row" gloss="passthrough">
           <div className="color-swatch" style={{ background: 'var(--core-lime)' }}>
             <span>Lime</span>
           </div>

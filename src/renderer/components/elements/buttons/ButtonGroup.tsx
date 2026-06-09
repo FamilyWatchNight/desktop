@@ -28,27 +28,19 @@ export function ButtonGroup({
   testId,
   className = '',
 }: ButtonGroupProps): React.ReactElement {
-  const classes = ['button-group', `button-group--${align}`, `button-group--${spacing}`, className]
+  const classes = [
+    'button-group',
+    `button-group--${align}`,
+    size && `container-size-${size}`,
+    `button-group--${spacing}`,
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
 
-  const sizedChildren = React.Children.map(children, (child) => {
-    if (!React.isValidElement<{ size?: ButtonSize }>(child) || size == null) {
-      return child;
-    }
-
-    const childProps = child.props;
-
-    if (childProps.size !== undefined) {
-      return child;
-    }
-
-    return React.cloneElement(child, { size });
-  });
-
   return (
     <div className={classes} data-testid={testId}>
-      {sizedChildren}
+      {children}
     </div>
   );
 }

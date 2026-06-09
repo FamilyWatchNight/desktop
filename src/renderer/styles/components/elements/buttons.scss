@@ -30,13 +30,14 @@ the Free Software Foundation, version 3.
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: variables.$element-padding variables.$element-padding * 1.5;
-  border-radius: variables.$element-radius;
+  padding: var(--element-padding) calc(var(--element-padding) * 1.5);
+  border-radius: variables.$base-element-radius;
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: rgba(255, 255, 255, 0.08);
   color: white;
   font-family: typography.$body-font-stack;
   font-weight: 500;
+  font-size: calc(var(--font-size) * 1.25);
   cursor: pointer;
   text-shadow: -0.1px -0.35px 1px rgba(0, 0, 0, 0.4);
   transition:
@@ -85,24 +86,10 @@ the Free Software Foundation, version 3.
   }
 }
 
-.button--small {
-  font-size: 0.85rem;
-  padding: calc(variables.$element-padding * 0.5) variables.$element-padding;
-}
-
-.button--medium {
-  font-size: 1.2rem;
-}
-
-.button--large {
-  font-size: 1.5rem;
-  padding: calc(variables.$element-padding * 1.25) calc(variables.$element-padding * 2);
-}
-
 .button-group {
   display: flex;
   flex-wrap: wrap;
-  gap: variables.$element-gap;
+  gap: var(--element-gap);
   align-items: center;
 }
 
@@ -128,5 +115,5 @@ the Free Software Foundation, version 3.
 }
 
 .button-group--compact {
-  gap: calc(variables.$element-gap / 2);
+  gap: calc(variables.$base-element-gap / 2);
 }

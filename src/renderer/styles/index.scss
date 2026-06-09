@@ -9,7 +9,16 @@ the Free Software Foundation, version 3.
 @use 'colors';
 @use 'fonts';
 @use 'typography';
+@use 'variables';
 @use 'components/elements';
+
+:root {
+  --font-size: #{variables.$base-font-size};
+  --container-padding: #{variables.$base-container-padding};
+  --container-gap: #{variables.$base-container-gap};
+  --element-padding: #{variables.$base-element-padding};
+  --element-gap: #{variables.$base-element-gap};
+}
 
 /* Reset */
 * {

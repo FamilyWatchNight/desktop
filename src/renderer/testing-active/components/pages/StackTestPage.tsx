@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 
 import { Card, Page, Section, Stack } from '../../../components/elements/containers';
+import { ContentSize } from '../../../components/properties';
 
 export default function StackTestPage(): React.ReactElement {
   const [spacing, setSpacing] = useState<'normal' | 'compact' | 'contiguous'>('normal');
   const [direction, setDirection] = useState<'row' | 'column'>('column');
+  const [size, setSize] = useState<ContentSize>('normal');
 
   const [props, setProps] = useState({
     wrap: true,
@@ -24,8 +26,10 @@ export default function StackTestPage(): React.ReactElement {
           <Stack
             testId="stack-preview"
             spacing={spacing}
+            size={size}
             direction={direction}
             wrap={props.wrap}
+            gloss="passthrough"
             align={props.align as 'start' | 'center' | 'end' | 'spread'}
           >
             {Array.from({ length: props.count }, (_, i) => (
@@ -44,6 +48,18 @@ export default function StackTestPage(): React.ReactElement {
             onChange={(e) => updateProp('count', parseInt(e.target.value, 10))}
             data-testid="stack-count-input"
           />
+        </label>
+        <label>
+          Size:
+          <select
+            value={size}
+            onChange={(e) => setSize(e.target.value as ContentSize)}
+            data-testid="stack-size-select"
+          >
+            <option value="small">small</option>
+            <option value="normal">normal</option>
+            <option value="large">large</option>
+          </select>
         </label>
         <label>
           Spacing:
