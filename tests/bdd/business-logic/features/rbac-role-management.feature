@@ -28,7 +28,7 @@ Feature: RBAC role management
   Scenario: Changing a hidden role's name doesn't remove its hidden status
     Given a role exists with display name "Role To Rename" and hidden status "true"
     When I rename the role to have display name "Renamed Role"
-    And the role should have display name "Renamed Role"
+    Then the role should have display name "Renamed Role"
     And the role should be marked as hidden
 
   Scenario: Changing a role's name and hidden status together should reflect both changes
