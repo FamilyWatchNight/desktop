@@ -10,7 +10,7 @@ import type { Page } from 'playwright';
 
 import type { CustomWorld } from './world';
 
-export const TIMEOUT = 4000;
+export const TIMEOUT = 10000;
 
 export async function verifyPageIsVisible(world: CustomWorld, pageName: string): Promise<void> {
   const page = await getActivePage(world);

@@ -6,6 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { TIMEOUT as UI_TIMEOUT } from '../../technical/infrastructure/ui-utils';
 import type { CustomWorld } from '../../technical/infrastructure/world';
 import { MenuPanel } from '../../technical/page-objects/MenuPanel';
 import { SettingsPage } from '../../technical/page-objects/SettingsPage';
@@ -17,6 +18,16 @@ export class UserPersona {
     const { page, browser } = await this.world.uiApi.openMainWindow();
     this.world.page = page;
     this.world.browser = browser;
+
+    // Make sure the page has loaded and the navigateTo function is available. Other steps will depend on it
+    type WindowWithNavigateTo = Window & { navigateTo?: (page: string) => void };
+    await page.waitForFunction(
+      () => typeof (window as WindowWithNavigateTo).navigateTo === 'function',
+      null,
+      {
+        timeout: UI_TIMEOUT,
+      },
+    );
   }
 
   async navigateToSettings(): Promise<void> {

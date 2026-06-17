@@ -6,6 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { beforeEach, describe, expect, jest, test } from '@jest/globals';
+
 function waitFor(cond: () => boolean, timeout = 2000): Promise<void> {
   return new Promise((resolve, reject) => {
     const start = Date.now();

@@ -6,8 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { World, setWorldConstructor, IWorldOptions } from '@cucumber/cucumber';
-import { _electron as electron, ElectronApplication, Page, Browser } from 'playwright';
+import { IWorldOptions, setWorldConstructor, World } from '@cucumber/cucumber';
+import { Browser, _electron as electron, ElectronApplication, Page } from 'playwright';
 
 import type { UserPersona } from '../../business-flow/personas/UserPersona';
 import { BackgroundTasks } from '../hooks/background-tasks';
@@ -205,7 +205,9 @@ export class CustomWorld extends World {
       if (step.argument?.docString?.content !== undefined) {
         args.push(step.argument.docString.content);
       } else if (step.argument?.dataTable?.rows) {
-        const rows = step.argument.dataTable.rows.map((row) => row.cells.map((cell) => cell.value));
+        const rows = step.argument.dataTable.rows.map((row) =>
+          row?.cells?.map((cell) => cell.value),
+        );
         args.push(rows);
       }
 

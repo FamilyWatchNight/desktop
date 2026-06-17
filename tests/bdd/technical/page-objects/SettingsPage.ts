@@ -6,9 +6,12 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { PAGE_IDS } from '../../../../src/renderer/pages/PageIds';
+
 import { BasePage } from './BasePage';
 
 export class SettingsPage extends BasePage {
+  static readonly pageId = PAGE_IDS.SETTINGS;
   readonly selectors = {
     pageRoot: '[data-testid="page-settings"]',
     webPortInput: '[data-testid="settings-webport-input"]',

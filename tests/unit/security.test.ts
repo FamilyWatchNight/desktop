@@ -10,6 +10,8 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 
+import { describe, expect, test } from '@jest/globals';
+
 import { assertPathInsideAllowedDirs, safeJoin } from '../../src/main/security';
 
 describe('Security Utilities', () => {

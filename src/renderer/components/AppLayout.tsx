@@ -6,18 +6,26 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import '../styles/components/AppLayout.scss';
 import { createApiClient } from '../api-client';
+import { useNavigation } from '../contexts/NavigationContext';
+import { PAGE_IDS } from '../pages/PageIds';
+import * as testing from '../testing';
 
+import { HomeIcon, SettingsIcon, TasksIcon } from './elements/icons';
+import { ExpandableMenuSection, MenuItem } from './elements/navigation';
+import pageRegistry from './pageRegistry';
 import BackgroundTasksPage from './pages/BackgroundTasksPage';
 import HomePage from './pages/HomePage';
 import SettingsPage from './pages/SettingsPage';
 import StyleboardPage from './pages/StyleboardPage';
 
+import '../styles/components/AppLayout.scss';
+
 const apiClient = createApiClient();
+testing.registerTestPages?.(pageRegistry);
 
 interface TaskPayload {
   id: string;
@@ -32,17 +40,19 @@ interface TaskPayload {
 export default function Layout(): React.ReactElement {
   const { t } = useTranslation(['layout', 'common']);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState('home');
+  const { currentPage } = useNavigation();
   const [systemExpanded, setSystemExpanded] = useState(false);
   const [activeTask, setActiveTask] = useState<TaskPayload | null>(null);
   const [queue, setQueue] = useState<TaskPayload[]>([]);
 
   const toggleMenu = (): void => setMenuOpen(!menuOpen);
   const closeMenu = (): void => setMenuOpen(false);
-  const navigateTo = (page: string): void => {
-    setCurrentPage(page);
-    closeMenu();
-  };
+
+  useEffect(() => {
+    if (menuOpen) {
+      closeMenu();
+    }
+  }, [currentPage]);
 
   useEffect(() => {
     const load = async (): Promise<void> => {
@@ -66,19 +76,26 @@ export default function Layout(): React.ReactElement {
   }, []);
 
   const renderPage = (): React.ReactElement => {
+    const registeredPage = pageRegistry.getPage(currentPage);
+    if (registeredPage) {
+      return React.createElement(registeredPage);
+    }
+
     switch (currentPage) {
-      case 'home':
+      case PAGE_IDS.HOME:
         return <HomePage />;
-      case 'settings':
+      case PAGE_IDS.SETTINGS:
         return <SettingsPage />;
-      case 'styleboard':
+      case PAGE_IDS.STYLEBOARD:
         return <StyleboardPage />;
-      case 'background-tasks':
+      case PAGE_IDS.BACKGROUND_TASKS:
         return <BackgroundTasksPage />;
       default:
         return <HomePage />;
     }
   };
+
+  const testMenuSection = testing.buildTestingMenu?.();
 
   return (
     <div className="app-layout" data-testid="app-layout">
@@ -104,99 +121,44 @@ export default function Layout(): React.ReactElement {
         <div className="menu-content">
           <div className="menu-nav-section">
             <nav className="menu-nav">
-              <button
-                className={`menu-item ${currentPage === 'home' ? 'active' : ''}`}
-                onClick={() => navigateTo('home')}
-                data-testid="menu-home"
-              >
-                <svg
-                  className="menu-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                <span>{t('menu.home')}</span>
-              </button>
+              <MenuItem
+                label={t('menu.home')}
+                icon={<HomeIcon width={20} height={20} />}
+                pageId={PAGE_IDS.HOME}
+                testId="menu-home"
+              />
             </nav>
-            <div className={`menu-system ${systemExpanded ? 'expanded' : 'collapsed'}`}>
-              <button
-                type="button"
-                className="menu-system-toggle"
-                data-testid="menu-system-toggle"
-                onClick={() => setSystemExpanded(!systemExpanded)}
-                aria-expanded={systemExpanded}
-                aria-controls="menu-system-items"
-              >
-                <span className="menu-system-chevron" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </span>
-                <span className="menu-system-label">{t('menu.system')}</span>
-              </button>
-              <div id="menu-system-items" className="menu-system-items">
-                <button
-                  className={`menu-item ${currentPage === 'background-tasks' ? 'active' : ''}`}
-                  onClick={() => navigateTo('background-tasks')}
-                  data-testid="menu-background-tasks"
-                >
-                  <svg
-                    className="menu-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M6 2v5l6 5v2l-6 5v5h12v-5l-6-5v-2l6-5V2H6z" />
-                  </svg>
-                  <span>{t('menu.backgroundTasks')}</span>
-                  {(activeTask || queue.length > 0) && (
-                    <span className="menu-badge" data-testid="menu-background-tasks-badge">
-                      {(activeTask ? 1 : 0) + queue.length}
-                    </span>
-                  )}
-                </button>
-                <button
-                  className={`menu-item ${currentPage === 'styleboard' ? 'active' : ''}`}
-                  onClick={() => navigateTo('styleboard')}
-                  data-testid="menu-styleboard"
-                >
-                  <svg
-                    className="menu-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M6 2v5l6 5v2l-6 5v5h12v-5l-6-5v-2l6-5V2H6z" />
-                  </svg>
-                  <span>{t('menu.styleboard')}</span>
-                </button>
-              </div>
-            </div>
+            <ExpandableMenuSection
+              label={t('menu.system')}
+              isExpanded={systemExpanded}
+              onExpandedChange={setSystemExpanded}
+              testId="menu-system-section"
+            >
+              <MenuItem
+                label={t('menu.backgroundTasks')}
+                icon={<TasksIcon width={20} height={20} />}
+                badge={
+                  activeTask || queue.length > 0 ? (activeTask ? 1 : 0) + queue.length : undefined
+                }
+                pageId={PAGE_IDS.BACKGROUND_TASKS}
+                testId="menu-background-tasks"
+              />
+              <MenuItem
+                label={t('menu.styleboard')}
+                icon={<TasksIcon width={20} height={20} />}
+                pageId={PAGE_IDS.STYLEBOARD}
+                testId="menu-styleboard"
+              />
+            </ExpandableMenuSection>
+            {testMenuSection}
           </div>
           <div className="menu-footer">
-            <button
-              className={`menu-item ${currentPage === 'settings' ? 'active' : ''}`}
-              onClick={() => navigateTo('settings')}
-              data-testid="menu-settings"
-            >
-              <svg
-                className="menu-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-              </svg>
-              <span>{t('menu.settings')}</span>
-            </button>
+            <MenuItem
+              label={t('menu.settings')}
+              icon={<SettingsIcon width={20} height={20} />}
+              pageId={PAGE_IDS.SETTINGS}
+              testId="menu-settings"
+            />
           </div>
         </div>
       </div>

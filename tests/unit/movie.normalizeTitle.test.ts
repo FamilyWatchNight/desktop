@@ -6,6 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { expect, test } from '@jest/globals';
+
 import { normalizeTitle } from '../../src/main/utils/text';
 
 test('normalizeTitle utility function', () => {

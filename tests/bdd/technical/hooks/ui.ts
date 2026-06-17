@@ -6,7 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { ElectronApplication, Page, Browser } from 'playwright';
+import { Browser, ElectronApplication, Page } from 'playwright';
 
 import { withTestHooks } from '../infrastructure/utils';
 
@@ -24,7 +24,9 @@ export class UI {
       const page = await browser.newPage();
 
       const webPort = await withTestHooks(this.app, async (hooks) => {
-        return (await hooks.settings.get('webPort')) || 3000;
+        return (
+          (await hooks.settings.get('webPort', { userId: -1, permissions: ['can-admin'] })) || 3000
+        );
       });
 
       await page.goto(`http://localhost:${webPort}`);

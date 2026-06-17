@@ -1,0 +1,181 @@
+/*
+Copyright (c) 2026 Steve Dwire
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3.
+*/
+
+@use '../../colors';
+@use '../../mixins';
+@use '../../variables';
+
+@use 'sass:color';
+
+// Common Styles size and gloss
+.container {
+  padding: var(--container-padding);
+  gap: var(--container-gap);
+  font-size: var(--font-size);
+}
+.container--size-small {
+  --container-padding: calc(
+    #{variables.$base-container-padding} * #{variables.$small-space-multiplier}
+  );
+  --container-gap: calc(#{variables.$base-container-gap} * #{variables.$small-space-multiplier});
+  --element-padding: calc(
+    #{variables.$base-element-padding} * #{variables.$small-space-multiplier}
+  );
+  --element-gap: calc(#{variables.$base-element-gap} * #{variables.$small-space-multiplier});
+  --font-size: calc(#{variables.$base-font-size} * #{variables.$small-text-multiplier});
+}
+.container--size-normal {
+  --container-padding: #{variables.$base-container-padding};
+  --container-gap: #{variables.$base-container-gap};
+  --element-padding: #{variables.$base-element-padding};
+  --element-gap: #{variables.$base-element-gap};
+  --font-size: #{variables.$base-font-size};
+}
+.container--size-large {
+  --container-padding: calc(
+    #{variables.$base-container-padding} * #{variables.$large-space-multiplier}
+  );
+  --container-gap: calc(#{variables.$base-container-gap} * #{variables.$large-space-multiplier});
+  --element-padding: calc(
+    #{variables.$base-element-padding} * #{variables.$large-space-multiplier}
+  );
+  --element-gap: calc(#{variables.$base-element-gap} * #{variables.$large-space-multiplier});
+  --font-size: calc(#{variables.$base-font-size} * #{variables.$large-text-multiplier});
+}
+
+.container--gloss-glassy {
+  background: colors.$container-background;
+  @include mixins.make-glassy;
+}
+.container--gloss-inset {
+  background: colors.$container-background;
+  @include mixins.make-inset;
+}
+.container--gloss-flat {
+  background: color.change(colors.$text-color, $alpha: 0.1);
+  backdrop-filter: blur(100px);
+}
+.container--gloss-transparent {
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.container.container--gloss-passthrough {
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0;
+}
+
+.container.container--spacing-compact {
+  gap: calc(var(--container-gap) / 2);
+}
+
+.container.container--spacing-contiguous {
+  gap: 0;
+}
+
+// Generic Group
+.group--flow-grid {
+  display: grid;
+}
+
+.group--flow-row {
+  flex-direction: row;
+}
+.group--flow-column {
+  flex-direction: column;
+}
+.group--flow-row,
+.group--flow-column {
+  display: flex;
+
+  &.group--spread-proportional > * {
+    flex-grow: 1;
+  }
+  &.group--spread-equal > * {
+    flex: 1 1 0%;
+    min-width: min-content;
+  }
+}
+
+// Card
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: #{variables.$base-element-radius};
+}
+
+.card__header {
+  font-size: 1.15em;
+  font-weight: 600;
+}
+
+.card__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.card__footer {
+  border-top: 1px solid color.change(colors.$text-color, $alpha: 0.3);
+  padding-top: var(--container-gap);
+}
+
+// Page
+.page {
+  min-height: 100%;
+  padding: variables.$page-padding;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: variables.$page-gap;
+
+  &.centered {
+    align-items: center;
+    justify-content: flex-start;
+
+    & .page-container {
+      width: 100%;
+      max-width: variables.$centered-width;
+    }
+  }
+}
+
+.page-container {
+  @include mixins.make-container;
+  padding: variables.$page-padding;
+  display: flex;
+  flex-direction: column;
+  gap: variables.$page-gap;
+  max-width: 100%;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0;
+  text-align: left;
+
+  .page.centered & {
+    text-align: center;
+  }
+}
+
+// Section Component
+.section {
+  @include mixins.make-container;
+  display: flex;
+  flex-direction: column;
+  gap: var(--container-gap);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}

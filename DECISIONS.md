@@ -154,7 +154,6 @@ This document records significant architectural and implementation decisions for
 
 - This is a temporary decision for the early development phase
 - As trust and pattern understanding grows, checkpoint frequency may relax
-- All guidance requests should use HumanAgent Chat, not free-form discussion
 
 ---
 
@@ -173,7 +172,7 @@ This document records significant architectural and implementation decisions for
 
 **Workflow**:
 
-- Agents flag documentation updates needed in HumanAgent Chat
+- Agents flag documentation updates needed in chat
 - Updates discussed before implementation (especially DECISIONS.md)
 - Documentation updates are final step before marking work complete
 
@@ -185,12 +184,12 @@ This document records significant architectural and implementation decisions for
 
 ---
 
-## 7. Documentation Updates Require HumanAgent Chat Discussion
+## 7. Documentation Updates Require Chat Discussion
 
 **Date**: March 2026  
 **Status**: Active
 
-**Decision**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in HumanAgent Chat before implementation.
+**Decision**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in chat before implementation.
 
 **Rationale**:
 
@@ -201,7 +200,7 @@ This document records significant architectural and implementation decisions for
 
 **Implementation**:
 
-- Propose changes in HumanAgent Chat first
+- Propose changes in chat first
 - Refine wording and approach together
 - Implement only after agreement
 - Use this process for all documentation changes

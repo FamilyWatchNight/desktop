@@ -7,7 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 module.exports = {
-  testMatch: ['<rootDir>/tests/unit/**/*.test.ts'],
+  testMatch: ['<rootDir>/tests/unit/**/*.test.ts', '<rootDir>/tests/unit/**/*.test.tsx'],
   testEnvironment: 'node',
   preset: 'ts-jest',
   transform: {
@@ -23,4 +23,5 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!tests/**/*', '!src/**/*.d.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.ts'],
 };

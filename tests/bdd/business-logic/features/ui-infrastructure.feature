@@ -5,6 +5,7 @@
 # the Free Software Foundation, version 3.
 
 @ui
+@end-to-end
 Feature: Basic UI Infrastructure
   As a user
   I want the application UI to be stable and responsive

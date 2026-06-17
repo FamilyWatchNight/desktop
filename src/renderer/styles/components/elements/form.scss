@@ -1,0 +1,71 @@
+@use '../../colors';
+@use '../../mixins';
+@use '../../variables';
+
+$field-label-gap: calc(var(--container-gap) / 2);
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--container-gap);
+}
+
+fieldset {
+  @include mixins.make-container-layout;
+  @include mixins.make-inset;
+  position: relative;
+  display: flex;
+  padding-top: 3em;
+  flex-direction: column;
+  gap: var(--container-gap);
+  border: 0;
+
+  legend {
+    top: 1.5em;
+    position: relative;
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+  }
+
+  &.checkbox-group,
+  &.radio-group {
+    box-shadow: none;
+    padding: $field-label-gap 0;
+    gap: $field-label-gap;
+    margin-top: 0;
+
+    legend {
+      top: 0;
+      font-weight: inherit;
+    }
+  }
+}
+
+input[type='text'],
+input[type='password'],
+input[type='email'],
+input[type='number'],
+select,
+textarea {
+  display: block;
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0.5rem;
+
+  label:has(&) {
+    display: flex;
+    flex-direction: column;
+    gap: $field-label-gap;
+  }
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: auto;
+  float: left;
+  margin-right: 0.5em;
+  width: 1.25em;
+  height: 1.25em;
+}

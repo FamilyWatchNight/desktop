@@ -7,7 +7,7 @@ the Free Software Foundation, version 3.
 */
 
 import log from 'electron-log';
-import type { Page } from 'playwright';
+import type { Locator, Page } from 'playwright';
 
 import { TIMEOUT as UI_TIMEOUT } from '../infrastructure/ui-utils';
 import type { CustomWorld } from '../infrastructure/world';
@@ -61,6 +61,21 @@ export abstract class BasePage {
 
   abstract readonly selectors: Record<string, string>;
 
+  getSelector(name: string): string {
+    const selector = this.selectors[name];
+    if (!selector) {
+      throw new Error(`Selector not found for ${name}`);
+    }
+
+    return selector;
+  }
+
+  async getLocator(name: string): Promise<Locator> {
+    const page = await this.getPage();
+    await this.waitForVisible(name);
+    return page.locator(this.getSelector(name));
+  }
+
   async navigate(path: string): Promise<void> {
     const page = await this.getPage();
     await page.goto(path);
@@ -68,10 +83,7 @@ export abstract class BasePage {
 
   async click(name: string): Promise<void> {
     const page = await this.getPage();
-    const selector = this.selectors[name];
-    if (!selector) {
-      throw new Error(`Selector not found for ${name}`);
-    }
+    const selector = this.getSelector(name);
 
     try {
       await page.click(selector, { timeout: UI_TIMEOUT });
@@ -89,24 +101,38 @@ export abstract class BasePage {
   }
 
   async isVisible(name: string): Promise<boolean> {
+    // Don't use this.getLocator, because it uses this.waitForVisible
     const page = await this.getPage();
-    const selector = this.selectors[name];
-    if (!selector) {
-      throw new Error(`Selector not found for ${name}`);
+    const locator = page.locator(this.getSelector(name));
+
+    return locator.isVisible().catch(() => false);
+  }
+
+  async isChecked(name: string): Promise<boolean> {
+    const page = await this.getPage();
+    const selector = this.getSelector(name);
+
+    const checkbox = page.locator(selector);
+    return checkbox.isChecked();
+  }
+
+  async check(name: string): Promise<void> {
+    const page = await this.getPage();
+    const selector = this.getSelector(name);
+
+    const checkbox = page.locator(selector);
+    if (!(await checkbox.isChecked())) {
+      await checkbox.click();
     }
 
-    return page
-      .locator(selector)
-      .isVisible()
-      .catch(() => false);
+    if (!(await checkbox.isChecked())) {
+      throw new Error(`Checking the "${name}" checkbox failed. Are you sure it's a checkbox?`);
+    }
   }
 
   async waitForVisible(name: string, timeout = UI_TIMEOUT): Promise<void> {
     const page = await this.getPage();
-    const selector = this.selectors[name];
-    if (!selector) {
-      throw new Error(`Selector not found for ${name}`);
-    }
+    const selector = this.getSelector(name);
 
     try {
       await page.waitForSelector(selector, { state: 'visible', timeout });
@@ -119,27 +145,165 @@ export abstract class BasePage {
     }
   }
 
-  async getText(name: string, timeout = UI_TIMEOUT): Promise<string | null> {
+  async setInputText(name: string, value: string): Promise<void> {
     const page = await this.getPage();
+    const selector = this.getSelector(name);
+
+    await page.fill(selector, value);
+  }
+
+  async setInputNumber(name: string, value: number): Promise<void> {
+    const page = await this.getPage();
+    const selector = this.getSelector(name);
+
+    await page.fill(selector, value.toString());
+  }
+
+  async getText(name: string, timeout = UI_TIMEOUT): Promise<string | null> {
     await this.waitForVisible(name, timeout);
 
-    const selector = this.selectors[name];
-    if (!selector) {
-      throw new Error(`Selector not found for ${name}`);
-    }
-
-    const locator = page.locator(selector);
+    const locator = await this.getLocator(name);
 
     const textValue = await locator.evaluate((el) => {
+      if (!el) {
+        return null;
+      }
+
       // If it's an input/textarea/select, it has a 'value' property
       if ('value' in el) {
-        return el.value;
+        return el.value as string;
       }
-      // Otherwise, return the visible text
-      return el.textContent;
+      if ('textContent' in el) {
+        return el.textContent as string;
+      }
+
+      return null;
     });
 
-    console.log(`[BasePage.getText] Got text for "${name}":`, textValue);
     return textValue;
+  }
+
+  async getNumber(name: string, timeout = UI_TIMEOUT): Promise<number | null> {
+    const text = await this.getText(name, timeout);
+    if (text === null) {
+      return null;
+    }
+    return Number(text?.replace(/[^0-9]/g, '') ?? 0);
+  }
+
+  async getId(name: string): Promise<string | null> {
+    const locator = await this.getLocator(name);
+    return locator.getAttribute('id');
+  }
+
+  async getAriaLabel(name: string): Promise<string | null> {
+    const locator = await this.getLocator(name);
+    return locator.getAttribute('aria-label');
+  }
+
+  async getFieldsetLegendText(name: string): Promise<string | null> {
+    const locator = await this.getLocator(name);
+    return locator.locator('legend').textContent();
+  }
+
+  /**
+   * Navigate to the page represented by this PageObject.
+   * The concrete PageObject class should declare a static `pageId` string.
+   * This calls `window.navigateTo(pageId)` inside the renderer via Playwright.
+   */
+  async navigateToPage(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ctor = this.constructor as any;
+    const pageId: string | undefined = ctor.pageId;
+    if (!pageId) {
+      throw new Error(`PageObject ${ctor.name} must declare a static pageId`);
+    }
+
+    const page = await this.getPage();
+    // Invoke the renderer-level navigation function exposed on window
+    await page.evaluate((p) => {
+      type WindowWithNavigateTo = Window & { navigateTo?: (page: string) => void };
+      const fn = (window as WindowWithNavigateTo).navigateTo;
+      if (typeof fn !== 'function') {
+        throw new Error('window.navigateTo is not available');
+      }
+      fn(p);
+    }, pageId);
+
+    // If this PageObject declares a pageRoot selector, wait for it to be visible.
+    if ((this.selectors as Record<string, string>).pageRoot) {
+      await this.waitForVisible('pageRoot', UI_TIMEOUT);
+    } else {
+      // Otherwise wait for network idle shortly to give the renderer a moment to update
+      await page.waitForLoadState('networkidle', { timeout: UI_TIMEOUT }).catch(() => {});
+    }
+  }
+
+  async selectRadioByKeyOrValue(
+    groupSelectorName: string,
+    optionKeyOrValue: string,
+  ): Promise<void> {
+    const page = await this.getPage();
+    const groupSelector = this.getSelector(groupSelectorName);
+    const fieldset = page.locator(groupSelector);
+
+    // Find all radios in this fieldset
+    const radios = fieldset.locator('input[type="radio"]');
+    const count = await radios.count();
+
+    if (count === 0) {
+      throw new Error(`No radio inputs found in fieldset "${groupSelectorName}"`);
+    }
+
+    // Try to find by value attribute first
+    for (let i = 0; i < count; i++) {
+      const radio = radios.nth(i);
+      const value = await radio.getAttribute('value');
+      if (value === optionKeyOrValue) {
+        await radio.click();
+        return;
+      }
+    }
+
+    // Try to find by label text
+    for (let i = 0; i < count; i++) {
+      const radio = radios.nth(i);
+      const id = await radio.getAttribute('id');
+      if (id) {
+        const label = fieldset.locator(`label[for="${id}"]`);
+        const labelText = await label.textContent();
+        if (labelText?.trim() === optionKeyOrValue) {
+          await radio.click();
+          return;
+        }
+      }
+    }
+
+    throw new Error(
+      `No radio option found matching "${optionKeyOrValue}" in fieldset "${groupSelectorName}"`,
+    );
+  }
+
+  async chooseOptionByKeyOrValue(
+    selectSelectorName: string,
+    optionKeyOrValue: string,
+  ): Promise<void> {
+    const page = await this.getPage();
+    const selectSelector = this.getSelector(selectSelectorName);
+    const selectElement = page.locator(selectSelector);
+
+    try {
+      // First try by option value attribute
+      await selectElement.selectOption(optionKeyOrValue);
+    } catch {
+      try {
+        // Then try by visible option text (label)
+        await selectElement.selectOption({ label: optionKeyOrValue });
+      } catch {
+        throw new Error(
+          `No option found in select "${selectSelectorName}" matching "${optionKeyOrValue}" by value or label`,
+        );
+      }
+    }
   }
 }

@@ -4,7 +4,7 @@ A cross-platform app for managing movie selection for a Family Watch Night
 
 ## Agent Workflow Guidance
 
-**CRITICAL: Agents should err on the side of asking for human guidance. Before considering any work complete, check in via HumanAgent Chat.**
+**CRITICAL: Agents should err on the side of asking for human guidance. Before considering any work complete, check in via chat.**
 
 ### Checkpoint Strategy
 
@@ -12,19 +12,19 @@ A cross-platform app for managing movie selection for a Family Watch Night
 - **Before completing a task**: Verify the solution matches expectations, ask if anything should be adjusted
 - **On scope questions**: If unsure whether to expand/reduce scope, ask first
 - **Implementation choices**: When multiple valid approaches exist, surface them for human decision-making
-- **Documentation Updates**: Always use HumanAgent Chat to propose documentation changes before implementing them
-- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via HumanAgent Chat to confirm completion status and receive guidance on next steps.
+- **Documentation Updates**: Always use chat to propose documentation changes before implementing them
+- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via chat to confirm completion status and receive guidance on next steps.
 
 **Never assume work is done. Always ask.**
 
 ### Interaction Patterns
 
-**HumanAgent Chat Usage:**
+**Chat Usage:**
 
-- **Documentation Changes**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in HumanAgent Chat before implementation
-- **Complex Decisions**: When multiple valid approaches exist, surface them in HumanAgent Chat for human decision-making
-- **Scope Clarification**: Use HumanAgent Chat to confirm understanding of requirements and scope before proceeding with implementation
-- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via HumanAgent Chat to confirm completion status and receive guidance on next steps.
+- **Documentation Changes**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in chat before implementation
+- **Complex Decisions**: When multiple valid approaches exist, surface them in chat for human decision-making
+- **Scope Clarification**: Use chat to confirm understanding of requirements and scope before proceeding with implementation
+- **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via chat to confirm completion status and receive guidance on next steps.
 
 ---
 
@@ -48,6 +48,9 @@ UI tests are structured into two levels of granularity:
    - Tests component behavior and interactions
    - Uses test-only pages excluded from production builds (similar to test hooks)
    - Focuses on component functionality rather than user workflows
+   - Builds test pages as real application pages using the same production layout components (`Page`, `Section`, etc.)
+   - Includes live controls within the page so tests verify real app composition, not isolated wrapper components
+   - Test pages are sourced from `src/renderer/testing-active/components/pages/` and registered through `src/renderer/testing-active/index.tsx`
 
 2. **User Experience Testing**: Validates end-to-end user workflows across multiple pages
    - Tests complete user journeys and page transitions
@@ -70,6 +73,7 @@ UI tests support dual transport modes controlled by `RENDER_LOCATION` environmen
   - `data-testid="page-settings"`
   - `data-testid="settings-save-button"`
   - `data-testid="settings-display-name-input"`
+- Avoid introducing a second layer of human-readable translation between `.feature` text and selector keys. Use the selector keys directly in feature files when those keys are already stable and human-readable.
 - Treat `data-testid` as part of the UI contract, not only a testing concern. This makes page objects and tests stable even when i18next text changes.
 - Page objects should consume these stable IDs rather than using localized text selectors.
 
@@ -96,6 +100,7 @@ UI tests support dual transport modes controlled by `RENDER_LOCATION` environmen
 - **Playwright Configuration** (`playwright-config.ts`): Centralized Playwright setup for both transports
 - **Page Objects** (`page-objects/`): `BasePage` and concrete page classes (`HomePage`, `SettingsPage`, etc.)
 - **UI Utilities** (`infrastructure/ui-utils.ts`): Cross-cutting UI testing functions (screenshots, waiting, window management)
+- **Component Test Pages**: Build pages in `src/renderer/testing-active/components/pages/` using the same renderer page framework as production pages, then register them in `src/renderer/testing-active/index.tsx`.
 
 **System Testing Infrastructure** (`tests/bdd/technical/infrastructure/`):
 
@@ -120,6 +125,7 @@ When adding features with stateful test scenarios, use this pattern to maintain 
 - Only serializable data can cross the hook boundary from Cucumber to Electron
 - NEVER, under any circumstances, change anything in `src/main/testing`. That folder's contents is overwritten at build time.
 - If any compile, build, or test failure points to a problem in `src/main/testing` and you believe that you need to change a file in that folder to resolve the error, instead make the change to the equivalent file in the `src/main/testing-active` folder. Those files will be copied into `src/main/testing` at build time, so your changes there will take effect at the next build.
+- Component test pages also live in `testing-active`; they are copied into `src/renderer/testing/` for integration builds by `use-testing-active.js` and should be built like normal renderer pages.
 
 ## Validation Flow
 
@@ -193,6 +199,9 @@ The renderer's API client automatically detects its environment and selects the 
   - Execute: `npm run test:features`
   - Execute UI tests in Electron: `npm run test:features`
   - Execute UI tests in Browser: `npm run test:features:browser`
+  - Always run feature tests through the npm scripts rather than invoking `cucumber-js` directly, so the active testing pages and required build hooks are applied.
+  - When running a specific feature subset, pass tags through the npm script, for example:
+    - `npm run test:features -- --tags "@ui and @form-controls"`
   - Feature scenarios in `tests/bdd/business-logic/features/`
   - Step definitions in `tests/bdd/business-logic/steps/`
   - Personas (domain-facing APIs) in `tests/bdd/business-flow/personas/`.
@@ -236,7 +245,7 @@ This project uses structured documentation to prevent stale guidance and capture
 **At the start of work:**
 
 - Check if ARCHITECTURE_ANALYSIS.md and DECISIONS.md are still aligned with the current request
-- If you notice a discrepancy between documented decisions and what you're asked to do, raise it via HumanAgent Chat
+- If you notice a discrepancy between documented decisions and what you're asked to do, raise it via chat
 - The human may want to override the documented decision, update documentation, or clarify the request
 
 **During work:**
@@ -246,13 +255,13 @@ This project uses structured documentation to prevent stale guidance and capture
 
 **At the end of work:**
 
-- Near completion, mention via HumanAgent Chat: "I notice the following documentation may need updates: [list]"
+- Near completion, mention via chat: "I notice the following documentation may need updates: [list]"
 - Wait for human approval before making changes
 - Update ARCHITECTURE_ANALYSIS.md if architecture/patterns changed
 - Create or update DECISIONS.md entries only with human guidance
 - Handle document updates as the final step before marking work complete
 
-**Key principle:** Documentation updates should happen in HumanAgent Chat discussion, not autonomously.
+**Key principle:** Documentation updates should happen in chat discussion, not autonomously.
 
 ---
 
@@ -398,7 +407,7 @@ LocalizationService demonstrates comprehensive security:
 
 If you identify security gaps or missing validation patterns:
 
-1. Flag via HumanAgent Chat before implementing
+1. Flag via chat before implementing
 2. Propose additions to `src/main/security/` library for reusable functions
 3. Reference CodeQL findings or security best practices in your proposal
 
