@@ -8,8 +8,8 @@ the Free Software Foundation, version 3.
 
 import React, { useContext, useRef, useState } from 'react';
 
-import { Button, ButtonGroup } from '../../../components/elements/buttons';
-import { Page, Section } from '../../../components/elements/containers';
+import { Button } from '../../../components/elements/buttons';
+import { Group, Page, Section } from '../../../components/elements/containers';
 import type { FormContextValue } from '../../../components/elements/form';
 import {
   Checkbox,
@@ -484,7 +484,7 @@ export default function FormControlsTestPage(): React.ReactElement {
           </div>
         </div>
         <div style={{ marginTop: 12 }}>
-          <ButtonGroup size="small" spacing="compact">
+          <Group flow="row" size="small" spread="equal">
             <Button
               data-testid="controlled-validate-button"
               onClick={() => {
@@ -533,7 +533,7 @@ export default function FormControlsTestPage(): React.ReactElement {
             >
               Reset Uncontrolled
             </Button>
-          </ButtonGroup>
+          </Group>
         </div>
       </Section>
     </>

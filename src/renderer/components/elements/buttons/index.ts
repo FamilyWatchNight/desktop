@@ -7,4 +7,3 @@ the Free Software Foundation, version 3.
 */
 
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './Button';
-export { ButtonGroup, type ButtonGroupProps } from './ButtonGroup';

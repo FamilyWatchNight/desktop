@@ -85,35 +85,3 @@ the Free Software Foundation, version 3.
     @include make-button-color(colors.$info-color);
   }
 }
-
-.button-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--element-gap);
-  align-items: center;
-}
-
-.button-group--start {
-  justify-content: flex-start;
-}
-
-.button-group--center {
-  justify-content: center;
-}
-
-.button-group--end {
-  justify-content: flex-end;
-}
-
-.button-group--spread {
-  justify-content: space-between;
-}
-
-.button-group--spread > .button {
-  flex: 1 1 0%;
-  min-width: 0;
-}
-
-.button-group--compact {
-  gap: calc(variables.$base-element-gap / 2);
-}

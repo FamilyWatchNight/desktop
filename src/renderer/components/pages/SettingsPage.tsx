@@ -10,8 +10,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../../api-client';
-import { Button, ButtonGroup } from '../elements/buttons';
-import { Page, Section } from '../elements/containers';
+import { Button } from '../elements/buttons';
+import { Group, Page, Section } from '../elements/containers';
 import { Form, NumberInput, TextInput } from '../elements/form';
 import type { FormContextValue } from '../elements/form/Form';
 
@@ -163,7 +163,7 @@ export default function SettingsPage(): React.ReactElement {
           />
         </Section>
         <Section title={t('backgroundTasks')} testId="settings-background-tasks-section">
-          <ButtonGroup size="small" align="center">
+          <Group flow="row" size="small" justifyContent="center">
             <Button
               variant="link"
               data-testid="settings-import-watchmode-button"
@@ -185,21 +185,21 @@ export default function SettingsPage(): React.ReactElement {
             >
               {t('importTmdb')}
             </Button>
-          </ButtonGroup>
+          </Group>
           {backgroundTaskMessage && (
             <div className="message success" data-testid="settings-background-task-message">
               {backgroundTaskMessage}
             </div>
           )}
         </Section>
-        <ButtonGroup>
+        <Group flow="row" spread="equal">
           <Button className="btn-primary" data-testid="settings-save-button" onClick={saveSettings}>
             {t('save')}
           </Button>
           <Button variant="secondary" data-testid="settings-cancel-button" onClick={handleCancel}>
             {t('button.cancel', { ns: 'common' })}
           </Button>
-        </ButtonGroup>
+        </Group>
         {statusMessage && (
           <div className={`message ${statusType}`} data-testid="settings-status-message">
             {statusMessage}

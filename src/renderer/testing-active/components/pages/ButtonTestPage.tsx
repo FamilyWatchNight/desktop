@@ -8,28 +8,29 @@ the Free Software Foundation, version 3.
 
 import React, { useState } from 'react';
 
-import { Button, ButtonGroup } from '../../../components/elements/buttons';
-import { Page, Section } from '../../../components/elements/containers';
+import { Button } from '../../../components/elements/buttons';
+import { Group, Page, Section } from '../../../components/elements/containers';
+import { ContentSize } from '../../../components/properties';
 
 export default function ButtonTestPage(): React.ReactElement {
   const [variant, setVariant] = useState<
     'primary' | 'secondary' | 'danger' | 'success' | 'info' | 'link'
   >('primary');
-  const [size, setSize] = useState<'small' | 'medium' | 'large'>('medium');
+  const [size, setSize] = useState<ContentSize>('normal');
   const [disabled, setDisabled] = useState(false);
 
   return (
     <>
       <Page title="Button Test" testId="page-button-test">
         <Section title="Component Preview">
-          <ButtonGroup size={size} testId="button-group-preview">
+          <Group flow="row" spread="equal" size={size} testId="button-group-preview">
             <Button variant={variant} disabled={disabled} data-testid="button-1">
               Primary
             </Button>
             <Button variant="secondary" disabled={disabled} data-testid="button-2">
               Secondary
             </Button>
-          </ButtonGroup>
+          </Group>
         </Section>
         <Section title="Controls">
           <label>
@@ -61,11 +62,11 @@ export default function ButtonTestPage(): React.ReactElement {
             Size:
             <select
               value={size}
-              onChange={(e) => setSize(e.target.value as 'small' | 'medium' | 'large')}
+              onChange={(e) => setSize(e.target.value as ContentSize)}
               data-testid="button-size-select"
             >
               <option value="small">small</option>
-              <option value="medium">medium</option>
+              <option value="medium">normal</option>
               <option value="large">large</option>
             </select>
           </label>

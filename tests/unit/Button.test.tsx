@@ -11,7 +11,6 @@ the Free Software Foundation, version 3.
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Button } from '../../src/renderer/components/elements/buttons/Button';
-import { ButtonGroup } from '../../src/renderer/components/elements/buttons/ButtonGroup';
 
 describe('Button', () => {
   test('renders with primary variant and custom data-testid', () => {
@@ -38,33 +37,5 @@ describe('Button', () => {
     fireEvent.click(button);
     expect(handleClick).not.toHaveBeenCalled();
     expect(button).toBeDisabled();
-  });
-});
-
-describe('ButtonGroup', () => {
-  test('renders children and applies alignment and spacing classes', () => {
-    render(
-      <ButtonGroup align="center" spacing="compact" testId="button-group">
-        <Button variant="secondary">Cancel</Button>
-        <Button variant="primary">Save</Button>
-      </ButtonGroup>,
-    );
-
-    const group = screen.getByTestId('button-group');
-    expect(group).toHaveClass('button-group--center');
-    expect(group).toHaveClass('button-group--compact');
-    expect(group).toHaveTextContent('Cancel');
-    expect(group).toHaveTextContent('Save');
-  });
-
-  test('defaults alignment to spread', () => {
-    render(
-      <ButtonGroup testId="default-spread">
-        <Button>One</Button>
-        <Button>Two</Button>
-      </ButtonGroup>,
-    );
-
-    expect(screen.getByTestId('default-spread')).toHaveClass('button-group--spread');
   });
 });

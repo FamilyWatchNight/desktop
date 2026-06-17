@@ -17,8 +17,7 @@ export const TEST_PAGE_IDS = {
   PAGE_BADGE_TEST: 'badge-test',
   PAGE_CARD_TEST: 'card-test',
   PAGE_LIST_TEST: 'list-test',
-  PAGE_STACK_TEST: 'stack-test',
-  PAGE_GRID_TEST: 'grid-test',
+  PAGE_GROUP_TEST: 'group-test',
 } as const;
 
 export type TestPageId = (typeof TEST_PAGE_IDS)[keyof typeof TEST_PAGE_IDS];

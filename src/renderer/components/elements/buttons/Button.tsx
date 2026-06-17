@@ -32,7 +32,7 @@ export function Button({
   const classes = [
     'button',
     variant !== 'primary' ? `btn-${variant}` : '',
-    size && `container-size-${size}`,
+    size && `container--size-${size}`,
     className,
   ]
     .filter(Boolean)

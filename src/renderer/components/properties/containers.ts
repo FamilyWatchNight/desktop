@@ -7,4 +7,5 @@ the Free Software Foundation, version 3.
 */
 
 export type ContainerGlossVariant = 'glossy' | 'inset' | 'flat' | 'transparent' | 'passthrough';
+export type ContainerSpacing = 'compact' | 'normal' | 'contiguous';
 export type ContentSize = 'small' | 'normal' | 'large';

@@ -16,12 +16,11 @@ import ButtonTestPage from './components/pages/ButtonTestPage';
 import CardTestPage from './components/pages/CardTestPage';
 import ExpandableMenuSectionTestPage from './components/pages/ExpandableMenuSectionTestPage';
 import FormControlsTestPage from './components/pages/FormControlsTestPage';
-import GridTestPage from './components/pages/GridTestPage';
+import GroupTestPage from './components/pages/GroupTestPage';
 import MenuItemTestPage from './components/pages/MenuItemTestPage';
 import MessageTestPage from './components/pages/MessageTestPage';
 import PageFrameworkTestPage from './components/pages/PageFrameworkTestPage';
 import ProgressBarTestPage from './components/pages/ProgressBarTestPage';
-import StackTestPage from './components/pages/StackTestPage';
 import { TEST_PAGE_IDS } from './TestPageIds';
 
 function TestingMenuSection(): React.ReactElement {
@@ -80,14 +79,9 @@ function TestingMenuSection(): React.ReactElement {
         testId="menu-testing-card-page"
       />
       <MenuItem
-        label="Stack Test"
-        pageId={`testing/${TEST_PAGE_IDS.PAGE_STACK_TEST}`}
-        testId="menu-testing-stack-page"
-      />
-      <MenuItem
-        label="Grid Test"
-        pageId={`testing/${TEST_PAGE_IDS.PAGE_GRID_TEST}`}
-        testId="menu-testing-grid-page"
+        label="Group Test"
+        pageId={`testing/${TEST_PAGE_IDS.PAGE_GROUP_TEST}`}
+        testId="menu-testing-group-page"
       />
     </ExpandableMenuSection>
   );
@@ -127,8 +121,7 @@ export function registerTestPages(registry: PageRegistry): void {
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_BADGE_TEST}`, BadgeTestPage, 'Badge Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_BUTTON_TEST}`, ButtonTestPage, 'Badge Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_CARD_TEST}`, CardTestPage, 'Card Test');
-  registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_STACK_TEST}`, StackTestPage, 'Stack Test');
-  registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_GRID_TEST}`, GridTestPage, 'Grid Test');
+  registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_GROUP_TEST}`, GroupTestPage, 'Group Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_BUTTON_TEST}`, ButtonTestPage, 'Button Test');
 }
 

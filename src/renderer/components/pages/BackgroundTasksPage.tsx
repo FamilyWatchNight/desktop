@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { createApiClient } from '../../api-client';
 import '../../styles/components/BackgroundTasksPage.scss';
 import { Button } from '../elements/buttons';
-import { Card, Page, Section, Stack } from '../elements/containers';
+import { Card, Group, Page, Section } from '../elements/containers';
 import { ProgressBar } from '../elements/feedback';
 
 const apiClient = createApiClient();
@@ -119,7 +119,7 @@ export default function BackgroundTasksPage(): React.ReactElement {
       </Section>
       <Section title={t('queuedTasks')} testId="background-tasks-queued-section">
         {queue.length > 0 ? (
-          <Stack direction="column">
+          <Group flow="column">
             {queue.map((task) => (
               <Card
                 key={task.id}
@@ -144,7 +144,7 @@ export default function BackgroundTasksPage(): React.ReactElement {
                 </Button>
               </Card>
             ))}
-          </Stack>
+          </Group>
         ) : (
           <Card gloss="flat">{t('noneQueued')}</Card>
         )}

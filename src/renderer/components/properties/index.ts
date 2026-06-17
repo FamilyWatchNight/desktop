@@ -1,1 +1,1 @@
-export { type ContainerGlossVariant, type ContentSize } from './containers';
+export { type ContainerGlossVariant, type ContainerSpacing, type ContentSize } from './containers';
