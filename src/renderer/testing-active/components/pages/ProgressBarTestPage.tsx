@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 
 import { Page, Section } from '../../../components/elements/containers';
 import { ProgressBar } from '../../../components/elements/feedback/ProgressBar';
+import { ContentSize } from '../../../components/properties';
 
 export default function ProgressBarTestPage(): React.ReactElement {
   const [current, setCurrent] = useState(25);
   const [max, setMax] = useState(100);
   const [indeterminate, setIndeterminate] = useState(false);
   const [showLabel, setShowLabel] = useState(true);
-  const [size, setSize] = useState<'small' | 'medium' | 'large'>('medium');
+  const [size, setSize] = useState<ContentSize>('normal');
 
   return (
     <Page title="ProgressBar Test" testId="progressbar-test-page">
@@ -64,10 +65,10 @@ export default function ProgressBarTestPage(): React.ReactElement {
           <select
             data-testid="progressbar-size-select"
             value={size}
-            onChange={(e) => setSize(e.target.value as any)}
+            onChange={(e) => setSize(e.target.value as ContentSize)}
           >
             <option value="small">small</option>
-            <option value="medium">medium</option>
+            <option value="normal">normal</option>
             <option value="large">large</option>
           </select>
         </label>

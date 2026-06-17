@@ -6,4 +6,4 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './Button';
+export { Button, type ButtonProps, type ButtonVariant } from './Button';

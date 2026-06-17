@@ -26,6 +26,6 @@ describe('ProgressBar', () => {
 
   test('applies size classes', () => {
     render(<ProgressBar size="small" testId="pb-3" />);
-    expect(screen.getByTestId('pb-3')).toHaveClass('progress-bar--small');
+    expect(screen.getByTestId('pb-3')).toHaveClass('container--size-small');
   });
 });

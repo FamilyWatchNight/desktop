@@ -1,11 +1,13 @@
 import React from 'react';
 
+import { ContentSize } from '../../properties';
+
 export interface ProgressBarProps {
   current?: number;
   max?: number;
   isIndeterminate?: boolean;
   showLabel?: boolean;
-  size?: 'small' | 'medium' | 'large';
+  size?: ContentSize;
   testId?: string;
   className?: string;
 }
@@ -15,13 +17,13 @@ export function ProgressBar({
   max = 100,
   isIndeterminate = false,
   showLabel = false,
-  size = 'medium',
+  size = 'normal',
   testId,
   className = '',
 }: ProgressBarProps): React.ReactElement {
   const percent =
     max > 0 && !isIndeterminate ? Math.max(0, Math.min(100, (current / max) * 100)) : 0;
-  const classes = ['progress-bar', `progress-bar--${size}`, className].filter(Boolean).join(' ');
+  const classes = ['progress-bar', `container--size-${size}`, className].filter(Boolean).join(' ');
   const label = isIndeterminate ? 'Loading' : `${Math.round(percent)}%`;
 
   return (

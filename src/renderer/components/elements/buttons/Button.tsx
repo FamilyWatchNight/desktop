@@ -8,12 +8,13 @@ the Free Software Foundation, version 3.
 
 import React, { ButtonHTMLAttributes } from 'react';
 
+import { ContentSize } from '../../properties';
+
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'info' | 'link';
-export type ButtonSize = 'small' | 'medium' | 'large';
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type'> {
   variant?: ButtonVariant;
-  size?: ButtonSize;
+  size?: ContentSize;
   testId?: string;
   type?: 'button' | 'submit' | 'reset';
   className?: string;
