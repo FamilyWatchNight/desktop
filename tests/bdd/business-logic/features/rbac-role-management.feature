@@ -34,7 +34,7 @@ Feature: RBAC role management
   Scenario: Changing a role's name and hidden status together should reflect both changes
     Given a role exists with display name "Editable Role" and hidden status "false"
     When I rename the role to have display name "Updated Role" and hidden status "true"
-    And the role should have display name "Updated Role"
+    Then the role should have display name "Updated Role"
     And the role should be marked as hidden
 
   Scenario: Duplicating a role creates a new custom role with the same permissions and hidden status and an updated name
