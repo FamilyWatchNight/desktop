@@ -6,14 +6,15 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-const js = require('@eslint/js');
-const prettier = require('eslint-config-prettier');
-const importPlugin = require('eslint-plugin-import');
-const reactPlugin = require('eslint-plugin-react');
-const globals = require('globals');
-const tseslint = require('typescript-eslint');
+import reactPlugin from '@eslint-react/eslint-plugin';
+import js from '@eslint/js';
+import prettier from 'eslint-config-prettier';
+import importPlugin from 'eslint-plugin-import-x';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
-module.exports = [
+export default [
   // Ignore generated folders
   {
     ignores: ['dist/**', 'build/**', 'coverage/**'],
@@ -53,18 +54,13 @@ module.exports = [
 
     plugins: {
       react: reactPlugin,
+      'react-hooks': reactHooksPlugin,
       import: importPlugin,
     },
 
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
-
     rules: {
-      // React 17+ JSX transform no longer requires React in scope
-      'react/react-in-jsx-scope': 'off',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
 
       // Stable import ordering
       'import/order': [
