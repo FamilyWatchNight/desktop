@@ -6,6 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from 'react';
 import React from 'react';
 
@@ -39,6 +40,7 @@ export function MenuItem({
   disabled,
   ...rest
 }: MenuItemProps): React.ReactElement {
+  const { ref, focused } = useFocusable();
   const navigation = useOptionalNavigation();
   const currentPage = pageId && navigation ? navigation.currentPage : undefined;
   const derivedActive = pageId ? currentPage === pageId : false;
@@ -57,10 +59,13 @@ export function MenuItem({
     onClick?.(event);
   };
 
-  const classes = ['menu-item', active ? 'active' : '', className].filter(Boolean).join(' ');
+  const classes = ['menu-item', active ? 'active' : '', focused && 'has-nav-focus', className]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <button
+      ref={ref}
       type={type}
       className={classes}
       aria-current={active ? 'page' : undefined}

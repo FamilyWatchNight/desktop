@@ -6,6 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
 import React, { ButtonHTMLAttributes } from 'react';
 
 import { ContentSize } from '../../properties';
@@ -30,8 +31,10 @@ export function Button({
   disabled,
   ...rest
 }: ButtonProps): React.ReactElement {
+  const { ref, focused } = useFocusable();
   const classes = [
     'button',
+    focused && 'has-nav-focus',
     variant !== 'primary' ? `btn-${variant}` : '',
     size && `container--size-${size}`,
     className,
@@ -40,7 +43,14 @@ export function Button({
     .join(' ');
 
   return (
-    <button type={type} className={classes} disabled={disabled} data-testid={testId} {...rest}>
+    <button
+      ref={ref}
+      type={type}
+      className={classes}
+      disabled={disabled}
+      data-testid={testId}
+      {...rest}
+    >
       {children}
     </button>
   );
