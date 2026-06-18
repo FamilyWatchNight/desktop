@@ -6,6 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { setFocus } from '@noriginmedia/norigin-spatial-navigation-core';
+import { FocusContext, useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -48,11 +50,36 @@ export default function Layout(): React.ReactElement {
   const toggleMenu = (): void => setMenuOpen(!menuOpen);
   const closeMenu = (): void => setMenuOpen(false);
 
+  const { ref: appRef, focusKey: appFocusKey } = useFocusable({
+    focusKey: 'APPLICATION_ROOT',
+    trackChildren: true,
+  });
+  const { ref: menuButtonRef, focused: menuButtonFocused } = useFocusable({
+    focusKey: 'MAIN_MENU_BUTTON',
+  });
+  const { ref: menuRef, focusKey: menuFocusKey } = useFocusable({
+    focusKey: 'MAIN_MENU',
+    focusable: menuOpen,
+    trackChildren: true,
+  });
+  const { ref: contentRef, focusKey: contentFocusKey } = useFocusable({
+    focusKey: 'MAIN_CONTENT',
+    focusable: !menuOpen,
+    trackChildren: true,
+  });
+
   useEffect(() => {
     if (menuOpen) {
       closeMenu();
+      setFocus(contentFocusKey);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
+
+  useEffect(() => {
+    setFocus(contentFocusKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const load = async (): Promise<void> => {
@@ -98,73 +125,82 @@ export default function Layout(): React.ReactElement {
   const testMenuSection = testing.buildTestingMenu?.();
 
   return (
-    <div className="app-layout" data-testid="app-layout">
-      <header className="app-header" data-testid="app-header">
-        <button
-          className="hamburger-button"
-          data-testid="menu-toggle-button"
-          onClick={toggleMenu}
-          aria-label={t('toggleMenu')}
-        >
-          <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
-          <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
-          <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
-        </button>
-        <h1 className="app-title" data-testid="app-title">
-          {t('app.name', { ns: 'common' })}
-        </h1>
-      </header>
-      {menuOpen && (
-        <div className="menu-overlay" data-testid="menu-overlay" onClick={closeMenu}></div>
-      )}
-      <div className={`side-menu ${menuOpen ? 'open' : ''}`} data-testid="side-menu">
-        <div className="menu-content">
-          <div className="menu-nav-section">
-            <nav className="menu-nav">
-              <MenuItem
-                label={t('menu.home')}
-                icon={<HomeIcon width={20} height={20} />}
-                pageId={PAGE_IDS.HOME}
-                testId="menu-home"
-              />
+    <FocusContext.Provider value={appFocusKey}>
+      <div ref={appRef} className="app-layout" data-testid="app-layout">
+        <header className="app-header" data-testid="app-header">
+          <button
+            ref={menuButtonRef}
+            className={'hamburger-button' + (menuButtonFocused ? ' has-nav-focus' : '')}
+            data-testid="menu-toggle-button"
+            onClick={toggleMenu}
+            aria-label={t('toggleMenu')}
+          >
+            <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
+            <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
+            <span className={`hamburger-line ${menuOpen ? 'open' : ''}`}></span>
+          </button>
+          <h1 className="app-title" data-testid="app-title">
+            {t('app.name', { ns: 'common' })}
+          </h1>
+        </header>
+        {menuOpen && (
+          <div className="menu-overlay" data-testid="menu-overlay" onClick={closeMenu}></div>
+        )}
+        <FocusContext.Provider value={menuFocusKey}>
+          <div className={`side-menu ${menuOpen ? 'open' : ''}`} data-testid="side-menu">
+            <nav inert={!menuOpen} className="menu-nav">
+              <div ref={menuRef} className="menu-content">
+                <div className="menu-nav-section">
+                  <MenuItem
+                    label={t('menu.home')}
+                    icon={<HomeIcon width={20} height={20} />}
+                    pageId={PAGE_IDS.HOME}
+                    testId="menu-home"
+                  />
+                  <ExpandableMenuSection
+                    label={t('menu.system')}
+                    isExpanded={systemExpanded}
+                    onExpandedChange={setSystemExpanded}
+                    testId="menu-system-section"
+                  >
+                    <MenuItem
+                      label={t('menu.backgroundTasks')}
+                      icon={<TasksIcon width={20} height={20} />}
+                      badge={
+                        activeTask || queue.length > 0
+                          ? (activeTask ? 1 : 0) + queue.length
+                          : undefined
+                      }
+                      pageId={PAGE_IDS.BACKGROUND_TASKS}
+                      testId="menu-background-tasks"
+                    />
+                    <MenuItem
+                      label={t('menu.styleboard')}
+                      icon={<TasksIcon width={20} height={20} />}
+                      pageId={PAGE_IDS.STYLEBOARD}
+                      testId="menu-styleboard"
+                    />
+                  </ExpandableMenuSection>
+                  {testMenuSection}
+                </div>
+                <div className="menu-footer">
+                  <MenuItem
+                    label={t('menu.settings')}
+                    icon={<SettingsIcon width={20} height={20} />}
+                    pageId={PAGE_IDS.SETTINGS}
+                    testId="menu-settings"
+                  />
+                </div>
+              </div>
             </nav>
-            <ExpandableMenuSection
-              label={t('menu.system')}
-              isExpanded={systemExpanded}
-              onExpandedChange={setSystemExpanded}
-              testId="menu-system-section"
-            >
-              <MenuItem
-                label={t('menu.backgroundTasks')}
-                icon={<TasksIcon width={20} height={20} />}
-                badge={
-                  activeTask || queue.length > 0 ? (activeTask ? 1 : 0) + queue.length : undefined
-                }
-                pageId={PAGE_IDS.BACKGROUND_TASKS}
-                testId="menu-background-tasks"
-              />
-              <MenuItem
-                label={t('menu.styleboard')}
-                icon={<TasksIcon width={20} height={20} />}
-                pageId={PAGE_IDS.STYLEBOARD}
-                testId="menu-styleboard"
-              />
-            </ExpandableMenuSection>
-            {testMenuSection}
           </div>
-          <div className="menu-footer">
-            <MenuItem
-              label={t('menu.settings')}
-              icon={<SettingsIcon width={20} height={20} />}
-              pageId={PAGE_IDS.SETTINGS}
-              testId="menu-settings"
-            />
+        </FocusContext.Provider>
+        <FocusContext.Provider value={contentFocusKey}>
+          <div ref={contentRef} className="main-content" data-testid="main-content">
+            {renderPage()}
           </div>
-        </div>
+        </FocusContext.Provider>
       </div>
-      <div className="main-content" data-testid="main-content">
-        {renderPage()}
-      </div>
-    </div>
+    </FocusContext.Provider>
   );
 }
