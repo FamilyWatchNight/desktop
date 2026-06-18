@@ -40,7 +40,7 @@ export function MenuItem({
   disabled,
   ...rest
 }: MenuItemProps): React.ReactElement {
-  const { ref, focused } = useFocusable();
+  const { ref, focused, focusSelf } = useFocusable();
   const navigation = useOptionalNavigation();
   const currentPage = pageId && navigation ? navigation.currentPage : undefined;
   const derivedActive = pageId ? currentPage === pageId : false;
@@ -66,6 +66,7 @@ export function MenuItem({
   return (
     <button
       ref={ref}
+      onFocus={focusSelf}
       type={type}
       className={classes}
       aria-current={active ? 'page' : undefined}

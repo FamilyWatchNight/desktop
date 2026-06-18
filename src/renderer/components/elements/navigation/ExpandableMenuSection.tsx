@@ -28,7 +28,7 @@ export function ExpandableMenuSection({
   testId,
   className = '',
 }: ExpandableMenuSectionProps): React.ReactElement {
-  const { ref, focused } = useFocusable();
+  const { ref, focused, focusSelf } = useFocusable();
   const generatedId = useId();
   const sectionId = testId ?? `expandable-menu-section-${generatedId}`;
   const contentId = `${sectionId}-content`;
@@ -67,6 +67,7 @@ export function ExpandableMenuSection({
     <div className={classes} data-testid={testId}>
       <button
         ref={ref}
+        onFocus={focusSelf}
         type="button"
         className="expandable-menu-section__header"
         aria-expanded={expanded}

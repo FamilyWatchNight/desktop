@@ -88,7 +88,7 @@ const BaseInputImpl = (
   }: BaseInputProps,
   forwardedRef: React.ForwardedRef<HTMLInputElement>,
 ) => {
-  const { ref: focusableRefRaw, focused } = useFocusable();
+  const { ref: focusableRefRaw, focused, focusSelf } = useFocusable();
   const focusableRef = focusableRefRaw as React.ForwardedRef<HTMLInputElement>;
   const { type: _type, ...restWithoutType } = rest as Record<string, unknown>;
   void _type;
@@ -244,6 +244,7 @@ const BaseInputImpl = (
       {...(implicitProps as React.InputHTMLAttributes<HTMLInputElement>)}
       {...(restWithoutType as React.InputHTMLAttributes<HTMLInputElement>)}
       ref={setRefs}
+      onFocus={focusSelf}
     />
   );
 

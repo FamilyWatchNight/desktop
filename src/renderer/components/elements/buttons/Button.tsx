@@ -31,7 +31,7 @@ export function Button({
   disabled,
   ...rest
 }: ButtonProps): React.ReactElement {
-  const { ref, focused } = useFocusable();
+  const { ref, focused, focusSelf } = useFocusable();
   const classes = [
     'button',
     focused && 'has-nav-focus',
@@ -46,6 +46,7 @@ export function Button({
     <button
       ref={ref}
       type={type}
+      onFocus={focusSelf}
       className={classes}
       disabled={disabled}
       data-testid={testId}

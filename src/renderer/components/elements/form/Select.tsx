@@ -48,7 +48,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       testId,
     });
 
-    const { ref: focusableRefRaw, focused } = useFocusable();
+    const { ref: focusableRefRaw, focused, focusSelf } = useFocusable();
     const focusableRef = focusableRefRaw as React.ForwardedRef<HTMLSelectElement>;
     const classes = [focused && 'has-nav-focus', className].filter(Boolean).join(' ');
 
@@ -97,7 +97,11 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     }
 
     const selectElement = (
-      <select {...(implicitProps as React.SelectHTMLAttributes<HTMLSelectElement>)} {...rest} />
+      <select
+        {...(implicitProps as React.SelectHTMLAttributes<HTMLSelectElement>)}
+        onFocus={focusSelf}
+        {...rest}
+      />
     );
 
     // If initialValue changes after mount, imperatively update the DOM value so uncontrolled select reflects it.
