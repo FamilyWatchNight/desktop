@@ -124,8 +124,33 @@ export default function Layout(): React.ReactElement {
 
   const testMenuSection = testing.buildTestingMenu?.();
 
+  const filterEffectsActive = true; // TODO: Set this to false to save CPU when there's no keyboard-nav energy ring to be shown
+  const svgFilterEffectsClasses = [
+    'svg-filter-effects-provider',
+    filterEffectsActive && 'svg-filter-effects-active',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <FocusContext.Provider value={appFocusKey}>
+      <svg className={svgFilterEffectsClasses} xmlns="http://w3.org">
+        <defs>
+          <filter id="hue-energy" x="-50%" y="-50%" width="200%" height="200%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="4" result="noise" />
+            <feColorMatrix type="hueRotate" in="noise" result="shiftedNoise">
+              <animate attributeName="values" from="0" to="360" dur="3s" repeatCount="indefinite" />
+            </feColorMatrix>
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="shiftedNoise"
+              scale="2"
+              xChannelSelector="R"
+              yChannelSelector="B"
+            />
+          </filter>
+        </defs>
+      </svg>
       <div ref={appRef} className="app-layout" data-testid="app-layout">
         <header className="app-header" data-testid="app-header">
           <button

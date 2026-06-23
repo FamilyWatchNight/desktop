@@ -53,12 +53,10 @@ export function ExpandableMenuSection({
     onExpandedChange?.(nextExpanded);
   };
 
-  const classes = [
-    'expandable-menu-section',
-    expanded ? 'expanded' : '',
-    focused && 'has-nav-focus',
-    className,
-  ]
+  const classes = ['expandable-menu-section', expanded ? 'expanded' : '', className]
+    .filter(Boolean)
+    .join(' ');
+  const buttonClasses = ['expandable-menu-section__header', focused && 'has-nav-focus']
     .filter(Boolean)
     .join(' ');
   const { ref: childrenRef, focusKey: childrenFocusKey } = useFocusable({ focusable: expanded });
@@ -69,7 +67,7 @@ export function ExpandableMenuSection({
         ref={ref}
         onFocus={focusSelf}
         type="button"
-        className="expandable-menu-section__header"
+        className={buttonClasses}
         aria-expanded={expanded}
         aria-controls={contentId}
         onClick={handleToggle}

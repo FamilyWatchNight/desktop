@@ -192,7 +192,6 @@ const BaseInputImpl = (
   // Compute element props while allowing explicit props to win
   const implicitProps: Record<string, unknown> = {
     id: inputId,
-    classes,
     'data-testid': testId,
     ref: setRefs,
     'aria-label': ariaLabel,
@@ -243,6 +242,7 @@ const BaseInputImpl = (
     <input
       {...(implicitProps as React.InputHTMLAttributes<HTMLInputElement>)}
       {...(restWithoutType as React.InputHTMLAttributes<HTMLInputElement>)}
+      className={classes}
       ref={setRefs}
       onFocus={focusSelf}
     />
@@ -287,7 +287,7 @@ const BaseInputImpl = (
 
   if (labelFirst) {
     return (
-      <label className={className} htmlFor={inputId}>
+      <label htmlFor={inputId}>
         <span>{label}</span>
         {inputElement}
       </label>
@@ -295,7 +295,7 @@ const BaseInputImpl = (
   }
 
   return (
-    <label className={className} htmlFor={inputId}>
+    <label htmlFor={inputId}>
       {inputElement}
       <span>{label}</span>
     </label>

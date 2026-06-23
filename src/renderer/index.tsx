@@ -16,7 +16,7 @@ import './i18n';
 initNorigin({
   debug: false,
   visualDebug: false,
-  shouldFocusDOMNode: true,
+  shouldFocusDOMNode: false,
 });
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
