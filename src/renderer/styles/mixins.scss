@@ -47,6 +47,7 @@
       outline: 2px solid var(--navigation-base-color);
       border-color: var(--navigation-base-color);
       box-shadow: 0 0 abs($gap) var(--navigation-base-color);
+      outline-offset: calc($gap / 2);
     }
   }
 }
