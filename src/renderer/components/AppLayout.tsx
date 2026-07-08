@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../api-client';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigationFocusable } from '../contexts/useNavigationFocusable';
 import { PAGE_IDS } from '../pages/PageIds';
 import * as testing from '../testing';
 
@@ -42,7 +43,7 @@ interface TaskPayload {
 export default function Layout(): React.ReactElement {
   const { t } = useTranslation(['layout', 'common']);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { currentPage } = useNavigation();
+  const { currentPage, navigationMode } = useNavigation();
   const [systemExpanded, setSystemExpanded] = useState(false);
   const [activeTask, setActiveTask] = useState<TaskPayload | null>(null);
   const [queue, setQueue] = useState<TaskPayload[]>([]);
@@ -54,8 +55,14 @@ export default function Layout(): React.ReactElement {
     focusKey: 'APPLICATION_ROOT',
     trackChildren: true,
   });
-  const { ref: menuButtonRef, focused: menuButtonFocused } = useFocusable({
-    focusKey: 'MAIN_MENU_BUTTON',
+  const {
+    ref: menuButtonRef,
+    focused: menuButtonFocused,
+    domRef: menuButtonDomRef,
+  } = useNavigationFocusable<HTMLButtonElement>({
+    onActivate: () => {
+      menuButtonDomRef.current?.click();
+    },
   });
   const { ref: menuRef, focusKey: menuFocusKey } = useFocusable({
     focusKey: 'MAIN_MENU',
@@ -167,6 +174,9 @@ export default function Layout(): React.ReactElement {
           <h1 className="app-title" data-testid="app-title">
             {t('app.name', { ns: 'common' })}
           </h1>
+          <span className="app-navigation-mode" data-testid="app-navigation-mode">
+            {navigationMode}
+          </span>
         </header>
         {menuOpen && (
           <div className="menu-overlay" data-testid="menu-overlay" onClick={closeMenu}></div>

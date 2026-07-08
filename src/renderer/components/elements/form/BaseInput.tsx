@@ -5,9 +5,10 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
-import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
 import log from 'electron-log/renderer';
 import React, { forwardRef, useContext, useEffect } from 'react';
+
+import { useNavigationFocusable } from '../../../contexts/useNavigationFocusable';
 
 import { GroupContext } from './GroupContext';
 import { useFormField } from './useFormField';
@@ -88,7 +89,16 @@ const BaseInputImpl = (
   }: BaseInputProps,
   forwardedRef: React.ForwardedRef<HTMLInputElement>,
 ) => {
-  const { ref: focusableRefRaw, focused, focusSelf } = useFocusable();
+  const {
+    ref: focusableRefRaw,
+    focused,
+    focusSelf,
+    domRef,
+  } = useNavigationFocusable<HTMLInputElement>({
+    onActivate: () => {
+      domRef.current?.click();
+    },
+  });
   const focusableRef = focusableRefRaw as React.ForwardedRef<HTMLInputElement>;
   const { type: _type, ...restWithoutType } = rest as Record<string, unknown>;
   void _type;

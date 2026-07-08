@@ -6,9 +6,9 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
-import log from 'electron-log/renderer';
 import React from 'react';
+
+import { useNavigationFocusable } from '../../../contexts/useNavigationFocusable';
 
 import { useFormField } from './useFormField';
 
@@ -48,7 +48,16 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       testId,
     });
 
-    const { ref: focusableRefRaw, focused, focusSelf } = useFocusable();
+    const {
+      ref: focusableRefRaw,
+      focused,
+      focusSelf,
+      domRef,
+    } = useNavigationFocusable<HTMLSelectElement>({
+      onActivate: () => {
+        domRef.current?.click();
+      },
+    });
     const focusableRef = focusableRefRaw as React.ForwardedRef<HTMLSelectElement>;
     const classes = [focused && 'has-nav-focus', className].filter(Boolean).join(' ');
 

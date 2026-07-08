@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import { FocusContext, useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
 import React, { type MouseEvent, type ReactNode, useEffect, useId, useState } from 'react';
 
+import { useNavigationFocusable } from '../../../contexts/useNavigationFocusable';
 import { ChevronIcon } from '../icons';
 
 export interface ExpandableMenuSectionProps {
@@ -28,7 +29,11 @@ export function ExpandableMenuSection({
   testId,
   className = '',
 }: ExpandableMenuSectionProps): React.ReactElement {
-  const { ref, focused, focusSelf } = useFocusable();
+  const { ref, focused, focusSelf, domRef } = useNavigationFocusable<HTMLButtonElement>({
+    onActivate: () => {
+      domRef.current?.click();
+    },
+  });
   const generatedId = useId();
   const sectionId = testId ?? `expandable-menu-section-${generatedId}`;
   const contentId = `${sectionId}-content`;

@@ -6,11 +6,11 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from 'react';
 import React from 'react';
 
 import { useOptionalNavigation } from '../../../contexts/NavigationContext';
+import { useNavigationFocusable } from '../../../contexts/useNavigationFocusable';
 
 export interface MenuItemProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
@@ -40,7 +40,12 @@ export function MenuItem({
   disabled,
   ...rest
 }: MenuItemProps): React.ReactElement {
-  const { ref, focused, focusSelf } = useFocusable();
+  const { ref, focused, focusSelf, domRef } = useNavigationFocusable<HTMLButtonElement>({
+    onActivate: () => {
+      if (disabled) return;
+      domRef.current?.click();
+    },
+  });
   const navigation = useOptionalNavigation();
   const currentPage = pageId && navigation ? navigation.currentPage : undefined;
   const derivedActive = pageId ? currentPage === pageId : false;
