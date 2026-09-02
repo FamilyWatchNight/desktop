@@ -14,7 +14,7 @@ import express from 'express';
 
 import { registerIpcHandlers } from './api-server/ipc';
 import { settingsService } from './api-server/ipc/instances';
-import { createSystemContext } from './auth/context-manager';
+import { createSystemContext } from './auth/auth-context';
 import * as db from './database';
 import { initialize as initializeEventNotificationManager } from './event-notification-manager';
 import i18n from './i18n';

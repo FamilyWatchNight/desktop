@@ -11,7 +11,7 @@ import { randomBytes } from 'crypto';
 import i18n from '../i18n';
 import type { AuthenticatedUser, UserService } from '../services/UserService';
 
-import { createAuthContext } from './context-manager';
+import { createAuthContext } from './auth-context';
 import { SessionError } from './errors';
 import type { PermissionStub } from './permissions';
 

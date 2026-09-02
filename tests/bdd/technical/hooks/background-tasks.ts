@@ -8,7 +8,7 @@ the Free Software Foundation, version 3.
 
 import { ElectronApplication } from 'playwright';
 
-import { type AuthContextPayload } from '../../../src/main/auth/context-manager';
+import { type AuthContextPayload } from '../../../src/main/auth/auth-context';
 import { withTestHooks } from '../infrastructure/utils';
 
 /**

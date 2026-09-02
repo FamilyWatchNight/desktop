@@ -12,7 +12,7 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import log from 'electron-log/main';
 
-import { AuthContext } from '../auth/context-manager';
+import { AuthContext } from '../auth/auth-context';
 import { AuthenticationError, AuthorizationError } from '../auth/errors';
 import { type PermissionStub, PERMISSIONS } from '../auth/permissions';
 import { getDb, getModels } from '../database';

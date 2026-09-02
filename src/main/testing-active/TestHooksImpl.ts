@@ -8,7 +8,7 @@ the Free Software Foundation, version 3.
 
 import { app } from 'electron';
 
-import { createAuthContext, type AuthContextPayload } from '../auth/context-manager';
+import { createAuthContext, type AuthContextPayload } from '../auth/auth-context';
 import { PERMISSION_STUBS, type PermissionStub } from '../auth/permissions';
 import * as backgroundTaskManager from '../background-task-manager';
 import * as db from '../database';

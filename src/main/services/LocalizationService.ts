@@ -11,8 +11,8 @@ import path from 'path';
 
 import { app } from 'electron';
 
-import { AuthContext } from '../auth/context-manager';
-import { safeJoin, assertPathInsideAllowedDirs } from '../security/pathGuards';
+import { AuthContext } from '../auth/auth-context';
+import { assertPathInsideAllowedDirs, safeJoin } from '../security/pathGuards';
 
 const isTestMode = process.env.NODE_ENV === 'test';
 const isDevMode = !(app && app.isPackaged);

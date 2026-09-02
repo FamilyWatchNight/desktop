@@ -6,7 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { AuthContext } from '../auth/context-manager';
+import { AuthContext } from '../auth/auth-context';
 import { AuthenticationError, AuthorizationError } from '../auth/errors';
 import type { PermissionStub } from '../auth/permissions';
 import { PERMISSIONS } from '../auth/permissions';
