@@ -11,6 +11,7 @@ import { ipcMain } from 'electron';
 import * as db from '../../database';
 
 import { registerAppIpcHandlers } from './app';
+import { registerAuthIpcHandlers } from './auth';
 import { registerBackgroundTaskIpcHandlers } from './background-tasks';
 import { registerMovieIpcHandlers } from './movies';
 import { broadcast, setWindow } from './notifications';
@@ -21,6 +22,7 @@ export { broadcast, setWindow };
 
 export function registerIpcHandlers(): void {
   registerAppIpcHandlers();
+  registerAuthIpcHandlers();
   registerBackgroundTaskIpcHandlers();
   registerMovieIpcHandlers();
   registerSettingsIpcHandlers();

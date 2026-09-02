@@ -11,6 +11,7 @@ import log from 'electron-log/renderer';
 import { ApiClient } from '../types';
 
 import { HttpAppApi } from './app';
+import { HttpAuthApi } from './auth';
 import { HttpBackgroundTaskApi } from './background-tasks';
 import { HttpMovieApi } from './movies';
 import { HttpSettingsApi } from './settings';
@@ -21,6 +22,7 @@ class HttpApiClient implements ApiClient {
   private ws: WebSocket | null = null;
 
   app = new HttpAppApi();
+  auth = new HttpAuthApi();
   backgroundTasks = new HttpBackgroundTaskApi(this);
   movies = new HttpMovieApi();
   settings = new HttpSettingsApi();

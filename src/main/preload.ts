@@ -8,6 +8,8 @@ the Free Software Foundation, version 3.
 
 import { contextBridge, ipcRenderer } from 'electron';
 
+let authToken: string | null = null;
+
 export interface ElectronAPI {
   app: {
     getAppVersion: () => Promise<string>;
@@ -21,6 +23,11 @@ export interface ElectronAPI {
       key: string,
       fallbackValue: string,
     ) => Promise<void>;
+  };
+  auth: {
+    login: (username: string, password: string) => Promise<unknown>;
+    getSession: () => Promise<unknown>;
+    logout: () => Promise<void>;
   };
   backgroundTasks: {
     enqueueBackgroundTask: (taskType: string, args?: Record<string, unknown>) => Promise<unknown>;
@@ -73,6 +80,21 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.invoke('locale-get', namespace, language),
     saveMissingKey: (namespace: string, language: string, key: string, fallbackValue: string) =>
       ipcRenderer.invoke('locale-missing-key', namespace, language, key, fallbackValue),
+  },
+  auth: {
+    async login(username: string, password: string) {
+      const session = await ipcRenderer.invoke('auth-login', username, password);
+      authToken = session.token;
+      return session;
+    },
+    getSession: () => ipcRenderer.invoke('auth-current', authToken),
+    async logout() {
+      try {
+        await ipcRenderer.invoke('auth-logout', authToken);
+      } finally {
+        authToken = null;
+      }
+    },
   },
   backgroundTasks: {
     enqueueBackgroundTask: (taskType: string, args?: Record<string, unknown>) =>

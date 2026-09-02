@@ -55,6 +55,22 @@ export interface FirstAdminUserData {
   displayName?: string | null;
 }
 
+export interface AuthSession {
+  token: string;
+  userId: number;
+  username: string;
+  roles: number[];
+  permissions: string[];
+  createdAt: number;
+  expiresAt: number;
+}
+
+export interface AuthApi {
+  login(username: string, password: string): Promise<AuthSession>;
+  getSession(): Promise<AuthSession>;
+  logout(): Promise<void>;
+}
+
 export interface UserApi {
   hasUsers(): Promise<boolean>;
   createFirstAdmin(data: FirstAdminUserData): Promise<{
@@ -69,6 +85,7 @@ export interface UserApi {
 
 export interface ApiClient {
   app: AppApi;
+  auth: AuthApi;
   backgroundTasks: BackgroundTaskApi;
   movies: MovieApi;
   settings: SettingsApi;
