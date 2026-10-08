@@ -6,7 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-import { Given, When, Then } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
@@ -457,6 +457,19 @@ When(
   },
 );
 
+async function assignRoleToUser(
+  world: CustomWorld,
+  roleKey: string,
+  userKey?: string,
+): Promise<void> {
+  const role = (await getRoleByKey(world, roleKey)) as { id: number };
+  const user = userKey
+    ? (getStoreUser(world, userKey) as { id: number })
+    : (getStoreUser(world) as { id: number });
+  const system = getSystemPersona(world);
+  await system.assignRoleToUser(user.id, role.id);
+}
+
 When('I assign the role to the user', async function (this: CustomWorld) {
   const role = getStoreRole(this);
   const user = getStoreUser(this);
@@ -465,10 +478,11 @@ When('I assign the role to the user', async function (this: CustomWorld) {
 });
 
 When('I assign the role {string} to the user', async function (this: CustomWorld, roleKey: string) {
-  const role = (await getRoleByKey(this, roleKey)) as { id: number };
-  const user = getStoreUser(this);
-  const system = getSystemPersona(this);
-  await system.assignRoleToUser(user.id, role.id);
+  await assignRoleToUser(this, roleKey);
+});
+
+Given('the user has the role {string}', async function (this: CustomWorld, roleKey: string) {
+  await assignRoleToUser(this, roleKey);
 });
 
 Then(
