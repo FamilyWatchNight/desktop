@@ -6,3 +6,10 @@ updates:
       interval: 'weekly'
     commit-message:
       prefix: 'chore(deps)'
+    groups:
+      react-ecosystem:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
