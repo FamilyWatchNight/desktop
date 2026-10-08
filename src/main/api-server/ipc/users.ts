@@ -15,6 +15,7 @@ import { userService } from './instances';
 
 export function registerUserIpcHandlers(): void {
   ipcMain.handle('users-has-users', () => userService.hasUsers());
+  ipcMain.handle('users-login-roster', () => userService.getLoginRoster());
   ipcMain.handle('users-create-first-admin', (_event, data: FirstAdminUserData) =>
     userService.createFirstAdmin(data),
   );

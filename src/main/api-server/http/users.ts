@@ -20,6 +20,11 @@ export function registerUserRoutes(app: Express): void {
     route(() => userService.hasUsers()),
   );
 
+  app.get(
+    '/api/users/login-roster',
+    route(() => userService.getLoginRoster()),
+  );
+
   app.post(
     '/api/users/bootstrap-admin',
     route((req: Request) => userService.createFirstAdmin(req.body as FirstAdminUserData)),

@@ -61,6 +61,7 @@ export interface ElectronAPI {
   };
   users: {
     hasUsers: () => Promise<boolean>;
+    getLoginRoster: () => Promise<unknown>;
     createFirstAdmin: (data: {
       username: string;
       email?: string | null;
@@ -133,6 +134,7 @@ contextBridge.exposeInMainWorld('electron', {
   },
   users: {
     hasUsers: () => ipcRenderer.invoke('users-has-users'),
+    getLoginRoster: () => ipcRenderer.invoke('users-login-roster'),
     createFirstAdmin: (data) => ipcRenderer.invoke('users-create-first-admin', data),
   },
 } as ElectronAPI);

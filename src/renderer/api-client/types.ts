@@ -73,6 +73,7 @@ export interface AuthApi {
 
 export interface UserApi {
   hasUsers(): Promise<boolean>;
+  getLoginRoster(): Promise<LoginRosterUser[]>;
   createFirstAdmin(data: FirstAdminUserData): Promise<{
     id: number;
     username: string;
@@ -81,6 +82,13 @@ export interface UserApi {
     createdAt: string;
     updatedAt: string;
   }>;
+}
+
+export interface LoginRosterUser {
+  id: number;
+  username: string;
+  hasPassword: boolean;
+  profile: { displayName: string | null } | null;
 }
 
 export interface ApiClient {
