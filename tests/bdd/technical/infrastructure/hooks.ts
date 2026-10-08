@@ -12,7 +12,7 @@ import * as path from 'path';
 
 import { After, Before } from '@cucumber/cucumber';
 
-import { createSystemContext } from '../../../../src/main/auth/context-manager';
+import { createSystemContext } from '../../../../src/main/auth/auth-context';
 import * as paths from '../../../../src/main/paths';
 
 import { withTestHooks } from './utils';

@@ -19,3 +19,15 @@ export class AuthorizationError extends Error {
     this.name = 'AuthorizationError';
   }
 }
+
+export type SessionErrorCode = 'invalid-session' | 'session-expired' | 'session-limit';
+
+export class SessionError extends AuthenticationError {
+  readonly code: SessionErrorCode;
+
+  constructor(code: SessionErrorCode, message: string) {
+    super(message);
+    this.name = 'SessionError';
+    this.code = code;
+  }
+}

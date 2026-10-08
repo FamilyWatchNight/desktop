@@ -6,7 +6,10 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { LoginRateLimiter } from '../../auth/login-rate-limiter';
+import { SessionManager } from '../../auth/session-manager';
 import {
+  AuthService,
   BackgroundTaskService,
   LocalizationService,
   MovieService,
@@ -20,3 +23,6 @@ export const localizationService = new LocalizationService();
 export const movieService = new MovieService();
 export const settingsService = new SettingsService();
 export const userService = new UserService();
+export const sessionManager = new SessionManager(userService);
+export const loginRateLimiter = new LoginRateLimiter();
+export const authService = new AuthService(userService, sessionManager, loginRateLimiter);

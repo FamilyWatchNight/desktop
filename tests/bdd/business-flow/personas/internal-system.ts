@@ -13,7 +13,7 @@ import {
   createSystemContext,
   type AuthContext,
   type AuthContextPayload,
-} from '../../../../src/main/auth/context-manager';
+} from '../../../../src/main/auth/auth-context';
 import { PERMISSIONS } from '../../../../src/main/auth/permissions';
 import { Role } from '../../../../src/main/db/models/Roles';
 import { User } from '../../../../src/main/db/models/Users';

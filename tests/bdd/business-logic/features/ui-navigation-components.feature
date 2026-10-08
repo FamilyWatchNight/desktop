@@ -12,7 +12,7 @@ Feature: Navigation component testing
   So that real renderer behavior is validated in the browser-based test UI
 
   Scenario: MenuItem renders label, badge, and active state
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the MenuItem test page is open for testing
     And the menu item label is set to "Watch Now"
     And the menu item badge is set to 5
@@ -22,7 +22,7 @@ Feature: Navigation component testing
     And the menu item preview should be active
 
   Scenario: ExpandableMenuSection expands and collapses
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Expandable Section test page is open for testing
     And the expandable section is expanded
     Then the expandable section toggle should have aria-expanded "true"
@@ -32,7 +32,7 @@ Feature: Navigation component testing
     And the expandable section content should be hidden
 
   Scenario: Button size and variant selection
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Button test page is open for testing
     And the button variant is set to "secondary"
     And the button size is set to "large"

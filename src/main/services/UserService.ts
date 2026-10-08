@@ -12,7 +12,7 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import log from 'electron-log/main';
 
-import { AuthContext } from '../auth/context-manager';
+import { AuthContext } from '../auth/auth-context';
 import { AuthenticationError, AuthorizationError } from '../auth/errors';
 import { type PermissionStub, PERMISSIONS } from '../auth/permissions';
 import { getDb, getModels } from '../database';
@@ -31,6 +31,13 @@ export interface AuthenticatedUser extends User {
 export interface BasicUserInfo {
   username: string;
   profile: { displayName: string | null; profileImagePath: string | null } | null;
+}
+
+export interface LoginRosterUser {
+  id: number;
+  username: string;
+  hasPassword: boolean;
+  profile: { displayName: string | null } | null;
 }
 
 export interface PermissionInfo {
@@ -107,6 +114,7 @@ export class UserService {
     }
 
     const username = typeof data?.username === 'string' ? data.username.trim() : '';
+
     if (!username) {
       throw new Error(this.t('errors.usernameRequired'));
     }
@@ -116,7 +124,6 @@ export class UserService {
     if (!adminRole) {
       throw new Error(this.t('errors.adminRoleNotFound'));
     }
-
     const userId = await users.create({
       username,
       email: data.email,
@@ -243,10 +250,34 @@ export class UserService {
       throw new AuthorizationError(this.t('errors.mustBeLoggedOut'));
     }
 
+    return this.getUsersWithPermissionStubs(permissions);
+  }
+
+  getLoginRoster(): LoginRosterUser[] {
+    const userIds = new Set([
+      ...this.getUserIdsWithPermissionStubs(['can-host']),
+      ...this.getUsersWithAdminPermission(),
+    ]);
+
+    return Array.from(userIds)
+      .map((userId) => this.toLoginRosterUser(userId))
+      .filter((user): user is LoginRosterUser => user !== null);
+  }
+
+  private getUsersWithPermissionStubs(permissions: PermissionStub[]): BasicUserInfo[] {
+    const userIds = new Set([
+      ...this.getUserIdsWithPermissionStubs(permissions),
+      ...this.getUsersWithAdminPermission(),
+    ]);
+
+    return Array.from(userIds)
+      .map((userId) => this.toBasicUserInfo(userId))
+      .filter((user): user is BasicUserInfo => user !== null);
+  }
+
+  private getUserIdsWithPermissionStubs(permissions: PermissionStub[]): number[] {
     const db = getDb();
     if (!db) throw new Error('Database not initialized');
-
-    const { users, userProfiles } = getModels();
 
     // Build query to get user IDs with specified permissions
     const placeholders = permissions.map(() => '?').join(',');
@@ -258,35 +289,40 @@ export class UserService {
       WHERE rp.permission_stub IN (${placeholders})
     `;
 
-    const userIds = (db.prepare(query).all(...permissions) as Array<{ id: number }>).map(
-      (row) => row.id,
-    );
-
-    // Check for can-admin (grants all permissions)
-    const adminUsers = this.getUsersWithAdminPermission();
-
-    // Combine and deduplicate
-    const userMap = new Map<number, BasicUserInfo>();
-
-    for (const userId of userIds) {
-      const user = users.getById(userId);
-      if (!user) continue;
-      const profile = userProfiles.getByUserId(userId);
-      userMap.set(user.id, { ...user, profile });
-    }
-
-    for (const adminUser of adminUsers) {
-      userMap.set(adminUser.id, { ...adminUser, profile: adminUser.profile });
-    }
-
-    return Array.from(userMap.values());
+    return (db.prepare(query).all(...permissions) as Array<{ id: number }>).map((row) => row.id);
   }
 
-  private getUsersWithAdminPermission(): AuthenticatedUser[] {
+  private toBasicUserInfo(userId: number): BasicUserInfo | null {
+    const { users, userProfiles } = getModels();
+    const user = users.getById(userId);
+    if (!user) return null;
+    const profile = userProfiles.getByUserId(userId);
+    return {
+      username: user.username,
+      profile: {
+        displayName: profile?.displayName || null,
+        profileImagePath: profile?.profileImagePath || null,
+      },
+    };
+  }
+
+  private toLoginRosterUser(userId: number): LoginRosterUser | null {
+    const { users, userProfiles } = getModels();
+    const user = users.getById(userId);
+    if (!user) return null;
+    const profile = userProfiles.getByUserId(userId);
+    const userRow = users.getByUsername(user.username);
+    return {
+      id: user.id,
+      username: user.username,
+      hasPassword: Boolean(userRow?.password_hash),
+      profile: profile ? { displayName: profile.displayName } : null,
+    };
+  }
+
+  private getUsersWithAdminPermission(): number[] {
     const db = getDb();
     if (!db) throw new Error('Database not initialized');
-
-    const { users, userProfiles } = getModels();
 
     const query = `
       SELECT DISTINCT u.id
@@ -298,14 +334,7 @@ export class UserService {
 
     const userIds = (db.prepare(query).all() as Array<{ id: number }>).map((row) => row.id);
 
-    return userIds
-      .map((userId) => {
-        const user = users.getById(userId);
-        if (!user) return null;
-        const profile = userProfiles.getByUserId(userId);
-        return { ...user, profile };
-      })
-      .filter((u): u is AuthenticatedUser => u !== null);
+    return userIds;
   }
 
   private getProfileImagesDir(): string {

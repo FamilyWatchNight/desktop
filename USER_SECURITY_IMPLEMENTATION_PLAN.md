@@ -14,6 +14,7 @@ The implementation builds on the existing database schema (users, user_profiles,
 - Add User and UserProfile models to handle database operations
 - Include methods for updating user profiles and managing profile images (stored in filesystem)
 - Add Cucumber integration tests for UserService methods
+- **Tests for this step:** Unit-test password hashing/verification, required unique usernames, passwordless users, profile updates, and secure profile-image storage; run the UserService Cucumber scenarios.
 - **Commit:** `feat: add UserService with authentication methods`
 
 ### Stage 2: Role-Based Access Control (RBAC) Service
@@ -22,6 +23,7 @@ The implementation builds on the existing database schema (users, user_profiles,
 - Add methods to assign/remove roles from users and check aggregated user permissions
 - Implement logic where can-admin grants all permissions
 - Add Cucumber integration tests for RoleService and permission checking
+- **Tests for this step:** Unit-test permission aggregation, `can-admin` wildcard behavior, role assignment/removal, and role constraints; run the RoleService Cucumber scenarios.
 - **Commit:** `feat: add RoleService and permission checking`
 
 ### Stage 3: Secure Services and APIs
@@ -30,6 +32,7 @@ The implementation builds on the existing database schema (users, user_profiles,
 - Implement authorization middleware in IPC and HTTP API layers (`src/main/api-server` and `src/renderer/api-client`)
 - Add authentication endpoints for login/session management
 - Add Cucumber integration tests verifying: when no users exist, can initialize roles/permissions and create first admin; with users present, services require authentication and proper permissions
+- **Tests for this step:** Test unauthenticated bootstrap operations, 401/403 transport mappings, authenticated service access, denied permissions, and fresh permission resolution through both IPC and HTTP.
 - **Commit:** `feat: secure services and APIs with authentication and authorization`
 
 ### Stage 4: Basic UI Testing Infrastructure
@@ -40,6 +43,7 @@ The implementation builds on the existing database schema (users, user_profiles,
   to the express server via HTTP.
 - Implement basic UI smoke test: open window, click menu, verify Settings page opens
 - Add Cucumber integration tests for the basic UI infrastructure
+- **Tests for this step:** Run the smoke feature in Electron and browser modes, confirming the window opens, menu interaction works, and Settings is reachable through the configured transport.
 - **Commit:** `feat: add basic UI testing infrastructure with Playwright`
 
 ### Stage 5: First Admin User Creation UI
@@ -49,16 +53,24 @@ The implementation builds on the existing database schema (users, user_profiles,
 - Automatically assign admin role
 - Introduce UnauthenticatedUser persona in Business flow layer for bootstrap actions
 - Add Cucumber integration tests for the first admin creation workflow
+- **Tests for this step:** Test empty-database visibility, valid and invalid submissions, optional fields, admin-role assignment, duplicate/second bootstrap rejection, and continued unauthenticated state in Electron and browser modes.
 - **Commit:** `feat: add first admin user creation UI`
 
 ### Stage 6: Login UI Workflow
 
 - Create login page component that lists existing users with can-host or can-admin permissions
-- Display user profile pictures and display names
-- Implement password prompt for users with passwords; allow immediate login for users without passwords
+- Display users as chips or cards, each with a user profile picture (in a circle) and display name (below the profile picture)
+- Where display name is missing, default to the username
+- Where profile picture is missing, default to the user's first initial in white in a solid colored circle, using the user record's numeric id to deterministically choose the color from among the `--core-*` color variables from `colors.scss`
+- Include a hover effect to enlarge the user's login chip in place without moving the other users' chips.
+- User clicks on their chip to begin login
+- For users with passwords, respond to a click by hiding other users' chips, animating the selected user's chip to the center of the screen, enlarged, with a password prompt added to the chip below the login/display name.
+- For users without passwords, respond to a click by logging in immmediately.
 - Integrate with UserService for authentication
 - Add AdminUser, HostUser, and RegularUser personas in Business flow layer for login and profile workflows
 - Add Cucumber integration tests for login workflow
+- Include a logout option in the menu.
+- **Tests for this step:** Unit-test session creation, one-hour expiry, invalidation, logout, deleted-user handling, and permission refresh. Test the blocking login overlay, eligible-user filtering, display-name fallback, deterministic initial avatars, hover/selection behavior, password and passwordless login, failed-login retry, authenticated shell access, and logout in both Electron and browser modes.
 - **Commit:** `feat: add login UI workflow`
 
 ### Stage 7: User Profile Management UI
@@ -67,6 +79,7 @@ The implementation builds on the existing database schema (users, user_profiles,
 - Allow updating display name, password, and profile picture
 - Enforce can-update-profile permission check
 - Add Cucumber integration tests for profile management
+- **Tests for this step:** Test permission gating, display-name/password/profile-image updates, validation failures, persistence, and the profile workflow in both supported UI transports.
 - **Commit:** `feat: add user profile management UI`
 
 ### Stage 8: User Management UI (Add/Edit/Delete)
@@ -78,6 +91,7 @@ The implementation builds on the existing database schema (users, user_profiles,
 - Prevent removing can-admin from own account
 - Allow creating users without roles
 - Add Cucumber integration tests for user management workflows
+- **Tests for this step:** Test authorized CRUD, users without roles, role assignment restrictions, self-admin protection, validation, persistence, and denied access for insufficient permissions.
 - **Commit:** `feat: add user management UI`
 
 ### Stage 9: Role Management UI
@@ -89,6 +103,7 @@ The implementation builds on the existing database schema (users, user_profiles,
 - Prevent deletion of system roles and roles that are assigned to users
 - Prevent modification of permissions for system roles
 - Add Cucumber integration tests for role management
+- **Tests for this step:** Test authorized role CRUD, duplication, display-name/hide changes, system-role protections, assigned-role deletion prevention, and unauthorized access.
 - **Commit:** `feat: add role management UI`
 
 ### Stage 10: Security Enforcement in Logic
@@ -97,6 +112,7 @@ The implementation builds on the existing database schema (users, user_profiles,
 - Ensure restrictions are enforced in application logic, not just UI
 - Update existing services to integrate with UserService and RoleService
 - Add Cucumber integration tests for permission enforcement
+- **Tests for this step:** Exercise every secured service/API operation with missing, valid, insufficient, stale, and `can-admin` contexts, asserting consistent domain and transport errors.
 - **Commit:** `feat: enforce permissions in application logic`
 
 ### Stage 11: Cucumber Feature Tests
@@ -104,6 +120,7 @@ The implementation builds on the existing database schema (users, user_profiles,
 - Write Cucumber feature files for all user security workflows (login, user creation, profile updates, etc.)
 - Implement step definitions using TDD approach
 - Validate behaviors including permission enforcement
+- **Tests for this step:** Execute the complete feature matrix for bootstrap, login, logout, profile, user, role, and permission workflows, including successful and denied paths.
 - **Commit:** `test: add cucumber features for user security workflows`
 
 ### Stage 12: Integration and Testing
@@ -111,6 +128,7 @@ The implementation builds on the existing database schema (users, user_profiles,
 - Run full test suite (unit tests, feature tests)
 - Fix any integration issues or failing tests
 - Ensure all workflows function end-to-end
+- **Tests for this step:** Run the full unit suite, all Cucumber features in Electron and browser modes, main/renderer builds, lint, and manual security checks for session expiry, credential leakage, authorization, and transport parity.
 - **Commit:** `chore: integrate and test user security features`
 
 ## Notes

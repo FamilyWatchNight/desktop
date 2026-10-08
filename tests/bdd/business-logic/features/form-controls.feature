@@ -13,7 +13,7 @@ Feature: Form Controls
   I want the Form Controls test page to expose inputs, fieldsets, and submit behavior
 
   Scenario: The controlled form updates state and displays current values
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Form Controls test page is open for testing
     When I enter "Alice" into the "controlledNameInput" input
     And I enter "alice@example.com" into the "controlledEmailInput" input
@@ -32,7 +32,7 @@ Feature: Form Controls
     And the "controlledNotificationMethodsDisplay" element should say "Notification methods: email, push"
 
   Scenario: The uncontrolled form submits DOM-updated values
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Form Controls test page is open for testing
     And the uncontrolled form is ready with no initial values
     And the "uncontrolledNameInput" input field has the value "Bob"
@@ -65,13 +65,13 @@ Feature: Form Controls
       """
 
   Scenario: Uncontrolled form initializes with no initial values
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Form Controls test page is open for testing
     And the uncontrolled form is ready with no initial values
     Then the uncontrolled form fields should display default values
 
   Scenario: Uncontrolled form initializes with provided initial values
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Form Controls test page is open for testing
     And the uncontrolled form is ready with initial values:
       """
@@ -88,7 +88,7 @@ Feature: Form Controls
     Then the uncontrolled form fields should be populated from the provided initial values
 
   Scenario: Uncontrolled form starts not ready, then becomes ready
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Form Controls test page is open for testing
     And the uncontrolled form is initially not ready
     Then the uncontrolled form fields should be disabled
@@ -108,7 +108,7 @@ Feature: Form Controls
     And the uncontrolled form fields should be populated from the provided initial values
 
   Scenario: Resetting the uncontrolled form restores default values
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Form Controls test page is open for testing
     And the uncontrolled form is ready with no initial values
     When I enter "Eve" into the "uncontrolledNameInput" input
@@ -121,7 +121,7 @@ Feature: Form Controls
     Then the uncontrolled form fields should display default values
 
   Scenario: Resetting the uncontrolled form restores provided initial values
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Form Controls test page is open for testing
     And the uncontrolled form is ready with initial values:
       """

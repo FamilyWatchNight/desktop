@@ -12,7 +12,7 @@ Feature: Page component testing
   So that changes to layout props are validated by BDD tests
 
   Scenario: Page component displays dynamic title, class, and centered styling
-    Given a user exists with username "hide-bootstrap-panel" and no password
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Page Framework test page is open for testing
     And the page title is set to "Hello Page"
     And the page is centered

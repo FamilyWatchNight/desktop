@@ -18,6 +18,9 @@ module.exports = {
   // (and other ESM-only packages) — exclude it from the ignore list.
   transformIgnorePatterns: ['node_modules/(?!(lodash-es)/)'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  moduleNameMapper: {
+    '\\.scss$': '<rootDir>/tests/styleMock.js',
+  },
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!tests/**/*', '!src/**/*.d.ts'],
   setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.ts'],
 };

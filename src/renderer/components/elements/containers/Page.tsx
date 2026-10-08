@@ -8,21 +8,19 @@ export interface PageProps {
   testId?: string;
 }
 
-export const Page: React.FC<PageProps> = ({
-  title,
-  children,
-  centered = false,
-  className = '',
-  testId,
-}) => {
-  const classes = ['page', centered ? 'centered' : '', className].filter(Boolean).join(' ');
+export const Page = React.forwardRef<HTMLDivElement, PageProps>(
+  ({ title, children, centered = false, className = '', testId }, ref) => {
+    const classes = ['page', centered ? 'centered' : '', className].filter(Boolean).join(' ');
 
-  return (
-    <main className={classes} data-testid={testId}>
-      <div className="page-container">
-        {title && <h1 className={'page-title'}>{title}</h1>}
-        {children}
-      </div>
-    </main>
-  );
-};
+    return (
+      <main className={classes} data-testid={testId}>
+        <div ref={ref} className="page-container">
+          {title && <h1 className={'page-title'}>{title}</h1>}
+          {children}
+        </div>
+      </main>
+    );
+  },
+);
+
+Page.displayName = 'Page';

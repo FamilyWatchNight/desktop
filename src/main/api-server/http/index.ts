@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import { Express } from 'express';
 
 import { registerAppRoutes } from './app';
+import { registerAuthRoutes } from './auth';
 import { registerBackgroundTaskRoutes } from './background-tasks';
 import { registerMovieRoutes } from './movies';
 import { broadcast, initializeWebSocketServer } from './notifications';
@@ -19,6 +20,7 @@ export { broadcast, initializeWebSocketServer };
 
 export function registerHttpRoutes(app: Express): void {
   registerAppRoutes(app);
+  registerAuthRoutes(app);
   registerBackgroundTaskRoutes(app);
   registerMovieRoutes(app);
   registerSettingsRoutes(app);
