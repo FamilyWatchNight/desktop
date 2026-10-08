@@ -12,6 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../api-client';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useNavigationFocusable } from '../contexts/useNavigationFocusable';
 import { PAGE_IDS } from '../pages/PageIds';
@@ -20,6 +21,7 @@ import * as testing from '../testing';
 import { HomeIcon, SettingsIcon, TasksIcon } from './elements/icons';
 import { ExpandableMenuSection, MenuItem } from './elements/navigation';
 import FirstAdminUserOverlay from './FirstAdminUserOverlay';
+import LoginOverlay from './LoginOverlay';
 import pageRegistry from './pageRegistry';
 import BackgroundTasksPage from './pages/BackgroundTasksPage';
 import HomePage from './pages/HomePage';
@@ -43,12 +45,14 @@ interface TaskPayload {
 
 export default function Layout(): React.ReactElement {
   const { t } = useTranslation(['layout', 'common']);
+  const { status: authStatus, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const { currentPage, navigationMode } = useNavigation();
   const [systemExpanded, setSystemExpanded] = useState(false);
   const [activeTask, setActiveTask] = useState<TaskPayload | null>(null);
   const [queue, setQueue] = useState<TaskPayload[]>([]);
   const [hasUsers, setHasUsers] = useState<boolean | null>(null);
+  const authGateActive = hasUsers === true && authStatus !== 'authenticated';
 
   const toggleMenu = (): void => setMenuOpen(!menuOpen);
   const closeMenu = (): void => setMenuOpen(false);
@@ -168,7 +172,11 @@ export default function Layout(): React.ReactElement {
         </defs>
       </svg>
       <div ref={appRef} className="app-layout" data-testid="app-layout">
-        <header inert={hasUsers === false} className="app-header" data-testid="app-header">
+        <header
+          inert={hasUsers === false || authGateActive}
+          className="app-header"
+          data-testid="app-header"
+        >
           <button
             ref={menuButtonRef}
             className={'hamburger-button' + (menuButtonFocused ? ' has-nav-focus' : '')}
@@ -192,7 +200,7 @@ export default function Layout(): React.ReactElement {
         )}
         <FocusContext.Provider value={menuFocusKey}>
           <div
-            inert={hasUsers === false}
+            inert={hasUsers === false || authGateActive}
             className={`side-menu ${menuOpen ? 'open' : ''}`}
             data-testid="side-menu"
           >
@@ -238,6 +246,11 @@ export default function Layout(): React.ReactElement {
                     pageId={PAGE_IDS.SETTINGS}
                     testId="menu-settings"
                   />
+                  <MenuItem
+                    label={t('menu.logout')}
+                    onClick={() => void logout().catch(() => undefined)}
+                    testId="menu-logout"
+                  />
                 </div>
               </div>
             </nav>
@@ -245,7 +258,7 @@ export default function Layout(): React.ReactElement {
         </FocusContext.Provider>
         <FocusContext.Provider value={contentFocusKey}>
           <div
-            inert={hasUsers === false}
+            inert={hasUsers === false || authGateActive}
             ref={contentRef}
             className="main-content"
             data-testid="main-content"
@@ -254,6 +267,7 @@ export default function Layout(): React.ReactElement {
           </div>
         </FocusContext.Provider>
         {hasUsers === false && <FirstAdminUserOverlay onCreated={() => setHasUsers(true)} />}
+        {hasUsers === true && authStatus !== 'authenticated' && <LoginOverlay />}
       </div>
     </FocusContext.Provider>
   );

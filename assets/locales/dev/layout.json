@@ -4,7 +4,8 @@
     "system": "___System___",
     "backgroundTasks": "___Background Tasks___",
     "styleboard": "___Styleboard___",
-    "settings": "___Settings___"
+    "settings": "___Settings___",
+    "logout": "___Log out___"
   },
   "toggleMenu": "___Toggle menu___"
 }
