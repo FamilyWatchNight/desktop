@@ -74,6 +74,12 @@ export interface AuthApi {
 export interface UserApi {
   hasUsers(): Promise<boolean>;
   getLoginRoster(): Promise<LoginRosterUser[]>;
+  getCurrentDetails(): Promise<UserDetails | null>;
+  updateCurrentProfile(data: CurrentUserProfileUpdate): Promise<void>;
+  changeCurrentPassword(password: string): Promise<void>;
+  removeCurrentPassword(): Promise<void>;
+  saveCurrentProfileImage(imageData: Uint8Array, mimeType: string): Promise<string>;
+  deleteCurrentProfileImage(): Promise<void>;
   createFirstAdmin(data: FirstAdminUserData): Promise<{
     id: number;
     username: string;
@@ -82,6 +88,39 @@ export interface UserApi {
     createdAt: string;
     updatedAt: string;
   }>;
+}
+
+export interface UserDetails {
+  account: {
+    id?: number;
+    username: string;
+    email?: string | null;
+    hasPassword: boolean;
+    lastLoginAt?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  profile: {
+    id?: number;
+    userId?: number;
+    displayName: string | null;
+    profileImagePath: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+  } | null;
+}
+
+export interface UserProfile {
+  id: number;
+  userId: number;
+  displayName: string | null;
+  profileImagePath: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CurrentUserProfileUpdate {
+  displayName?: string | null;
 }
 
 export interface LoginRosterUser {

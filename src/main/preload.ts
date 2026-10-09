@@ -62,6 +62,12 @@ export interface ElectronAPI {
   users: {
     hasUsers: () => Promise<boolean>;
     getLoginRoster: () => Promise<unknown>;
+    getCurrentDetails: () => Promise<unknown>;
+    updateCurrentProfile: (data: { displayName?: string | null }) => Promise<void>;
+    changeCurrentPassword: (password: string) => Promise<void>;
+    removeCurrentPassword: () => Promise<void>;
+    saveCurrentProfileImage: (imageData: Uint8Array, mimeType: string) => Promise<string>;
+    deleteCurrentProfileImage: () => Promise<void>;
     createFirstAdmin: (data: {
       username: string;
       email?: string | null;
@@ -135,6 +141,17 @@ contextBridge.exposeInMainWorld('electron', {
   users: {
     hasUsers: () => ipcRenderer.invoke('users-has-users'),
     getLoginRoster: () => ipcRenderer.invoke('users-login-roster'),
+    getCurrentDetails: () => ipcRenderer.invoke('users-current-details', authToken),
+    updateCurrentProfile: (data: { displayName?: string | null }) =>
+      ipcRenderer.invoke('users-update-current-profile', authToken, data),
+    changeCurrentPassword: (password: string) =>
+      ipcRenderer.invoke('users-change-current-password', authToken, password),
+    removeCurrentPassword: () =>
+      ipcRenderer.invoke('users-remove-current-password', authToken),
+    saveCurrentProfileImage: (imageData: Uint8Array, mimeType: string) =>
+      ipcRenderer.invoke('users-save-current-profile-image', authToken, imageData, mimeType),
+    deleteCurrentProfileImage: () =>
+      ipcRenderer.invoke('users-delete-current-profile-image', authToken),
     createFirstAdmin: (data) => ipcRenderer.invoke('users-create-first-admin', data),
   },
 } as ElectronAPI);

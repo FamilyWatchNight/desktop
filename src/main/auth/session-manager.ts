@@ -74,7 +74,7 @@ export class SessionManager {
     const createdAt = this.now();
     const token = randomBytes(32).toString('hex');
     const record: SessionRecord = {
-      userId: user.id,
+      userId: user.account.id,
       createdAt,
       expiresAt: createdAt + SESSION_TTL_MS,
     };
@@ -86,7 +86,7 @@ export class SessionManager {
     }
 
     const sessionsForUser = Array.from(this.sessions.values()).filter(
-      (session) => session.userId === user.id,
+      (session) => session.userId === user.account.id,
     ).length;
     if (sessionsForUser >= this.maxSessionsPerUser) {
       throw new SessionError('session-limit', this.t('errors.sessionLimitReached'));
@@ -143,7 +143,7 @@ export class SessionManager {
     const authContext = createAuthContext(record.userId, []);
     const user = this.userService.getUserById(record.userId, authContext);
 
-    if (!user || !('id' in user)) {
+    if (!user || user.account.id === undefined) {
       this.sessions.delete(token);
       throw new SessionError('invalid-session', this.t('errors.invalidSession'));
     }
@@ -157,8 +157,8 @@ export class SessionManager {
       token,
       createdAt: record.createdAt,
       expiresAt: record.expiresAt,
-      userId: user.id,
-      username: user.username,
+      userId: user.account.id,
+      username: user.account.username,
       roles,
       permissions,
     };

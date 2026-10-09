@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
+import type { AuthenticatedUser } from '../../../../src/main/services/UserService';
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
 import {
   generatePngBuffer,
@@ -33,8 +34,13 @@ function getSystemPersona(world: CustomWorld): InternalSystemPersona {
   return state.system as InternalSystemPersona;
 }
 
-function setStoreUser(world: CustomWorld, user: { id: number }, userKey?: string) {
-  world.setStateObject('users', user, userKey);
+function setStoreUser(
+  world: CustomWorld,
+  user: { id: number; username: string } | AuthenticatedUser,
+  userKey?: string,
+) {
+  const account = 'account' in user ? user.account : user;
+  world.setStateObject('users', { id: account.id, username: account.username }, userKey);
 }
 
 function getStoreUser(world: CustomWorld, userKey?: string) {
@@ -48,6 +54,7 @@ function getStoreRole(world: CustomWorld, roleKey?: string) {
 async function createUserNoPassword(world: CustomWorld, username: string) {
   const system = getSystemPersona(world);
   const user = await system.createUser({ username });
+  world.setStateReturn(user, 'createdUser');
   setStoreUser(world, user, username);
   return user;
 }
@@ -55,6 +62,7 @@ async function createUserNoPassword(world: CustomWorld, username: string) {
 async function createUserWithPassword(world: CustomWorld, username: string, password: string) {
   const system = getSystemPersona(world);
   const user = await system.createUser({ username, password });
+  world.setStateReturn(user, 'createdUser');
   setStoreUser(world, user, username);
   return user;
 }
@@ -92,10 +100,11 @@ When(
 );
 
 Then('the user should be created successfully', function (this: CustomWorld) {
-  const user = getStoreUser(this) as { id?: number; username?: string } | undefined;
+  const user = this.getStateReturn('createdUser') as AuthenticatedUser | undefined;
   expect(user).toBeDefined();
-  expect(user?.id).toBeDefined();
-  expect(user?.username).toBeDefined();
+  expect(user?.account.id).toBeDefined();
+  expect(user?.account.username).toBeDefined();
+  expect(user?.account.hasPassword).toBeDefined();
 });
 
 Given(
@@ -170,9 +179,11 @@ When(
 );
 
 Then('authentication should succeed', function (this: CustomWorld) {
-  const authResult = this.getStateReturn('authenticate') as Record<string, unknown> | null;
+  const authResult = this.getStateReturn('authenticate') as
+    | AuthenticatedUser
+    | null;
   expect(authResult).toBeDefined();
-  expect(authResult?.id).toBeDefined();
+  expect(authResult?.account.id).toBeDefined();
 });
 
 Then('authentication should fail', function (this: CustomWorld) {
@@ -425,6 +436,7 @@ async function getUserProfile(world: CustomWorld, userKey: string) {
   const user = getStoreUser(world, userKey) as { id: number };
   const system = getSystemPersona(world);
   const result = await system.getUserById(user.id as number);
+  world.setStateReturn(result, 'getUserDetails');
   world.setStateReturn(result?.profile, 'getUserProfile');
   return result?.profile;
 }
@@ -444,16 +456,27 @@ When(
 
 Then('the returned profile should be limited', async function (this: CustomWorld) {
   const profile = this.getStateReturn('getUserProfile') as Record<string, unknown> | undefined;
+  const details = this.getStateReturn('getUserDetails') as
+    | { account?: Record<string, unknown> }
+    | undefined;
   expect(profile).toBeDefined();
   expect(profile?.displayName).toBeDefined();
   expect(profile?.id).toBeUndefined();
+  expect(details?.account?.username).toBeDefined();
+  expect(details?.account?.hasPassword).toBeDefined();
+  expect(details?.account?.id).toBeUndefined();
 });
 
 Then('the returned profile should be complete', async function (this: CustomWorld) {
   const profile = this.getStateReturn('getUserProfile') as Record<string, unknown> | undefined;
+  const details = this.getStateReturn('getUserDetails') as
+    | { account?: Record<string, unknown> }
+    | undefined;
   expect(profile).toBeDefined();
   expect(profile?.displayName).toBeDefined();
   expect(profile?.id).toBeDefined();
+  expect(details?.account?.id).toBeDefined();
+  expect(details?.account?.hasPassword).toBeDefined();
 });
 
 When('I authenticate as user {string}', async function (this: CustomWorld, userKey: string) {
@@ -461,12 +484,12 @@ When('I authenticate as user {string}', async function (this: CustomWorld, userK
   const system = getSystemPersona(this);
   const fullUser = await system.getUserById(user.id as number);
   // Authenticate the user - assume no password since we only have username in the map
-  const authenticatedUser = await system.authenticateUser(fullUser?.username as string, '');
+  const authenticatedUser = await system.authenticateUser(fullUser?.account.username as string, '');
   if (!authenticatedUser) {
     throw new Error(`Failed to authenticate as user "${userKey}"`);
   }
   setStoreUser(this, authenticatedUser, userKey);
-  system.runAsUser(authenticatedUser.id as number);
+  system.runAsUser(authenticatedUser.account.id);
 });
 
 async function getUsersWithPermissions(world: CustomWorld, permissions: string) {

@@ -17,7 +17,12 @@ import {
 import { PERMISSIONS } from '../../../../src/main/auth/permissions';
 import { Role } from '../../../../src/main/db/models/Roles';
 import { User } from '../../../../src/main/db/models/Users';
-import { AuthenticatedUser, FirstAdminUserData } from '../../../../src/main/services/UserService';
+import {
+  AuthenticatedUser,
+  BasicUserInfo,
+  FirstAdminUserData,
+  UserDetails,
+} from '../../../../src/main/services/UserService';
 import { withTestHooks } from '../../technical/infrastructure/utils';
 import { CustomWorld } from '../../technical/infrastructure/world';
 /**
@@ -310,17 +315,17 @@ export class InternalSystemPersona {
       password,
       this.getAuthContextPayload(),
     );
-    if (result?.id) {
-      await this.runAsUser(result.id as number);
+    if (result) {
+      await this.runAsUser(result.account.id);
     }
     return result;
   }
 
-  async getUserById(id: number): Promise<AuthenticatedUser | null> {
+  async getUserById(id: number): Promise<UserDetails | null> {
     return await this.world.usersApi.getUserById(id, this.getAuthContextPayload());
   }
 
-  async getUsersWithPermissions(permissions: string[]): Promise<AuthenticatedUser[]> {
+  async getUsersWithPermissions(permissions: string[]): Promise<BasicUserInfo[]> {
     return await this.world.usersApi.getUsersWithPermissions(
       permissions,
       this.getAuthContextPayload(),

@@ -214,7 +214,7 @@ Feature: User Service
     And user "bob" should have the display name "Bob Self Updated"
 
   @auth
-  Scenario: UserService.changePassword requires can-update-profile for self-service and can-manage-users for other users
+  Scenario: UserService.changePassword allows authenticated self-service and requires can-manage-users for other users
     Given a user exists with username "charlie" and password "oldpass"
     And a user exists with username "henry"
 
@@ -238,19 +238,16 @@ Feature: User Service
     When I attempt to change the password of user "charlie" to "henryChangedIt"
     Then an AuthorizationError should be thrown
 
-    # Self-service without can-update-profile should fail
+    # Self-service without profile permissions should succeed
     Given I run as user "charlie"
-    When I attempt to change the password of user "charlie" to "anotherpass"
-    Then an AuthorizationError should be thrown
-
-    # Self-service with can-update-profile should succeed
-    Given I run as user "charlie" with the permissions "can-update-profile"
     When I attempt to change the password of user "charlie" to "anotherpass"
     Then no error should be thrown
 
     When I attempt to change the password of user "charlie" to ""
     Then an error should be thrown
 
+    # Authenticated self-service can also remove the password without profile permissions
+    Given I run as user "charlie"
     When I attempt to remove the password of user "charlie"
     Then no error should be thrown
 

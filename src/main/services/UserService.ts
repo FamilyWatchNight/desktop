@@ -20,13 +20,43 @@ import { type UserProfile, type UserProfileData } from '../db/models/UserProfile
 import { type User, type UserData } from '../db/models/Users';
 import i18n from '../i18n';
 import { getAppDataRoot } from '../paths';
-import { assertPathInsideAllowedDirs, safeJoin } from '../security';
+import { assertPathInsideAllowedDirs, safeJoin, ValidationError } from '../security';
 
 export type CreateUserData = UserData;
 
-export interface AuthenticatedUser extends User {
+/**
+ * Missing account/profile metadata means the authenticated caller lacks permission to see it;
+ * null means the field is visible but has no value. `getUserById` returns private fields to the
+ * target user or a caller with `can-manage-users`, and otherwise returns the public fields.
+ * `getCurrentUserDetails` additionally requires `can-update-profile` for self-access.
+ * `hasPassword` is included in both views, matching the public login roster.
+ */
+export interface UserDetails {
+  account: {
+    id?: number;
+    username: string;
+    email?: string | null;
+    hasPassword: boolean;
+    lastLoginAt?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  profile: {
+    id?: number;
+    userId?: number;
+    displayName: string | null;
+    profileImagePath: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+  } | null;
+}
+
+export interface AuthenticatedUser extends UserDetails {
+  account: User & { hasPassword: boolean };
   profile: UserProfile | null;
 }
+
+export const PROFILE_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 
 export interface BasicUserInfo {
   username: string;
@@ -85,6 +115,37 @@ export class UserService {
     }
   }
 
+  private validatePasswordManagementAccess(
+    authContext: AuthContext | undefined,
+    targetUserId: number,
+  ): void {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+
+    if (
+      authContext.userId !== targetUserId &&
+      !authContext.hasPermission('can-manage-users')
+    ) {
+      throw new AuthorizationError(this.t('errors.insufficientPermissions'));
+    }
+  }
+
+  private getPrivateUserDetails(userId: number): AuthenticatedUser | null {
+    const { users, userProfiles } = getModels();
+    const user = users.getById(userId);
+    if (!user) return null;
+
+    const userRow = users.getByUsername(user.username);
+    return {
+      account: {
+        ...user,
+        hasPassword: Boolean(userRow?.password_hash),
+      },
+      profile: userProfiles.getByUserId(userId),
+    };
+  }
+
   hasUsers(): boolean {
     const db = getDb();
     if (!db) throw new Error('Database not initialized');
@@ -108,12 +169,11 @@ export class UserService {
     }
 
     try {
-      const { users, userProfiles } = getModels();
+      const { users } = getModels();
       const userId = await users.create(data);
-      const user = users.getById(userId);
+      const user = this.getPrivateUserDetails(userId);
       if (!user) throw new Error('Failed to retrieve created user');
-      const profile = userProfiles.getByUserId(userId);
-      return { ...user, profile };
+      return user;
     } catch (error) {
       log.error('[UserService.createUser] Error creating user:', error, 'data:', data);
       if (error instanceof Error) {
@@ -169,7 +229,7 @@ export class UserService {
     password: string,
     authContext?: AuthContext,
   ): Promise<AuthenticatedUser | null> {
-    const { users, userProfiles } = getModels();
+    const { users } = getModels();
     const userRow = users.getByUsername(username);
     if (!userRow) return null;
 
@@ -192,14 +252,11 @@ export class UserService {
 
     if (!isValid) return null;
 
-    const profile = userProfiles.getByUserId(userRow.id);
-
     users.updateLastLogin(userRow.id);
-    const user = users.getById(userRow.id);
-    return user ? { ...user, profile } : null;
+    return this.getPrivateUserDetails(userRow.id);
   }
 
-  getUserById(id: number, authContext?: AuthContext): AuthenticatedUser | BasicUserInfo | null {
+  getUserById(id: number, authContext?: AuthContext): UserDetails | null {
     let canSeeUserDetails = false;
 
     if (authContext) {
@@ -207,23 +264,23 @@ export class UserService {
         authContext.userId === id || authContext.hasPermission('can-manage-users');
     }
 
-    const { users, userProfiles } = getModels();
-    const user = users.getById(id);
+    const user = this.getPrivateUserDetails(id);
     if (!user) return null;
 
-    const profile = userProfiles.getByUserId(user.id);
+    if (canSeeUserDetails) return user;
 
-    if (canSeeUserDetails) {
-      return { ...user, profile };
-    } else {
-      return {
-        username: user.username,
-        profile: {
-          displayName: profile?.displayName || null,
-          profileImagePath: profile?.profileImagePath || null,
-        },
-      };
-    }
+    return {
+      account: {
+        username: user.account.username,
+        hasPassword: user.account.hasPassword,
+      },
+      profile: user.profile
+        ? {
+            displayName: user.profile.displayName,
+            profileImagePath: user.profile.profileImagePath,
+          }
+        : null,
+    };
   }
 
   async updateUserProfile(
@@ -242,15 +299,34 @@ export class UserService {
     }
   }
 
+  getCurrentUserDetails(authContext?: AuthContext): UserDetails | null {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    this.validateProfileUpdateAccess(authContext, authContext.userId);
+
+    return this.getUserById(authContext.userId, authContext);
+  }
+
+  async updateCurrentUserProfile(
+    data: Pick<UserProfileData, 'displayName'>,
+    authContext?: AuthContext,
+  ): Promise<void> {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    await this.updateUserProfile(authContext.userId, data, authContext);
+  }
+
   async changePassword(
     userId: number,
     newPassword: string,
     authContext?: AuthContext,
   ): Promise<void> {
-    this.validateProfileUpdateAccess(authContext, userId);
+    this.validatePasswordManagementAccess(authContext, userId);
 
     if (!newPassword) {
-      throw new Error(this.t('errors.passwordRequired'));
+      throw new ValidationError(this.t('errors.passwordRequired'));
     }
 
     const { users } = getModels();
@@ -258,10 +334,24 @@ export class UserService {
   }
 
   async removePassword(userId: number, authContext?: AuthContext): Promise<void> {
-    this.validateProfileUpdateAccess(authContext, userId);
+    this.validatePasswordManagementAccess(authContext, userId);
 
     const { users } = getModels();
     users.removePassword(userId);
+  }
+
+  async changeCurrentUserPassword(newPassword: string, authContext?: AuthContext): Promise<void> {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    await this.changePassword(authContext.userId, newPassword, authContext);
+  }
+
+  async removeCurrentUserPassword(authContext?: AuthContext): Promise<void> {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    await this.removePassword(authContext.userId, authContext);
   }
 
   getUsersWithPermissions(
@@ -378,13 +468,11 @@ export class UserService {
     // Validate mime type
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
     if (!allowedTypes.includes(mimeType)) {
-      throw new Error('Invalid image type. Only PNG and JPEG are allowed.');
+      throw new ValidationError('Invalid image type. Only PNG and JPEG are allowed.');
     }
 
-    // Validate size (5MB limit)
-    const maxSize = 5 * 1024 * 1024;
-    if (imageBuffer.length > maxSize) {
-      throw new Error('Image too large. Maximum size is 5MB.');
+    if (imageBuffer.length > PROFILE_IMAGE_MAX_BYTES) {
+      throw new ValidationError('Image too large. Maximum size is 5MB.');
     }
 
     // Ensure directory exists
@@ -411,6 +499,17 @@ export class UserService {
     return filename;
   }
 
+  async saveCurrentUserProfileImage(
+    imageBuffer: Buffer,
+    mimeType: string,
+    authContext?: AuthContext,
+  ): Promise<string> {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    return this.saveProfileImage(authContext.userId, imageBuffer, mimeType, authContext);
+  }
+
   async deleteProfileImage(userId: number, authContext?: AuthContext): Promise<void> {
     this.validateProfileUpdateAccess(authContext, userId);
 
@@ -430,6 +529,13 @@ export class UserService {
 
     // Update profile
     await this.updateUserProfile(userId, { profileImagePath: null }, authContext);
+  }
+
+  async deleteCurrentUserProfileImage(authContext?: AuthContext): Promise<void> {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    await this.deleteProfileImage(authContext.userId, authContext);
   }
 
   // Permission checking - aggregates permissions from all user roles

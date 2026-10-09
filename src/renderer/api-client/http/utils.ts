@@ -12,9 +12,11 @@ export function setAuthToken(token: string | null): void {
   authToken = token;
 }
 
-export async function callApi(path: string, options: RequestInit = {}) {
+export async function callApi<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers);
-  headers.set('Content-Type', 'application/json');
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
   if (authToken) headers.set('Authorization', `Bearer ${authToken}`);
 
   const res = await fetch(path, {
@@ -25,5 +27,5 @@ export async function callApi(path: string, options: RequestInit = {}) {
   if (!json.success) {
     throw new Error(json.error || 'Request failed');
   }
-  return json.data;
+  return json.data as T;
 }

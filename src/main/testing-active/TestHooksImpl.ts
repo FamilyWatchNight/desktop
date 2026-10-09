@@ -222,11 +222,7 @@ export interface TestHooks {
     getTestUserById: (
       id: number,
       authContext?: AuthContextPayload,
-    ) => Promise<
-      | import('../services/UserService').AuthenticatedUser
-      | import('../services/UserService').BasicUserInfo
-      | null
-    >;
+    ) => Promise<import('../services/UserService').UserDetails | null>;
     getUsersWithPermissions: (
       permissions: string[],
       authContext?: AuthContextPayload,

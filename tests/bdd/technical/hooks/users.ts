@@ -10,7 +10,12 @@ import { ElectronApplication } from 'playwright';
 
 import { type AuthContextPayload } from '../../../src/main/auth/auth-context';
 import { User } from '../../../src/main/db/models/Users';
-import { AuthenticatedUser, FirstAdminUserData } from '../../../src/main/services/UserService';
+import {
+  AuthenticatedUser,
+  BasicUserInfo,
+  FirstAdminUserData,
+  UserDetails,
+} from '../../../src/main/services/UserService';
 import { withTestHooks } from '../infrastructure/utils';
 
 /**
@@ -79,7 +84,7 @@ export class Users {
   async getUserById(
     id: number,
     authContext?: AuthContextPayload,
-  ): Promise<AuthenticatedUser | null> {
+  ): Promise<UserDetails | null> {
     return await withTestHooks(
       this.app,
       async (hooks, id, authContext) => {
@@ -181,7 +186,7 @@ export class Users {
   async getUsersWithPermissions(
     permissions: string[],
     authContext?: AuthContextPayload,
-  ): Promise<AuthenticatedUser[]> {
+  ): Promise<BasicUserInfo[]> {
     return await withTestHooks(
       this.app,
       async (hooks, permissions, authContext) => {

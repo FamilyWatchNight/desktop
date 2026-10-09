@@ -16,12 +16,15 @@ import type { AuthenticatedUser, UserService } from '../../src/main/services/Use
 
 function createUser(): AuthenticatedUser {
   return {
-    id: 7,
-    username: 'host-user',
-    email: null,
-    lastLoginAt: null,
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedAt: '2026-01-01T00:00:00.000Z',
+    account: {
+      id: 7,
+      username: 'host-user',
+      email: null,
+      hasPassword: true,
+      lastLoginAt: null,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    },
     profile: null,
   };
 }
