@@ -126,6 +126,12 @@ export function registerUserRoutes(app: Express): void {
     profileRoute((req) => userService.getCurrentUserDetails(getSessionAuthContext(req))),
   );
 
+  app.get(
+    '/api/users/me/profile-image',
+    requireAuth,
+    profileRoute((req) => userService.getCurrentUserProfileImage(getSessionAuthContext(req))),
+  );
+
   app.patch(
     '/api/users/me/profile',
     requireAuth,

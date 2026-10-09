@@ -6,4 +6,4 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
-export { ChevronIcon, HomeIcon, SettingsIcon, TasksIcon } from './icons';
+export { ChevronIcon, HomeIcon, ProfileIcon, SettingsIcon, TasksIcon } from './icons';

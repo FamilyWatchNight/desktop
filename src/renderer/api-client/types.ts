@@ -75,6 +75,7 @@ export interface UserApi {
   hasUsers(): Promise<boolean>;
   getLoginRoster(): Promise<LoginRosterUser[]>;
   getCurrentDetails(): Promise<UserDetails | null>;
+  getCurrentProfileImage(): Promise<CurrentProfileImage | null>;
   updateCurrentProfile(data: CurrentUserProfileUpdate): Promise<void>;
   changeCurrentPassword(password: string): Promise<void>;
   removeCurrentPassword(): Promise<void>;
@@ -121,6 +122,11 @@ export interface UserProfile {
 
 export interface CurrentUserProfileUpdate {
   displayName?: string | null;
+}
+
+export interface CurrentProfileImage {
+  data: string;
+  mimeType: 'image/jpeg' | 'image/png';
 }
 
 export interface LoginRosterUser {

@@ -20,7 +20,12 @@ import { type UserProfile, type UserProfileData } from '../db/models/UserProfile
 import { type User, type UserData } from '../db/models/Users';
 import i18n from '../i18n';
 import { getAppDataRoot } from '../paths';
-import { assertPathInsideAllowedDirs, safeJoin, ValidationError } from '../security';
+import {
+  assertNoSymlinkEscape,
+  assertPathInsideAllowedDirs,
+  safeJoin,
+  ValidationError,
+} from '../security';
 
 export type CreateUserData = UserData;
 
@@ -454,7 +459,44 @@ export class UserService {
   }
 
   private getProfileImagesDir(): string {
-    return path.join(getAppDataRoot(), 'profile-images');
+    return safeJoin(getAppDataRoot(), 'profile-images');
+  }
+
+  async getCurrentUserProfileImage(
+    authContext?: AuthContext,
+  ): Promise<{ data: string; mimeType: 'image/jpeg' | 'image/png' } | null> {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+    this.validateProfileUpdateAccess(authContext, authContext.userId);
+
+    const user = this.getPrivateUserDetails(authContext.userId);
+    const filename = user?.profile?.profileImagePath;
+    if (!filename) return null;
+
+    const imagesDir = this.getProfileImagesDir();
+    assertNoSymlinkEscape(imagesDir, getAppDataRoot());
+    const filePath = safeJoin(imagesDir, filename);
+    assertPathInsideAllowedDirs(filePath, imagesDir);
+
+    const extension = path.extname(filename).toLowerCase();
+    const mimeType =
+      extension === '.jpg' || extension === '.jpeg'
+        ? 'image/jpeg'
+        : extension === '.png'
+          ? 'image/png'
+          : null;
+    if (!mimeType) {
+      throw new ValidationError('Invalid profile image type');
+    }
+
+    const fileStats = await fs.promises.stat(filePath);
+    if (fileStats.size > PROFILE_IMAGE_MAX_BYTES) {
+      throw new ValidationError('Profile image exceeds the maximum size');
+    }
+
+    const image = await fs.promises.readFile(filePath);
+    return { data: image.toString('base64'), mimeType };
   }
 
   async saveProfileImage(

@@ -63,6 +63,7 @@ export interface ElectronAPI {
     hasUsers: () => Promise<boolean>;
     getLoginRoster: () => Promise<unknown>;
     getCurrentDetails: () => Promise<unknown>;
+    getCurrentProfileImage: () => Promise<unknown>;
     updateCurrentProfile: (data: { displayName?: string | null }) => Promise<void>;
     changeCurrentPassword: (password: string) => Promise<void>;
     removeCurrentPassword: () => Promise<void>;
@@ -142,6 +143,8 @@ contextBridge.exposeInMainWorld('electron', {
     hasUsers: () => ipcRenderer.invoke('users-has-users'),
     getLoginRoster: () => ipcRenderer.invoke('users-login-roster'),
     getCurrentDetails: () => ipcRenderer.invoke('users-current-details', authToken),
+    getCurrentProfileImage: () =>
+      ipcRenderer.invoke('users-current-profile-image', authToken),
     updateCurrentProfile: (data: { displayName?: string | null }) =>
       ipcRenderer.invoke('users-update-current-profile', authToken, data),
     changeCurrentPassword: (password: string) =>

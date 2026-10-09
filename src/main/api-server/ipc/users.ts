@@ -62,6 +62,9 @@ export function registerUserIpcHandlers(): void {
   ipcMain.handle('users-current-details', (_event, token: unknown) =>
     userService.getCurrentUserDetails(getSessionAuthContext(token)),
   );
+  ipcMain.handle('users-current-profile-image', (_event, token: unknown) =>
+    userService.getCurrentUserProfileImage(getSessionAuthContext(token)),
+  );
   ipcMain.handle(
     'users-update-current-profile',
     (_event, token: unknown, data: unknown) =>

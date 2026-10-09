@@ -8,6 +8,7 @@ the Free Software Foundation, version 3.
 
 import {
   CurrentUserProfileUpdate,
+  CurrentProfileImage,
   FirstAdminUserData,
   LoginRosterUser,
   UserApi,
@@ -27,6 +28,10 @@ export class HttpUserApi implements UserApi {
 
   getCurrentDetails(): Promise<UserDetails | null> {
     return callApi<UserDetails | null>('/api/users/me');
+  }
+
+  getCurrentProfileImage(): Promise<CurrentProfileImage | null> {
+    return callApi<CurrentProfileImage | null>('/api/users/me/profile-image');
   }
 
   updateCurrentProfile(data: CurrentUserProfileUpdate): Promise<void> {
