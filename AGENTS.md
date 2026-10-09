@@ -269,6 +269,8 @@ This project uses structured documentation to prevent stale guidance and capture
 
 After any substantive code change, immediately run relevant tests (unit, smoke, feature) to validate functionality. If tests fail, iterate up to three targeted fixes; if still failing, summarize root cause and options.
 
+Before running any build or validation command that may invoke linting, run ESLint with `--fix` on every file changed for the task. Repeat this after subsequent edits and before later build steps, so fixable lint errors are corrected before they can fail a build.
+
 ## Exploration Strategy
 
 When researching complex questions or searching large codebases, use the Explore subagent for thorough, read-only investigations to avoid cluttering the main conversation.
