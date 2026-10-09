@@ -224,6 +224,16 @@ Then(
   },
 );
 
+Then(
+  'user {string} should have the display name {string}',
+  async function (this: CustomWorld, userKey: string, expectedDisplayName: string) {
+    const user = getStoreUser(this, userKey) as { id: number };
+    const system = getSystemPersona(this);
+    const updated = await system.getUserById(user.id);
+    expect(updated?.profile?.displayName).toBe(expectedDisplayName);
+  },
+);
+
 async function saveProfileImage(
   world: CustomWorld,
   userKey: string | undefined,
@@ -395,6 +405,17 @@ When(
   async function (this: CustomWorld, userKey: string, newPassword: string) {
     await attemptAsync(this, async () => {
       await changePassword(this, userKey, newPassword);
+    });
+  },
+);
+
+When(
+  'I attempt to remove the password of user {string}',
+  async function (this: CustomWorld, userKey: string) {
+    await attemptAsync(this, async () => {
+      const user = getStoreUser(this, userKey) as { id: number };
+      const system = getSystemPersona(this);
+      await system.removePassword(user.id);
     });
   },
 );

@@ -245,4 +245,15 @@ export class Users {
       authContext,
     );
   }
+
+  async removePassword(userId: number, authContext?: AuthContextPayload): Promise<void> {
+    return await withTestHooks(
+      this.app,
+      async (hooks, userId, authContext) => {
+        return hooks.users.removePassword(userId, authContext);
+      },
+      userId,
+      authContext,
+    );
+  }
 }

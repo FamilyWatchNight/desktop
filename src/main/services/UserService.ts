@@ -70,6 +70,21 @@ export class UserService {
     }
   }
 
+  private validateProfileUpdateAccess(authContext: AuthContext | undefined, targetUserId: number): void {
+    if (!authContext) {
+      throw new AuthenticationError(this.t('errors.authenticationRequired'));
+    }
+
+    const hasRequiredPermission =
+      authContext.userId === targetUserId
+        ? authContext.hasPermission('can-update-profile')
+        : authContext.hasPermission('can-manage-users');
+
+    if (!hasRequiredPermission) {
+      throw new AuthorizationError(this.t('errors.insufficientPermissions'));
+    }
+  }
+
   hasUsers(): boolean {
     const db = getDb();
     if (!db) throw new Error('Database not initialized');
@@ -216,7 +231,7 @@ export class UserService {
     data: UserProfileData,
     authContext?: AuthContext,
   ): Promise<void> {
-    this.validateAuthContext(authContext, userId);
+    this.validateProfileUpdateAccess(authContext, userId);
 
     const { userProfiles } = getModels();
     const existingProfile = userProfiles.getByUserId(userId);
@@ -232,10 +247,21 @@ export class UserService {
     newPassword: string,
     authContext?: AuthContext,
   ): Promise<void> {
-    this.validateAuthContext(authContext, userId);
+    this.validateProfileUpdateAccess(authContext, userId);
+
+    if (!newPassword) {
+      throw new Error(this.t('errors.passwordRequired'));
+    }
 
     const { users } = getModels();
     await users.updatePassword(userId, newPassword);
+  }
+
+  async removePassword(userId: number, authContext?: AuthContext): Promise<void> {
+    this.validateProfileUpdateAccess(authContext, userId);
+
+    const { users } = getModels();
+    users.removePassword(userId);
   }
 
   getUsersWithPermissions(
@@ -347,7 +373,7 @@ export class UserService {
     mimeType: string,
     authContext?: AuthContext,
   ): Promise<string> {
-    this.validateAuthContext(authContext, userId);
+    this.validateProfileUpdateAccess(authContext, userId);
 
     // Validate mime type
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
@@ -386,7 +412,7 @@ export class UserService {
   }
 
   async deleteProfileImage(userId: number, authContext?: AuthContext): Promise<void> {
-    this.validateAuthContext(authContext, userId);
+    this.validateProfileUpdateAccess(authContext, userId);
 
     const user = this.getUserById(userId);
     if (!user || !user.profile?.profileImagePath) return;

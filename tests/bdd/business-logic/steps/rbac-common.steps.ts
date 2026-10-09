@@ -711,6 +711,15 @@ Given('I run as user {string}', async function (this: CustomWorld, userKey: stri
   await persona.runAsUser(user?.id);
 });
 
+Given(
+  'I run as user {string} with the permissions {string}',
+  function (this: CustomWorld, userKey: string, permissions: string) {
+    const persona = getSystemPersona(this);
+    const user = getStoreUser(this, userKey);
+    persona.runAsUserWithPermissions(user.id, parsePermissionList(permissions));
+  },
+);
+
 async function getAllRoles(world: CustomWorld) {
   const system = getSystemPersona(world);
   const allRoles = await system.getAllRoles();

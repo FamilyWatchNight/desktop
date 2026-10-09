@@ -41,6 +41,7 @@ export default class UsersModel {
   private getByIdStmt!: Database.Statement;
   private getByUsernameStmt!: Database.Statement;
   private updatePasswordStmt!: Database.Statement;
+  private removePasswordStmt!: Database.Statement;
   private updateLastLoginStmt!: Database.Statement;
   private deleteStmt!: Database.Statement;
 
@@ -60,6 +61,10 @@ export default class UsersModel {
 
     this.updatePasswordStmt = this.db.prepare(`
       UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?
+    `);
+
+    this.removePasswordStmt = this.db.prepare(`
+      UPDATE users SET password_hash = NULL, updated_at = ? WHERE id = ?
     `);
 
     this.updateLastLoginStmt = this.db.prepare(`
@@ -110,6 +115,10 @@ export default class UsersModel {
     const now = new Date().toISOString();
 
     this.updatePasswordStmt.run(hash, now, id);
+  }
+
+  removePassword(id: number): void {
+    this.removePasswordStmt.run(new Date().toISOString(), id);
   }
 
   updateLastLogin(id: number): void {

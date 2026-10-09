@@ -248,6 +248,7 @@ export interface TestHooks {
       newPassword: string,
       authContext?: AuthContextPayload,
     ) => Promise<void>;
+    removePassword: (userId: number, authContext?: AuthContextPayload) => Promise<void>;
     assignRoleToUser: (
       userId: number,
       roleId: number,
@@ -562,6 +563,12 @@ export function getTestHooks(): TestHooks {
           ? createAuthContext(authContext.userId, authContext.permissions)
           : undefined;
         return executeServiceMethod(() => userService.changePassword(userId, newPassword, ctx));
+      },
+      removePassword: async (userId, authContext) => {
+        const ctx = authContext
+          ? createAuthContext(authContext.userId, authContext.permissions)
+          : undefined;
+        return executeServiceMethod(() => userService.removePassword(userId, ctx));
       },
       assignRoleToUser: async (userId, roleId, authContext) => {
         const ctx = authContext

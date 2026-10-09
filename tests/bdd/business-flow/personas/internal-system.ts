@@ -29,6 +29,7 @@ export class InternalSystemPersona {
 
   private isUnauthenticated: boolean = false;
   private customPermissions: string[] | null = null;
+  private customUserId: number | null = null;
 
   constructor(private world: CustomWorld) {
     this.authContext = createSystemContext();
@@ -64,7 +65,7 @@ export class InternalSystemPersona {
     }
     if (this.customPermissions !== null) {
       return {
-        userId: 0, // Test user ID
+        userId: this.customUserId ?? 0,
         permissions: this.customPermissions,
       };
     }
@@ -358,6 +359,10 @@ export class InternalSystemPersona {
     );
   }
 
+  async removePassword(userId: number): Promise<void> {
+    return await this.world.usersApi.removePassword(userId, this.getAuthContextPayload());
+  }
+
   async assignRoleToUser(userId: number, roleId: number): Promise<void> {
     return await this.world.usersApi.assignRoleToUser(userId, roleId, this.getAuthContextPayload());
   }
@@ -388,15 +393,18 @@ export class InternalSystemPersona {
   runUnauthenticated(): void {
     this.isUnauthenticated = true;
     this.customPermissions = null;
+    this.customUserId = null;
   }
 
-  runWithPermissions(permissionStubs: string[]): void {
+  runWithPermissions(permissionStubs: string[], userId = 0): void {
     this.isUnauthenticated = false;
     this.customPermissions = permissionStubs;
+    this.customUserId = userId;
   }
 
   runWithoutPermissions(excludedPermissionStubs: string[]): void {
     this.isUnauthenticated = false;
+    this.customUserId = 0;
     const allPermissions = PERMISSIONS.map((p) => p.stub);
     const excluded = new Set(['can-admin', ...excludedPermissionStubs]);
     this.customPermissions = allPermissions.filter((p) => !excluded.has(p));
@@ -407,6 +415,7 @@ export class InternalSystemPersona {
     // With customPermissions = null, getAuthContextPayload will use the real authContext
     this.isUnauthenticated = false;
     this.customPermissions = null;
+    this.customUserId = null;
 
     // Build authContext with the user's actual permissions from the system
     const systemAuthContextPayload = {
@@ -418,5 +427,11 @@ export class InternalSystemPersona {
       systemAuthContextPayload,
     );
     this.authContext = createAuthContext(userId, permissions);
+  }
+
+  runAsUserWithPermissions(userId: number, permissionStubs: string[]): void {
+    this.isUnauthenticated = false;
+    this.customPermissions = permissionStubs;
+    this.customUserId = userId;
   }
 }
