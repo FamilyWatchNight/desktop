@@ -45,7 +45,7 @@
     "@cucumber/cucumber": "^13.2.1",
     "@eslint-react/eslint-plugin": "^5.19.1",
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.62.1",
+    "@playwright/test": "^1.63.0",
     "@swc/core": "^1.16.12",
     "@swc/jest": "^0.2.39",
     "@testing-library/jest-dom": "^7.0.1",
@@ -78,7 +78,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.1",
-    "vite": "^8.1.5"
+    "vite": "^8.3.3"
   },
   "dependencies": {
     "@fontsource-variable/nunito-sans": "^5.3.0",
@@ -86,7 +86,7 @@
     "@noriginmedia/norigin-spatial-navigation-react": "^3.2.0",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^13.0.3",
-    "csv-parse": "^7.0.2",
+    "csv-parse": "^7.0.3",
     "electron-log": "^5.4.4",
     "electron-store": "^11.0.2",
     "express": "^5.2.1",
@@ -96,7 +96,7 @@
     "i18next-http-backend": "^4.0.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-i18next": "^17.0.15",
+    "react-i18next": "^17.0.16",
     "uuid": "^14.0.2",
     "ws": "^8.22.0"
   },
