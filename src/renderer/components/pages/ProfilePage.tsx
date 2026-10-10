@@ -10,7 +10,7 @@ import React, { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../../api-client';
-import type { UserDetails } from '../../api-client';
+import type { CurrentProfileImage, UserDetails } from '../../api-client';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../elements/buttons';
 import { Group, Page, Section } from '../elements/containers';
@@ -25,6 +25,39 @@ type Notice = { type: 'success' | 'error'; message: string };
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function createProfileImageUrl(image: CurrentProfileImage, invalidImageMessage: string): string {
+  if (!image || typeof image !== 'object') {
+    throw new Error(invalidImageMessage);
+  }
+
+  const maxBase64Length = Math.ceil(MAX_PROFILE_IMAGE_BYTES / 3) * 4;
+  const isAllowedType = image.mimeType === 'image/png' || image.mimeType === 'image/jpeg';
+  const isValidBase64 =
+    typeof image.data === 'string' &&
+    image.data.length > 0 &&
+    image.data.length <= maxBase64Length &&
+    image.data.length % 4 === 0 &&
+    /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(image.data);
+
+  if (!isAllowedType || !isValidBase64) {
+    throw new Error(invalidImageMessage);
+  }
+
+  let binary: string;
+  try {
+    binary = atob(image.data);
+  } catch {
+    throw new Error(invalidImageMessage);
+  }
+
+  if (binary.length > MAX_PROFILE_IMAGE_BYTES) {
+    throw new Error(invalidImageMessage);
+  }
+
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  return URL.createObjectURL(new Blob([bytes.buffer], { type: image.mimeType }));
 }
 
 export default function ProfilePage(): React.ReactElement {
@@ -56,6 +89,13 @@ export default function ProfilePage(): React.ReactElement {
     return () => URL.revokeObjectURL(previewUrl);
   }, [selectedImage]);
 
+  useEffect(
+    () => () => {
+      if (savedImageUrl) URL.revokeObjectURL(savedImageUrl);
+    },
+    [savedImageUrl],
+  );
+
   useEffect(() => {
     let active = true;
 
@@ -80,7 +120,9 @@ export default function ProfilePage(): React.ReactElement {
         setDisplayName(initialDisplayName);
         setSavedDisplayName(initialDisplayName);
         setSavedImageUrl(
-          profileImage ? `data:${profileImage.mimeType};base64,${profileImage.data}` : null,
+          profileImage
+            ? createProfileImageUrl(profileImage, t('errors.imageTypeError'))
+            : null,
         );
       } catch (error) {
         if (active) setNotice({ type: 'error', message: getErrorMessage(error) });
@@ -208,7 +250,7 @@ export default function ProfilePage(): React.ReactElement {
       );
       const savedImage = await apiClient.users.getCurrentProfileImage();
       setSavedImageUrl(
-        savedImage ? `data:${savedImage.mimeType};base64,${savedImage.data}` : null,
+        savedImage ? createProfileImageUrl(savedImage, t('errors.imageTypeError')) : null,
       );
       setSelectedImage(null);
       if (imageInputRef.current) imageInputRef.current.value = '';

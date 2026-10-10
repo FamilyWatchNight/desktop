@@ -507,6 +507,10 @@ export class UserService {
   ): Promise<string> {
     this.validateProfileUpdateAccess(authContext, userId);
 
+    if (!Buffer.isBuffer(imageBuffer)) {
+      throw new ValidationError('Invalid profile image data');
+    }
+
     // Validate mime type
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
     if (!allowedTypes.includes(mimeType)) {

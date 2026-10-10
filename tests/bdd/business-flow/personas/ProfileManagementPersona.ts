@@ -6,7 +6,7 @@ it under the terms of the GNU General Public License,
 version 3.
 */
 
-import type { Buffer } from 'node:buffer';
+import { Buffer } from 'node:buffer';
 
 import { HomePage } from '../../technical/page-objects/HomePage';
 import { MenuPanel } from '../../technical/page-objects/MenuPanel';
@@ -79,7 +79,10 @@ export class ProfileManagementPersona extends UserPersona {
   }
 
   async getSavedUserDetails(username: string) {
-    const user = this.world.getStateObject('users', username) as { id: number };
+    const user = this.world.getStateObject('users', username) as { id?: unknown } | null;
+    if (!user || typeof user.id !== 'number') {
+      throw new Error(`No stored user found for username "${username}"`);
+    }
     return this.system.getUserById(user.id);
   }
 
