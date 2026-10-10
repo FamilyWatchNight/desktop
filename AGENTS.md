@@ -40,6 +40,13 @@ This project uses a three-layer BDD architecture inspired by _BDD in Action_:
 
 **Key principle**: Business Logic steps must not call the Technical layer directly. They go through personas, which maintain a stable domain-facing API for test scenarios.
 
+### BDD Step and Page Object Responsibilities
+
+- Describe user goals and business intent in feature files and business-logic steps (for example, signing in or updating a profile), rather than naming individual inputs, buttons, or layout details.
+- Put selectors and low-level UI interactions such as filling a specific field or clicking a specific control in technical page objects.
+- Have business-flow personas compose page-object operations into reusable user workflows. Common actions available to any user, such as signing in or signing out, belong in the shared `UserPersona` and shared UI steps so other feature suites can reuse them.
+- Keep element-specific feature steps for component-level tests whose purpose is explicitly to validate individual controls; do not use them as the default pattern for user workflows.
+
 ### UI Testing Levels
 
 UI tests are structured into two levels of granularity:
