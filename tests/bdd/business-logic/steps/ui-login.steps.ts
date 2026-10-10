@@ -8,8 +8,17 @@ the Free Software Foundation, version 3.
 
 import { Then, When } from '@cucumber/cucumber';
 
+import { UserPersona } from '../../business-flow/personas/UserPersona';
+import { TIMEOUT as UI_TIMEOUT } from '../../technical/infrastructure/ui-utils';
 import { CustomWorld } from '../../technical/infrastructure/world';
 import { LoginPage } from '../../technical/page-objects';
+
+function getUserPersona(world: CustomWorld): UserPersona {
+  if (!world.currentUserPersona) {
+    world.currentUserPersona = new UserPersona(world);
+  }
+  return world.currentUserPersona;
+}
 
 function getUserIdForUsername(world: CustomWorld, username: string): number {
   const user = world.getStateObject('users', username) as { id: number } | null;
@@ -36,6 +45,18 @@ Then('the login overlay should be visible', async function (this: CustomWorld) {
 
 Then('the login overlay should be hidden', async function (this: CustomWorld) {
   await getLoginPage(this).waitForDismissal();
+});
+
+When(
+  'I sign in as {string} with password {string}',
+  { timeout: 3 * UI_TIMEOUT },
+  async function (this: CustomWorld, username: string, password: string) {
+    await getUserPersona(this).signIn(username, password);
+  },
+);
+
+When('I sign out', { timeout: 2 * UI_TIMEOUT }, async function (this: CustomWorld) {
+  await getUserPersona(this).signOut();
 });
 
 Then(
