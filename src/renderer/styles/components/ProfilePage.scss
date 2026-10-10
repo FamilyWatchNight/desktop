@@ -1,0 +1,64 @@
+@use '../colors';
+
+.profile-username,
+.profile-message {
+  text-align: center;
+}
+
+.profile-username {
+  opacity: 0.75;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--container-gap);
+}
+
+.profile-hint {
+  opacity: 0.8;
+}
+
+.profile-image-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.profile-image-preview,
+.profile-image-placeholder {
+  width: 8rem;
+  height: 8rem;
+  flex: 0 0 8rem;
+  border-radius: 50%;
+}
+
+.profile-image-preview {
+  object-fit: cover;
+}
+
+.profile-image-placeholder {
+  display: grid;
+  place-items: center;
+  padding: 0.75rem;
+  background: colors.$form-background;
+  text-align: center;
+}
+
+.profile-image-controls {
+  display: flex;
+  flex: 1 1 18rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.profile-file-label {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.profile-image-controls input[type='file'] {
+  max-width: 100%;
+}

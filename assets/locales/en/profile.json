@@ -1,0 +1,42 @@
+{
+  "labels": {
+    "title": "Your Profile",
+    "displayNameSection": "Display name",
+    "displayName": "Display name",
+    "saveDisplayName": "Save display name",
+    "reset": "Reset",
+    "passwordSection": "Password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "savePassword": "Save password",
+    "removePassword": "Remove password",
+    "imageSection": "Profile picture",
+    "imageAlt": "Your profile picture",
+    "chooseImage": "Choose a picture",
+    "saveImage": "Save picture",
+    "discardImage": "Discard selection",
+    "removeImage": "Remove picture"
+  },
+  "messages": {
+    "loading": "Loading your profile…",
+    "displayNameSaved": "Display name saved.",
+    "passwordExists": "Your account currently has a password.",
+    "passwordMissing": "Your account currently has no password.",
+    "confirmPasswordRemoval": "Remove your password? You will be able to sign in without one.",
+    "passwordSaved": "Password saved.",
+    "passwordRemoved": "Password removed.",
+    "noImage": "No profile picture",
+    "imageLimits": "PNG or JPEG, up to {{maxSize}} MB.",
+    "confirmImageRemoval": "Remove your profile picture?",
+    "imageSaved": "Profile picture saved.",
+    "imageRemoved": "Profile picture removed."
+  },
+  "errors": {
+    "loadError": "Your profile could not be loaded.",
+    "permissionDenied": "You do not have permission to update your profile.",
+    "passwordRequired": "Enter a password.",
+    "passwordMismatch": "The passwords do not match.",
+    "imageTypeError": "Choose a PNG or JPEG image.",
+    "imageSizeError": "The image must be no larger than {{maxSize}} MB."
+  }
+}

@@ -8,6 +8,7 @@ the Free Software Foundation, version 3.
 
 import { TIMEOUT as UI_TIMEOUT } from '../../technical/infrastructure/ui-utils';
 import type { CustomWorld } from '../../technical/infrastructure/world';
+import { LoginPage } from '../../technical/page-objects/LoginPage';
 import { MenuPanel } from '../../technical/page-objects/MenuPanel';
 import { SettingsPage } from '../../technical/page-objects/SettingsPage';
 
@@ -37,5 +38,28 @@ export class UserPersona {
 
     const settingsPage = new SettingsPage(this.world);
     await settingsPage.waitForVisible('pageRoot', 10000);
+  }
+
+  async signIn(username: string, password: string): Promise<void> {
+    const user = this.world.getStateObject('users', username) as { id: number };
+    const loginPage = new LoginPage(this.world);
+
+    await loginPage.waitForVisible('pageRoot');
+    await loginPage.waitForUserPresent(user.id);
+    if ((await loginPage.getUserCount()) > 1) {
+      await loginPage.clickUser(user.id);
+    }
+    await loginPage.waitForPasswordForm();
+    await loginPage.enterPassword(password);
+    await loginPage.submitPassword();
+    await loginPage.waitForDismissal();
+  }
+
+  async signOut(): Promise<void> {
+    const menu = new MenuPanel(this.world);
+    const loginPage = new LoginPage(this.world);
+
+    await menu.logout();
+    await loginPage.waitForVisible('pageRoot');
   }
 }

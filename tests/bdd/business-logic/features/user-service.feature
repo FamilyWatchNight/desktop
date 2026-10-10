@@ -183,7 +183,7 @@ Feature: User Service
     And the returned profile should be complete
 
   @auth
-  Scenario: UserService.updateUserProfile permits self-access without can-admin
+  Scenario: UserService.updateUserProfile requires can-update-profile for self-service and can-manage-users for other users
     Given a user exists with username "bob"
     And a user exists with username "grace"
 
@@ -202,13 +202,19 @@ Feature: User Service
     When I attempt to update the display name of user "bob" to "Bob By Grace"
     Then an AuthorizationError should be thrown
 
-    # As the same user (without can-admin): should succeed
+    # Self-service without can-update-profile should fail
     Given I run as user "bob"
     When I attempt to update the display name of user "bob" to "Bob Self Updated"
+    Then an AuthorizationError should be thrown
+
+    # Self-service with can-update-profile should succeed
+    Given I run as user "bob" with the permissions "can-update-profile"
+    When I attempt to update the display name of user "bob" to "Bob Self Updated"
     Then no error should be thrown
+    And user "bob" should have the display name "Bob Self Updated"
 
   @auth
-  Scenario: UserService.changePassword permits self-access without can-admin
+  Scenario: UserService.changePassword allows authenticated self-service and requires can-manage-users for other users
     Given a user exists with username "charlie" and password "oldpass"
     And a user exists with username "henry"
 
@@ -232,13 +238,27 @@ Feature: User Service
     When I attempt to change the password of user "charlie" to "henryChangedIt"
     Then an AuthorizationError should be thrown
 
-    # As the same user (without can-admin): should succeed with new password
+    # Self-service without profile permissions should succeed
     Given I run as user "charlie"
     When I attempt to change the password of user "charlie" to "anotherpass"
     Then no error should be thrown
 
+    When I attempt to change the password of user "charlie" to ""
+    Then an error should be thrown
+
+    # Authenticated self-service can also remove the password without profile permissions
+    Given I run as user "charlie"
+    When I attempt to remove the password of user "charlie"
+    Then no error should be thrown
+
+    Given I run unauthenticated
+    When I authenticate with username "charlie" and password "anotherpass"
+    Then authentication should fail
+    When I authenticate with username "charlie" and no password
+    Then authentication should succeed
+
   @auth
-  Scenario: UserService.saveProfileImage permits self-access without can-manage-users
+  Scenario: UserService.saveProfileImage requires can-update-profile for self-service and can-manage-users for other users
     Given a user exists with username "diana"
 
     # Unauthenticated: should fail
@@ -256,8 +276,8 @@ Feature: User Service
     When I attempt to save a 100KB PNG profile image for the user "diana"
     Then an AuthorizationError should be thrown
 
-    # As the same user (without can-admin): should succeed
-    Given I run as user "diana"
+    # Self-service with can-update-profile should succeed
+    Given I run as user "diana" with the permissions "can-update-profile"
     When I attempt to save a 100KB PNG profile image for the user "diana"
     Then no error should be thrown
 

@@ -17,6 +17,7 @@ export class LoginPage extends BasePage {
     passwordInput: '[data-testid="login-password-input"]',
     cancelButton: '[data-testid="login-cancel-button"]',
     submitButton: '[data-testid="login-submit-button"]',
+    userChips: '[data-login-user-id]',
   };
 
   async waitForDismissal(): Promise<void> {
@@ -35,12 +36,25 @@ export class LoginPage extends BasePage {
     });
   }
 
+  async waitForUserPresent(userId: number): Promise<void> {
+    const page = await this.getPage();
+    await page.locator(this.getUserSelector(userId)).waitFor({
+      state: 'attached',
+      timeout: UI_TIMEOUT,
+    });
+  }
+
   async waitForUserAbsent(userId: number): Promise<void> {
     const page = await this.getPage();
     await page.locator(this.getUserSelector(userId)).waitFor({
       state: 'detached',
       timeout: UI_TIMEOUT,
     });
+  }
+
+  async getUserCount(): Promise<number> {
+    const page = await this.getPage();
+    return page.locator(this.getSelector('userChips')).count();
   }
 
   async clickUser(userId: number): Promise<void> {

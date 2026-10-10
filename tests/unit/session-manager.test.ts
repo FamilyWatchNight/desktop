@@ -10,7 +10,11 @@ import { describe, expect, jest, test } from '@jest/globals';
 
 import { SessionError } from '../../src/main/auth/errors';
 import { SESSION_TTL_MS, SessionManager } from '../../src/main/auth/session-manager';
-import type { AuthenticatedUser, UserService } from '../../src/main/services/UserService';
+import type {
+  AuthenticatedUser,
+  UserDetails,
+  UserService,
+} from '../../src/main/services/UserService';
 
 function thrownBy(action: () => void): unknown {
   try {
@@ -23,21 +27,28 @@ function thrownBy(action: () => void): unknown {
 
 function createUser(): AuthenticatedUser {
   return {
-    id: 7,
-    username: 'host-user',
-    email: null,
-    lastLoginAt: null,
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedAt: '2026-01-01T00:00:00.000Z',
+    account: {
+      id: 7,
+      username: 'host-user',
+      email: null,
+      hasPassword: true,
+      lastLoginAt: null,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    },
     profile: null,
   };
+}
+
+function createUserDetails(user: AuthenticatedUser): UserDetails {
+  return user;
 }
 
 describe('SessionManager', () => {
   test('creates a session with an opaque token and session metadata', async () => {
     const user = createUser();
     const userService = {
-      getUserById: jest.fn(() => user),
+      getUserById: jest.fn(() => createUserDetails(user)),
       getRolesForUser: jest.fn(() => [3]),
       getUserPermissions: jest.fn(() => [
         { stub: 'can-host', displayName: 'Can Host Watch Night' },
@@ -48,8 +59,8 @@ describe('SessionManager', () => {
     const session = await manager.createSession(user);
 
     expect(session.token).toMatch(/^[a-f0-9]{64}$/);
-    expect(session.userId).toBe(user.id);
-    expect(session.username).toBe(user.username);
+    expect(session.userId).toBe(user.account.id);
+    expect(session.username).toBe(user.account.username);
     expect(session.roles).toEqual([3]);
     expect(session.permissions).toEqual(['can-host']);
     expect(session.expiresAt - session.createdAt).toBe(SESSION_TTL_MS);
@@ -61,7 +72,7 @@ describe('SessionManager', () => {
       { stub: 'can-host', displayName: 'Can Host Watch Night' },
     ];
     const userService = {
-      getUserById: jest.fn(() => user),
+      getUserById: jest.fn(() => createUserDetails(user)),
       getRolesForUser: jest.fn(() => [3]),
       getUserPermissions: jest.fn(() => permissions),
     } as unknown as UserService;
@@ -79,7 +90,7 @@ describe('SessionManager', () => {
     let now = 1_000;
     const user = createUser();
     const userService = {
-      getUserById: jest.fn(() => user),
+      getUserById: jest.fn(() => createUserDetails(user)),
       getRolesForUser: jest.fn(() => []),
       getUserPermissions: jest.fn(() => []),
     } as unknown as UserService;
@@ -99,7 +110,7 @@ describe('SessionManager', () => {
   test('destroying a session makes its token invalid and is idempotent', async () => {
     const user = createUser();
     const userService = {
-      getUserById: jest.fn(() => user),
+      getUserById: jest.fn(() => createUserDetails(user)),
       getRolesForUser: jest.fn(() => []),
       getUserPermissions: jest.fn(() => []),
     } as unknown as UserService;
@@ -118,7 +129,7 @@ describe('SessionManager', () => {
   test('invalidates a session when its user no longer exists', async () => {
     let user: AuthenticatedUser | null = createUser();
     const userService = {
-      getUserById: jest.fn(() => user),
+      getUserById: jest.fn(() => (user ? createUserDetails(user) : null)),
       getRolesForUser: jest.fn(() => []),
       getUserPermissions: jest.fn(() => []),
     } as unknown as UserService;
@@ -136,7 +147,7 @@ describe('SessionManager', () => {
   test('rejects new sessions when the global capacity is reached', async () => {
     const user = createUser();
     const userService = {
-      getUserById: jest.fn(() => user),
+      getUserById: jest.fn(() => createUserDetails(user)),
       getRolesForUser: jest.fn(() => []),
       getUserPermissions: jest.fn(() => []),
     } as unknown as UserService;
@@ -158,7 +169,7 @@ describe('SessionManager', () => {
   test('rejects new sessions when a user reaches their per-user capacity', async () => {
     const user = createUser();
     const userService = {
-      getUserById: jest.fn(() => user),
+      getUserById: jest.fn(() => createUserDetails(user)),
       getRolesForUser: jest.fn(() => []),
       getUserPermissions: jest.fn(() => []),
     } as unknown as UserService;
@@ -180,9 +191,14 @@ describe('SessionManager', () => {
   test('removes expired sessions before applying capacity limits', async () => {
     let now = 1_000;
     const firstUser = createUser();
-    const secondUser = { ...firstUser, id: 8, username: 'second-user' };
+    const secondUser: AuthenticatedUser = {
+      ...firstUser,
+      account: { ...firstUser.account, id: 8, username: 'second-user' },
+    };
     const userService = {
-      getUserById: jest.fn((id: number) => (id === firstUser.id ? firstUser : secondUser)),
+      getUserById: jest.fn((id: number) =>
+        createUserDetails(id === firstUser.account.id ? firstUser : secondUser),
+      ),
       getRolesForUser: jest.fn(() => []),
       getUserPermissions: jest.fn(() => []),
     } as unknown as UserService;
@@ -198,7 +214,7 @@ describe('SessionManager', () => {
 
     // Attempt to create a session for the second user should succeed because the first user's session has expired
     await expect(manager.createSession(secondUser)).resolves.toMatchObject({
-      userId: secondUser.id,
+      userId: secondUser.account.id,
     });
   });
 });

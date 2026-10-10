@@ -44,7 +44,7 @@ i18n
   .use(ApiBackend)
   .use(electronDetector)
   .init({
-    ns: ['layout', 'backgroundTasks', 'common', 'settings'],
+    ns: ['layout', 'backgroundTasks', 'common', 'settings', 'profile'],
     defaultNS: 'common',
     fallbackLng: isDevMode ? 'dev' : 'en',
     interpolation: {

@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
+import type { AuthenticatedUser } from '../../../../src/main/services/UserService';
 import { InternalSystemPersona } from '../../business-flow/personas/internal-system';
 import { attemptAsync } from '../../technical/infrastructure/utils';
 import { CustomWorld } from '../../technical/infrastructure/world';
@@ -71,8 +72,13 @@ function getStoreRolePermissions(world: CustomWorld, roleKey?: string): string[]
   return (stored as { id: number; permissions: string[] }).permissions;
 }
 
-function setStoreUser(world: CustomWorld, user: { id: number }, userKey?: string) {
-  world.setStateObject('users', user, userKey);
+function setStoreUser(
+  world: CustomWorld,
+  user: { id: number; username: string } | AuthenticatedUser,
+  userKey?: string,
+) {
+  const account = 'account' in user ? user.account : user;
+  world.setStateObject('users', { id: account.id, username: account.username }, userKey);
 }
 
 function getStoreUser(world: CustomWorld, userKey?: string) {
@@ -195,7 +201,7 @@ Given('a user exists with the role assigned', async function (this: CustomWorld)
   const role = getStoreRole(this);
   const user = await createUser(this);
   const system = getSystemPersona(this);
-  await system.assignRoleToUser(user.id, role.id);
+  await system.assignRoleToUser(user.account.id, role.id);
 });
 
 Given(
@@ -205,7 +211,7 @@ Given(
     const role = (await getRoleByKey(this, roleKey)) as { id: number };
 
     const user = await createUser(this);
-    await system.assignRoleToUser(user.id, role.id);
+    await system.assignRoleToUser(user.account.id, role.id);
 
     setStoreUser(this, user);
 
@@ -228,7 +234,7 @@ Given(
     const system = getSystemPersona(this);
     const role = (await getRoleByKey(this, roleKey)) as { id: number };
     const user = await createUser(this);
-    await system.assignRoleToUser(user.id, role.id);
+    await system.assignRoleToUser(user.account.id, role.id);
 
     setStoreUser(this, user, userKey);
   },
@@ -400,7 +406,7 @@ Given('a user exists with only the role assigned', async function (this: CustomW
   const role = getStoreRole(this);
   const user = await createUser(this);
   const system = getSystemPersona(this);
-  await system.assignRoleToUser(user.id, role.id);
+  await system.assignRoleToUser(user.account.id, role.id);
 });
 
 When('I create a role', async function (this: CustomWorld) {
@@ -710,6 +716,15 @@ Given('I run as user {string}', async function (this: CustomWorld, userKey: stri
   const user = getStoreUser(this, userKey);
   await persona.runAsUser(user?.id);
 });
+
+Given(
+  'I run as user {string} with the permissions {string}',
+  function (this: CustomWorld, userKey: string, permissions: string) {
+    const persona = getSystemPersona(this);
+    const user = getStoreUser(this, userKey);
+    persona.runAsUserWithPermissions(user.id, parsePermissionList(permissions));
+  },
+);
 
 async function getAllRoles(world: CustomWorld) {
   const system = getSystemPersona(world);

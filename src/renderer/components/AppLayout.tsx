@@ -18,13 +18,14 @@ import { useNavigationFocusable } from '../contexts/useNavigationFocusable';
 import { PAGE_IDS } from '../pages/PageIds';
 import * as testing from '../testing';
 
-import { HomeIcon, SettingsIcon, TasksIcon } from './elements/icons';
+import { HomeIcon, ProfileIcon, SettingsIcon, TasksIcon } from './elements/icons';
 import { ExpandableMenuSection, MenuItem } from './elements/navigation';
 import FirstAdminUserOverlay from './FirstAdminUserOverlay';
 import LoginOverlay from './LoginOverlay';
 import pageRegistry from './pageRegistry';
 import BackgroundTasksPage from './pages/BackgroundTasksPage';
 import HomePage from './pages/HomePage';
+import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import StyleboardPage from './pages/StyleboardPage';
 
@@ -45,14 +46,16 @@ interface TaskPayload {
 
 export default function Layout(): React.ReactElement {
   const { t } = useTranslation(['layout', 'common']);
-  const { status: authStatus, logout } = useAuth();
+  const { status: authStatus, session, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { currentPage, navigationMode } = useNavigation();
+  const { currentPage, navigateTo, navigationMode } = useNavigation();
   const [systemExpanded, setSystemExpanded] = useState(false);
   const [activeTask, setActiveTask] = useState<TaskPayload | null>(null);
   const [queue, setQueue] = useState<TaskPayload[]>([]);
   const [hasUsers, setHasUsers] = useState<boolean | null>(null);
   const authGateActive = hasUsers === true && authStatus !== 'authenticated';
+  const canUpdateProfile =
+    authStatus === 'authenticated' && session?.permissions.includes('can-update-profile') === true;
 
   const toggleMenu = (): void => setMenuOpen(!menuOpen);
   const closeMenu = (): void => setMenuOpen(false);
@@ -133,6 +136,8 @@ export default function Layout(): React.ReactElement {
         return <HomePage />;
       case PAGE_IDS.SETTINGS:
         return <SettingsPage />;
+      case PAGE_IDS.PROFILE:
+        return <ProfilePage />;
       case PAGE_IDS.STYLEBOARD:
         return <StyleboardPage />;
       case PAGE_IDS.BACKGROUND_TASKS:
@@ -240,6 +245,14 @@ export default function Layout(): React.ReactElement {
                   {testMenuSection}
                 </div>
                 <div className="menu-footer">
+                  {canUpdateProfile && (
+                    <MenuItem
+                      label={t('menu.profile')}
+                      icon={<ProfileIcon width={20} height={20} />}
+                      pageId={PAGE_IDS.PROFILE}
+                      testId="menu-profile"
+                    />
+                  )}
                   <MenuItem
                     label={t('menu.settings')}
                     icon={<SettingsIcon width={20} height={20} />}
@@ -248,7 +261,11 @@ export default function Layout(): React.ReactElement {
                   />
                   <MenuItem
                     label={t('menu.logout')}
-                    onClick={() => void logout().catch(() => undefined)}
+                    onClick={() => {
+                      navigateTo(PAGE_IDS.HOME);
+                      if (currentPage === PAGE_IDS.HOME) closeMenu();
+                      void logout().catch(() => undefined);
+                    }}
                     testId="menu-logout"
                   />
                 </div>
