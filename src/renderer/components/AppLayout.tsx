@@ -48,7 +48,7 @@ export default function Layout(): React.ReactElement {
   const { t } = useTranslation(['layout', 'common']);
   const { status: authStatus, session, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { currentPage, navigationMode } = useNavigation();
+  const { currentPage, navigateTo, navigationMode } = useNavigation();
   const [systemExpanded, setSystemExpanded] = useState(false);
   const [activeTask, setActiveTask] = useState<TaskPayload | null>(null);
   const [queue, setQueue] = useState<TaskPayload[]>([]);
@@ -261,7 +261,11 @@ export default function Layout(): React.ReactElement {
                   />
                   <MenuItem
                     label={t('menu.logout')}
-                    onClick={() => void logout().catch(() => undefined)}
+                    onClick={() => {
+                      navigateTo(PAGE_IDS.HOME);
+                      if (currentPage === PAGE_IDS.HOME) closeMenu();
+                      void logout().catch(() => undefined);
+                    }}
                     testId="menu-logout"
                   />
                 </div>
