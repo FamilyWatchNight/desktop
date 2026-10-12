@@ -1,10 +1,30 @@
+import { afterEach } from '@jest/globals';
 import { BaseWebAdapter, init } from '@noriginmedia/norigin-spatial-navigation-core';
 import '@testing-library/jest-dom';
+import { act, cleanup } from '@testing-library/react';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+// Initialize i18n for testing purposes
+i18n.use(initReactI18next).init({
+  lng: 'en',
+  fallbackLng: 'en',
+  ns: ['translations'],
+  defaultNS: 'translations',
+  debug: false,
+  resources: { en: { translations: {} } }, // Add real test translations if needed
+});
 
 // Check if the current Jest runner is executing in a browser-like (jsdom) context
 const isJsdomEnvironment = typeof window !== 'undefined' && typeof document !== 'undefined';
 
 if (isJsdomEnvironment) {
+  afterEach(async () => {
+    await act(async () => {
+      cleanup();
+    });
+  });
+
   // 1. Initialize the layout adapter strictly for DOM-based UI tests
   init({
     layoutAdapter: BaseWebAdapter,
@@ -31,4 +51,22 @@ if (isJsdomEnvironment) {
     configurable: true,
     value: jest.fn(), // Creates a mock function that safely does nothing
   });
+
+  // 4. Mock electron-log to prevent actual logging (or console errors) during tests
+  jest.mock('electron-log', () => ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    verbose: jest.fn(),
+    debug: jest.fn(),
+    silly: jest.fn(),
+    log: jest.fn(),
+    functions: {},
+    transports: {
+      console: {},
+      file: {},
+    },
+  }));
+
+  jest.mock('electron-log/renderer', () => jest.requireMock('electron-log'));
 }
