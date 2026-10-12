@@ -39,4 +39,22 @@ if (isJsdomEnvironment) {
     configurable: true,
     value: jest.fn(), // Creates a mock function that safely does nothing
   });
+
+  // 4. Mock electron-log to prevent actual logging (or console errors) during tests
+  jest.mock('electron-log', () => ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    verbose: jest.fn(),
+    debug: jest.fn(),
+    silly: jest.fn(),
+    log: jest.fn(),
+    functions: {},
+    transports: {
+      console: {},
+      file: {},
+    },
+  }));
+
+  jest.mock('electron-log/renderer', () => jest.requireMock('electron-log'));
 }
