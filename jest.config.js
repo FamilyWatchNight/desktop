@@ -9,6 +9,7 @@ the Free Software Foundation, version 3.
 module.exports = {
   testMatch: ['<rootDir>/tests/unit/**/*.test.ts', '<rootDir>/tests/unit/**/*.test.tsx'],
   testEnvironment: 'node',
+  setupFiles: ['<rootDir>/tests/jest.pre-setup.ts'],
   // Transform TypeScript and JavaScript files with @swc/jest so ESM packages
   // like `lodash-es` can be transpiled for the Jest runtime.
   transform: {

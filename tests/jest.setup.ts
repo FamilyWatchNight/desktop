@@ -1,10 +1,18 @@
+import { afterEach } from '@jest/globals';
 import { BaseWebAdapter, init } from '@noriginmedia/norigin-spatial-navigation-core';
 import '@testing-library/jest-dom';
+import { act, cleanup } from '@testing-library/react';
 
 // Check if the current Jest runner is executing in a browser-like (jsdom) context
 const isJsdomEnvironment = typeof window !== 'undefined' && typeof document !== 'undefined';
 
 if (isJsdomEnvironment) {
+  afterEach(async () => {
+    await act(async () => {
+      cleanup();
+    });
+  });
+
   // 1. Initialize the layout adapter strictly for DOM-based UI tests
   init({
     layoutAdapter: BaseWebAdapter,
