@@ -2,6 +2,18 @@ import { afterEach } from '@jest/globals';
 import { BaseWebAdapter, init } from '@noriginmedia/norigin-spatial-navigation-core';
 import '@testing-library/jest-dom';
 import { act, cleanup } from '@testing-library/react';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+// Initialize i18n for testing purposes
+i18n.use(initReactI18next).init({
+  lng: 'en',
+  fallbackLng: 'en',
+  ns: ['translations'],
+  defaultNS: 'translations',
+  debug: false,
+  resources: { en: { translations: {} } }, // Add real test translations if needed
+});
 
 // Check if the current Jest runner is executing in a browser-like (jsdom) context
 const isJsdomEnvironment = typeof window !== 'undefined' && typeof document !== 'undefined';
