@@ -2,7 +2,7 @@
 
 A cross-platform app for managing movie selection for a Family Watch Night
 
-# Planned Features
+# Planned Product Features
 
 - Track each family member's interest in movies to watch together
 - Maintain your family's library of streaming services plus DVDs and Blu-rays (physical, ISO, and MKV)
@@ -19,16 +19,13 @@ Vibe-coded proof-of-concept work-in-progress
 
 Currently developing in Windows. Also targeting Mac and Linux.
 
-## Future Development Stages (TBD)
+Automated testing is in place: Jest unit tests and Cucumber feature tests, with Playwright for UI automation. The app also uses i18next and maintains locale resources under `assets/locales/`.
 
-Later work will harden the vibe-coded proof-of-concept into a more stable app:
+## Development Roadmap
 
-- ~~Activate Fast Refresh / Hot Reloading~~ ✅
 - Improve code maintainability
-- Support automated testing
 - Invite contributions from the development community
 - Include cross-platform releases
-- Support internationalization & language translation
 
 ## License
 
