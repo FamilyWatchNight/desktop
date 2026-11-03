@@ -47,50 +47,9 @@ This is a single-context repo; use the root `GLOSSARY.md` and `docs/adr/`. See `
 
 ---
 
----
+## Architecture reference
 
-# Agent Implementation Guidance
-
----
-
-# Architecture
-
-- Typescript-based Electron app whose UI is exposed both using Electron's built-in renderer and via HTTP using an express server.
-- Main process logic is not exposed to the renderer directly through IPC. Instead, it is bundled into a service under `./src/main/services`. Then, it is exposed through both IPC and HTTP through classes in `./src/main/api-server`. The renderer process consumes those services using either an IPC or HTTP client that exists in `./src/renderer/api-client`.
-
-## Core Services (`./src/main/services/`)
-
-- **MovieService**: Movie database CRUD and search
-- **SettingsService**: Application settings persistence
-- **BackgroundTaskService**: Async task management (imports, etc.)
-- **LocalizationService**: i18n and locale management
-
-Each service is pure business logic, completely decoupled from transport (IPC or HTTP).
-
-## Dual Transport Pattern (HTTP + IPC)
-
-The same service instances are exposed through TWO transports:
-
-- **HTTP** (via Express): Exposed on a configurable port (in settings), localhost-only with rate-limiting (100 req/min)
-  - Used when accessing the app through a browser window
-- **IPC** (Electron): For native app communication between main and renderer processes
-  - Used when accessing the app through the Electron window
-
-The renderer's API client automatically detects its environment and selects the appropriate transport. This means the same React components are designed to work seamlessly whether launched in Electron or in a browser.
-
-## Database
-
-- **better-sqlite3**: Embedded, synchronous, platform-specific storage paths
-- **Migrations-based**: Auto-run migrations on startup from `./src/main/db/migrations/`
-- **Models layer**: Handles type conversion (e.g., boolean ↔ 0/1)
-
-## Main Process Files
-
-- **index.ts**: Startup orchestration (i18n → DB → tray → window → servers)
-- **window-manager.ts**: Keeps window singleton, enforces preload security
-- **api-server.ts**: HTTP + IPC server setup
-- **ipc-handlers.ts**: Registers IPC event handlers
-- **server.ts**: Express setup with rate limiting and security
+For tasks that depend on system design or component relationships, consult [ARCHITECTURE_ANALYSIS.md](./ARCHITECTURE_ANALYSIS.md). Treat it as a reference and verify relevant behavior against the current code; flag discrepancies before relying on it.
 
 ---
 
