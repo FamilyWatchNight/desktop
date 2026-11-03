@@ -6,6 +6,16 @@ This document outlines the implementation plan for completing the user security 
 
 The implementation builds on the existing database schema (users, user_profiles, roles, role_permissions, user_roles tables) and permissions definitions in `permissions.ts`.
 
+## Current Status
+
+Stages 1–7 are complete. Remaining work from Stages 8–12 is tracked in GitHub:
+
+- Spec: [#338 Complete User and Role Administration](https://github.com/FamilyWatchNight/desktop/issues/338)
+- Role management: [#339 Manage roles across Electron and Browser](https://github.com/FamilyWatchNight/desktop/issues/339)
+- User management: [#340 Manage user accounts across Electron and Browser](https://github.com/FamilyWatchNight/desktop/issues/340), blocked by #339
+
+The tickets include their test and integration criteria and do not map one-to-one to the original stages. GitHub Issues is the active source of truth for status and dependencies; the detailed stage descriptions below are retained as historical context.
+
 ## Implementation Stages
 
 ### Stage 1: User Authentication Service
