@@ -2,6 +2,20 @@
 
 A cross-platform app for managing movie selection for a Family Watch Night
 
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live in this repository's GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the default canonical triage label names: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a single-context repo; use the root `GLOSSARY.md` and `docs/adr/`. See `docs/agents/domain.md`.
+
 ## Agent Workflow Guidance
 
 **CRITICAL: Agents should err on the side of asking for human guidance. Before considering any work complete, check in via chat.**
@@ -12,7 +26,6 @@ A cross-platform app for managing movie selection for a Family Watch Night
 - **Before completing a task**: Verify the solution matches expectations, ask if anything should be adjusted
 - **On scope questions**: If unsure whether to expand/reduce scope, ask first
 - **Implementation choices**: When multiple valid approaches exist, surface them for human decision-making
-- **Documentation Updates**: Always use chat to propose documentation changes before implementing them
 - **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via chat to confirm completion status and receive guidance on next steps.
 
 **Never assume work is done. Always ask.**
@@ -21,7 +34,7 @@ A cross-platform app for managing movie selection for a Family Watch Night
 
 **Chat Usage:**
 
-- **Documentation Changes**: All updates to AGENTS.md, DECISIONS.md, ARCHITECTURE_ANALYSIS.md must be proposed and refined in chat before implementation
+- **Documentation changes**: Follow the Documentation Strategy below.
 - **Complex Decisions**: When multiple valid approaches exist, surface them in chat for human decision-making
 - **Scope Clarification**: Use chat to confirm understanding of requirements and scope before proceeding with implementation
 - **Phase/Task Completion**: Never declare phases, stages, or tasks as "complete" unilaterally. Always check in via chat to confirm completion status and receive guidance on next steps.
@@ -92,6 +105,8 @@ UI tests support dual transport modes controlled by `RENDER_LOCATION` environmen
   - Execute: `npm run test:features`
   - Execute UI tests in Electron: `npm run test:features`
   - Execute UI tests in Browser: `npm run test:features:browser`
+  - Always run feature tests through the npm scripts rather than invoking `cucumber-js` directly, so the active testing pages and required build hooks are applied.
+  - When running a specific feature subset, pass tags through the npm script, for example: `npm run test:features -- --tags "@ui and @form-controls"`.
   - Feature scenarios in `tests/bdd/business-logic/features/`
   - Step definitions in `tests/bdd/business-logic/steps/`
   - Personas (domain-facing APIs) in `tests/bdd/business-flow/personas/`.
@@ -191,47 +206,6 @@ The renderer's API client automatically detects its environment and selects the 
 - **api-server.ts**: HTTP + IPC server setup
 - **ipc-handlers.ts**: Registers IPC event handlers
 - **server.ts**: Express setup with rate limiting and security
-
----
-
-# Testing
-
-### Test Structure
-
-- **Unit tests** (Jest): Located in `tests/unit/`, for isolated business logic
-  - Execute: `npm run test:unit`
-- **Feature tests** (Cucumber/BDD): Located in `tests/bdd/`
-  - Execute: `npm run test:features`
-  - Execute UI tests in Electron: `npm run test:features`
-  - Execute UI tests in Browser: `npm run test:features:browser`
-  - Always run feature tests through the npm scripts rather than invoking `cucumber-js` directly, so the active testing pages and required build hooks are applied.
-  - When running a specific feature subset, pass tags through the npm script, for example:
-    - `npm run test:features -- --tags "@ui and @form-controls"`
-  - Feature scenarios in `tests/bdd/business-logic/features/`
-  - Step definitions in `tests/bdd/business-logic/steps/`
-  - Personas (domain-facing APIs) in `tests/bdd/business-flow/personas/`.
-    - `internal-system.ts` used for interacting at the system level without the UI
-    - `UserPersona.ts`: base class for interacting with the UI. Default implementations go here, with any persona-specific overrides in classes that extend.
-  - Page objects (UI interaction details) in `tests/bdd/technical/page-objects/`
-  - Test hooks and infrastructure in `tests/bdd/technical/`
-
-### Test Hooks
-
-- Service logic cannot be tested via Jest unit tests because it runs inside the Electron main process
-- Testing hooks, exposed only for integration testing, live in `src/main/testing-active`
-- The `InternalSystemPersona` in `tests/bdd/business-flow/personas/internal-system.ts` uses test APIs in `tests/bdd/technical/hooks` to call those hooks that run in the Electron main process
-- UI testing uses Playwright for browser automation
-- Only serializable data can cross the hook boundary from Cucumber to Electron
-- NEVER, under any circumstances, change anything in `src/main/testing`. That folder's contents is overwritten at build time.
-- If any compile, build, or test failure points to a problem in `src/main/testing` and you believe that you need to change a file in that folder to resolve the error, instead make the change to the equivalent file in the `src/main/testing-active` folder. Those files will be copied into `src/main/testing` at build time, so your changes there will take effect at the next build.
-
-### Validation Flow
-
-Before writing tests:
-
-1. Get approval on test approach and coverage strategy
-2. For each test, get validation before moving to the next one
-3. Check in before marking test work complete
 
 ---
 
