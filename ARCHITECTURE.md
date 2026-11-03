@@ -1,20 +1,20 @@
-# Family Watch Night - Comprehensive Architecture Analysis
+# Family Watch Night Architecture
 
 ## Executive Summary
 
-Family Watch Night is a TypeScript-based Electron desktop application with a sophisticated dual-mode API architecture. The main distinctive feature is that core business logic is completely decoupled from the IPC/HTTP exposure layer—services are business-logic containers that know nothing about Electron or web communication, which are instead exposed through parallel HTTP and IPC adapters. This allows the same logic to be used via multiple channels.
+Family Watch Night is a TypeScript-based Electron application with a React renderer. Its renderer API has IPC and HTTP implementations, allowing the UI to use either transport. Authentication and authorization requirements are handled by the relevant main-process services and route adapters.
 
-The testing infrastructure uses a three-layer BDD architecture to verify business logic independently of transport concerns. See [Testing Architecture](#3-testing-architecture) below for details.
+Tests include Jest unit tests and Cucumber feature specifications. Playwright provides browser and Electron UI automation for feature tests. See [Testing Architecture](#3-testing-architecture) below for details.
 
 ---
 
 ## 1. Key Services and Their Responsibilities
 
-Located in `src/main/services/`, services are stateless, framework-agnostic classes that encapsulate core business logic. Full method signatures are available in the source code; this section describes key responsibilities and patterns.
+Services live in `src/main/services/`. Their responsibilities vary; consult the source for current method signatures and authentication requirements.
 
 ### **MovieService**
 
-- **Responsibility**: Movie CRUD operations and search
+- **Responsibility**: Authenticated movie lookups by ID and external catalog ID, and title search. The service does not currently expose create, update, or delete operations.
 
 ### **SettingsService**
 
@@ -22,11 +22,11 @@ Located in `src/main/services/`, services are stateless, framework-agnostic clas
 
 ### **BackgroundTaskService**
 
-- **Responsibility**: Long-running asynchronous task coordination and progress reporting
+- **Responsibility**: Authenticated task enqueueing, state retrieval, cancellation, and queued-task removal through the background task manager. Administrative permission is required.
 
 ### **UserService**
 
-- **Responsibility**: User authentication and profile management
+- **Responsibility**: User creation, authentication, user details, and profile-related operations. See the service for the current API.
 
 ### **RoleService**
 
@@ -47,7 +47,7 @@ Located in `src/main/services/`, services are stateless, framework-agnostic clas
 
 The main process orchestrates the entire application. Key files and their roles:
 
-### **[index.ts](index.ts)** - Application Entry Point
+### **[src/main/index.ts](src/main/index.ts)** - Application Entry Point
 
 ```
 app.on('ready'):
@@ -56,31 +56,32 @@ app.on('ready'):
   3. Initialize settings manager
   4. Create tray icon with context menu
   5. Register IPC handlers
-  6. Start HTTP server on configured port
+  6. Start localhost HTTP/WebSocket server on configured port
 ```
 
-- **Tray integration**: Double-click/click to focus window, quit option
-- **Test mode**: Sets `app.testHooks` for integration testing when NODE_ENV=test
+- **Tray integration**: Clicking the tray icon opens or focuses the application window; the menu also offers quit.
+- **Test mode**: Attaches test hooks to the Electron app and exposes test-only IPC support when `NODE_ENV=test`.
 
-### **[window-manager.ts](window-manager.ts)** - Window Lifecycle
+### **[src/main/window-manager.ts](src/main/window-manager.ts)** - Window Lifecycle
 
 - Singleton pattern: reuses existing window if not destroyed
 - Creates BrowserWindow with:
   - Context isolation + preload script for security
   - Loads dev URL (`ELECTRON_START_URL` for dev) or built index.html
-- Hooks into `background-task-manager` to notify window of task updates
-- Sends updates via `mainWindow.webContents.send('background-task-update', ...)`
+- Registers the window with the IPC notification adapter, which is used by the event notification manager.
 
-### **[preload.ts](preload.ts)** - IPC Surface Definition
+### **[src/main/preload.ts](src/main/preload.ts)** - IPC Surface Definition
 
-Defines and exposes all available IPC channels via `contextBridge`:
+Defines a typed preload API via `contextBridge`:
 
 ```typescript
 window.electron = {
-  app: { getAppVersion, getAppLocale, getServerPort, ... },
-  backgroundTasks: { enqueueBackgroundTask, getBackgroundTasks, ... },
-  movies: { create, getById, getAll, ... },
-  settings: { loadSettings, saveSettings, ... }
+  app: { ... },
+  auth: { ... },
+  backgroundTasks: { ... },
+  movies: { ... },
+  settings: { ... },
+  users: { ... }
 }
 ```
 
@@ -88,19 +89,15 @@ window.electron = {
 - **Dual mode**: Each method maps to an ipcRenderer.invoke() call
 - **Test mode**: When NODE_ENV=test, exposes `window.testApi` for test hooks
 
-### **[server.ts](server.ts)** - Express Server Setup
+### **[src/main/server.ts](src/main/server.ts)** - Express Server Setup
 
 - **Security layers**:
   1. Rate limiting: 100 requests/minute per client
-  2. Host validation: only accepts localhost or 127.0.0.1 (prevents DNS rebind attacks)
-- **Routes**:
-  - `/api/*` - service endpoints
-  - `/dist/*` - built renderer assets
-  - `/*` - static files from assets/
-  - Default handler - serves index.html (SPA routing)
-- **Port**: Configurable via settings (default 3000)
+  2. Host validation: only accepts `localhost` or `127.0.0.1`
+- **Routes and assets**: Serves the built renderer at `/`, registers JSON API routes, and serves static files from `dist/renderer`. WebSocket notifications share the HTTP server.
+- **Binding and port**: Binds to `localhost`; the port is configurable via settings (default 3000).
 
-### **[database.ts](database.ts)** - SQLite Management
+### **[src/main/database.ts](src/main/database.ts)** - SQLite Management
 
 - **Platform-specific app data paths**:
   - Windows: `%APPDATA%/FamilyWatchNight/sqlite/`
@@ -113,40 +110,38 @@ window.electron = {
 - **Testing**: Supports in-memory database for fast test execution
 - **Exports**: `initDatabase()`, `initMockDatabase()`, `getModels()`, `closeDatabase()`
 
-### **[api-server.ts](api-server.ts)** - Re-export Hub
+### **[src/main/api-server.ts](src/main/api-server.ts)** - Re-export Hub
 
-Simple barrel file re-exporting HTTP and IPC handler registration functions:
+Barrel file re-exporting HTTP routes, WebSocket setup and broadcasts, IPC window/broadcast helpers, and IPC handler registration.
+`server.ts` uses it for HTTP routes and WebSocket setup; `window-manager.ts` uses it to register the window with the IPC notification adapter.
 
-```typescript
-export { registerHttpRoutes, registerAppRoutes, registerIpcHandlers };
-```
+### **[src/main/api-server/ipc/index.ts](src/main/api-server/ipc/index.ts)** - IPC Orchestrator
 
-Used by `index.ts` to cleanly register all handlers.
-
-### **[api-server/ipc/index.ts](api-server/ipc/index.ts)** - IPC Orchestrator
-
-- Removes all handlers before re-registering (idempotent, safe for reloads)
-- Imports and chains handler registration:
+- Registers handler groups for:
   - `registerAppIpcHandlers()`
+  - `registerAuthIpcHandlers()`
   - `registerBackgroundTaskIpcHandlers()`
   - `registerMovieIpcHandlers()`
   - `registerSettingsIpcHandlers()`
+  - `registerUserIpcHandlers()`
 - **Test mode**: Registers `test:get-db-status` handler when NODE_ENV=test
 
-### **[api-server/http/index.ts](api-server/http/index.ts)** - HTTP Orchestrator
+### **[src/main/api-server/http/index.ts](src/main/api-server/http/index.ts)** - HTTP Orchestrator
 
 ```typescript
 registerHttpRoutes(app: Express) {
   registerAppRoutes(app)
+  registerAuthRoutes(app)
   registerBackgroundTaskRoutes(app)
   registerMovieRoutes(app)
   registerSettingsRoutes(app)
+  registerUserRoutes(app)
 }
 ```
 
-Each function adds routes to the Express app using the centralized service instances.
+Each function adds routes to the Express app using its corresponding HTTP route module.
 
-### **[background-task-manager.ts](background-task-manager.ts)** - Task Queue Engine
+### **[src/main/background-task-manager.ts](src/main/background-task-manager.ts)** - Task Queue Engine
 
 Manages task lifecycle without using a queue library:
 
@@ -165,19 +160,15 @@ runTask() → executes with TaskContext (progress reporting, cancellation)
 - **Cancellation**: Active task can be cancelled, next task starts immediately
 - **Notifications**: Calls `notifyFn()` on state changes (observed by window-manager)
 
-### **[ipc-handlers.ts](ipc-handlers.ts)** - LEGACY
-
-This file is being refactored into modular handlers. Currently contains duplicated Movie/Settings/BackgroundTask handlers that should migrate to `api-server/ipc/` structure.
-
 ---
 
 ## 3. Testing Architecture
 
-Family Watch Night uses a **three-layer BDD architecture** inspired by _BDD in Action_ to separate business-facing test scenarios from technical implementation details:
+Feature tests use a **three-layer BDD structure** to separate business-facing scenarios from technical implementation details:
 
-1. **Business Logic Layer** (`tests/bdd/business-logic/`): Feature files and step definitions expressing business scenarios in domain language
-2. **Business Flow Layer** (`tests/bdd/business-flow/personas/`): Persona classes (e.g., `InternalSystemPersona`) that translate domain intent into actionable steps
-3. **Technical Layer** (`tests/bdd/technical/`): Test hooks, infrastructure, and low-level integrations with the application
+1. **Business Logic Layer** (`tests/bdd/business-logic/`): Cucumber feature files and step definitions.
+2. **Business Flow Layer** (`tests/bdd/business-flow/personas/`): Personas that compose actions for feature steps.
+3. **Technical Layer** (`tests/bdd/technical/`): Test hooks, Playwright page objects, and infrastructure.
 
 **Key principle**: Business Logic steps must not directly call the Technical layer. All interactions route through personas, which maintain a stable domain-facing API.
 
@@ -204,18 +195,19 @@ Family Watch Night uses a **three-layer BDD architecture** inspired by _BDD in A
    - Stable contract for step definitions—changes to technical layer don't require step updates
 
 5. **Test State Store** (`tests/bdd/technical/infrastructure/world.ts`):
-   - Hierarchy: `world.getStateStore(namespace)` returns a shared state object for scenario context
-   - Supports keyed storage (`state.map.set(key, value)`) for multiple instances
-   - Supports last-created storage (`state.lastRole`) for un-keyed access to most recent instance
-   - Maintains isolation: each scenario gets a fresh state store
+   - Provides named state stores scoped to the current Cucumber scenario.
+   - Supports keyed and latest-value storage for scenario data.
+   - Is cleared between scenarios.
 
 ### Example: Adding a Role Feature
 
-- **Feature file** (`tests/bdd/business-logic/features/rbac.feature`): User-facing scenario
+- **Feature file** (`tests/bdd/business-logic/features/rbac-role-management.feature`): User-facing scenario
 - **Step definition** (`tests/bdd/business-logic/steps/rbac-common.steps.ts`): Calls `getSystemPersona(world).createRole()`
 - **Persona** (`tests/bdd/business-flow/personas/internal-system.ts`): Implements `createRole()` → delegates to `world.rolesApi.createRole()`
 - **Technical Hooks Layer** (`tests/bdd/technical/hooks/roles.ts`): Calls `withTestHooks()` to invoke the test hook
 - **Test hook** (`src/main/testing-active/TestHooksImpl.ts`): Executes the actual `roleService.create()`
+
+Feature files are the specification layer; Playwright is used where browser or Electron UI automation is needed. The test scripts build the app with test hooks before running Cucumber. Unit tests live separately in `tests/unit/` and run with Jest. See [`docs/agents/testing.md`](docs/agents/testing.md) and [`tests/bdd/README.md`](tests/bdd/README.md) for executable guidance.
 
 This layering ensures that:
 
@@ -233,24 +225,32 @@ The renderer is a React SPA that communicates with services via the dual API lay
 ### **[App.tsx](src/renderer/App.tsx)** - Root Component
 
 ```typescript
-export default function App() {
-  return <AppLayout />
+export default function App(): React.ReactElement {
+  return (
+    <AuthProvider>
+      <PageRegistryProvider>
+        <NavigationProvider>
+          <AppLayout />
+        </NavigationProvider>
+      </PageRegistryProvider>
+    </AuthProvider>
+  );
 }
 ```
 
-Simple render of main layout component.
+The root component provides authentication, page registry, and navigation contexts.
 
 ### **[AppLayout.tsx](src/renderer/components/AppLayout.tsx)** - Main Layout Container
 
 - **API Client**: `createApiClient()` factory instantiates IPC or HTTP client
 - **State**:
-  - `currentPage`: home, settings, background-tasks
+  - `currentPage`: selected page from the navigation context
   - `activeTask`, `queue`: background task state
-  - `menuOpen`: hamburger menu state
+  - `menuOpen`: navigation menu state
 - **Lifecycle**:
-  1. On mount: fetches initial background task state via `apiClient.backgroundTasks.getBackgroundTasks()`
-  2. Subscribes to updates via `apiClient.backgroundTasks.onBackgroundTaskUpdate(callback)`
-- **Pages**: HomePage, SettingsPage, BackgroundTasksPage (imported conditionally)
+  1. Checks whether users exist and fetches initial background-task state.
+  2. Subscribes to background-task updates through the selected API client.
+- **Pages**: Home, Profile, Settings, Styleboard, and Background Tasks, plus registered test pages when enabled.
 
 ### UI Automation Selectors
 
@@ -262,36 +262,18 @@ Simple render of main layout component.
 
 ### **[api-client/index.ts](src/renderer/api-client/index.ts)** - Transport Selection
 
-```typescript
-function createApiClient(): ApiClient {
-  if (typeof window !== 'undefined' && (window as any).electron) {
-    return (window as any).electron; // IPC mode: use preload-exposed API
-  }
-  return createHttpApiClient(); // HTTP mode: direct REST calls
-}
-```
+`createApiClient()` selects the preload-exposed API in Electron and the HTTP adapter in a browser.
 
 **This is the key architectural pattern**: Same interface, two backends. Enables:
 
 - Electron app's window communicates via IPC
-- The same UI is available to remote browsers or future mobile APPs over HTTP
+- A browser running on the local machine can use the localhost HTTP server
 
 ### **[api-client/http/index.ts](src/renderer/api-client/http/index.ts)** - HTTP Adapter
 
 Implements `ApiClient` interface using `fetch()` to make HTTP calls:
 
-```typescript
-export function createHttpApiClient(): ApiClient {
-  return {
-    app: new HttpAppApi(),
-    backgroundTasks: new HttpBackgroundTaskApi(),
-    movies: new HttpMovieApi(),
-    settings: new HttpSettingsApi(),
-  };
-}
-```
-
-Each class contains methods like `getAll()` that `fetch('/api/movies')`.
+`HttpApiClient` implements `ApiClient` with HTTP-backed `app`, `auth`, `backgroundTasks`, `movies`, `settings`, and `users` clients.
 
 ### **[api-client/types.ts](src/renderer/api-client/types.ts)** - API Contract
 
@@ -300,9 +282,11 @@ Defines TypeScript interface that both IPC and HTTP implementations must satisfy
 ```typescript
 interface ApiClient {
   app: AppApi;
-  backgroundTasks: BackgroundTasksApi;
-  movies: MoviesApi;
+  auth: AuthApi;
+  backgroundTasks: BackgroundTaskApi;
+  movies: MovieApi;
   settings: SettingsApi;
+  users: UserApi;
 }
 ```
 
@@ -310,8 +294,10 @@ Forces consistency between both adapters.
 
 ### **Other Components**
 
-- **HomePage.tsx** - Movie list/search, likely imports tasks
+- **HomePage.tsx** - Movie search and catalog view
+- **ProfilePage.tsx** - Current user's profile
 - **SettingsPage.tsx** - Application settings UI
+- **StyleboardPage.tsx** - Styleboard UI
 - **BackgroundTasksPage.tsx** - Task queue visualization
 
 ---
@@ -346,7 +332,7 @@ Platform-specific standard locations stored by `database.ts`:
 - **UserProfiles**: Extended user data (display name, profile image)
 - **Movies**: Movie catalog with TMDB/Watchmode IDs
 - **Roles**: Role definitions (system roles like "admin" + custom roles)
-- **RolePermissions**: Junction table mapping roles to permission stubs
+- **RolePermissions**: Role-to-permission assignments
 - **UserRoles**: Junction table mapping users to assigned roles
 
 See `src/main/db/models/` for full implementations.
@@ -355,7 +341,7 @@ See `src/main/db/models/` for full implementations.
 
 In-memory SQLite (`Database(':memory:')`) enables fast test execution without file I/O. Tests call `initMockDatabase()` to get a fresh database with all migrations applied and models instantiated.
 
-## 5. API Server Pattern - Unified Service Exposure
+## 6. API Server Pattern - Unified Service Exposure
 
 The architecture reflects a core principle: **Business logic lives in services, exposure is decoupled.**
 
@@ -371,124 +357,40 @@ Services (Business Logic)
 
 ### **HTTP Route Pattern** (`api-server/http/*.ts`)
 
-Example from [movies.ts](src/main/api-server/http/movies.ts):
+The movie routes currently expose lookups by database ID, Watchmode ID, and TMDB ID, plus title search. See [`src/main/api-server/http/movies.ts`](src/main/api-server/http/movies.ts). The shared `route()` helper wraps handler results in a `{ success, data }` envelope and catches errors into `{ success: false, error }`.
 
-```typescript
-const movieService = new MovieService();
-
-export function registerMovieRoutes(app: Express) {
-  app.post(
-    '/api/movies',
-    route((req) => movieService.create(req.body)),
-  );
-  app.get(
-    '/api/movies/:id',
-    route((req) => movieService.getById(Number(req.params.id))),
-  );
-  app.get(
-    '/api/movies',
-    route((req) =>
-      req.query.searchTerm
-        ? movieService.searchByTitle(String(req.query.searchTerm))
-        : movieService.getAll(),
-    ),
-  );
-  app.put(
-    '/api/movies/:id',
-    route((req) => ({
-      success: movieService.update(Number(req.params.id), req.body),
-    })),
-  );
-  app.delete(
-    '/api/movies/:id',
-    route((req) => ({
-      success: movieService.delete(Number(req.params.id)),
-    })),
-  );
-}
-```
-
-The `route()` wrapper:
-
-```typescript
-function route(handler: (req: Request) => any) {
-  return async (req: Request, res: Response) => {
-    try {
-      const result = await handler(req);
-      res.json(result);
-    } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
-    }
-  };
-}
-```
-
-Provides consistent error handling across all routes.
+**Current integration discrepancy**: `MovieService` requires an `AuthContext`, but the current HTTP and IPC movie handlers call it without one. The preload and renderer API types also still declare movie create, get-all, update, and delete methods that are absent from `MovieService` and the registered handlers. The app code was not changed as part of this documentation update.
 
 ### **IPC Handler Pattern** (`api-server/ipc/*.ts`)
 
-Example from [movies.ts](src/main/api-server/ipc/movies.ts):
+The IPC movie handlers expose the same lookup operations through `ipcMain.handle()`. See [`src/main/api-server/ipc/movies.ts`](src/main/api-server/ipc/movies.ts).
 
-```typescript
-const movieService = new MovieService();
-
-export function registerMovieIpcHandlers() {
-  ipcMain.handle('movies-create', (_event, movieData) => movieService.create(movieData));
-  ipcMain.handle('movies-get-by-id', (_event, id) => movieService.getById(id));
-  ipcMain.handle('movies-get-all', () => movieService.getAll());
-  ipcMain.handle('movies-search-by-title', (_event, searchTerm) =>
-    movieService.searchByTitle(searchTerm),
-  );
-  ipcMain.handle('movies-update', (_event, id, movieData) => ({
-    success: movieService.update(id, movieData),
-  }));
-  ipcMain.handle('movies-delete', (_event, id) => ({
-    success: movieService.delete(id),
-  }));
-}
-```
-
-**Parallel structure**: Same service calls, same response shapes, different transport.
+**Parallel structure**: HTTP and IPC provide separate adapters for the renderer API. The exact method sets and response shapes are defined by the current adapters and API-client types.
 
 ### **Service Instance Management**
 
-Each API adapter file creates its own service instance:
-
-```typescript
-// api-server/http/movies.ts
-const movieService = new MovieService();
-
-// api-server/ipc/movies.ts
-const movieService = new MovieService();
-```
-
-These can be extracted to shared `instances.ts` for single-instance pattern (currently some files use this approach).
+Some IPC handlers share service instances from `api-server/ipc/instances.ts`; HTTP route modules instantiate their own services.
 
 ### **Why This Pattern?**
 
-1. **Services are testable**: Mock database, inject dependencies
-2. **Clean separation**: Services don't know about HTTP/IPC mechanics
-3. **Port flexibility**: Can be run as standalone server, or headless daemon
-4. **Framework-agnostic**: Services work with any UI framework
+1. **Transport separation**: Renderer components use an API client rather than calling IPC or HTTP directly.
+2. **Parallel adapters**: The Electron preload API and HTTP API expose operations to the same renderer.
+3. **Focused testing**: Cucumber features can exercise service hooks and UI flows through the test harness.
 
 ---
 
 ### API Callbacks using Event Notification Manager
 
-This subsystem coordinates real-time event dispatch across both IPC and HTTP/WebSocket transports.
+The current notification manager forwards background-task state changes across IPC and HTTP/WebSocket transports. It is not a general registration framework for arbitrary services.
 
 #### **Roles and Responsibilities**
 
-- **Broadcasters (Services)**
-  - Services that emit asynchronous state events implement a standard callback API.
-  - Example: `BackgroundTaskService` exposes `setNotifyFn(fn)` and `clearNotifyFn(fn)`.
-  - These services are _producers_ of events, some of which may be interesting to the renderer via API
+- **Event source**
+  - `background-task-manager` exposes `setNotifyFn(fn)` and invokes the callback when task state changes.
 
-- **EventNotificationManager**
-  - Used to make events available to the renderer.
-  - In `event-notification-manager.ts`, `initialize()` registers callback functions on broadcaster services.
-  - This callback receives events and forwards them to all configured transport broadcasters.
-  - Acts as the central “single source of subscription wiring” for event propagation.
+- **Event notification manager**
+  - `src/main/event-notification-manager.ts` registers a callback with `background-task-manager`.
+  - The callback forwards `background-task-update` events through the IPC and HTTP notification broadcasters.
 
 - **Transports**
   - **IPC transport** (`api-server/ipc/notifications.ts`) implements `broadcast(eventType, data)` to send IPC messages to renderer windows.
@@ -496,15 +398,13 @@ This subsystem coordinates real-time event dispatch across both IPC and HTTP/Web
 
 #### **Sample Event Flow**
 
-1. `BackgroundTaskService` emits update via callback supplied from `EventNotificationManager`.
-2. `EventNotificationManager` receives background task state and calls:
-   - `ipcNotifications.broadcast('background-task-update', state)`
-   - `httpNotifications.broadcast('background-task-update', state)`
+1. `background-task-manager` emits an update via the callback supplied by the event notification manager.
+2. `event-notification-manager` forwards the state with `broadcastIpc()` and `broadcastHttp()`.
 3. Renderer clients receive updates via chosen transport.
 
 ---
 
-## 6. Build and Development Setup
+## 7. Build and Development Setup
 
 ### **Package.json Scripts**
 
@@ -514,20 +414,20 @@ This subsystem coordinates real-time event dispatch across both IPC and HTTP/Web
 | `npm run build:main`     | Compiles TypeScript, generates app-info.json, copies migrations                         |
 | `npm run build:renderer` | Vite build for React + CSS                                                              |
 | `npm run test:unit`      | Jest unit tests                                                                         |
-| `npm run test:smoke`     | Cucumber smoke tests (basic health checks)                                              |
-| `npm run test:component` | Cucumber integration tests (full workflows)                                             |
-| `npm run test:features`  | All Cucumber tests                                                                      |
+| `npm run test:smoke`     | Cucumber smoke profile                                                                  |
+| `npm run test:component` | Cucumber component profile                                                              |
+| `npm run test:features`  | Full Cucumber feature suite                                                             |
 | `npm run build`          | Production: clean + build main + build renderer + package with electron-builder         |
 
 ### **Key Dependencies**
 
 | Category      | Package                              | Usage                   |
 | ------------- | ------------------------------------ | ----------------------- |
-| **Framework** | electron 41.x                        | Desktop runtime         |
+| **Framework** | electron                              | Desktop runtime         |
 | **Server**    | express 5.x                          | HTTP API                |
-| **Database**  | better-sqlite3 12.x                  | Embedded SQLite         |
+| **Database**  | better-sqlite3                       | Embedded SQLite         |
 | **Renderer**  | react 19.x, react-i18next            | UI framework + i18n     |
-| **i18n**      | i18next, i18next-fs-backend          | Multi-language support  |
+| **i18n**      | i18next, i18next-fs-backend          | Localization             |
 | **Testing**   | jest, playwright, @cucumber/cucumber | Testing frameworks      |
 | **Build**     | vite, electron-builder, typescript   | Compilation + packaging |
 
@@ -542,7 +442,7 @@ This subsystem coordinates real-time event dispatch across both IPC and HTTP/Web
 4. Package with electron-builder
 ```
 
-#### **Integration Testing Build**
+#### **Feature-Test Build**
 
 ```
 npm run build:main:for-integration-testing
@@ -576,49 +476,25 @@ npm run test:unit
 # Smoke tests (basic health checks)
 npm run test:smoke
 
-# Integration tests (full workflows)
+# Component profile
 npm run test:component
 
 # All Cucumber tests
 npm run test:features
 
-# All tests
+# Unit and feature tests
 npm run test
 ```
 
 ---
 
-## 7. Common Patterns and Conventions
+## 8. Common Patterns and Conventions
 
 ### **Pattern: Service-First Architecture**
 
-- All business logic lives in `src/main/services/`
-- Services are stateless, framework-agnostic
-- IPC/HTTP are thin adapters over services
-- **Benefit**: Easy to test, refactor, or change transports
-
-### **Pattern: Idempotent IPC Handler Registration**
-
-```typescript
-export function registerIpcHandlers() {
-  // Remove all old handlers first
-  channels.forEach((ch) => {
-    try {
-      ipcMain.removeHandler(ch);
-    } catch {}
-  });
-
-  // Guard against initializing twice
-  if (handlersRegistered) return;
-  handlersRegistered = true;
-
-  // Register new handlers
-  registerAppIpcHandlers();
-  // ...
-}
-```
-
-Allows hot-reload and multiple calls safely.
+- Main-process services centralize domain and application operations.
+- HTTP routes and IPC handlers adapt those operations to their transports.
+- Some concerns, such as task queueing, are implemented in modules outside the service directory.
 
 ### **Pattern: Prepared Statements with Type Conversion**
 
@@ -643,27 +519,6 @@ export { SettingsService } from './SettingsService';
 ```
 
 Enables clean imports: `import { MovieService } from './services'`
-
-### **Pattern: Error Wrapping in HTTP**
-
-```typescript
-app.post(
-  '/api/movies',
-  route((req) => movieService.create(req.body)),
-);
-
-// route() wrapper:
-async (req, res) => {
-  try {
-    const result = await handler(req);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ error: (error as Error).message });
-  }
-};
-```
-
-All HTTP errors are caught and formatted consistently.
 
 ### **Pattern: Task Registry**
 
@@ -720,125 +575,27 @@ Security: Prevents injection attacks in locale strings.
 
 ---
 
-## 8. Testing Patterns
+## 9. Test Layout and Commands
 
-### **Unit Tests** (`tests/unit/`)
+- Jest unit tests live in `tests/unit/` and run with `npm run test:unit`.
+- Cucumber features live in `tests/bdd/business-logic/features/`; steps, personas, and technical helpers are in sibling `business-logic/`, `business-flow/`, and `technical/` directories.
+- Cucumber is the feature specification and orchestration layer. Playwright remains the UI automation library for browser and Electron scenarios.
+- Feature commands build the application with test hooks before running Cucumber: `npm run test:features` runs the full feature suite, while `npm run test:smoke` and `npm run test:component` select profiles. Browser and Electron variants are available as `npm run test:features:browser` and `npm run test:features:electron`.
+- The Cucumber world maintains scenario-scoped state; hooks reset that state and isolate app data between scenarios.
 
-- Framework: Jest
-- Focus: Pure logic without Electron
-- Example: [movie.normalizeTitle.test.ts](tests/unit/movie.normalizeTitle.test.ts)
-
-```typescript
-describe('title normalization', () => {
-  test('removes diacritics', () => {
-    const result = movies.normalizeTitle('Amélie');
-    expect(result).toBe('Amelie');
-  });
-});
-```
-
-### **Integration Tests** (`tests/component/`)
-
-- Framework: Cucumber BDD + Playwright
-- Focus: Full application workflows
-- Structure: Feature files in `smoke/` and `workflows/` for integration scenarios
-- Data Persistence: Module-level variables (e.g., `currentMovie`, `currentSettings`) for scenario data
-- Isolation: Automatic clearing of test stores and databases
-- Test Levels: @smoke (health checks), @integration (workflows)
-- Profiles: Cucumber profiles for targeted test execution
-
----
-
-## 9. Test Architecture Evolution
-
-### **Current State (March 2026)**
-
-- **Smoke Tests**: Basic app health via Cucumber @smoke tags
-- **Integration Tests**: Full workflows via Cucumber @integration tags
-- **Unit Tests**: Pure logic testing with Jest
-- **Isolation**: Automatic test store/database clearing
-- **Data Persistence**: Module variables for scenario state
-- **Coverage**: Settings management, movie operations, background tasks
-
-### **Key Components**
-
-- Test hooks provide direct service access in NODE_ENV=test
-- Dual transport testing (IPC + HTTP surfaces)
-- Playwright launches full Electron app for integration
-- Cucumber BDD with Gherkin features for business-readable tests
-- Component test pages are authored in `src/renderer/testing-active/components/pages/`, composed with production `Page`/`Section` layout components, and registered through `src/renderer/testing-active/index.tsx`.
-- During integration builds, `use-testing-active.js` copies these pages into `src/renderer/testing/` so the renderer uses real app page structures for component validation.
-
-### **Test Infrastructure**
-
-#### **Test Mode Activation**
-
-```bash
-# Build for integration testing
-npm run build:main:for-integration-testing
-# Loads testing-active stubs
-
-# Run tests with NODE_ENV set
-NODE_ENV=test npm run test:features
-```
-
-#### **Test Database**
-
-```typescript
-// In test setup
-const Database = require('../infrastructure/db');
-await db.initMockDatabase(); // In-memory SQLite
-```
-
-#### **Test Fixtures**
-
-- [domains/db.ts](tests/features/domains/db.ts) - Data setup helpers
-- [domains/movies.ts](tests/features/domains/movies.ts) - Movie test helpers
-
-#### **World Context** (Cucumber)
-
-```typescript
-// tests/features/infrastructure/world.ts
-export class CustomWorld extends World {
-  public app!: ElectronApplication;
-  public page!: Page;
-  public database!: Database;
-  // ... shared test context
-}
-```
-
-Provides shared fixture state across step definitions. Also maps task reference names to task IDs to support deterministic feature test assertions.
-
-### **Test Mocking Strategy**
-
-1. **Database**: Use in-memory SQLite, pre-populated with test data
-2. **Background Tasks**:
-   - Mock TaskContext provided by test harness;
-   - MockBackgroundTask allows deterministic setting of progress, triggering update events.
-3. **IPC Events**: Playwright waits for IPC messages sent by main process
-4. **HTTP**: Can test HTTP layer independently without Electron (faster)
-5. **File I/O**: Uses real temp directory for LocalizationService tests
-6. **Electron Store**: Settings uses in-memory `MockElectronStore` provided by test harness
-
-### **Common Patterns**
-
-| Pattern                  | Purpose                                           |
-| ------------------------ | ------------------------------------------------- |
-| `withTestHooks(app, fn)` | Run code with access to main process internals    |
-| Stub CSV/JSON            | Pre-load test database with realistic data        |
-| Scenario tagging         | @import @tmdb @missing-data for test organization |
+See [`docs/agents/testing.md`](docs/agents/testing.md) for test responsibilities, locations, and invocation details.
 
 ---
 
 ## Architecture Strengths
 
-1. **Clean separation of concerns**: Services don't know about transport layer
-2. **Testability**: Services tested independently of transport
-3. **Flexibility**: Can run as desktop app, web app, or headless service
+1. **Transport separation**: Renderer components use an API client instead of directly depending on IPC or HTTP.
+2. **Testability**: Unit and feature tests exercise service operations and UI flows through separate harnesses.
+3. **Local browser support**: A browser on the same machine can use the localhost HTTP API.
 4. **Security**: Context isolation, path validation, rate limiting, localhost-only
 5. **Performance**: Prepared statements, in-memory DB for tests, no ORMs
 6. **Type safety**: Full TypeScript, pre-compiled queries
-7. **Internationalization**: Multi-language support with fallback handling
+7. **Internationalization**: i18next-based localization and locale resources
 
 ---
 
@@ -869,10 +626,10 @@ Provides shared fixture state across step definitions. Also maps task reference 
 2. Database initialization will run it automatically
 3. Queries through `db.getModels().tableName.method()`
 
-### Running Full Test Suite
+### Running Unit and Feature Tests
 
 ```bash
-npm run test         # Runs all three test types in sequence
+npm run test         # Runs unit tests followed by the Cucumber feature suite
 ```
 
 ### Debugging

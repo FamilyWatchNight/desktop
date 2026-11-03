@@ -51,7 +51,7 @@ Builds the application (without integration testing hooks) for active developmen
 
 `dev:test`
 
-Similar to `npm run dev` except it builds the application with the integration testing hooks included. This allows you to execute the integration tests on the live app with the debugger attached.
+Similar to `npm run dev` except it builds the application with test hooks included. This supports running and debugging Cucumber feature tests against the live app.
 
 ## Other scripts
 
@@ -65,15 +65,15 @@ Builds the electron main application. This is not meant to be called directly, a
 
 `build:main`
 
-Calls `/scripts/use-testing-noop.js` to plug in the empty test hooks, then calls `build:main:raw` to build the electron main application as it would be built for a production environment.
+Calls `./scripts/use-testing-noop.js` to plug in the empty test hooks, then calls `build:main:raw` to build the electron main application as it would be built for a production environment.
 
 `build:main:for-integration-testing`
 
-Calls `./scripts/use-testing-active.js` to plug in the active integration testing hooks, then calls `build:main:raw` to build the electron main application with support for integration testing and its mocks.
+Calls `./scripts/use-testing-active.js` to plug in the active test hooks, then calls `build:main:raw`. The Cucumber feature-test scripts use this build.
 
 `build:renderer`
 
-Builds only the electron renderer process. This is not meant to be called directly. It's used by other build scripts.
+Builds the electron renderer process with no-op test hooks. It is also used by production build scripts.
 
 `build:main:watch`
 
@@ -95,19 +95,15 @@ This script is one of three that execute concurrently in `npm run dev`.
 
 `test`
 
-Runs the three scripts listed below to execute unit tests, then integration tests, then feature tests.
+Runs `test:unit` followed by `test:features`.
 
 `test:unit`
 
-Uses jest to execute only the unit tests from `./src/tests/unit`.
-
-`test:integration`
-
-Builds the main application with integration testing hooks and executes the Playwright integration tests from `./src/tests/integration`.
+Uses Jest to run unit tests from `tests/unit/`.
 
 `test:features`
 
-Builds the main application with integration testing hooks and executes the Cucumber feature tests from `./src/tests/features`.
+Builds the main and renderer applications with test hooks, then runs the Cucumber feature tests from `tests/bdd/business-logic/features/`. Playwright provides browser and Electron UI automation where needed. See `docs/agents/testing.md` for test locations and available scripts.
 
 `build`
 

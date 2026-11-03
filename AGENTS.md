@@ -49,7 +49,7 @@ This is a single-context repo; use the root `GLOSSARY.md` and `docs/adr/`. See `
 
 ## Architecture reference
 
-For tasks that depend on system design or component relationships, consult [ARCHITECTURE_ANALYSIS.md](./ARCHITECTURE_ANALYSIS.md). Treat it as a reference and verify relevant behavior against the current code; flag discrepancies before relying on it.
+For tasks that depend on system design or component relationships, consult [ARCHITECTURE.md](./ARCHITECTURE.md). Treat it as a reference and verify relevant behavior against the current code; flag discrepancies before relying on it.
 
 ---
 
@@ -59,7 +59,7 @@ This project uses structured documentation to prevent stale guidance and capture
 
 ## Key Documents
 
-- **ARCHITECTURE_ANALYSIS.md**: "Living" documentation of system design, application architecture, and how testing infrastructure integrates with the main application
+- **ARCHITECTURE.md**: "Living" documentation of system design, application architecture, and how testing infrastructure integrates with the main application
 - **DECISIONS.md**: Record of significant architectural and implementation decisions (created as-needed)
 - **AGENTS.md**: This file — agent workflow, conventions, testing patterns, and guidance
 
@@ -67,7 +67,7 @@ This project uses structured documentation to prevent stale guidance and capture
 
 **At the start of work:**
 
-- Check if ARCHITECTURE_ANALYSIS.md and DECISIONS.md are still aligned with the current request
+- Check if ARCHITECTURE.md and DECISIONS.md are still aligned with the current request
 - If you notice a discrepancy between documented decisions and what you're asked to do, raise it via chat
 - The human may want to override the documented decision, update documentation, or clarify the request
 
@@ -80,7 +80,7 @@ This project uses structured documentation to prevent stale guidance and capture
 
 - Near completion, mention via chat: "I notice the following documentation may need updates: [list]"
 - Wait for human approval before making changes
-- Update ARCHITECTURE_ANALYSIS.md if architecture/patterns changed
+- Update ARCHITECTURE.md if architecture/patterns changed
 - Create or update DECISIONS.md entries only with human guidance
 - Handle document updates as the final step before marking work complete
 

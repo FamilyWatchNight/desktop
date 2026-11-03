@@ -1,13 +1,13 @@
 # BDD Testing Architecture
 
-This directory implements a three-layered BDD testing approach inspired by John Ferguson Smart's "BDD In Action", adapted for our Electron application's testing needs.
+This directory implements a three-layer BDD testing approach for the application. Cucumber feature files are the business-readable specification and orchestration layer; Playwright remains the UI automation library for browser and Electron scenarios.
 
 ## Layer Overview
 
 ### 1. Business Logic Layer (`business-logic/`)
 
 - **Purpose**: Contains Cucumber feature files that describe business requirements in natural language
-- **Contents**: `.feature` files with scenarios, organized by workflow (e.g., `smoke/`, `workflows/`)
+- **Contents**: `.feature` files containing scenarios, located in `business-logic/features/`
 - **Style**: Business-focused, no technical implementation details
 - **Example**: "When a user assigns a role, then permissions are updated"
 
@@ -20,9 +20,9 @@ This directory implements a three-layered BDD testing approach inspired by John 
 
 #### Persona Types
 
-- **Internal System Persona** (`internal-system.ts`): Represents trusted backend operations (jobs, cron, service-to-service calls). Used for testing raw business logic without transport concerns. Methods like `createUser()`, `assignRole()`, `getEffectivePermissions()`.
-- **External System Persona** (`external-system.ts`): Represents external API consumers (UI, CLI, third-party integrations). Calls HTTP endpoints with authentication context. Methods like `login()`, `callApiEndpoint()`.
-- **User Personas** (`admin-user.ts`, `host-user.ts`, `regular-user.ts`): Represent human actors with specific roles. Orchestrate complete user journeys through UI or API. Methods like `performAction()`, `navigateToPage()`.
+- **Internal System Persona** (`internal-system.ts`): Provides service-oriented operations for feature steps.
+- **User Persona** (`UserPersona.ts`): Composes user-facing actions and workflows.
+- **Specialized Personas** (`ProfileManagementPersona.ts`, `TesterPersona.ts`, `UnauthenticatedUserPersona.ts`): Support focused profile, test, and unauthenticated-user scenarios.
 
 ### 3. Technical Layer (`technical/`)
 
@@ -31,8 +31,7 @@ This directory implements a three-layered BDD testing approach inspired by John 
 - **Style**: Technical primitives, close to application code
 - **Subdirectories**:
   - `hooks/`: Direct service/database test hooks
-  - `api/` (future): HTTP API transport helpers
-  - `page-objects/` (future): UI automation helpers
+  - `page-objects/`: Playwright UI automation helpers
 - **Dependency**: Called by Business Flow Layer, contains no business logic
 
 ## Dependency Rules
@@ -42,25 +41,15 @@ This directory implements a three-layered BDD testing approach inspired by John 
 - No reverse dependencies allowed
 - Unit tests (`tests/unit/`) remain independent
 
-## Current Implementation Status
+## Current Implementation
 
-### Stage 2 (RBAC Business Logic)
+- Feature files and step definitions are under `business-logic/`.
+- Business-flow personas include service-oriented and user-oriented workflows.
+- Technical helpers include main-process test hooks, scenario infrastructure, and Playwright page objects.
+- Feature scripts build the app with test hooks and run Cucumber; `RENDER_LOCATION` selects Browser or Electron UI automation.
+- Jest unit tests live outside this BDD tree in `tests/unit/`.
 
-- **Business Logic**: Feature files for role assignment and permission checking
-- **Business Flow**: `internal-system.ts` persona for trusted backend operations
-- **Technical**: `hooks/` with direct service calls (no transport layer yet)
-
-### Stage 3 (API Transport)
-
-- **Business Logic**: Feature files for authenticated API interactions
-- **Business Flow**: `external-system.ts` persona for HTTP API calls with auth
-- **Technical**: `api/` with HTTP client helpers and request/response handling
-
-### Stage 4 (UI Flows)
-
-- **Business Logic**: Feature files for end-to-end user journeys
-- **Business Flow**: User personas (`admin-user.ts`, `host-user.ts`, `regular-user.ts`) for UI interactions
-- **Technical**: `page-objects/` with UI automation helpers and DOM manipulation
+See `docs/agents/testing.md` for current test commands and repository test guidance.
 
 ## Implementation Guidelines
 
