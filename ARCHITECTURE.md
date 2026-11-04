@@ -252,6 +252,12 @@ The root component provides authentication, page registry, and navigation contex
   2. Subscribes to background-task updates through the selected API client.
 - **Pages**: Home, Profile, Settings, Styleboard, and Background Tasks, plus registered test pages when enabled.
 
+### Renderer UI and Navigation
+
+The renderer initializes Norigin Spatial Navigation and wraps its focus behavior with `NavigationProvider` and `useNavigationFocusable`. The current interaction model supports mouse and keyboard navigation: Tab follows DOM focus order, while Norigin handles arrow-key spatial movement. Registered controls with activation callbacks respond to Enter/Space in arrow-navigation mode. `AppLayout` separates the menu and page content into focus contexts and makes inactive regions inert.
+
+The Electron window starts at 1200×800, while the same renderer is served for local browser use. Desktop/laptop layouts are the current product target. Remote/gamepad support is a future goal, and WCAG 2.2 AA is the intended accessibility target; neither remote/gamepad support nor current WCAG conformance is claimed. See [`docs/agents/ui-ux.md`](docs/agents/ui-ux.md) for renderer patterns, constraints, and questions to raise during UI work.
+
 ### UI Automation Selectors
 
 - The renderer should assign stable `data-testid` attributes to all actionable and focusable UI controls.

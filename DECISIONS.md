@@ -33,3 +33,9 @@ This document records decisions whose rationale may help guide future changes. S
 **Rationale**: Centralizing the current event wiring avoids duplicating transport dispatch and keeps background-task notifications consistent across renderer transports. The current manager handles background-task updates; it is not a general event-registration framework.
 
 **Trade-off**: The manager must be initialized after the server and IPC notification facilities are available.
+
+## 6. Set Renderer UX and Accessibility Targets
+
+**Decision**: Target desktop/laptop layouts and mouse/keyboard input today, while keeping future remote/gamepad support feasible. Set WCAG 2.2 AA as the intended accessibility target.
+
+**Rationale**: The local browser surface does not make mobile layout a current product requirement, and remote/gamepad support is a future goal rather than current validation scope. WCAG 2.2 AA is a new target that may require work in existing UI; when changes intersect with potential gaps, agree on the retrofit scope before expanding the task. See [`docs/agents/ui-ux.md`](docs/agents/ui-ux.md) for implementation guidance.
