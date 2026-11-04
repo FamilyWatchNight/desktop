@@ -79,10 +79,8 @@ This project uses structured documentation to prevent stale guidance and capture
 
 **At the end of work:**
 
-- Near completion, mention via chat: "I notice the following documentation may need updates: [list]"
-- Wait for human approval before making changes
-- Update ARCHITECTURE.md if architecture/patterns changed
-- Create or update DECISIONS.md entries only with human guidance
-- Handle document updates as the final step before marking work complete
+- Update directly relevant documentation when the work changes architecture, established patterns, or durable project guidance.
+- Record settled architectural decisions in DECISIONS.md when warranted; ask for guidance when the decision itself remains unresolved.
+- Keep documentation edits within the task's scope and include them in validation and review.
 
-**Key principle:** Documentation updates should happen in chat discussion, not autonomously.
+**Key principle:** Keep documentation aligned with the product and implementation; use chat to resolve uncertainty, not as a required approval gate for relevant documentation updates.
