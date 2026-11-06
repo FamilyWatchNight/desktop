@@ -18,6 +18,31 @@ Infer the repo from `git remote -v`; `gh` does this automatically when run insid
 
 File issues only into the user's own repo. Never file into `mattpocock/skills` (the repo these skills come from) unless the user owns it. In a fork, `gh` can default to the upstream parent, so before the first `gh issue create` of a session, check the target with `gh repo view --json nameWithOwner` and confirm it with the user if it is not their repo.
 
+## Ticket sizing for `/to-tickets`
+
+Treat the parent issue as the complete feature outcome and merge scope. Size
+child tickets as independently verifiable work units that fit one fresh context,
+including design discussion, tests, validation, and likely rework. The completed
+child graph must deliver the parent's end-to-end behavior.
+
+Prefer a user-visible feature flow per child. Keep service behavior and its tests
+with that flow by default. Give service-policy work its own child only when it
+captures an independently meaningful rule or decision that warrants a separate
+context; state its observable behavior and block consuming flows on it.
+
+Treat IPC/HTTP as transport adapters, not standalone "API" work by default.
+Include the adapters, input validation, renderer client wiring, and transport
+coverage with the feature flow that needs them, added just in time. Split by
+transport layer only when it has an independent consumer or outcome.
+
+A substantial, independently testable renderer pattern may have its own child
+ticket before its first full feature use. Name its consumer and make that flow
+depend on the pattern. Include the relevant durable UI/UX guidance with the
+pattern ticket.
+
+Treat commits as review checkpoints, not automatic ticket boundaries. A feature
+merge may combine multiple child tickets and commits.
+
 ## Pull requests as a triage surface
 
 **PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_

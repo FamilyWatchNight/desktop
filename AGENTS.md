@@ -6,7 +6,8 @@ A cross-platform app for managing movie selection for a Family Watch Night
 
 ### Issue tracker
 
-Issues and specs live in this repository's GitHub Issues. See `docs/agents/issue-tracker.md`.
+Issues and specs live in this repository's GitHub Issues. For `/to-tickets`
+sizing and tracker operations, see `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
