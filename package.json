@@ -45,7 +45,7 @@
     "@cucumber/cucumber": "^13.3.0",
     "@eslint-react/eslint-plugin": "^5.28.8",
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "^1.64.1",
     "@swc/core": "^1.16.18",
     "@swc/jest": "^0.2.39",
     "@testing-library/jest-dom": "^7.0.1",
