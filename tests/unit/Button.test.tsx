@@ -38,4 +38,54 @@ describe('Button', () => {
     expect(handleClick).not.toHaveBeenCalled();
     expect(button).toBeDisabled();
   });
+
+  test('exposes disabledReason via aria-disabled and aria-describedby', () => {
+    render(
+      <Button disabled disabledReason="This role is assigned" testId="reason-button">
+        Delete
+      </Button>,
+    );
+
+    const button = screen.getByTestId('reason-button');
+    // Remains focusable so the reason can be reached; not natively disabled.
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    expect(button).toHaveAttribute('aria-describedby');
+
+    const describedBy = button.getAttribute('aria-describedby') as string;
+    const description = document.getElementById(describedBy);
+    expect(description).toBeInTheDocument();
+    expect(description).toHaveTextContent('This role is assigned');
+  });
+
+  test('does not activate when disabled with a reason', () => {
+    const handleClick = jest.fn();
+    render(
+      <Button
+        disabled
+        disabledReason="This role is assigned"
+        onClick={handleClick}
+        testId="reason-noop"
+      >
+        Delete
+      </Button>,
+    );
+
+    const button = screen.getByTestId('reason-noop');
+    fireEvent.click(button);
+    expect(handleClick).not.toHaveBeenCalled();
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  test('does not add aria-describedby when disabled without a reason', () => {
+    render(
+      <Button disabled testId="plain-disabled">
+        Delete
+      </Button>,
+    );
+
+    const button = screen.getByTestId('plain-disabled');
+    expect(button).toBeDisabled();
+    expect(button).not.toHaveAttribute('aria-describedby');
+  });
 });

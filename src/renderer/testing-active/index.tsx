@@ -1,4 +1,4 @@
-/*
+﻿/*
 Copyright (c) 2026 Steve Dwire
 
 This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@ import MenuItemTestPage from './components/pages/MenuItemTestPage';
 import MessageTestPage from './components/pages/MessageTestPage';
 import PageFrameworkTestPage from './components/pages/PageFrameworkTestPage';
 import ProgressBarTestPage from './components/pages/ProgressBarTestPage';
+import TooltipTestPage from './components/pages/TooltipTestPage';
 import { TEST_PAGE_IDS } from './TestPageIds';
 
 function TestingMenuSection(): React.ReactElement {
@@ -83,6 +84,11 @@ function TestingMenuSection(): React.ReactElement {
         pageId={`testing/${TEST_PAGE_IDS.PAGE_GROUP_TEST}`}
         testId="menu-testing-group-page"
       />
+      <MenuItem
+        label="Tooltip / Disabled Reason Test"
+        pageId={`testing/${TEST_PAGE_IDS.PAGE_TOOLTIP_TEST}`}
+        testId="menu-testing-tooltip-page"
+      />
     </ExpandableMenuSection>
   );
 }
@@ -123,6 +129,11 @@ export function registerTestPages(registry: PageRegistry): void {
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_CARD_TEST}`, CardTestPage, 'Card Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_GROUP_TEST}`, GroupTestPage, 'Group Test');
   registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_BUTTON_TEST}`, ButtonTestPage, 'Button Test');
+  registry.registerPage(
+    `testing/${TEST_PAGE_IDS.PAGE_TOOLTIP_TEST}`,
+    TooltipTestPage,
+    'Tooltip / Disabled Reason Test',
+  );
 }
 
 export function buildTestingMenu(): React.ReactNode {
