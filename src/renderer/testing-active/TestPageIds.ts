@@ -19,6 +19,7 @@ export const TEST_PAGE_IDS = {
   PAGE_LIST_TEST: 'list-test',
   PAGE_GROUP_TEST: 'group-test',
   PAGE_TOOLTIP_TEST: 'tooltip-test',
+  PAGE_MODAL_TEST: 'modal-test',
 } as const;
 
 export type TestPageId = (typeof TEST_PAGE_IDS)[keyof typeof TEST_PAGE_IDS];

@@ -19,6 +19,7 @@ import FormControlsTestPage from './components/pages/FormControlsTestPage';
 import GroupTestPage from './components/pages/GroupTestPage';
 import MenuItemTestPage from './components/pages/MenuItemTestPage';
 import MessageTestPage from './components/pages/MessageTestPage';
+import ModalTestPage from './components/pages/ModalTestPage';
 import PageFrameworkTestPage from './components/pages/PageFrameworkTestPage';
 import ProgressBarTestPage from './components/pages/ProgressBarTestPage';
 import TooltipTestPage from './components/pages/TooltipTestPage';
@@ -89,6 +90,11 @@ function TestingMenuSection(): React.ReactElement {
         pageId={`testing/${TEST_PAGE_IDS.PAGE_TOOLTIP_TEST}`}
         testId="menu-testing-tooltip-page"
       />
+      <MenuItem
+        label="Modal Test"
+        pageId={`testing/${TEST_PAGE_IDS.PAGE_MODAL_TEST}`}
+        testId="menu-testing-modal-page"
+      />
     </ExpandableMenuSection>
   );
 }
@@ -134,6 +140,7 @@ export function registerTestPages(registry: PageRegistry): void {
     TooltipTestPage,
     'Tooltip / Disabled Reason Test',
   );
+  registry.registerPage(`testing/${TEST_PAGE_IDS.PAGE_MODAL_TEST}`, ModalTestPage, 'Modal Test');
 }
 
 export function buildTestingMenu(): React.ReactNode {

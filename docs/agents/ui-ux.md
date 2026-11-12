@@ -26,6 +26,17 @@ For UI behavior changed during design, specification, ticketing, or implementati
 - **Semantics and language**: Prefer native interactive elements and meaningful ARIA relationships. User-facing text uses i18next; follow the localization rules in `docs/agents/implementation.md`.
 - **UI tests**: Keep stable, translation-independent `data-testid` values on interactive controls and page roots. Follow `docs/agents/testing.md` for component and journey-test boundaries.
 
+## Modal and destructive-confirmation pattern
+
+- Use the shared `Modal` for modal interactions. Give it a visible, action-specific title and, when useful, a concise plain-text description. The description is associated with the dialog for assistive technology; keep structured or lengthy content in the dialog body instead.
+- The caller controls whether the dialog is open. Route every enabled cancellation path (Cancel action, close button, Escape, and backdrop) through the same cancellation behavior, and close it in response. Escape and backdrop dismissal are independent options; disable one only when the task requires it.
+- Keep the close button visible unless another obvious, keyboard-accessible action-area control closes the dialog. Keep keyboard focus within the dialog; focus an explicitly marked initial control, otherwise the first focusable action, and fall back to the close button when there are no focusable actions. Return focus to the opener when the dialog closes. Do not make background content interactive while the modal is open.
+- Use `leftActions` and `rightActions` as logical start/end groups: left/right in left-to-right layouts, adapting to the corresponding logical edges in right-to-left layouts. The shared modal handles wrapping and scrolling; narrow windows must keep actions visible while allowing long content to scroll independently.
+- For ordinary custom dialogs, place supporting actions at the logical start and the primary action at the logical end. Native dialogs may use platform-specific button order; custom dialogs in this app follow one consistent convention rather than implying a universal order. For destructive confirmation, keep Cancel first and secondary, followed by a specific, danger-styled action; place the group at the logical end. Use a title naming the action and target, a concise description of consequences and reversibility, and a specific action-verb label. Do not use a generic “Are you sure?” prompt.
+- Use `DestructiveConfirmation` for permitted destructive actions. Populate `title` with a terse question that starts with the same verb assigned to `confirmLabel`; for example: "Delete thing: {thingname}?". It is controlled by its caller. The caller's `onConfirm` handler performs the requested action and sets `isOpen` to `false` to close the dialog; its `onCancel` handler also closes it without reporting confirmation. If the action is asynchronous and can fail, close after success so the caller can keep the dialog open to report or recover from failure.
+
+Follow the [WAI-ARIA modal dialog pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) and relevant [WCAG 2.2 guidance](https://www.w3.org/TR/WCAG22/) for focus order and visibility. These references guide behavior; they do not establish conformance.
+
 ## Available vs. unavailable actions
 
 - **Hide unauthorized actions.** When a user is not permitted to access an action at all, omit the control from the layout rather than rendering it disabled. A missing control is not selectable and cannot be mistakenly activated.
