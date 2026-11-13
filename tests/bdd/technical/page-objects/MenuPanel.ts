@@ -16,8 +16,8 @@ export class MenuPanel extends BasePage {
     logoutButton: '[data-testid="menu-logout"]',
     backgroundTasksButton: '[data-testid="menu-background-tasks"]',
     toggleButton: '[data-testid="menu-toggle-button"]',
-    overlay: '[data-testid="menu-overlay"]',
     sideMenu: '[data-testid="side-menu"]',
+    overlay: '[data-testid="side-menu__backdrop"]',
   };
 
   async isMenuOpen(): Promise<boolean> {
@@ -50,5 +50,20 @@ export class MenuPanel extends BasePage {
   async logout(): Promise<void> {
     await this.ensureMenuIsOpen();
     await this.click('logoutButton');
+  }
+
+  async pressEscape(): Promise<void> {
+    const page = await this.getPage();
+    await page.keyboard.press('Escape');
+  }
+
+  async clickOverlay(): Promise<void> {
+    const page = await this.getPage();
+    await page.locator(this.getSelector('overlay')).click();
+  }
+
+  async getSideMenuWidth(): Promise<number | null> {
+    const sideMenu = await this.getLocator('sideMenu');
+    return (await sideMenu.boundingBox())?.width ?? null;
   }
 }

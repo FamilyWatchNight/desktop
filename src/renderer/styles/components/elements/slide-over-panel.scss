@@ -1,0 +1,67 @@
+@use '../../colors';
+@use '../../mixins';
+@use '../../variables';
+
+.slide-over-panel__backdrop {
+  position: fixed;
+  z-index: 999;
+  inset: var(--app-header-height, 64px) 0 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.slide-over-panel {
+  position: fixed;
+  z-index: 1000;
+  top: var(--app-header-height, 64px);
+  bottom: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: min(var(--slide-over-panel-width, 30vw), 100%);
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: colors.$container-background;
+  backdrop-filter: blur(80px);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.slide-over-panel--left {
+  left: 0;
+  border-right: 2px solid colors.$glass-shadow-edge;
+  transform: translateX(-100%);
+}
+
+.slide-over-panel--right {
+  right: 0;
+  border-left: 2px solid colors.$glass-shadow-edge;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+  transform: translateX(100%);
+}
+
+.slide-over-panel--open {
+  transform: translateX(0);
+}
+
+.slide-over-panel__top {
+  flex: 1 0 auto;
+}
+
+.slide-over-panel__bottom {
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+
+@media (max-width: 600px) {
+  .slide-over-panel {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-over-panel {
+    transition: none;
+  }
+}

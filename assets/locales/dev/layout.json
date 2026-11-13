@@ -1,5 +1,6 @@
 {
   "menu": {
+    "label": "___Main Menu___",
     "home": "___Home___",
     "system": "___System___",
     "backgroundTasks": "___Background Tasks___",

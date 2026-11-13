@@ -13,3 +13,4 @@ export * from './LoginPage';
 export * from './MenuPanel';
 export * from './ProfileManagementPage';
 export * from './SettingsPage';
+export * from './SlideOverPanelTestPage';
