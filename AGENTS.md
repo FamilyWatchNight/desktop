@@ -6,7 +6,8 @@ A cross-platform app for managing movie selection for a Family Watch Night
 
 ### Issue tracker
 
-Issues and specs live in this repository's GitHub Issues. See `docs/agents/issue-tracker.md`.
+Issues and specs live in this repository's GitHub Issues. For `/to-tickets`
+sizing and tracker operations, see `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
@@ -20,7 +21,7 @@ This is a single-context repo; use the root `GLOSSARY.md` and `docs/adr/`. See `
 
 - When changing or running tests, follow `docs/agents/testing.md`; consult `tests/bdd/README.md` for the BDD layer model and dependency rules.
 - When changing application code, follow `docs/agents/implementation.md`.
-- When changing renderer UI or making UX decisions, follow `docs/agents/ui-ux.md`.
+- For UI/UX design, specs, tickets, or renderer changes, follow `docs/agents/ui-ux.md`.
 - When changing file operations, user-input handling, localization writes, IPC/preload exposure, or the HTTP server, follow `docs/agents/security.md`.
 
 ## Agent Workflow Guidance

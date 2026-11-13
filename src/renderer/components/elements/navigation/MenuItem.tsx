@@ -11,6 +11,7 @@ import React from 'react';
 
 import { useOptionalNavigation } from '../../../contexts/NavigationContext';
 import { useNavigationFocusable } from '../../../contexts/useNavigationFocusable';
+import { Tooltip } from '../feedback/Tooltip';
 
 export interface MenuItemProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
@@ -25,6 +26,7 @@ export interface MenuItemProps extends Omit<
   type?: 'button' | 'submit' | 'reset';
   className?: string;
   testId?: string;
+  disabledReason?: string;
 }
 
 export function MenuItem({
@@ -38,8 +40,13 @@ export function MenuItem({
   testId,
   type = 'button',
   disabled,
+  disabledReason,
   ...rest
 }: MenuItemProps): React.ReactElement {
+  const hasDisabledReason = disabled && Boolean(disabledReason);
+  const isAriaDisabled = hasDisabledReason;
+  const isNativeDisabled = disabled && !disabledReason;
+
   const { ref, focused, focusSelf, domRef } = useNavigationFocusable<HTMLButtonElement>({
     onActivate: () => {
       if (disabled) return;
@@ -68,7 +75,7 @@ export function MenuItem({
     .filter(Boolean)
     .join(' ');
 
-  return (
+  const button = (
     <button
       ref={ref}
       onFocus={focusSelf}
@@ -76,7 +83,8 @@ export function MenuItem({
       className={classes}
       aria-current={active ? 'page' : undefined}
       onClick={handleClick}
-      disabled={disabled}
+      disabled={isNativeDisabled}
+      aria-disabled={isAriaDisabled || undefined}
       data-testid={testId}
       {...rest}
     >
@@ -89,4 +97,10 @@ export function MenuItem({
       ) : null}
     </button>
   );
+
+  if (hasDisabledReason) {
+    return <Tooltip content={disabledReason}>{button}</Tooltip>;
+  }
+
+  return button;
 }

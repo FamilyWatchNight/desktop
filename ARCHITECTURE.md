@@ -256,6 +256,8 @@ The root component provides authentication, page registry, and navigation contex
 
 The renderer initializes Norigin Spatial Navigation and wraps its focus behavior with `NavigationProvider` and `useNavigationFocusable`. The current interaction model supports mouse and keyboard navigation: Tab follows DOM focus order, while Norigin handles arrow-key spatial movement. Registered controls with activation callbacks respond to Enter/Space in arrow-navigation mode. `AppLayout` separates the menu and page content into focus contexts and makes inactive regions inert.
 
+`SlideOverPanel` is the reusable side-panel primitive. Its caller controls open state, side, width, optional initial focus, and whether it requests blocking of page content. `AppLayout` provides a shared content-blocking coordinator that applies `inert` to `.main-content` while one or more active components request blocking; the header remains outside that boundary. This is intentionally distinct from the existing whole-window `Modal` behavior. The navigation menu uses this panel with its legacy 290px width.
+
 The Electron window starts at 1200×800, while the same renderer is served for local browser use. Desktop/laptop layouts are the current product target. Remote/gamepad support is a future goal, and WCAG 2.2 AA is the intended accessibility target; neither remote/gamepad support nor current WCAG conformance is claimed. See [`docs/agents/ui-ux.md`](docs/agents/ui-ux.md) for renderer patterns, constraints, and questions to raise during UI work.
 
 ### UI Automation Selectors
@@ -429,11 +431,11 @@ The current notification manager forwards background-task state changes across I
 
 | Category      | Package                              | Usage                   |
 | ------------- | ------------------------------------ | ----------------------- |
-| **Framework** | electron                              | Desktop runtime         |
+| **Framework** | electron                             | Desktop runtime         |
 | **Server**    | express 5.x                          | HTTP API                |
 | **Database**  | better-sqlite3                       | Embedded SQLite         |
 | **Renderer**  | react 19.x, react-i18next            | UI framework + i18n     |
-| **i18n**      | i18next, i18next-fs-backend          | Localization             |
+| **i18n**      | i18next, i18next-fs-backend          | Localization            |
 | **Testing**   | jest, playwright, @cucumber/cucumber | Testing frameworks      |
 | **Build**     | vite, electron-builder, typescript   | Compilation + packaging |
 
