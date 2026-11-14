@@ -55,10 +55,12 @@ When(
 
 When('I press Escape in the modal', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
   await getPageObject(this).pressEscape();
+  await new Promise((r) => setTimeout(r, 1000)); // Give the animation time to finish
 });
 
 When('I click the modal backdrop', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
   await getPageObject(this).clickBackdrop();
+  await new Promise((r) => setTimeout(r, 1000)); // Give the animation time to finish
 });
 
 When(

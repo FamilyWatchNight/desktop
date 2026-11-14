@@ -44,10 +44,12 @@ Given(
 
 When('I open the slide-over panel', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
   await getPageObject(this).openPanel();
+  await new Promise((r) => setTimeout(r, 1000)); // Give the animation time to finish
 });
 
 When('I open the navigation menu', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
   await new MenuPanel(this).ensureMenuIsOpen();
+  await new Promise((r) => setTimeout(r, 1000)); // Give the animation time to finish
 });
 
 When(
