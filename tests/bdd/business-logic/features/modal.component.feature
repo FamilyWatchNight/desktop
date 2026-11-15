@@ -27,12 +27,16 @@ Feature: Modal and destructive-confirmation pattern
     Then the confirmation cancellation should be recorded
     And the confirmation dialog should be closed
 
-  Scenario: Escape and backdrop cancel the generic modal
+  Scenario: Escape cancels the generic modal
     Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
     And the Modal test page is open for testing
     When I open the generic modal
     And I press Escape in the modal
     Then the generic modal should be closed
+
+  Scenario: Backdrop cancels the generic modal
+    Given a user "hide-bootstrap-panel" exists with the role "admin" assigned
+    And the Modal test page is open for testing
     When I open the generic modal
     And I click the modal backdrop
     Then the generic modal should be closed
