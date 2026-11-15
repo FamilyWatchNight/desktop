@@ -24,7 +24,7 @@ For UI behavior changed during design, specification, ticketing, or implementati
 - **Focus appearance**: Sass mixins provide a `:focus-visible` ring and a separate spatial-navigation ring. Reuse these patterns so keyboard and spatial focus remain visible.
 - **Components and visual style**: Reuse the renderer's shared buttons, form controls, containers, and navigation components. Styling uses Sass variables and color tokens, a dark glass-like surface, and the Nunito Sans font stack.
 - **Semantics and language**: Prefer native interactive elements and meaningful ARIA relationships. User-facing text uses i18next; follow the localization rules in `docs/agents/implementation.md`.
-- **UI tests**: Keep stable, translation-independent `data-testid` values on interactive controls and page roots. Follow `docs/agents/testing.md` for component and journey-test boundaries.
+- **UI tests**: Keep stable, translation-independent `data-testid` values on interactive controls and page roots. When writing BDD UI tests, follow the UI-specific link in `docs/agents/bdd-testing.md` for component and journey-test boundaries.
 
 ## Modal and destructive-confirmation pattern
 

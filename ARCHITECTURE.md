@@ -207,7 +207,7 @@ Feature tests use a **three-layer BDD structure** to separate business-facing sc
 - **Technical Hooks Layer** (`tests/bdd/technical/hooks/roles.ts`): Calls `withTestHooks()` to invoke the test hook
 - **Test hook** (`src/main/testing-active/TestHooksImpl.ts`): Executes the actual `roleService.create()`
 
-Feature files are the specification layer; Playwright is used where browser or Electron UI automation is needed. The test scripts build the app with test hooks before running Cucumber. Unit tests live separately in `tests/unit/` and run with Jest. See [`docs/agents/testing.md`](docs/agents/testing.md) and [`tests/bdd/README.md`](tests/bdd/README.md) for executable guidance.
+Feature files are the specification layer; Playwright is used where browser or Electron UI automation is needed. The test scripts build the app with test hooks before running Cucumber. Unit tests live separately in `tests/unit/` and run with Jest. See [`docs/agents/testing.md`](docs/agents/testing.md) for general and unit-test guidance, [`docs/agents/bdd-testing.md`](docs/agents/bdd-testing.md) for BDD test execution, and [`tests/bdd/README.md`](tests/bdd/README.md) for the human-facing layer overview.
 
 This layering ensures that:
 
@@ -591,7 +591,7 @@ Security: Prevents injection attacks in locale strings.
 - Feature commands build the application with test hooks before running Cucumber: `npm run test:features` runs the full feature suite, while `npm run test:smoke` and `npm run test:component` select profiles. Browser and Electron variants are available as `npm run test:features:browser` and `npm run test:features:electron`.
 - The Cucumber world maintains scenario-scoped state; hooks reset that state and isolate app data between scenarios.
 
-See [`docs/agents/testing.md`](docs/agents/testing.md) for test responsibilities, locations, and invocation details.
+See [`docs/agents/testing.md`](docs/agents/testing.md) for general test practices, and [`docs/agents/bdd-testing.md`](docs/agents/bdd-testing.md) for BDD responsibilities, locations, and invocation details.
 
 ---
 

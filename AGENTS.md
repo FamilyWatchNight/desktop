@@ -19,7 +19,7 @@ This is a single-context repo; use the root `GLOSSARY.md` and `docs/adr/`. See `
 
 ## Project references
 
-- When changing or running tests, follow `docs/agents/testing.md`; consult `tests/bdd/README.md` for the BDD layer model and dependency rules.
+- When changing or running tests, follow `docs/agents/testing.md`. When writing Cucumber BDD tests, also follow `docs/agents/bdd-testing.md`; use `tests/bdd/README.md` as the human-facing layer overview.
 - When changing application code, follow `docs/agents/implementation.md`.
 - For UI/UX design, specs, tickets, or renderer changes, follow `docs/agents/ui-ux.md`.
 - When changing file operations, user-input handling, localization writes, IPC/preload exposure, or the HTTP server, follow `docs/agents/security.md`.

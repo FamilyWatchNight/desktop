@@ -1,6 +1,6 @@
 # Implementation Guide
 
-Use this guide when changing application code. For test design and execution, see `docs/agents/testing.md`; for security-sensitive changes, see `docs/agents/security.md`.
+Use this guide when changing application code. For test design and execution, see `docs/agents/testing.md`; for Cucumber feature tests, see `docs/agents/bdd-testing.md`; for security-sensitive changes, see `docs/agents/security.md`.
 
 ## Implementation workflow
 
