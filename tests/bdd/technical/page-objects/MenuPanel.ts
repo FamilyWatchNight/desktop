@@ -6,6 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { expect } from '@playwright/test';
+
 import { BasePage } from './BasePage';
 
 export class MenuPanel extends BasePage {
@@ -22,6 +24,25 @@ export class MenuPanel extends BasePage {
 
   async isMenuOpen(): Promise<boolean> {
     return this.isVisible('overlay');
+  }
+
+  async assertMenuOpen(shouldBeOpen: boolean): Promise<void> {
+    const page = await this.getPage();
+    const overlay = page.locator(this.getSelector('overlay'));
+
+    if (shouldBeOpen) {
+      await expect(overlay).toBeVisible();
+    } else {
+      await expect(overlay).not.toBeVisible();
+    }
+  }
+
+  async assertSideMenuWidth(expectedWidth: number): Promise<void> {
+    const page = await this.getPage();
+    await expect(page.locator(this.getSelector('sideMenu'))).toHaveCSS(
+      'width',
+      `${expectedWidth}px`,
+    );
   }
 
   async ensureMenuIsOpen(): Promise<void> {
@@ -60,10 +81,5 @@ export class MenuPanel extends BasePage {
   async clickOverlay(): Promise<void> {
     const page = await this.getPage();
     await page.locator(this.getSelector('overlay')).click();
-  }
-
-  async getSideMenuWidth(): Promise<number | null> {
-    const sideMenu = await this.getLocator('sideMenu');
-    return (await sideMenu.boundingBox())?.width ?? null;
   }
 }

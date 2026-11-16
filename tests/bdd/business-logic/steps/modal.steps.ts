@@ -7,7 +7,6 @@ as published by the Free Software Foundation, version 3.
 */
 
 import { Given, Then, When } from '@cucumber/cucumber';
-import { expect } from '@playwright/test';
 
 import { TesterPersona } from '../../business-flow/personas/TesterPersona';
 import { CustomWorld } from '../../technical/infrastructure/world';
@@ -55,12 +54,10 @@ When(
 
 When('I press Escape in the modal', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
   await getPageObject(this).pressEscape();
-  await new Promise((r) => setTimeout(r, 1000)); // Give the animation time to finish
 });
 
 When('I click the modal backdrop', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
   await getPageObject(this).clickBackdrop();
-  await new Promise((r) => setTimeout(r, 1000)); // Give the animation time to finish
 });
 
 When(
@@ -111,8 +108,7 @@ Then(
   'the confirmation dialog should be named {string}',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld, expectedName: string) {
-    const page = await this.page;
-    await expect(page.getByRole('dialog', { name: expectedName })).toBeVisible();
+    await getPageObject(this).assertDialogNamed(expectedName);
   },
 );
 
@@ -120,8 +116,7 @@ Then(
   'the confirmation actions should be ordered {string} then {string}',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld, first: string, second: string) {
-    const actions = await getPageObject(this).getConfirmationActionOrder();
-    expect(actions.map((action) => action.trim())).toEqual([first, second]);
+    await getPageObject(this).assertConfirmationActionOrder(first, second);
   },
 );
 
@@ -129,7 +124,7 @@ Then(
   'the confirmation action buttons should fit inside the dialog',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld) {
-    expect(await getPageObject(this).areConfirmationActionsInsideDialog()).toBe(true);
+    await getPageObject(this).assertConfirmationActionsInsideDialog();
   },
 );
 
@@ -137,8 +132,7 @@ Then(
   'the confirmation Cancel action should have focus',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld) {
-    const page = await this.page;
-    await expect(page.getByTestId('destructive-confirmation-cancel')).toBeFocused();
+    await getPageObject(this).assertConfirmationCancelFocused();
   },
 );
 
@@ -146,7 +140,7 @@ Then(
   'the confirmation action should be recorded',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld) {
-    expect(await getPageObject(this).getOutcome()).toBe('Confirmation action selected');
+    await getPageObject(this).assertOutcomeIs('Confirmation action selected');
   },
 );
 
@@ -154,7 +148,7 @@ Then(
   'the confirmation cancellation should be recorded',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld) {
-    expect(await getPageObject(this).getOutcome()).toBe('Confirmation canceled');
+    await getPageObject(this).assertOutcomeIs('Confirmation canceled');
   },
 );
 
@@ -162,7 +156,7 @@ Then(
   'the confirmation dialog should remain open',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld) {
-    expect(await getPageObject(this).isDialogVisible()).toBe(true);
+    await getPageObject(this).assertDialogVisible(true);
   },
 );
 
@@ -170,7 +164,7 @@ Then(
   'the confirmation dialog should be closed',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld) {
-    expect(await getPageObject(this).isDialogVisible()).toBe(false);
+    await getPageObject(this).assertDialogVisible(false);
   },
 );
 
@@ -178,7 +172,7 @@ Then(
   'the generic modal should be closed',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld) {
-    expect(await getPageObject(this).isDialogVisible()).toBe(false);
+    await getPageObject(this).assertDialogVisible(false);
   },
 );
 
@@ -186,7 +180,7 @@ Then(
   'the generic modal actions should fit inside the dialog',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld) {
-    expect(await getPageObject(this).areModalActionsInsideDialog()).toBe(true);
+    await getPageObject(this).assertModalActionsInsideDialog();
   },
 );
 
@@ -194,7 +188,7 @@ Then(
   'the end of modal content should be visible',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld) {
-    expect(await getPageObject(this).isModalContentEndInViewport()).toBe(true);
+    await getPageObject(this).assertModalContentEndVisible();
   },
 );
 
@@ -202,6 +196,6 @@ Then(
   'the destructive action should have spatial focus',
   { timeout: STEP_TIMEOUT },
   async function (this: CustomWorld) {
-    expect(await getPageObject(this).isConfirmationActionSpatiallyFocused()).toBe(true);
+    await getPageObject(this).assertConfirmationActionHasSpatialFocus();
   },
 );

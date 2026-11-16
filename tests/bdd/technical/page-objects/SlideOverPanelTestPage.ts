@@ -6,6 +6,8 @@ it under the terms of the GNU General Public License
 as published by the Free Software Foundation, version 3.
 */
 
+import { expect } from '@playwright/test';
+
 import { TEST_PAGE_IDS } from '../../../../src/renderer/testing-active/TestPageIds';
 
 import { BasePage } from './BasePage';
@@ -55,27 +57,52 @@ export class SlideOverPanelTestPage extends BasePage {
     await page.keyboard.press('Escape');
   }
 
-  async isPanelOpen(): Promise<boolean> {
-    const panel = await this.getLocator('panel');
-    return panel.evaluate((element) => element.classList.contains('slide-over-panel--open'));
-  }
-
-  async isMainContentBlocked(): Promise<boolean> {
-    const content = await this.getLocator('mainContent');
-    return content.evaluate((element) => element.hasAttribute('inert'));
-  }
-
-  async isBackdropVisible(): Promise<boolean> {
+  async assertPanelNamed(accessibleName: string): Promise<void> {
     const page = await this.getPage();
-    return page
-      .locator(this.getSelector('backdrop'))
-      .isVisible()
-      .catch(() => false);
+    await expect(page.getByRole('region', { name: accessibleName })).toBeVisible();
   }
 
-  async isPanelOnRight(): Promise<boolean> {
-    const panel = await this.getLocator('panel');
-    return panel.evaluate((element) => element.classList.contains('slide-over-panel--right'));
+  async assertMainContentBlocked(shouldBeBlocked: boolean): Promise<void> {
+    const page = await this.getPage();
+    const mainContent = page.locator(this.getSelector('mainContent'));
+
+    if (shouldBeBlocked) {
+      await expect(mainContent).toHaveAttribute('inert', '');
+    } else {
+      await expect(mainContent).not.toHaveAttribute('inert', '');
+    }
+  }
+
+  async assertPanelOpen(shouldBeOpen: boolean): Promise<void> {
+    const page = await this.getPage();
+    const panel = page.locator(this.getSelector('panel'));
+
+    if (shouldBeOpen) {
+      await expect(panel).toHaveClass(/slide-over-panel--open/);
+    } else {
+      await expect(panel).not.toHaveClass(/slide-over-panel--open/);
+    }
+  }
+
+  async assertOutcomeIs(expectedOutcome: string): Promise<void> {
+    const page = await this.getPage();
+    await expect(page.locator(this.getSelector('outcome'))).toHaveText(expectedOutcome);
+  }
+
+  async assertBackdropVisible(shouldBeVisible: boolean): Promise<void> {
+    const page = await this.getPage();
+    const backdrop = page.locator(this.getSelector('backdrop'));
+
+    if (shouldBeVisible) {
+      await expect(backdrop).toBeVisible();
+    } else {
+      await expect(backdrop).not.toBeVisible();
+    }
+  }
+
+  async assertPanelOnRight(): Promise<void> {
+    const page = await this.getPage();
+    await expect(page.locator(this.getSelector('panel'))).toHaveClass(/slide-over-panel--right/);
   }
 
   async clickBackdrop(): Promise<void> {
@@ -88,23 +115,18 @@ export class SlideOverPanelTestPage extends BasePage {
     await page.setViewportSize({ width, height });
   }
 
-  async doesPanelFitViewport(): Promise<boolean> {
-    const panel = await this.getLocator('panel');
+  async assertPanelFitsViewport(): Promise<void> {
     const page = await this.getPage();
     const viewport = page.viewportSize();
-    await page.waitForFunction((selector) => {
-      const element = document.querySelector(selector);
-      if (!element) return false;
-      const bounds = element.getBoundingClientRect();
-      return bounds.left >= 0 && bounds.right <= document.documentElement.clientWidth;
-    }, this.getSelector('panel'));
-    const bounds = await panel.boundingBox();
-    if (!viewport || !bounds) return false;
-    return (
-      bounds.x >= 0 &&
-      bounds.x + bounds.width <= viewport.width &&
-      (viewport.width > 600 || Math.abs(bounds.width - viewport.width) <= 1)
-    );
+    if (!viewport) {
+      throw new Error('Viewport size is not available');
+    }
+
+    const panel = page.locator(this.getSelector('panel'));
+    await expect(panel).toBeInViewport({ ratio: 1 });
+    if (viewport.width <= 600) {
+      await expect(panel).toHaveCSS('width', `${viewport.width}px`);
+    }
   }
 
   async scrollPanelToEnd(): Promise<void> {
@@ -114,29 +136,36 @@ export class SlideOverPanelTestPage extends BasePage {
     });
   }
 
-  async isBottomSlotVisible(): Promise<boolean> {
-    const panel = await this.getLocator('panel');
-    return panel.evaluate((panelElement, bottomSelector) => {
-      const bottomElement = panelElement.querySelector(bottomSelector);
-      if (!bottomElement) return false;
-      const panelBounds = panelElement.getBoundingClientRect();
-      const bottomBounds = bottomElement.getBoundingClientRect();
-      return bottomBounds.top >= panelBounds.top && bottomBounds.bottom <= panelBounds.bottom;
-    }, this.getSelector('bottomSlot'));
+  async assertBottomSlotVisible(): Promise<void> {
+    await expect
+      .poll(async () => {
+        const bounds = await this.getPanelSlotBounds('bottomSlot');
+        return (
+          bounds !== null &&
+          bounds.slot.y >= bounds.panel.y &&
+          bounds.slot.y + bounds.slot.height <= bounds.panel.y + bounds.panel.height
+        );
+      })
+      .toBe(true);
   }
 
-  async isTopStartOutsidePanelViewport(): Promise<boolean> {
-    const panel = await this.getLocator('panel');
-    return panel.evaluate((panelElement, topStartSelector) => {
-      const topStartElement = panelElement.querySelector(topStartSelector);
-      if (!topStartElement) return false;
-      const panelBounds = panelElement.getBoundingClientRect();
-      const topStartBounds = topStartElement.getBoundingClientRect();
-      return topStartBounds.bottom <= panelBounds.top || topStartBounds.top >= panelBounds.bottom;
-    }, this.getSelector('topStart'));
+  async assertTopStartOutsidePanelViewport(): Promise<void> {
+    await expect
+      .poll(async () => {
+        const bounds = await this.getPanelSlotBounds('topStart');
+        return (
+          bounds !== null &&
+          (bounds.slot.y + bounds.slot.height <= bounds.panel.y ||
+            bounds.slot.y >= bounds.panel.y + bounds.panel.height)
+        );
+      })
+      .toBe(true);
   }
 
-  async getOutcome(): Promise<string | null> {
-    return this.getText('outcome');
+  private async getPanelSlotBounds(slotName: 'bottomSlot' | 'topStart') {
+    const page = await this.getPage();
+    const panel = await page.locator(this.getSelector('panel')).boundingBox();
+    const slot = await page.locator(this.getSelector(slotName)).boundingBox();
+    return panel && slot ? { panel, slot } : null;
   }
 }

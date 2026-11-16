@@ -6,6 +6,8 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3.
 */
 
+import { expect } from '@playwright/test';
+
 import { TEST_PAGE_IDS } from '../../../../src/renderer/testing-active/TestPageIds';
 
 import { BasePage } from './BasePage';
@@ -47,18 +49,40 @@ export class ModalTestPage extends BasePage {
     await this.click('confirmationConfirm');
   }
 
-  async getConfirmationActionOrder(): Promise<string[]> {
+  async assertDialogNamed(expectedName: string): Promise<void> {
     const page = await this.getPage();
-    return page.locator(this.getSelector('rightActions')).locator('button').allTextContents();
+    await expect(page.getByRole('dialog', { name: expectedName })).toBeVisible();
   }
 
-  async getOutcome(): Promise<string | null> {
-    return this.getText('modalOutcome');
+  async assertConfirmationActionOrder(first: string, second: string): Promise<void> {
+    const page = await this.getPage();
+    const actions = page.locator(this.getSelector('rightActions')).locator('button');
+    await expect(actions).toHaveText([first, second]);
   }
 
-  async isDialogVisible(): Promise<boolean> {
+  async assertConfirmationActionsInsideDialog(): Promise<void> {
+    await this.assertActionsInsideDialog('confirmationActionButtons', 2);
+  }
+
+  async assertConfirmationCancelFocused(): Promise<void> {
     const page = await this.getPage();
-    return page.locator(this.getSelector('dialog')).isVisible();
+    await expect(page.locator(this.getSelector('confirmationCancel'))).toBeFocused();
+  }
+
+  async assertOutcomeIs(expectedOutcome: string): Promise<void> {
+    const page = await this.getPage();
+    await expect(page.locator(this.getSelector('modalOutcome'))).toHaveText(expectedOutcome);
+  }
+
+  async assertDialogVisible(shouldBeVisible: boolean): Promise<void> {
+    const page = await this.getPage();
+    const dialog = page.locator(this.getSelector('dialog'));
+
+    if (shouldBeVisible) {
+      await expect(dialog).toBeVisible();
+    } else {
+      await expect(dialog).not.toBeVisible();
+    }
   }
 
   async pressEscape(): Promise<void> {
@@ -81,10 +105,11 @@ export class ModalTestPage extends BasePage {
     await page.keyboard.press('Enter');
   }
 
-  async isConfirmationActionSpatiallyFocused(): Promise<boolean> {
-    const action = await this.getLocator('confirmationConfirm');
-    const className = await action.getAttribute('class');
-    return className?.split(/\s+/).includes('has-nav-focus') ?? false;
+  async assertConfirmationActionHasSpatialFocus(): Promise<void> {
+    const page = await this.getPage();
+    await expect(page.locator(this.getSelector('confirmationConfirm'))).toHaveClass(
+      /has-nav-focus/,
+    );
   }
 
   async clickBackdrop(): Promise<void> {
@@ -104,63 +129,60 @@ export class ModalTestPage extends BasePage {
     });
   }
 
-  async isModalContentEndInViewport(): Promise<boolean> {
+  async assertModalContentEndVisible(): Promise<void> {
     const page = await this.getPage();
-    return page.locator(this.getSelector('modalContentEnd')).evaluate((element) => {
-      const content = element.closest('[data-testid="modal-content"]');
-      if (!content) return false;
-
-      const contentBounds = content.getBoundingClientRect();
-      const elementBounds = element.getBoundingClientRect();
-      return (
-        elementBounds.height > 0 &&
-        elementBounds.top >= contentBounds.top &&
-        elementBounds.bottom <= contentBounds.bottom
-      );
-    });
+    await expect(page.locator(this.getSelector('modalContentEnd'))).toBeInViewport({ ratio: 1 });
   }
 
-  async areModalActionsInsideDialog(): Promise<boolean> {
-    return this.areActionsInsideDialog(this.getSelector('modalActionButtons'), 3);
+  async assertModalActionsInsideDialog(): Promise<void> {
+    await this.assertActionsInsideDialog('modalActionButtons', 3);
   }
 
-  async areConfirmationActionsInsideDialog(): Promise<boolean> {
-    return this.areActionsInsideDialog(this.getSelector('confirmationActionButtons'), 2);
-  }
-
-  private async areActionsInsideDialog(selector: string, expectedCount: number): Promise<boolean> {
-    const dialog = await this.getLocator('dialog');
-    const dialogBounds = await dialog.boundingBox();
-    if (!dialogBounds) return false;
-
+  private async assertActionsInsideDialog(
+    selectorName: 'modalActionButtons' | 'confirmationActionButtons',
+    expectedCount: number,
+  ): Promise<void> {
     const page = await this.getPage();
-    const actionBounds = await page.locator(selector).evaluateAll((buttons) =>
-      buttons.map((button) => {
-        const bounds = button.getBoundingClientRect();
-        return {
-          left: bounds.left,
-          right: bounds.right,
-          top: bounds.top,
-          bottom: bounds.bottom,
-          width: bounds.width,
-          height: bounds.height,
-        };
-      }),
-    );
+    const dialog = page.locator(this.getSelector('dialog'));
+    const actions = page.locator(this.getSelector(selectorName));
     const viewport = page.viewportSize();
-    if (!viewport) return false;
+    if (!viewport) {
+      throw new Error('Viewport size is not available');
+    }
+    await expect(actions).toHaveCount(expectedCount);
 
-    return (
-      actionBounds.length === expectedCount &&
-      actionBounds.every(
-        (bounds) =>
-          bounds.width > 0 &&
-          bounds.height > 0 &&
-          bounds.left >= Math.max(dialogBounds.x, 0) &&
-          bounds.right <= Math.min(dialogBounds.x + dialogBounds.width, viewport.width) &&
-          bounds.top >= Math.max(dialogBounds.y, 0) &&
-          bounds.bottom <= Math.min(dialogBounds.y + dialogBounds.height, viewport.height),
-      )
-    );
+    await expect
+      .poll(async () => {
+        const dialogBounds = await dialog.boundingBox();
+        if (!dialogBounds) return false;
+
+        const actionBounds = await actions.evaluateAll((buttons) =>
+          buttons.map((button) => {
+            const bounds = button.getBoundingClientRect();
+            return {
+              left: bounds.left,
+              right: bounds.right,
+              top: bounds.top,
+              bottom: bounds.bottom,
+              width: bounds.width,
+              height: bounds.height,
+            };
+          }),
+        );
+
+        return (
+          actionBounds.length === expectedCount &&
+          actionBounds.every(
+            (bounds) =>
+              bounds.width > 0 &&
+              bounds.height > 0 &&
+              bounds.left >= Math.max(dialogBounds.x, 0) &&
+              bounds.right <= Math.min(dialogBounds.x + dialogBounds.width, viewport.width) &&
+              bounds.top >= Math.max(dialogBounds.y, 0) &&
+              bounds.bottom <= Math.min(dialogBounds.y + dialogBounds.height, viewport.height),
+          )
+        );
+      })
+      .toBe(true);
   }
 }
