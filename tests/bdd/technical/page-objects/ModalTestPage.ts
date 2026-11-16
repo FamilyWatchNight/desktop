@@ -85,9 +85,10 @@ export class ModalTestPage extends BasePage {
     }
   }
 
-  async pressEscape(): Promise<void> {
+  async pressModalEscape(): Promise<void> {
     const page = await this.getPage();
-    await page.keyboard.press('Escape');
+    const dialog = page.locator(this.getSelector('dialog'));
+    await dialog.press('Escape');
   }
 
   async pressTab(shift = false): Promise<void> {

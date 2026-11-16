@@ -53,7 +53,7 @@ When(
 );
 
 When('I press Escape in the modal', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
-  await getPageObject(this).pressEscape();
+  await getPageObject(this).pressModalEscape();
 });
 
 When('I click the modal backdrop', { timeout: STEP_TIMEOUT }, async function (this: CustomWorld) {
