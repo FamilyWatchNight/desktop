@@ -124,6 +124,24 @@ export class RoleService {
       throw new AuthorizationError(this.t('errors.cannotModifySystemRole'));
     }
 
+    // Enforce the can-admin retention invariant: a role that currently grants
+    // can-admin may only lose it if at least one other user still holds can-admin
+    // through a different role. This prevents leaving zero users able to administer.
+    const currentStubs = models.rolePermissions.getPermissionsForRole(roleId).map((p) => p.stub);
+    const currentlyGrantsAdmin = currentStubs.includes('can-admin');
+    const wouldStillGrantAdmin = permissionStubs.includes('can-admin');
+
+    if (currentlyGrantsAdmin && !wouldStillGrantAdmin) {
+      const remainingAdminUsers = models.userRoles.countUsersWithCanAdminExcludingRole(roleId);
+      if (remainingAdminUsers === 0) {
+        throw new Error(
+          this.t(
+            'errors.cannotRemoveLastCanAdmin',
+          ),
+        );
+      }
+    }
+
     models.rolePermissions.setPermissionsForRole(roleId, permissionStubs);
   }
 

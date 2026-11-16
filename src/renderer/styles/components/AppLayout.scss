@@ -27,6 +27,30 @@ the Free Software Foundation, version 3.
   display: inline;
 }
 
+/* Scrollbar Styling */
+$scrollbar-size: 0.75rem;
+
+::-webkit-scrollbar {
+  width: $scrollbar-size;
+  height: $scrollbar-size;
+}
+
+::-webkit-scrollbar-track {
+  background: #8884;
+  @include mixins.make-inset;
+}
+
+::-webkit-scrollbar-thumb {
+  background: colors.$container-background;
+  @include mixins.make-glassy;
+  border-radius: calc($scrollbar-size / 2);
+}
+
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-corner {
+  display: none;
+}
+
 /* Layout Styles */
 .app-layout {
   position: relative;
@@ -104,62 +128,25 @@ the Free Software Foundation, version 3.
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
-/* Menu Overlay */
-.menu-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  backdrop-filter: blur(2px);
-}
-
-/* Side Menu */
-.side-menu {
-  position: fixed;
-  top: var(--app-header-height);
-  left: 0;
-  height: 100vh;
-  width: 290px;
-  background: colors.$container-background;
-  backdrop-filter: blur(80px);
-  border-right: 2px solid colors.$glass-shadow-edge;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-.side-menu.open {
-  transform: translateX(0);
+/* Navigation Menu */
+.slide-over-panel__backdrop:has(+ .side-menu),
+.slide-over-panel.side-menu {
+  z-index: 2000;
 }
 
 .menu-content {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 100%;
 }
 
-/* Navigation Section (Scrollable) */
+/* Navigation Section */
 .menu-nav-section {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
   padding: 20px 0;
 }
 
-.menu-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 /* Menu Footer (Settings at Bottom) */
-.menu-footer {
+.side-menu .slide-over-panel__bottom {
   border-top: 1px solid #404040;
   padding: 16px;
   background: rgba(30, 30, 30, 0.5);
@@ -171,22 +158,4 @@ the Free Software Foundation, version 3.
   width: 100%;
   min-height: calc(100vh - var(--app-header-height));
   transition: margin-left 0.3s ease;
-}
-
-/* Scrollbar Styling */
-.menu-nav-section::-webkit-scrollbar {
-  width: 6px;
-}
-
-.menu-nav-section::-webkit-scrollbar-track {
-  background: rgba(30, 30, 30, 0.5);
-}
-
-.menu-nav-section::-webkit-scrollbar-thumb {
-  background: rgba(100, 100, 100, 0.5);
-  border-radius: 3px;
-}
-
-.menu-nav-section::-webkit-scrollbar-thumb:hover {
-  background: rgba(120, 120, 120, 0.7);
 }

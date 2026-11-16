@@ -1,6 +1,6 @@
 # Decisions
 
-This document records decisions whose rationale may help guide future changes. See `docs/agents/implementation.md` and `docs/agents/testing.md` for current implementation guidance.
+This document records decisions whose rationale may help guide future changes. See `docs/agents/implementation.md`, `docs/agents/testing.md`, and `docs/agents/bdd-testing.md` for current implementation and test guidance.
 
 ## 1. Cucumber Features Specify Behavior; Playwright Automates the UI
 

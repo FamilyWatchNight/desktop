@@ -11,6 +11,8 @@ import {
 
 import { useOptionalNavigation } from './NavigationContext';
 
+export const NAVIGATION_FOCUS_CHANGE_EVENT = 'navigationfocuschange';
+
 export function scrollElementIntoView(element: HTMLElement): void {
   element.style.scrollMarginTop = '100px';
   element.style.scrollMarginBottom = '1rem';
@@ -83,8 +85,21 @@ export function useNavigationFocusable<T extends HTMLElement = HTMLElement>(
 
   useEffect(() => {
     if (!focused || !element) {
+      element?.dispatchEvent(
+        new CustomEvent(NAVIGATION_FOCUS_CHANGE_EVENT, {
+          bubbles: true,
+          detail: { focused: false },
+        }),
+      );
       return undefined;
     }
+
+    element.dispatchEvent(
+      new CustomEvent(NAVIGATION_FOCUS_CHANGE_EVENT, {
+        bubbles: true,
+        detail: { focused: true },
+      }),
+    );
 
     const frame = window.requestAnimationFrame(() => {
       if (element.isConnected) {
@@ -92,7 +107,17 @@ export function useNavigationFocusable<T extends HTMLElement = HTMLElement>(
       }
     });
 
-    return () => window.cancelAnimationFrame(frame);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (element.isConnected) {
+        element.dispatchEvent(
+          new CustomEvent(NAVIGATION_FOCUS_CHANGE_EVENT, {
+            bubbles: true,
+            detail: { focused: false },
+          }),
+        );
+      }
+    };
   }, [element, focused]);
 
   return {

@@ -8,5 +8,7 @@ the Free Software Foundation, version 3.
 
 export { Card, type CardProps } from './Card';
 export { Group, type GroupFlow, type GroupProps } from './Group';
+export { Modal, type ModalProps } from './Modal';
 export { Page, type PageProps } from './Page';
 export { Section, type SectionProps } from './Section';
+export { SlideOverPanel, type SlideOverPanelProps } from './SlideOverPanel';

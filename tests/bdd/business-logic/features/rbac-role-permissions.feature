@@ -29,6 +29,22 @@ Feature: RBAC role permissions
     When I update the role's permissions to be "can-vote, can-rate, can-update-profile"
     Then the role should have the permissions "can-vote, can-rate, can-update-profile"
 
+  Scenario: Removing can-admin from the only role granting it to a user is rejected
+    Given a role "admin-role" exists with the permissions "can-admin, can-vote"
+    And a user exists with the role "admin-role" assigned
+    When I attempt to update the role's permissions to be "can-vote"
+    Then an error should be thrown
+    And the role should have the permissions "can-admin, can-vote"
+
+  Scenario: Removing can-admin is allowed when another user retains it through a different role
+    Given a role "backup-admin" exists with the permissions "can-admin, can-vote"
+    And a user exists with the role "backup-admin" assigned
+    And a role "admin-role" exists with the permissions "can-admin, can-vote"
+    And a user exists with the role "admin-role" assigned
+    When I attempt to update the role's permissions to be "can-vote"
+    Then no error should be thrown
+    And the role should have the permissions "can-vote"
+
   Scenario: Listing all permissions returns exactly the system-defined permissions
     When I retrieve all defined permissions
     Then the results should include exactly these permissions:

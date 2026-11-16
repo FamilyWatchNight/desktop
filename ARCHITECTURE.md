@@ -207,7 +207,7 @@ Feature tests use a **three-layer BDD structure** to separate business-facing sc
 - **Technical Hooks Layer** (`tests/bdd/technical/hooks/roles.ts`): Calls `withTestHooks()` to invoke the test hook
 - **Test hook** (`src/main/testing-active/TestHooksImpl.ts`): Executes the actual `roleService.create()`
 
-Feature files are the specification layer; Playwright is used where browser or Electron UI automation is needed. The test scripts build the app with test hooks before running Cucumber. Unit tests live separately in `tests/unit/` and run with Jest. See [`docs/agents/testing.md`](docs/agents/testing.md) and [`tests/bdd/README.md`](tests/bdd/README.md) for executable guidance.
+Feature files are the specification layer; Playwright is used where browser or Electron UI automation is needed. The test scripts build the app with test hooks before running Cucumber. Unit tests live separately in `tests/unit/` and run with Jest. See [`docs/agents/testing.md`](docs/agents/testing.md) for general and unit-test guidance, [`docs/agents/bdd-testing.md`](docs/agents/bdd-testing.md) for BDD test execution, and [`tests/bdd/README.md`](tests/bdd/README.md) for the human-facing layer overview.
 
 This layering ensures that:
 
@@ -255,6 +255,8 @@ The root component provides authentication, page registry, and navigation contex
 ### Renderer UI and Navigation
 
 The renderer initializes Norigin Spatial Navigation and wraps its focus behavior with `NavigationProvider` and `useNavigationFocusable`. The current interaction model supports mouse and keyboard navigation: Tab follows DOM focus order, while Norigin handles arrow-key spatial movement. Registered controls with activation callbacks respond to Enter/Space in arrow-navigation mode. `AppLayout` separates the menu and page content into focus contexts and makes inactive regions inert.
+
+`SlideOverPanel` is the reusable side-panel primitive. Its caller controls open state, side, width, optional initial focus, and whether it requests blocking of page content. `AppLayout` provides a shared content-blocking coordinator that applies `inert` to `.main-content` while one or more active components request blocking; the header remains outside that boundary. This is intentionally distinct from the existing whole-window `Modal` behavior. The navigation menu uses this panel with its legacy 290px width.
 
 The Electron window starts at 1200×800, while the same renderer is served for local browser use. Desktop/laptop layouts are the current product target. Remote/gamepad support is a future goal, and WCAG 2.2 AA is the intended accessibility target; neither remote/gamepad support nor current WCAG conformance is claimed. See [`docs/agents/ui-ux.md`](docs/agents/ui-ux.md) for renderer patterns, constraints, and questions to raise during UI work.
 
@@ -429,11 +431,11 @@ The current notification manager forwards background-task state changes across I
 
 | Category      | Package                              | Usage                   |
 | ------------- | ------------------------------------ | ----------------------- |
-| **Framework** | electron                              | Desktop runtime         |
+| **Framework** | electron                             | Desktop runtime         |
 | **Server**    | express 5.x                          | HTTP API                |
 | **Database**  | better-sqlite3                       | Embedded SQLite         |
 | **Renderer**  | react 19.x, react-i18next            | UI framework + i18n     |
-| **i18n**      | i18next, i18next-fs-backend          | Localization             |
+| **i18n**      | i18next, i18next-fs-backend          | Localization            |
 | **Testing**   | jest, playwright, @cucumber/cucumber | Testing frameworks      |
 | **Build**     | vite, electron-builder, typescript   | Compilation + packaging |
 
@@ -589,7 +591,7 @@ Security: Prevents injection attacks in locale strings.
 - Feature commands build the application with test hooks before running Cucumber: `npm run test:features` runs the full feature suite, while `npm run test:smoke` and `npm run test:component` select profiles. Browser and Electron variants are available as `npm run test:features:browser` and `npm run test:features:electron`.
 - The Cucumber world maintains scenario-scoped state; hooks reset that state and isolate app data between scenarios.
 
-See [`docs/agents/testing.md`](docs/agents/testing.md) for test responsibilities, locations, and invocation details.
+See [`docs/agents/testing.md`](docs/agents/testing.md) for general test practices, and [`docs/agents/bdd-testing.md`](docs/agents/bdd-testing.md) for BDD responsibilities, locations, and invocation details.
 
 ---
 

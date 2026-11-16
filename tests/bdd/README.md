@@ -49,16 +49,11 @@ This directory implements a three-layer BDD testing approach for the application
 - Feature scripts build the app with test hooks and run Cucumber; `RENDER_LOCATION` selects Browser or Electron UI automation.
 - Jest unit tests live outside this BDD tree in `tests/unit/`.
 
-See `docs/agents/testing.md` for current test commands and repository test guidance.
-
 ## Implementation Guidelines
 
 ### Writing New Tests
 
-1. Start with business requirements in `business-logic/` feature files
-2. Implement persona methods in `business-flow/personas/`
-3. Add technical helpers in `technical/hooks/` if needed
-4. Keep layers separated; personas should not know about database schemas
+For agent guidance on writing and running feature tests, see `docs/agents/bdd-testing.md`. Its UI-specific link leads to the PageObject and assertion conventions for UI tests.
 
 ## References
 

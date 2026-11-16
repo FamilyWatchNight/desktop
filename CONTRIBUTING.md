@@ -103,7 +103,7 @@ Uses Jest to run unit tests from `tests/unit/`.
 
 `test:features`
 
-Builds the main and renderer applications with test hooks, then runs the Cucumber feature tests from `tests/bdd/business-logic/features/`. Playwright provides browser and Electron UI automation where needed. See `docs/agents/testing.md` for test locations and available scripts.
+Builds the main and renderer applications with test hooks, then runs the Cucumber feature tests from `tests/bdd/business-logic/features/`. Playwright provides browser and Electron UI automation where needed. See `docs/agents/bdd-testing.md` for test locations and available scripts.
 
 `build`
 

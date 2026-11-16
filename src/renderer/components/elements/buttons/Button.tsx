@@ -10,6 +10,7 @@ import React, { ButtonHTMLAttributes } from 'react';
 
 import { useNavigationFocusable } from '../../../contexts/useNavigationFocusable';
 import { ContentSize } from '../../properties';
+import { Tooltip } from '../feedback/Tooltip';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'info' | 'link';
 
@@ -19,6 +20,7 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
   testId?: string;
   type?: 'button' | 'submit' | 'reset';
   className?: string;
+  disabledReason?: string;
 }
 
 export function Button({
@@ -29,14 +31,25 @@ export function Button({
   testId,
   className = '',
   disabled,
+  disabledReason,
+  onClick,
   ...rest
 }: ButtonProps): React.ReactElement {
+  const hasDisabledReason = disabled && Boolean(disabledReason);
+  const isAriaDisabled = hasDisabledReason;
+  const isNativeDisabled = disabled && !disabledReason;
+
   const { ref, focused, focusSelf, domRef } = useNavigationFocusable<HTMLButtonElement>({
     onActivate: () => {
       if (disabled) return;
       domRef.current?.click();
     },
   });
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    if (disabled) return;
+    onClick?.(event);
+  };
 
   const classes = [
     'button',
@@ -48,17 +61,25 @@ export function Button({
     .filter(Boolean)
     .join(' ');
 
-  return (
+  const button = (
     <button
       ref={ref}
       type={type}
       onFocus={focusSelf}
       className={classes}
-      disabled={disabled}
+      disabled={isNativeDisabled}
+      aria-disabled={isAriaDisabled || undefined}
+      onClick={handleClick}
       data-testid={testId}
       {...rest}
     >
       {children}
     </button>
   );
+
+  if (!hasDisabledReason) {
+    return button;
+  }
+
+  return <Tooltip content={disabledReason}>{button}</Tooltip>;
 }
