@@ -105,3 +105,59 @@
   background: colors.$core-red;
   color: white;
 }
+
+// Tooltip
+//
+.tooltip__overlay {
+  position: fixed;
+  z-index: 1000;
+  max-width: 16rem;
+  width: max-content;
+  padding: 0.4rem 0.6rem;
+  border-radius: variables.$base-element-radius;
+  background: colors.$input-background;
+  border: 1px solid colors.$input-border;
+  color: colors.$text-color;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.tooltip__overlay--placement-top {
+  transform: translateX(-50%) translateY(0.25rem);
+}
+
+.tooltip__overlay--placement-top.tooltip__overlay--open {
+  transform: translateX(-50%) translateY(0);
+}
+
+.tooltip__overlay--placement-bottom {
+  transform: translateX(-50%) translateY(-0.25rem);
+}
+
+.tooltip__overlay--placement-bottom.tooltip__overlay--open {
+  transform: translateX(-50%) translateY(0);
+}
+
+.tooltip__overlay--placement-left {
+  transform: translateY(-50%) translateX(0.25rem);
+}
+
+.tooltip__overlay--placement-left.tooltip__overlay--open {
+  transform: translateY(-50%) translateX(0);
+}
+
+.tooltip__overlay--placement-right {
+  transform: translateY(-50%) translateX(-0.25rem);
+}
+
+.tooltip__overlay--placement-right.tooltip__overlay--open {
+  transform: translateY(-50%) translateX(0);
+}
+
+.tooltip__overlay--open {
+  opacity: 1;
+}

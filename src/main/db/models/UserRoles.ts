@@ -29,6 +29,7 @@ export default class UserRolesModel {
   private getByRoleIdStmt!: Database.Statement;
   private getByUserAndRoleStmt!: Database.Statement;
   private deleteByUserAndRoleStmt!: Database.Statement;
+  private countUsersWithCanAdminExcludingRoleStmt!: Database.Statement;
 
   constructor(db: Database.Database) {
     this.db = db;
@@ -49,6 +50,13 @@ export default class UserRolesModel {
     this.deleteByUserAndRoleStmt = this.db.prepare(
       'DELETE FROM user_roles WHERE user_id = ? AND role_id = ?',
     );
+    this.countUsersWithCanAdminExcludingRoleStmt = this.db.prepare(`
+      SELECT COUNT(DISTINCT ur.user_id) AS count
+      FROM user_roles ur
+      JOIN role_permissions rp ON ur.role_id = rp.role_id
+      WHERE rp.permission_stub = 'can-admin'
+        AND ur.role_id != ?
+    `);
   }
 
   assignRoleToUser(userId: number, roleId: number): void {
@@ -79,5 +87,16 @@ export default class UserRolesModel {
   hasRole(userId: number, roleId: number): boolean {
     const row = this.getByUserAndRoleStmt.get(userId, roleId) as UserRoleRow | undefined;
     return !!row;
+  }
+
+  /**
+   * Returns the number of users who hold `can-admin` through any assigned role,
+   * excluding the given role's own contribution. Used by the service layer to
+   * enforce the can-admin retention invariant before removing that permission.
+   */
+  countUsersWithCanAdminExcludingRole(roleId: number): number {
+    const result = this.countUsersWithCanAdminExcludingRoleStmt.get(roleId) as
+      { count: number } | undefined;
+    return result?.count ?? 0;
   }
 }

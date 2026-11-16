@@ -4,6 +4,7 @@
   },
   "button": {
     "ok": "_____OK_____",
-    "cancel": "___Cancel___"
+    "cancel": "___Cancel___",
+    "close": "___Close___"
   }
 }

@@ -52,4 +52,29 @@ describe('MenuItem', () => {
     expect(menuButton).toHaveClass('menu-item');
     expect(menuButton).toHaveClass('active');
   });
+
+  test('exposes disabledReason via aria-disabled and aria-describedby', () => {
+    render(
+      <NavigationProvider>
+        <MenuItem
+          label="Home"
+          pageId="home"
+          disabled
+          disabledReason="You do not have access"
+          testId="menu-disabled"
+        />
+      </NavigationProvider>,
+    );
+
+    const item = screen.getByTestId('menu-disabled');
+    // Remains focusable so the reason can be reached; not natively disabled.
+    expect(item).not.toBeDisabled();
+    expect(item).toHaveAttribute('aria-disabled', 'true');
+    expect(item).toHaveAttribute('aria-describedby');
+
+    const describedBy = item.getAttribute('aria-describedby') as string;
+    const description = document.getElementById(describedBy);
+    expect(description).toBeInTheDocument();
+    expect(description).toHaveTextContent('You do not have access');
+  });
 });

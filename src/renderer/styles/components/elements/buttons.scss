@@ -21,7 +21,7 @@ the Free Software Foundation, version 3.
   border-bottom-color: colors.make-shadow-color($shadow-color);
   border-left-color: $shadow-color;
 
-  &:hover:not(:disabled) {
+  &:hover:not(:disabled):not([aria-disabled='true']) {
     background: colors.make-gradient($highlight-color);
   }
 }
@@ -51,7 +51,8 @@ the Free Software Foundation, version 3.
 
   @include mixins.make-focusable;
 
-  &:disabled {
+  &:disabled,
+  &[aria-disabled='true'] {
     opacity: 0.55;
     cursor: not-allowed;
   }
@@ -60,7 +61,7 @@ the Free Software Foundation, version 3.
     background: transparent;
     border-color: rgba(colors.$text-color, 0.2);
 
-    &:hover {
+    &:hover:not(:disabled):not([aria-disabled='true']) {
       background: rgba(colors.$primary-color, 0.2);
     }
   }
@@ -70,7 +71,7 @@ the Free Software Foundation, version 3.
     border-color: transparent;
     color: colors.make-text-color(colors.$info-color);
 
-    &:hover {
+    &:hover:not(:disabled):not([aria-disabled='true']) {
       background: transparent;
       color: colors.$max-foreground;
     }

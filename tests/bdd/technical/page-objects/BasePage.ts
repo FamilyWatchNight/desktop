@@ -237,6 +237,7 @@ export abstract class BasePage {
       // Otherwise wait for network idle shortly to give the renderer a moment to update
       await page.waitForLoadState('networkidle', { timeout: UI_TIMEOUT }).catch(() => {});
     }
+    await page.bringToFront();
   }
 
   async selectRadioByKeyOrValue(

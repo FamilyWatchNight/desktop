@@ -13,11 +13,17 @@ import { useTranslation } from 'react-i18next';
 
 import { createApiClient } from '../api-client';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  ContentBlockingProvider,
+  useContentBlockingState,
+} from '../contexts/ContentBlockingContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useNavigationFocusable } from '../contexts/useNavigationFocusable';
 import { PAGE_IDS } from '../pages/PageIds';
 import * as testing from '../testing';
 
+import '../styles/components/AppLayout.scss';
+import { SlideOverPanel } from './elements/containers';
 import { HomeIcon, ProfileIcon, SettingsIcon, TasksIcon } from './elements/icons';
 import { ExpandableMenuSection, MenuItem } from './elements/navigation';
 import FirstAdminUserOverlay from './FirstAdminUserOverlay';
@@ -28,8 +34,6 @@ import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import StyleboardPage from './pages/StyleboardPage';
-
-import '../styles/components/AppLayout.scss';
 
 const apiClient = createApiClient();
 testing.registerTestPages?.(pageRegistry);
@@ -45,9 +49,18 @@ interface TaskPayload {
 }
 
 export default function Layout(): React.ReactElement {
+  return (
+    <ContentBlockingProvider>
+      <PotentiallyBlockingLayout />
+    </ContentBlockingProvider>
+  );
+}
+
+function PotentiallyBlockingLayout(): React.ReactElement {
   const { t } = useTranslation(['layout', 'common']);
   const { status: authStatus, session, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const contentBlocked = useContentBlockingState();
   const { currentPage, navigateTo, navigationMode } = useNavigation();
   const [systemExpanded, setSystemExpanded] = useState(false);
   const [activeTask, setActiveTask] = useState<TaskPayload | null>(null);
@@ -200,14 +213,45 @@ export default function Layout(): React.ReactElement {
             {navigationMode}
           </span>
         </header>
-        {menuOpen && (
-          <div className="menu-overlay" data-testid="menu-overlay" onClick={closeMenu}></div>
-        )}
         <FocusContext.Provider value={menuFocusKey}>
-          <div
-            inert={hasUsers === false || authGateActive}
-            className={`side-menu ${menuOpen ? 'open' : ''}`}
-            data-testid="side-menu"
+          <SlideOverPanel
+            side="left"
+            isOpen={menuOpen}
+            isInert={hasUsers === false || authGateActive}
+            blocksContent
+            ariaLabel={t('menu.label')}
+            width={290}
+            onBackdropClick={closeMenu}
+            onEscape={() => undefined}
+            className="side-menu"
+            testId="side-menu"
+            bottomSlot={
+              <>
+                {canUpdateProfile && (
+                  <MenuItem
+                    label={t('menu.profile')}
+                    icon={<ProfileIcon width={20} height={20} />}
+                    pageId={PAGE_IDS.PROFILE}
+                    testId="menu-profile"
+                  />
+                )}
+                <MenuItem
+                  label={t('menu.settings')}
+                  icon={<SettingsIcon width={20} height={20} />}
+                  pageId={PAGE_IDS.SETTINGS}
+                  testId="menu-settings"
+                />
+                <MenuItem
+                  label={t('menu.logout')}
+                  onClick={() => {
+                    navigateTo(PAGE_IDS.HOME);
+                    if (currentPage === PAGE_IDS.HOME) closeMenu();
+                    void logout().catch(() => undefined);
+                  }}
+                  testId="menu-logout"
+                />
+              </>
+            }
           >
             <nav inert={!menuOpen} className="menu-nav">
               <div ref={menuRef} className="menu-content">
@@ -244,38 +288,13 @@ export default function Layout(): React.ReactElement {
                   </ExpandableMenuSection>
                   {testMenuSection}
                 </div>
-                <div className="menu-footer">
-                  {canUpdateProfile && (
-                    <MenuItem
-                      label={t('menu.profile')}
-                      icon={<ProfileIcon width={20} height={20} />}
-                      pageId={PAGE_IDS.PROFILE}
-                      testId="menu-profile"
-                    />
-                  )}
-                  <MenuItem
-                    label={t('menu.settings')}
-                    icon={<SettingsIcon width={20} height={20} />}
-                    pageId={PAGE_IDS.SETTINGS}
-                    testId="menu-settings"
-                  />
-                  <MenuItem
-                    label={t('menu.logout')}
-                    onClick={() => {
-                      navigateTo(PAGE_IDS.HOME);
-                      if (currentPage === PAGE_IDS.HOME) closeMenu();
-                      void logout().catch(() => undefined);
-                    }}
-                    testId="menu-logout"
-                  />
-                </div>
               </div>
             </nav>
-          </div>
+          </SlideOverPanel>
         </FocusContext.Provider>
         <FocusContext.Provider value={contentFocusKey}>
           <div
-            inert={hasUsers === false || authGateActive}
+            inert={hasUsers === false || authGateActive || contentBlocked}
             ref={contentRef}
             className="main-content"
             data-testid="main-content"
