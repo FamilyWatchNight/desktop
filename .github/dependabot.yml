@@ -21,3 +21,9 @@ updates:
           - 'eslint-plugin-react-hooks'
           - '@eslint-react/eslint-plugin'
           - '@eslint/js'
+      i18next-ecosystem:
+        patterns:
+          - 'i18next'
+          - 'i18next-fs-backend'
+          - 'i18next-http-backend'
+          - 'react-i18next'
