@@ -9,7 +9,29 @@ on:
       - 'v*'
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      contents: read
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          # 'code' will be true if any file OUTSIDE these folders changes
+          filters: |
+            code:
+              - '!**.md'
+              - '!.github/**'
+              - '!.vscode/**'
+
   build:
+    needs: detect-changes
+    # Only run if code changes were detected, OR if this is a push to main/tags (ensuring CI always runs on main)
+    if: ${{ needs.detect-changes.outputs.code == 'true' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') }}
     permissions:
       contents: read
 
