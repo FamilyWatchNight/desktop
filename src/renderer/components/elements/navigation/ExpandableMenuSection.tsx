@@ -80,7 +80,7 @@ export function ExpandableMenuSection({
       >
         <span className="expandable-menu-section__label">{label}</span>
         <span className="expandable-menu-section__chevron" aria-hidden="true">
-          <ChevronIcon width={18} height={18} />
+          <ChevronIcon decorative width={18} height={18} />
         </span>
       </button>
       <FocusContext.Provider value={childrenFocusKey}>

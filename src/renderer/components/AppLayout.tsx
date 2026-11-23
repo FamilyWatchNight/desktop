@@ -24,7 +24,14 @@ import * as testing from '../testing';
 
 import '../styles/components/AppLayout.scss';
 import { SlideOverPanel } from './elements/containers';
-import { HomeIcon, ProfileIcon, SettingsIcon, TasksIcon } from './elements/icons';
+import {
+  HomeIcon,
+  PaletteIcon,
+  ProfileIcon,
+  SettingsIcon,
+  SignOutIcon,
+  TasksIcon,
+} from './elements/icons';
 import { ExpandableMenuSection, MenuItem } from './elements/navigation';
 import FirstAdminUserOverlay from './FirstAdminUserOverlay';
 import LoginOverlay from './LoginOverlay';
@@ -230,19 +237,20 @@ function PotentiallyBlockingLayout(): React.ReactElement {
                 {canUpdateProfile && (
                   <MenuItem
                     label={t('menu.profile')}
-                    icon={<ProfileIcon width={20} height={20} />}
+                    icon={<ProfileIcon decorative width={20} height={20} />}
                     pageId={PAGE_IDS.PROFILE}
                     testId="menu-profile"
                   />
                 )}
                 <MenuItem
                   label={t('menu.settings')}
-                  icon={<SettingsIcon width={20} height={20} />}
+                  icon={<SettingsIcon decorative width={20} height={20} />}
                   pageId={PAGE_IDS.SETTINGS}
                   testId="menu-settings"
                 />
                 <MenuItem
                   label={t('menu.logout')}
+                  icon={<SignOutIcon decorative width={20} height={20} />}
                   onClick={() => {
                     navigateTo(PAGE_IDS.HOME);
                     if (currentPage === PAGE_IDS.HOME) closeMenu();
@@ -258,7 +266,7 @@ function PotentiallyBlockingLayout(): React.ReactElement {
                 <div className="menu-nav-section">
                   <MenuItem
                     label={t('menu.home')}
-                    icon={<HomeIcon width={20} height={20} />}
+                    icon={<HomeIcon decorative width={20} height={20} />}
                     pageId={PAGE_IDS.HOME}
                     testId="menu-home"
                   />
@@ -270,7 +278,7 @@ function PotentiallyBlockingLayout(): React.ReactElement {
                   >
                     <MenuItem
                       label={t('menu.backgroundTasks')}
-                      icon={<TasksIcon width={20} height={20} />}
+                      icon={<TasksIcon decorative width={20} height={20} />}
                       badge={
                         activeTask || queue.length > 0
                           ? (activeTask ? 1 : 0) + queue.length
@@ -281,7 +289,7 @@ function PotentiallyBlockingLayout(): React.ReactElement {
                     />
                     <MenuItem
                       label={t('menu.styleboard')}
-                      icon={<TasksIcon width={20} height={20} />}
+                      icon={<PaletteIcon decorative width={20} height={20} />}
                       pageId={PAGE_IDS.STYLEBOARD}
                       testId="menu-styleboard"
                     />
