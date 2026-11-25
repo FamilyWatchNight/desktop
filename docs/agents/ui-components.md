@@ -1,8 +1,15 @@
 # Renderer Component Implementation Guide
 
-Use this guide when **implementing or extending a renderer control**, especially one that
-can be disabled. For when to use a disabled control and how to pass its reason, see the
-consumer-facing guidance in [`docs/agents/ui-ux.md`](ui-ux.md).
+Use this guide when **implementing or extending a renderer control**. For when to **use**
+a disabled control and how to pass its reason, see the consumer-facing guidance in
+[`docs/agents/ui-ux.md`](ui-ux.md).
+
+When creating new components, consider Radix UI's implementation as a base for those
+that require significant functionality beyond core DOM elements. Weigh the cost of
+maintaining and running local component tests for a from-scratch implementation
+against the cost of depending on and overriding Radix's default behavior. Present
+component-specific tradeoffs for human review before deciding whether to build from
+scratch or extend from Radix UI.
 
 ## Disabled-reason pattern (`disabledReason`)
 
