@@ -21,6 +21,7 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          predicate-quantifier: 'every'
           # 'code' will be true if any file OUTSIDE these folders changes
           filters: |
             code:
