@@ -6,6 +6,7 @@
   "singleQuote": true,
   "trailingComma": "all",
   "proseWrap": "preserve",
+  "endOfLine": "lf",
   "overrides": [
     {
       "files": "*.feature",

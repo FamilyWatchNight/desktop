@@ -1,6 +1,66 @@
 {
   "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "cucumberArgs",
+      "type": "promptString",
+      "description": "CucumberJS filter arguments (e.g. --tags @smoke or --name 'Login scenario')",
+      "default": ""
+    }
+  ],
   "tasks": [
+    {
+      "label": "Normalize Changed Files",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "normalize"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Main (Integration Testing)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build:main:for-integration-testing"],
+      "dependsOn": ["Normalize Changed Files"],
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "Build Renderer (Integration Testing)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build:renderer:for-integration-testing"],
+      "dependsOn": ["Normalize Changed Files"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run All Unit Tests",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:unit"],
+      "dependsOn": ["Normalize Changed Files"],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run All Feature Tests",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:features"],
+      "dependsOn": ["Normalize Changed Files"],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Targeted Feature Tests",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:features", "--", "${input:cucumberArgs}"],
+      "dependsOn": ["Normalize Changed Files"],
+      "group": "test",
+      "problemMatcher": []
+    },
     {
       "label": "Start Electron Debug",
       "type": "shell",

@@ -6,8 +6,9 @@ Use this guide when changing application code. For test design and execution, se
 
 - Inspect the package manifest and relevant configuration before assuming available commands or build requirements.
 - Before changing a pattern, compare two or three similar implementations in the codebase. Follow existing dependency, naming, error-handling, and export patterns; ask if they conflict or remain unclear.
-- For substantive code changes, run the relevant tests immediately. If they fail, make up to three targeted fix attempts, then report the cause and options.
-- Before build or validation commands that invoke linting, run ESLint with `--fix` on every changed file; repeat after further edits.
+- For builds and tests, use a defined VS Code task through the `runTask` tool.
+- For substantive code changes, run the relevant test task promptly. If it fails, make up to three targeted fix attempts, then report the cause and options.
+- If the defined tasks do not support the desired build or test approach, report what is needed and include it in `/retro` so the human can consider adding task support.
 - For complex codebase research, use the Explore agent for a bounded, read-only investigation.
 - When adding a dependency, prefer minimal, pinned, widely used packages and update manifests and lockfiles.
 - Non-trivial generated code should be runnable and include a minimal harness, usage/troubleshooting guidance, and the required dependency updates.

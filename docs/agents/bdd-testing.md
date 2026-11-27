@@ -9,12 +9,10 @@ Use this guide when writing or running Cucumber feature tests. For the human-fac
 - Keep Business Logic steps going through personas rather than calling Technical-layer helpers directly.
 - Keep selectors and low-level UI interactions in technical PageObjects.
 
-## Test locations and commands
+## Test locations and execution
 
 - Cucumber features live in `tests/bdd/business-logic/features/`; steps in `tests/bdd/business-logic/steps/`; personas in `tests/bdd/business-flow/personas/`; and PageObjects and infrastructure in `tests/bdd/technical/`.
-- Run feature tests through npm scripts, not `cucumber-js` directly, so required testing pages and build hooks are applied.
-- `npm run test:features` runs the full feature suite; use `npm run test:features:electron` for Electron and `npm run test:features:browser` for Browser.
-- To select a feature subset, pass tags through the npm script, for example: `npm run test:features -- --tags "@ui and @form-controls"`.
+- Run Cucumber only through defined VS Code tasks using `runTask`: use `Run All Feature Tests` for the full suite or `Run Targeted Feature Tests` with its `cucumberArgs` input for tag or scenario filters.
 
 ## Scenario state
 
@@ -31,7 +29,6 @@ Build-generated files under `src/main/testing/` are overwritten. Make changes to
 - Before the first test, agree with the user on the test approach and coverage.
 - After each scenario, check that it worked as intended before proceeding.
 - Verify test state isolation, persona contracts, and the separation between Business Logic and Technical layers.
-- When changing `src/main/testing-active/TestHooksImpl.ts` or related hooks, run `npm run build:main:for-integration-testing` before feature tests.
 
 ## UI BDD tests
 
