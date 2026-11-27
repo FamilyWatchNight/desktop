@@ -1,7 +1,7 @@
 # Agent Testing Guide
 
-- For Cucumber feature tests, follow the [BDD testing guide](bdd-testing.md); its UI-only link leads to PageObject and UI assertion conventions when relevant.
-- Unit tests live in `tests/unit/`; run them with `npm run test:unit`.
+- Unit tests live in `tests/unit/`; run them with the `Run All Unit Tests` task through `runTask`.
+- For Cucumber tests, follow the [BDD testing guide](bdd-testing.md), which names the full-suite and targeted-feature tasks.
 
 ## Validation
 

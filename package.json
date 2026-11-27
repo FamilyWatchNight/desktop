@@ -6,6 +6,7 @@
   "homepage": "./",
   "scripts": {
     "clean": "rimraf dist",
+    "normalize": "node scripts/normalize-changed-files.mjs",
     "build:main": "node scripts/use-testing-noop.js && npm run build:main:raw",
     "build:main:for-integration-testing": "node scripts/use-testing-active.js && npm run build:main:raw",
     "build:main:raw": "node scripts/generate-app-info.js && tsc -p tsconfig.main.json && node scripts/copy-migrations.js",
@@ -68,6 +69,8 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import-x": "^4.18.1",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^17.14.0",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
