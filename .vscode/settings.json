@@ -12,6 +12,8 @@
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
 
+  "task.saveBeforeRun": "always",
+
   "js/ts.tsdk.path": "node_modules/typescript/lib",
 
   "files.eol": "\n",
@@ -32,12 +34,6 @@
   "cucumber.features": ["tests/bdd/business-logic/features/**/*.feature"],
   "files.watcherExclude": {
     "**/node_modules/**": true
-  },
-  "cucumber-test-runner-new.debugEnvironmentVariables": {
-    "PWDEBUG": "1"
-  },
-  "cucumber-test-runner-new.environmentVariables": {
-    "NODE_ENV": "test"
   },
   "git.enableCommitSigning": true,
   "i18n-ally.localesPaths": ["assets/locales"],
